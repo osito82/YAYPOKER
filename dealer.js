@@ -1,8 +1,9 @@
 const Socket = require("./sockets");
 
 class Dealer {
-  constructor(gameId, players, deck) {
+  constructor(gameId, players, deck, torneoId) {
     this.gameId = gameId;
+    this.torneoId = torneoId;
     this.deck = deck;
 
     this.players = players;
@@ -79,7 +80,7 @@ class Dealer {
   talkToPLayerById(idNumber, targetMessage) {
     try {
       console.log("MATCH - talkToPLayerById " + idNumber);
-      const targetSocket = Socket.getSocket(idNumber);
+      const targetSocket = Socket.getSocket(this.torneoId, idNumber);
       targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
     } catch (error) {
       console.log(error);
@@ -93,7 +94,7 @@ class Dealer {
       if (foundPlayer) {
         console.log("MATCH - talkToPLayer" + playerNumber);
         const playerId = foundPlayer.id;
-        const targetSocket = Socket.getSocket(playerId);
+        const targetSocket = Socket.getSocket(this.torneoId, playerId);
         targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
       }
     } catch (error) {
@@ -105,7 +106,14 @@ class Dealer {
     try {
       for (const player of this.players) {
         const playerId = player.id;
-        const targetSocket = Socket.getSocket(playerId);
+
+        console.log(
+          this.torneoId,
+          playerId,
+          "his.torneoId, playerId - 2222222"
+        );
+
+        const targetSocket = Socket.getSocket(this.torneoId, playerId);
         targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
       }
     } catch (error) {

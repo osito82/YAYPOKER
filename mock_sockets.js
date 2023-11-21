@@ -12,7 +12,7 @@ const dealtPrivateCards = {
 
 //Player Initial Bet
 const initialBet = {
-  //chipsToBet: 20,
+  //torneoNumber:"55585548LC",
   action: "initialBet",
 };
 
@@ -54,5 +54,5 @@ exports.initialBet = initialBet;
 exports.dealtPrivateCards = dealtPrivateCards;
 exports.log = log;
 exports.sendMessage = sendMessage;
-exports.fold = fold
-exports.close = close
+exports.fold = fold;
+exports.close = close;

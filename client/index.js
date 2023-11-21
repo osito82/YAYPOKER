@@ -2,7 +2,7 @@ const WebSocket = require("ws");
 const readline = require("readline");
 const mockTest = require("../mock_sockets");
 
-const socket = new WebSocket("ws://localhost:3333");
+const socket = new WebSocket("ws://localhost:8888");
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -23,22 +23,15 @@ socket.addEventListener("open", (event) => {
       case "1":
         sendCommand(mockTest["signUp"]);
         break;
-
       case "initialBet":
       case "ib":
         //case "3":
-
-        rl.question(
-          " - Money to Bet: ",
-          (chipsToBet) => {
-            chipsToBet = Number(chipsToBet);
-            mockTest.initialBet.chipsToBet = chipsToBet;
-            sendCommand(mockTest["initialBet"]);
-            promptCommand();
-          }
-          //   );
-          //}
-        );
+        rl.question(" - Money to Bet: ", (chipsToBet) => {
+          chipsToBet = Number(chipsToBet);
+          mockTest.initialBet.chipsToBet = chipsToBet;
+          sendCommand(mockTest["initialBet"]);
+          promptCommand();
+        });
 
         break;
 
@@ -64,7 +57,6 @@ socket.addEventListener("open", (event) => {
         console.log("Fold");
         sendCommand(mockTest["fold"]);
         // socket.close();  // Cierra la conexión WebSocket
-      //  rl.close();
         break;
 
       case "close":
@@ -114,21 +106,10 @@ socket.addEventListener("open", (event) => {
         handleCommand(command);
 
         askCommand();
-
-        // if (
-        //   command.toLowerCase() !== "cerrar" &&
-        //   command.toLowerCase() !== "close"
-        // ) {
-        //   askCommand();
-        // } else {
-        //   rl.close();
-        // }
       });
     };
 
-    // if (!rl.closed) {
     askCommand();
-    // }
   };
 
   promptCommand();

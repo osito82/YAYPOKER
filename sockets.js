@@ -1,16 +1,33 @@
-const log = require("./log");
 class Socket {
-    static socketsArray = [];
-  
-    static addSocket(socket) {
-      this.socketsArray.push(socket);
-      log.add({ addSocket: socket.id });
+  static torneoSockets = new Map();
+
+  static addSocket(socket, idTorneo) {
+    if (!this.torneoSockets.has(idTorneo)) {
+      this.torneoSockets.set(idTorneo, []);
     }
-  
-    static getSocket(id) {
-      return this.socketsArray.find((socket) => socket.id === id);
-    }
+
+    this.torneoSockets.get(idTorneo).push(socket);
   }
-  
-  module.exports = Socket;
-  
+
+  static getSockets() {
+    return this.torneoSockets;
+  }
+
+  static getSocket(idTorneo, id) {
+    const torneoSockets = this.torneoSockets.get(idTorneo);
+    if (torneoSockets) {
+      return torneoSockets.find((socket) => socket.id === id);
+    }
+    return null;
+  }
+
+  static socketExists(idTorneo, id) {
+    const torneoSockets = this.torneoSockets.get(idTorneo);
+    if (torneoSockets) {
+      return torneoSockets.some((socket) => socket.id === id);
+    }
+    return false;
+  }
+}
+
+module.exports = Socket;

@@ -5,15 +5,21 @@ const StepChecker = require("./stepChecker");
 
 const R = require("radash");
 const log = require("./log");
-const { generateUniqueId } = require("./utils");
 
 class Match {
-  constructor() {
-    this.gameId = generateUniqueId();
+  constructor(torneoId, gameId) {
+    this.torneoId = torneoId;
+    this.gameId = gameId;
     this.pot = 0;
     this.players = [];
     this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101);
-    this.dealer = new Dealer(this.gameId, this.players, this.shuffledDeck);
+
+    this.dealer = new Dealer(
+      this.gameId,
+      this.players,
+      this.shuffledDeck,
+      torneoId
+    );
     this.stepChecker = new StepChecker(this.gameId);
   }
 
@@ -117,7 +123,6 @@ class Match {
       this.dealer.talkToAllPlayers("Minimun 2 Players to Start");
     }
 
-    //!this.stepChecker.isAllowedTo("blinds")
     //Blinds
     if (this.stepChecker.isAllowedTo("blinds")) {
       const timerAskBlinds = () => {
@@ -150,4 +155,4 @@ class Match {
   }
 }
 
-module.exports = new Match();
+module.exports = Match;

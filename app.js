@@ -11,12 +11,27 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const log = require("./log");
-const match = require("./match");
+const Match = require("./match");
 const Socket = require("./sockets");
+const Torneo = require("./torneo");
 
-wss.on("connection", (ws) => {
+const gameId = generateUniqueId()
+wss.on("connection", (ws, req) => {
+  const urlParams = new URLSearchParams(req.url.substring(1));
+  const torneoId = urlParams.get("torneoId") ?? "default_Torneo";
+
+  let match;
+
   const thisSocket = { id: generateUniqueId(), socket: ws };
-  Socket.addSocket(thisSocket);
+
+  Socket.addSocket(thisSocket, torneoId);
+
+  const thisMatch = new Match(torneoId, gameId);
+
+  Torneo.addMatch(thisMatch, torneoId);
+    
+      match = Torneo.getMatch(torneoId, gameId);
+
 
   ws.on("message", (data) => {
     let jsonData;
@@ -31,11 +46,23 @@ wss.on("connection", (ws) => {
       }
     }
 
+    if (jsonData && jsonData.action === "signUp") {
+      log.add({ step: "Sign Up" });
+
+      if (!torneoId || !Torneo.torneoExists(torneoId)) {
+        console.log("no torneoId");
+        ws.close();
+        return;
+      }
+
+      match.signUpPlayer(jsonData, thisSocket.id);
+    }
+
     if (jsonData && jsonData.action === "sendMessage") {
       const targetPlayerId = jsonData.targetPlayerId;
       const targetMessage = jsonData.targetMessage;
 
-      const targetSocket = Socket.getSocket(targetPlayerId);
+      const targetSocket = Socket.getSocket(torneoId, targetPlayerId);
 
       if (targetSocket && targetSocket.socket) {
         targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
@@ -46,11 +73,6 @@ wss.on("connection", (ws) => {
       }
     }
 
-    if (jsonData && jsonData.action === "signUp") {
-      log.add({ step: "Sign Up" });
-      match.signUpPlayer(jsonData, thisSocket.id);
-    }
-
     if (jsonData && jsonData.action === "fold") {
       log.add({ step: "Fold" });
       match.fold(thisSocket.id);
@@ -59,7 +81,7 @@ wss.on("connection", (ws) => {
     if (jsonData && jsonData.action === "close") {
       log.add({ step: "Close" });
 
-      const targetSocket = Socket.getSocket(thisSocket.id);
+      const targetSocket = Socket.getSocket(torneoId, thisSocket.id);
 
       if (targetSocket && targetSocket.socket) {
         targetSocket.socket.terminate();
@@ -85,13 +107,14 @@ wss.on("connection", (ws) => {
     }
 
     if (jsonData && jsonData.action === "log") {
+      console.log("log");
+      console.log(Socket.getSockets());
       log.print();
-      //   ws.send(log.get());
     }
   });
 });
 
 app.get("/", (req, res) => res.send("hola mundo"));
-server.listen(3333, () => {
-  console.log("Servidor escuchando en http://localhost:3333");
+server.listen(8888, () => {
+  console.log("Servidor escuchando en http://localhost:8888");
 });
