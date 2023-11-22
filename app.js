@@ -48,7 +48,6 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "signUp") {
-      //log.add({ step: "Sign Up" });
 
       jsonData.name = myName;
 
@@ -83,12 +82,8 @@ wss.on("connection", (ws, req) => {
 
     if (jsonData && jsonData.action === "close") {
       log.add({ step: "Close" });
-      match.close(thisSocket.id, torneoId);
-      // const targetSocket = Socket.getSocket(torneoId, thisSocket.id);
+      match.close(thisSocket, torneoId);
 
-      // if (targetSocket && targetSocket.socket) {
-      //   targetSocket.socket.terminate();
-      // }
     }
 
     if (jsonData && jsonData.action === "initialBet") {

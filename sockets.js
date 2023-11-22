@@ -21,7 +21,24 @@ class Socket {
       console.log(`Nuevo usuario ${name} ha sido agregado.`);
     }
   }
-//}
+
+  static removeSocket(socket, idTorneo) {
+    if (this.torneoSockets.has(idTorneo)) {
+      const torneoSockets = this.torneoSockets.get(idTorneo);
+      const socketIndex = torneoSockets.findIndex(
+        (s) => s.name === socket.name
+      );
+
+      if (socketIndex !== -1) {
+        torneoSockets.splice(socketIndex, 1);
+        console.log(`Usuario ${socket.name} ha sido eliminado.`);
+      } else {
+        console.log(`Usuario ${socket.name} no encontrado en el torneo.`);
+      }
+    } else {
+      console.log(`Torneo con ID ${idTorneo} no encontrado.`);
+    }
+  }
 
   static getSockets() {
     return this.torneoSockets;

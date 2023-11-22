@@ -118,9 +118,11 @@ class Match {
     }
   }
 
-  close(thisSocketId, torneoId) {
+  close(thisSocket, torneoId) {
+    const { id: thisSocketId } = thisSocket;
     console.log("MATCH - close");
-    this.dealer.talkToPLayerById(thisSocketId, "bye amigo");
+
+    console.log(thisSocketId, "thisSocketId");
 
     ///Remove User from Users Array
     const index = this.players.findIndex(
@@ -130,15 +132,11 @@ class Match {
       this.players.splice(index, 1)[0];
     }
 
-    ///Close User's Socket
-    const thisSocket = Socket.getSocket(torneoId, thisSocketId);
+    // Close socket after removing user information
     if (thisSocket) {
-      // console.log(thisSocket, 'xxxx')
-      //thisSocket
+      Socket.removeSocket(thisSocket, torneoId);
       thisSocket.socket.close();
     }
-
-    console.log(Socket.socketExists(torneoId, thisSocketId));
   }
 
   vigilant() {
