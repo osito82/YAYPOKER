@@ -20,9 +20,10 @@ const gameId = generateUniqueId();
 wss.on("connection", (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1));
   const torneoId = urlParams.get("torneoId") ?? "default_Torneo";
-  const myName = randomName();
+  const playerName = urlParams.get("playerName") ?? randomName();
+  
 
-  const thisSocket = { id: generateUniqueId(), name: myName, socket: ws };
+  const thisSocket = { id: generateUniqueId(), name: playerName, socket: ws };
 
   Socket.addSocket(thisSocket, torneoId);
 
@@ -48,8 +49,7 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "signUp") {
-
-      jsonData.name = myName;
+      jsonData.name = playerName;
 
       if (!torneoId || !Torneo.torneoExists(torneoId)) {
         console.log("no torneo Id");
@@ -83,7 +83,6 @@ wss.on("connection", (ws, req) => {
     if (jsonData && jsonData.action === "close") {
       log.add({ step: "Close" });
       match.close(thisSocket, torneoId);
-
     }
 
     if (jsonData && jsonData.action === "initialBet") {
@@ -100,7 +99,6 @@ wss.on("connection", (ws, req) => {
 
     if (jsonData && jsonData.action === "stats") {
       match.stats();
-      //  log.add({ step: "3. Dealt Private Cards" });
     }
 
     if (jsonData && jsonData.action === "startGame") {
@@ -113,6 +111,11 @@ wss.on("connection", (ws, req) => {
       console.log("log");
       log.print();
     }
+  });
+
+  ws.on("close", () => {
+    console.log("Cliente desconectado");
+    match.close(thisSocket, torneoId);
   });
 });
 

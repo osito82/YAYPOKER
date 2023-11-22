@@ -21,13 +21,13 @@ function shuffle(array) {
 
 function generateUniqueId() {
   const fullUUID = uuidv4();
-  const shortUUID = fullUUID.substr(0, 3).replace(/-/g, '');
+  const shortUUID = fullUUID.substr(0, 4).replace(/-/g, '');
   return shortUUID;
 }
 
 
 function randomName() {
-  const nombres = ["Osito", "Duke", "Billy", "Dixon", "Daniel"];
+  const nombres = ["Osito", "Duke", "Billy", "Dixon", "Daniel", "Luis", "Marco", "Uribe", "Roberto", "Joshua"];
   const indiceAleatorio = Math.floor(Math.random() * nombres.length);
   const nombreElegido = nombres[indiceAleatorio];
   return nombreElegido;
