@@ -5,6 +5,7 @@ const StepChecker = require("./stepChecker");
 
 const R = require("radash");
 const log = require("./log");
+const Socket = require("./sockets");
 
 class Match {
   constructor(torneoId, gameId) {
@@ -27,7 +28,7 @@ class Match {
     console.log("MATCH - signUpPlayer");
 
     if (this.players.length >= 10) {
-      console.log("Max Ten Players"); //todo max players
+      console.log("Max Ten Players");
       return;
     }
 
@@ -38,23 +39,28 @@ class Match {
       [],
       thisSocketId
     );
-    const foundPlayer = this.players.find(
-      (myPlayer) => myPlayer.id == thisSocketId
+
+    const existingPlayerIndex = this.players.findIndex(
+      (s) => s.name === data.name
     );
 
-    const playerNumber = this.players.length + 1;
+    if (existingPlayerIndex !== -1) {
+      // Si ya existe un socket con el mismo nombre, actualiza el socket
+      this.players[existingPlayerIndex] = player;
+      console.log(`Usuario ${data.name} se ha reconectado.`);
+    } else {
+      // Si no existe, añade el nuevo socket
+      this.players.push(player);
+      console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
+    }
 
-    player.setPlayerNumber(playerNumber);
-
-    if (playerNumber >= 2) this.stepChecker.passedStep("signUp");
-
-    if (!foundPlayer) this.players.push(player);
+    if (this.players.length >= 2) this.stepChecker.grantStep("signUp");
   }
 
   dealtPrivateCards() {
     console.log("MATCH - dealtPrivateCards");
     this.dealer.dealCardsEachPlayer(2);
-    this.stepChecker.passedStep("dealPrivateCards");
+    this.stepChecker.grantStep("dealPrivateCards");
     log.add({ players: this.players });
   }
 
@@ -88,14 +94,14 @@ class Match {
       if (!this.dealer.hasPlayerBet(1)) {
         this.dealer.talkToPLayer(1, "P1 - Please make your bet");
       } else {
-        this.stepChecker.passedStep("smallBlind");
+        this.stepChecker.grantStep("smallBlind");
       }
 
       //bigBlind Ask for bet P2
       if (!this.dealer.hasPlayerBet(2)) {
         this.dealer.talkToPLayer(2, "P2 - Please make your bet");
       } else {
-        this.stepChecker.passedStep("bigBlind");
+        this.stepChecker.grantStep("bigBlind");
       }
     }
   }
@@ -112,10 +118,36 @@ class Match {
     }
   }
 
+  close(thisSocketId, torneoId) {
+    console.log("MATCH - close");
+    this.dealer.talkToPLayerById(thisSocketId, "bye amigo");
+
+    ///Remove User from Users Array
+    const index = this.players.findIndex(
+      (player) => player.id === thisSocketId
+    );
+    if (index !== -1) {
+      this.players.splice(index, 1)[0];
+    }
+
+    ///Close User's Socket
+    const thisSocket = Socket.getSocket(torneoId, thisSocketId);
+    if (thisSocket) {
+      // console.log(thisSocket, 'xxxx')
+      //thisSocket
+      thisSocket.socket.close();
+    }
+
+    console.log(Socket.socketExists(torneoId, thisSocketId));
+  }
+
+  vigilant() {
+    // console.log("vigilant");
+  }
+
   startGame() {
     console.log("MATCH - startGame");
 
-    //Sign Up Min 2 Playes
     if (
       !this.stepChecker.checkStep("signUp") &&
       !this.dealer.hasMinimunPlayers()
@@ -139,19 +171,16 @@ class Match {
       const intervalId = setInterval(timerAskBlinds, 10000);
     }
 
-    //Deal Private Cards
-    // console.log("Deal Private Cards");
-    console.log(this.stepChecker.isAllowedTo("dealPrivateCards"), "xxx");
     if (this.stepChecker.isAllowedTo("dealPrivateCards")) {
-      //console.log("holis");
       this.dealtPrivateCards();
     }
 
-    //   if (this.dealer.hasPlayerBet(1) && this.dealer.hasPlayerBet(2))
-
-    //      this.dealer.dealCardsDealer(3);
-
     log.add({ dealerCards: this.dealer.showCards() });
+  }
+
+  stats() {
+    console.log("Players", JSON.stringify(this.players));
+    console.log("Sockets", Socket.getSockets());
   }
 }
 

@@ -13,11 +13,7 @@ class Player {
     this.cards.push(card);
   }
 
-  setPlayerNumber(number) {
-    this.playerNumber = number;
-  }
-
-  countCards() {
+   countCards() {
     return this.cards.length;
   }
 

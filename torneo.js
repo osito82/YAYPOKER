@@ -6,19 +6,18 @@ class Torneo {
   }
 
   static addMatch(match, idTorneo) {
+    
     if (!this.torneos.has(idTorneo)) {
       this.torneos.set(idTorneo, []);
     }
 
     const torneoMatches = this.torneos.get(idTorneo);
 
-    // Verificar si ya existe un partido con el mismo ID
     const matchExists = torneoMatches.some(
       (existingMatch) => existingMatch.gameId === match.gameId
     );
 
     if (!matchExists) {
-      // Crear una nueva lista para evitar la mutación directa de la lista en el mapa
       const nuevaLista = [...torneoMatches, match];
       this.torneos.set(idTorneo, nuevaLista);
     } else {
@@ -34,8 +33,7 @@ class Torneo {
     if (torneoMatches) {
       return torneoMatches.find((match) => match.gameId === id);
     }
-
-    return null; // O cualquier valor que consideres apropiado si el torneo no se encuentra o no tiene partidos
+    return null;
   }
 
   static torneoExists(idTorneo) {

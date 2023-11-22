@@ -56,11 +56,19 @@ class Dealer {
     return this.players.length >= 2;
   }
 
+  //  number = []
+
   getPlayerByNumber(number) {
-    const foundPlayer = this.players.find(
-      (myPlayer) => myPlayer.playerNumber == number
-    );
-    return foundPlayer;
+    const idx = Number(number) - 1; // Resta 1 en lugar de sumar 1
+    const foundPlayer = this.players[idx];
+
+    if (foundPlayer) {
+      console.log(foundPlayer);
+      return foundPlayer;
+    } else {
+      console.log("Jugador no encontrado");
+      return null; // O devuelve algo que indique que el jugador no fue encontrado
+    }
   }
 
   getPlayerById(number) {
@@ -92,10 +100,14 @@ class Dealer {
       const foundPlayer = this.getPlayerByNumber(playerNumber);
 
       if (foundPlayer) {
-        console.log("MATCH - talkToPLayer" + playerNumber);
+        console.log("MATCH - talkToPLayer " + playerNumber);
         const playerId = foundPlayer.id;
         const targetSocket = Socket.getSocket(this.torneoId, playerId);
-        targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+        if (targetSocket) {
+          targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+        } else {
+          console.log("There is not socket for player" + playerId);
+        }
       }
     } catch (error) {
       console.log(error);

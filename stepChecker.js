@@ -19,8 +19,13 @@ class StepChecker {
     return step in this.gameFlow ? this.gameFlow[step] : false;
   }
 
-  passedStep(step) {
+  grantStep(step) {
     this.gameFlow[step] = true;
+    return this;
+  }
+
+  revokeStep(step) {
+    this.gameFlow[step] = false;
     return this;
   }
 
@@ -41,7 +46,7 @@ class StepChecker {
           this.checkStep("smallBlind") &&
           this.checkStep("bigBlind")
         );
-        //break;
+      //break;
     }
   }
 }

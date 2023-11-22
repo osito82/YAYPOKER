@@ -25,4 +25,14 @@ function generateUniqueId() {
   return shortUUID;
 }
 
-module.exports = { shuffle, generateUniqueId };
+
+function randomName() {
+  const nombres = ["Osito", "Duke", "Billy", "Dixon", "Daniel"];
+  const indiceAleatorio = Math.floor(Math.random() * nombres.length);
+  const nombreElegido = nombres[indiceAleatorio];
+  return nombreElegido;
+}
+
+
+
+module.exports = { shuffle, generateUniqueId, randomName };

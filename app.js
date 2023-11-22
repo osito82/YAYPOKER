@@ -4,7 +4,7 @@ const R = require("radash");
 const http = require("http");
 const WebSocket = require("ws");
 
-const { generateUniqueId } = require("./utils");
+const { generateUniqueId, randomName } = require("./utils");
 
 const app = express();
 const server = http.createServer(app);
@@ -15,23 +15,24 @@ const Match = require("./match");
 const Socket = require("./sockets");
 const Torneo = require("./torneo");
 
-const gameId = generateUniqueId()
+const gameId = generateUniqueId();
+
 wss.on("connection", (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1));
   const torneoId = urlParams.get("torneoId") ?? "default_Torneo";
+  const myName = randomName();
 
-  let match;
-
-  const thisSocket = { id: generateUniqueId(), socket: ws };
+  const thisSocket = { id: generateUniqueId(), name: myName, socket: ws };
 
   Socket.addSocket(thisSocket, torneoId);
 
   const thisMatch = new Match(torneoId, gameId);
 
-  Torneo.addMatch(thisMatch, torneoId);
-    
-      match = Torneo.getMatch(torneoId, gameId);
+  setInterval(() => thisMatch.vigilant(), 2500);
 
+  Torneo.addMatch(thisMatch, torneoId);
+
+  let match = Torneo.getMatch(torneoId, gameId);
 
   ws.on("message", (data) => {
     let jsonData;
@@ -47,10 +48,12 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "signUp") {
-      log.add({ step: "Sign Up" });
+      //log.add({ step: "Sign Up" });
+
+      jsonData.name = myName;
 
       if (!torneoId || !Torneo.torneoExists(torneoId)) {
-        console.log("no torneoId");
+        console.log("no torneo Id");
         ws.close();
         return;
       }
@@ -80,12 +83,12 @@ wss.on("connection", (ws, req) => {
 
     if (jsonData && jsonData.action === "close") {
       log.add({ step: "Close" });
+      match.close(thisSocket.id, torneoId);
+      // const targetSocket = Socket.getSocket(torneoId, thisSocket.id);
 
-      const targetSocket = Socket.getSocket(torneoId, thisSocket.id);
-
-      if (targetSocket && targetSocket.socket) {
-        targetSocket.socket.terminate();
-      }
+      // if (targetSocket && targetSocket.socket) {
+      //   targetSocket.socket.terminate();
+      // }
     }
 
     if (jsonData && jsonData.action === "initialBet") {
@@ -100,6 +103,11 @@ wss.on("connection", (ws, req) => {
       log.add({ step: "3. Dealt Private Cards" });
     }
 
+    if (jsonData && jsonData.action === "stats") {
+      match.stats();
+      //  log.add({ step: "3. Dealt Private Cards" });
+    }
+
     if (jsonData && jsonData.action === "startGame") {
       match.startGame();
       log.add({ step: "4. Start the Game" });
@@ -108,7 +116,6 @@ wss.on("connection", (ws, req) => {
 
     if (jsonData && jsonData.action === "log") {
       console.log("log");
-      console.log(Socket.getSockets());
       log.print();
     }
   });
