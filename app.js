@@ -115,7 +115,7 @@ wss.on("connection", (ws, req) => {
 
   ws.on("close", () => {
     console.log("Cliente desconectado");
-    match.close(thisSocket, torneoId);
+  //  match.close(thisSocket, torneoId);
   });
 });
 
