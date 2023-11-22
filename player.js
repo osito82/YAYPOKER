@@ -2,6 +2,7 @@ class Player {
   constructor(gameId, name, chips, cards, id) {
     this.gameId = gameId;
     this.id = id;
+    this.viewCards = false
     this.name = name;
     this.chips = chips;
     this.cards = cards;
@@ -15,6 +16,10 @@ class Player {
 
    countCards() {
     return this.cards.length;
+  }
+
+  viewCards() {
+    return this.viewCards = true;
   }
 
   getPlayer(playersArray, playerId) {

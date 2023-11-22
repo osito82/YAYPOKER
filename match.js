@@ -45,11 +45,9 @@ class Match {
     );
 
     if (existingPlayerIndex !== -1) {
-      // Si ya existe un player con el mismo nombre, actualiza el player ID
       this.players[existingPlayerIndex].id = player.id;
       console.log(`Usuario ${data.name} se ha reconectado.`);
     } else {
-      // Si no existe, añade el nuevo player
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
     }
@@ -132,7 +130,7 @@ class Match {
       this.players.splice(index, 1)[0];
     }
 
-    // Close socket after removing user information
+    /// Close socket after removing user information
     if (thisSocket) {
       Socket.removeSocket(thisSocket, torneoId);
       thisSocket.socket.close();

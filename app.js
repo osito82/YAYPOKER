@@ -17,11 +17,12 @@ const Torneo = require("./torneo");
 
 const gameId = generateUniqueId();
 
+const startTime = new Date();
+
 wss.on("connection", (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1));
   const torneoId = urlParams.get("torneoId") ?? "default_Torneo";
   const playerName = urlParams.get("playerName") ?? randomName();
-  
 
   const thisSocket = { id: generateUniqueId(), name: playerName, socket: ws };
 
@@ -115,11 +116,40 @@ wss.on("connection", (ws, req) => {
 
   ws.on("close", () => {
     console.log("Cliente desconectado");
-  //  match.close(thisSocket, torneoId);
   });
 });
 
-app.get("/", (req, res) => res.send("hola mundo"));
-server.listen(8888, () => {
-  console.log("Servidor escuchando en http://localhost:8888");
+app.get("/", (req, res) => res.send("Poker!"));
+const port = 8888;
+server.listen(port, () => {
+  console.log(`Servidor escuchando en http://localhost:${port}`);
+});
+
+
+
+app.get("/status", (req, res) => {
+  //const currentTime = new Date().toLocaleString();
+  //const uptime = currentTime - startTime;
+  //const uptime = new Date() - startTime;
+  const uptimeInMilliseconds = new Date() - startTime;
+
+  // Convierte el tiempo de ejecución a un formato más legible
+  const uptimeInSeconds = Math.floor(uptimeInMilliseconds / 1000);
+  const hours = Math.floor(uptimeInSeconds / 3600);
+  const minutes = Math.floor((uptimeInSeconds % 3600) / 60);
+  const seconds = uptimeInSeconds % 60;
+
+  res.json({
+    status: "Server is running",
+    startTime: startTime.toLocaleString(),
+    uptime: {
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+    },
+  });
+});
+
+app.get('*', (req, res) => {
+  res.redirect('/'); // Redirige a la ruta principal
 });

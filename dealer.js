@@ -12,10 +12,9 @@ class Dealer {
   cards = [];
 
   dealCardsEachPlayer(numberOfCards = 1) {
-    //console.log(this.players, '-------')
+    
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
-        // console.log('cerotes', player.countCards()  )
         if (player.countCards() == 2) return;
 
         const cardToDeal = this.deck.shift();
@@ -56,10 +55,8 @@ class Dealer {
     return this.players.length >= 2;
   }
 
-  //  number = []
-
   getPlayerByNumber(number) {
-    const idx = Number(number) - 1; // Resta 1 en lugar de sumar 1
+    const idx = Number(number) - 1;
     const foundPlayer = this.players[idx];
 
     if (foundPlayer) {
@@ -67,7 +64,7 @@ class Dealer {
       return foundPlayer;
     } else {
       console.log("Jugador no encontrado");
-      return null; // O devuelve algo que indique que el jugador no fue encontrado
+      return null;
     }
   }
 
@@ -115,15 +112,10 @@ class Dealer {
   }
 
   talkToAllPlayers(targetMessage) {
+    console.log("MATCH - talkToAllPlayers ");
     try {
       for (const player of this.players) {
         const playerId = player.id;
-
-        console.log(
-          this.torneoId,
-          playerId,
-          "his.torneoId, playerId - 2222222"
-        );
 
         const targetSocket = Socket.getSocket(this.torneoId, playerId);
         targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
