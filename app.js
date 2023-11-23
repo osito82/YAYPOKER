@@ -99,7 +99,7 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "stats") {
-      match.stats();
+      match.stats(thisSocket.id);
     }
 
     if (jsonData && jsonData.action === "startGame") {
@@ -125,12 +125,7 @@ server.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
 });
 
-
-
 app.get("/status", (req, res) => {
-  //const currentTime = new Date().toLocaleString();
-  //const uptime = currentTime - startTime;
-  //const uptime = new Date() - startTime;
   const uptimeInMilliseconds = new Date() - startTime;
 
   // Convierte el tiempo de ejecución a un formato más legible
@@ -150,6 +145,6 @@ app.get("/status", (req, res) => {
   });
 });
 
-app.get('*', (req, res) => {
-  res.redirect('/'); // Redirige a la ruta principal
+app.get("*", (req, res) => {
+  res.redirect("/"); // Redirige a la ruta principal
 });

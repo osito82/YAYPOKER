@@ -11,8 +11,9 @@ class Dealer {
 
   cards = [];
 
+
+
   dealCardsEachPlayer(numberOfCards = 1) {
-    
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
         if (player.countCards() == 2) return;
@@ -60,7 +61,6 @@ class Dealer {
     const foundPlayer = this.players[idx];
 
     if (foundPlayer) {
-      console.log(foundPlayer);
       return foundPlayer;
     } else {
       console.log("Jugador no encontrado");

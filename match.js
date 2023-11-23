@@ -2,6 +2,7 @@ const Player = require("./player");
 const Dealer = require("./dealer");
 const Deck = require("./deck");
 const StepChecker = require("./stepChecker");
+const PokerCore = require('./pokerCore')
 
 const R = require("radash");
 const log = require("./log");
@@ -104,7 +105,7 @@ class Match {
     }
   }
 
-  fold(thisSocketId) {
+   fold(thisSocketId) {
     console.log("MATCH - fold");
     this.dealer.talkToPLayerById(thisSocketId, "bye amigo");
 
@@ -174,9 +175,15 @@ class Match {
     log.add({ dealerCards: this.dealer.showCards() });
   }
 
-  stats() {
+  stats(socketId) {
+    console.log(socketId)
+    //const thisPlayer = this.dealer.getPlayerById(socketId);
+    //console.log(thisPlayer)
+
     console.log("Players", JSON.stringify(this.players));
     console.log("Sockets", Socket.getSockets());
+
+    
   }
 }
 
