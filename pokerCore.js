@@ -39,7 +39,7 @@ detectPairs = (cartas) => {
 
   if (parejas.length === 1) {
     return {
-      pairs: parejas.length === 1,
+      pokerHand: "pairs",
       show: parejas,
       cards: cartas,
     };
@@ -64,7 +64,7 @@ detectTwoPairs = (cartas) => {
 
   if (parejas.length === 2) {
     return {
-      twoPairs: parejas.length === 2,
+      pokerHand: "twoPairs",
       show: parejas,
       cards: cartas,
     };
@@ -73,7 +73,23 @@ detectTwoPairs = (cartas) => {
   }
 };
 
-detectFlush = (cartas) => {
+const detectStraightFlush = (cartas) => {
+  const isStraight = detectStraight(cartas);
+  const isFlush = detectFlush(cartas);
+  const isRoyalFlush = detectRoyalFlush(cartas);
+
+  if (isStraight && isFlush && !isRoyalFlush) {
+    return {
+      pokerHand: "straightFlush",
+      show: cartas,
+      cards: cartas,
+    };
+  } else {
+    return false;
+  }
+};
+
+const detectFlush = (cartas) => {
   let flusha = new Set();
 
   for (const carta of cartas) {
@@ -83,8 +99,8 @@ detectFlush = (cartas) => {
 
   if (flusha.size === 1) {
     return {
+      pokerHand: "flush",
       show: cartas,
-      flush: true,
       cards: cartas,
     };
   } else {
@@ -124,11 +140,20 @@ function detectRoyalFlush(cartas) {
 
   if (Number(sumValues) == 60 && isFlush) {
     return {
-      royalFlush: true,
+      pokerHand: "royalFlush",
       show: cartas,
       cards: cartas,
     };
   } else return false;
+}
+
+function isArrayOrderedAndConsecutive(arr) {
+  for (let i = 0; i < arr.length - 1; i++) {
+    if (arr[i] + 1 !== arr[i + 1]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function detectStraight(cartas) {
@@ -147,39 +172,25 @@ function detectStraight(cartas) {
       case "A":
         return 14;
       default:
-        return parseInt(valor, 10); // Convertir a entero
+        return parseInt(valor, 10);
     }
   });
 
   const numerosOrdenados = realValues.slice().sort((a, b) => a - b);
 
-  for (let i = 0; i < numerosOrdenados.length - 1; i++) {
-    if (numerosOrdenados[i] + 1 !== numerosOrdenados[i + 1]) {
-      return false;
-    }
-  }
+  let memo = [1, 2, 3, 4, 5];
 
-  return {
-    straight: true,
-    show: cartas,
-    cards: cartas,
-  };
-}
-
-function detectStraightFlush(cartas) {
-  const isStraight = detectStraight(cartas);
-  const isFlush = detectStraight(cartas);
-  const isRoyalFlush = detectRoyalFlush(cartas);
-
-  if (isStraight && isFlush && !isRoyalFlush) {
-    return {
-      straightFlush: true,
+  if (isArrayOrderedAndConsecutive(numerosOrdenados)) {
+    result = {
+      pokerHand: "straight",
       show: cartas,
       cards: cartas,
     };
   } else {
-    return false;
+    result = false;
   }
+
+  return result;
 }
 
 detectHighCard = (cartas) => {
@@ -226,7 +237,7 @@ detectHighCard = (cartas) => {
 
     if (miniArray[0].toString() === numberToCard(bigestNumber).toString()) {
       return {
-        highCard: true,
+        pokerHand: "highCard",
         show: carta,
         cards: cartas,
       };
@@ -243,7 +254,7 @@ function detectFullHouse(cartas) {
 
   if (isThreeSome && isPairs) {
     return {
-      fullHouse: true,
+      pokerHand: "fullHouse",
       show: cartas,
       cards: cartas,
     };
@@ -268,7 +279,7 @@ detectThreesome = (cartas) => {
 
   if (trio.length === 3) {
     return {
-      threeSome: trio.length === 3,
+      pokerHand: "threeOfAKind",
       show: trio,
       cards: cartas,
     };
@@ -294,7 +305,7 @@ detectFourOfaKind = (cartas) => {
 
   if (fouroak.length === 4) {
     return {
-      fourOfaKind: fouroak.length === 4,
+      pokerHand: "fourOfaKind",
       show: fouroak,
       cards: cartas,
     };
@@ -310,71 +321,73 @@ class PokerCore {
     let hand = {};
     let tempHand;
     const joinedCards = dealerCards.concat(playerCards);
-    console.log(joinedCards);
-    const combinationsArray = combinar(joinedCards, 5);
 
-    //console.log(combinationsArray);
+    const combinationsArray = combinar(joinedCards, 5);
 
     combinationsArray.forEach((array) => {
       tempHand = detectRoyalFlush(array);
-      if (tempHand && tempHand.royalFlush) {
+
+      if (tempHand && tempHand.pokerHand == "royalFlush") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectStraightFlush(array);
-      if (tempHand && tempHand.straightFlush) {
+
+      if (tempHand && tempHand.pokerHand === "straightFlush") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectFourOfaKind(array);
-      if (tempHand && tempHand.fourOfaKind) {
+      if (tempHand && tempHand.pokerHand == "fourOfaKind") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectFullHouse(array);
-      if (tempHand && tempHand.fullHouse) {
+      if (tempHand && tempHand.pokerHand == "fullHouse") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectFlush(array);
-      if (tempHand && tempHand.flush) {
+      if (tempHand && tempHand.pokerHand == "flush") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectStraight(array);
-      if (tempHand && tempHand.straight) {
+      if (tempHand && tempHand.pokerHand == "straight") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectThreesome(array);
-      if (tempHand && tempHand.threeSome) {
+      if (tempHand && tempHand.pokerHand == "threeOfAKind") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectTwoPairs(array);
-      if (tempHand && tempHand.twoPairs) {
+      if (tempHand && tempHand.pokerHand == "twoPairs") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectPairs(array);
-      if (tempHand && tempHand.pairs) {
+      if (tempHand && tempHand.pokerHand == "pairs") {
         hand = tempHand;
         return;
       }
 
       tempHand = detectHighCard(array);
-      if (tempHand && tempHand.highCard) {
+      if (tempHand && tempHand.pokerHand == "highCard") {
         hand = tempHand;
         return;
       }
+
+      ////////////
 
       //tempHand
       //console.log(detectStraightFlush(array), "detectStraightFlush");
