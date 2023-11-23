@@ -116,6 +116,7 @@ wss.on("connection", (ws, req) => {
 
   ws.on("close", () => {
     console.log("Cliente desconectado");
+    match.pause(thisSocket);
   });
 });
 

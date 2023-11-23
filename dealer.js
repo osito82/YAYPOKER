@@ -11,8 +11,6 @@ class Dealer {
 
   cards = [];
 
-
-
   dealCardsEachPlayer(numberOfCards = 1) {
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
@@ -114,11 +112,11 @@ class Dealer {
   talkToAllPlayers(targetMessage) {
     console.log("MATCH - talkToAllPlayers ");
     try {
-      for (const player of this.players) {
-        const playerId = player.id;
-
-        const targetSocket = Socket.getSocket(this.torneoId, playerId);
-        targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+      const allSockets = Socket.getSocketByTorneo(this.torneoId);
+      if (allSockets) {
+        allSockets.forEach((thisSocket) => {
+          thisSocket.socket.send(JSON.stringify({ message: targetMessage }));
+        });
       }
     } catch (error) {
       console.log(error);

@@ -12,11 +12,9 @@ class Socket {
     const existingSocketIndex = torneoSockets.findIndex((s) => s.name === name);
 
     if (existingSocketIndex !== -1) {
-      // Si ya existe un socket con el mismo nombre, actualiza el socket
       torneoSockets[existingSocketIndex] = socket;
       console.log(`Usuario ${name} se ha reconectado.`);
     } else {
-      // Si no existe, añade el nuevo socket
       torneoSockets.push(socket);
       console.log(`Nuevo usuario ${name} ha sido agregado.`);
     }
@@ -42,6 +40,15 @@ class Socket {
 
   static getSockets() {
     return this.torneoSockets;
+  }
+
+
+  static getSocketByTorneo(idTorneo) {
+    const torneoSockets = this.torneoSockets.get(idTorneo);
+    if (torneoSockets) {
+      return torneoSockets
+    }
+    return null;
   }
 
   static getSocket(idTorneo, id) {

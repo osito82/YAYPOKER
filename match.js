@@ -2,11 +2,12 @@ const Player = require("./player");
 const Dealer = require("./dealer");
 const Deck = require("./deck");
 const StepChecker = require("./stepChecker");
-const PokerCore = require('./pokerCore')
+const PokerCore = require("./pokerCore");
 
 const R = require("radash");
 const log = require("./log");
 const Socket = require("./sockets");
+const { startGame } = require("./mock_sockets");
 
 class Match {
   constructor(torneoId, gameId) {
@@ -48,12 +49,26 @@ class Match {
     if (existingPlayerIndex !== -1) {
       this.players[existingPlayerIndex].id = player.id;
       console.log(`Usuario ${data.name} se ha reconectado.`);
+
+      if (this.stepChecker.checkStep("pause")) {
+        this.dealer.talkToAllPlayers(`${data.name} ya volvio`);
+        this.stepChecker.revokeStep("pause");
+        this.startGame();
+      }
     } else {
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
     }
 
-    if (this.players.length >= 2) this.stepChecker.grantStep("signUp");
+    //   this.stepChecker.grantStep("signUp")
+
+    if (this.players.length >= 2) {
+      this.stepChecker.grantStep("signUp");
+    } else {
+      this.stepChecker.revokeStep("signUp");
+    }
+
+    return;
   }
 
   dealtPrivateCards() {
@@ -105,7 +120,7 @@ class Match {
     }
   }
 
-   fold(thisSocketId) {
+  fold(thisSocketId) {
     console.log("MATCH - fold");
     this.dealer.talkToPLayerById(thisSocketId, "bye amigo");
 
@@ -121,7 +136,7 @@ class Match {
     const { id: thisSocketId } = thisSocket;
     console.log("MATCH - close");
 
-    console.log(thisSocketId, "thisSocketId");
+    //  console.log(thisSocketId, "thisSocketId");
 
     ///Remove User from Users Array
     const index = this.players.findIndex(
@@ -142,9 +157,33 @@ class Match {
     // console.log("vigilant");
   }
 
+  pause(socket) {
+    this.dealer.talkToAllPlayers(
+      `The user ${socket.name} - ${socket.id} got disconnected`
+    );
+    if (this.stepChecker.checkStep("startGame")) {
+      this.stepChecker.grantStep("pause");
+    }
+    setTimeout(() => {
+      this.stepChecker.revokeStep("pause");
+      this.dealer.talkToAllPlayers(
+        `Player ${socket.name} - ${socket.id} didnt come back, lets continue`
+      );
+      this.startGame();
+    }, 30000); 
+  }
+  //}
+
   startGame() {
     console.log("MATCH - startGame");
 
+    // if (this.stepChecker.checkStep("pause")) {
+    //   this.dealer.talkToAllPlayers(
+    //     "A player got disconnected lets wait one minute"
+    //   );
+    // }
+
+    //check more than 2 players
     if (
       !this.stepChecker.checkStep("signUp") &&
       !this.dealer.hasMinimunPlayers()
@@ -173,17 +212,19 @@ class Match {
     }
 
     log.add({ dealerCards: this.dealer.showCards() });
+
+    this.stepChecker.grantStep("startGame");
   }
 
   stats(socketId) {
-    console.log(socketId)
+    console.log(socketId);
     //const thisPlayer = this.dealer.getPlayerById(socketId);
     //console.log(thisPlayer)
 
     console.log("Players", JSON.stringify(this.players));
     console.log("Sockets", Socket.getSockets());
 
-    
+    console.log("gameFlow", JSON.stringify(this.stepChecker.gameFlow));
   }
 }
 
