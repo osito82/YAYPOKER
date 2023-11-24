@@ -13,10 +13,10 @@ class Socket {
 
     if (existingSocketIndex !== -1) {
       torneoSockets[existingSocketIndex] = socket;
-      console.log(`Usuario ${name} se ha reconectado.`);
+      console.log(`Socket - addSocket - Reconnected - ${name} - ${id}`);
     } else {
       torneoSockets.push(socket);
-      console.log(`Nuevo usuario ${name} ha sido agregado.`);
+      console.log(`Socket - addSocket - Connected - ${name} - ${id}.`);
     }
   }
 
@@ -29,12 +29,19 @@ class Socket {
 
       if (socketIndex !== -1) {
         torneoSockets.splice(socketIndex, 1);
-        console.log(`Usuario ${socket.name} ha sido eliminado.`);
+        console.log(
+          `Socket - removeSocket - Removed - ${socket.name} - ${socket.id}.`
+        );
       } else {
-        console.log(`Usuario ${socket.name} no encontrado en el torneo.`);
+        console.log(
+          `Socket - removeSocket - Not Found in Torneo - ${socket.name} - ${socket.id}.`
+        );
       }
     } else {
-      console.log(`Torneo con ID ${idTorneo} no encontrado.`);
+      console.log(
+        `Socket - removeSocket - Not Found - ${socket.name} - ${socket.id}.`
+      );
+      //console.log(`Torneo con ID ${idTorneo} no encontrado.`);
     }
   }
 
@@ -42,7 +49,7 @@ class Socket {
     return this.torneoSockets;
   }
 
-  static getSocketByTorneo(idTorneo) {
+  static getSocketsByTorneo(idTorneo) {
     const torneoSockets = this.torneoSockets.get(idTorneo);
     if (torneoSockets) {
       return torneoSockets;

@@ -23,13 +23,14 @@ socket.addEventListener("open", (event) => {
       case "1":
         sendCommand(mockTest["signUp"]);
         break;
-      case "initialBet":
+      case "setBet":
       case "ib":
+      case "sb":
         //case "3":
         rl.question(" - Money to Bet: ", (chipsToBet) => {
           chipsToBet = Number(chipsToBet);
-          mockTest.initialBet.chipsToBet = chipsToBet;
-          sendCommand(mockTest["initialBet"]);
+          mockTest.setBet.chipsToBet = chipsToBet;
+          sendCommand(mockTest["setBet"]);
           promptCommand();
         });
 

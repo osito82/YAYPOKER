@@ -26,8 +26,8 @@ class Match {
     this.stepChecker = new StepChecker(this.gameId);
   }
 
-  signUpPlayer(data, thisSocketId) {
-    console.log("MATCH - signUpPlayer");
+  signUp(data, thisSocketId) {
+    console.log("MATCH - signUp");
 
     if (this.players.length >= 10) {
       console.log("Max Ten Players");
@@ -51,7 +51,7 @@ class Match {
       console.log(`Usuario ${data.name} se ha reconectado.`);
 
       if (this.stepChecker.checkStep("pause")) {
-        this.dealer.talkToAllPlayers(`${data.name} ya volvio`);
+        this.dealer.talkToAllPlayersOnTable(`${data.name} ya volvio`);
         this.stepChecker.revokeStep("pause");
         this.continue();
       }
@@ -80,8 +80,8 @@ class Match {
     log.add({ players: this.players });
   }
 
-  initialBet(thisSocketId, chipsToBet) {
-    console.log("MATCH - initialBet");
+  setBet(thisSocketId, chipsToBet) {
+    console.log("MATCH - setBet");
     if (R.isEmpty(this.players)) {
       return;
     }
@@ -94,8 +94,12 @@ class Match {
 
     this.pot = this.pot + chipsToBet;
 
+    this.dealer.talkToAllPlayersOnTable(
+      `${foundPlayer.name} - bet ${chipsToBet} - pot ${this.pot}`
+    );
+
     log.add({
-      initialBet: {
+      setBet: {
         player: foundPlayer,
         pot: this.pot,
       },
@@ -103,8 +107,7 @@ class Match {
   }
 
   askForBets(bettingFor) {
-    // console.log("MATCH - askForBets");
-
+    
     if (bettingFor == "blinds") {
       if (this.dealer.hasPlayerBet(1) && this.dealer.hasPlayerBet(2)) {
         this.stepChecker.grantStep("blinds");
@@ -129,7 +132,7 @@ class Match {
     if (index !== -1) {
       this.players.splice(index, 1);
     }
-    this.continue()
+    this.continue();
   }
 
   fold(thisSocketId) {
@@ -142,6 +145,7 @@ class Match {
     if (index !== -1) {
       this.players.splice(index, 1);
     }
+    this.continue();
   }
 
   close(thisSocket, torneoId) {
@@ -169,21 +173,20 @@ class Match {
   }
 
   pause(socket) {
-    this.dealer.talkToAllPlayers(
+    this.dealer.talkToAllPlayersOnTable(
       `The user ${socket.name} - ${socket.id} got disconnected`
     );
     this.stepChecker.grantStep("pause");
 
-    
     setTimeout(() => {
       this.stepChecker.revokeStep("pause");
       this.playerLeave(socket.id);
-      this.dealer.talkToAllPlayers(
+      this.dealer.talkToAllPlayersOnTable(
         `Player ${socket.name} - ${socket.id} didnt come back, lets continue`
       );
       //this.startGame();
     }, 15000);
-    this.continue()
+    this.continue();
   }
 
   continue() {
@@ -195,36 +198,27 @@ class Match {
 
     ///Pause
     if (this.stepChecker.checkStep("pause")) {
-      this.dealer.talkToAllPlayers("We are on pause");
+      this.dealer.talkToAllPlayersOnTable("We are on pause");
       return;
     }
 
     ///Check Minimun Players
-
-
-
-    if (
-   //   !this.stepChecker.checkStep("signUp") &&
-      !this.dealer.hasMinimunPlayers()
-      //&&
-      // this.stepChecker.checkStep("pause")
-    ) {
-      this.dealer.talkToAllPlayers("Minimun 2 Players to Start");
+    if (!this.dealer.hasMinimunPlayers()) {
+      this.dealer.talkToAllPlayersOnTable("Minimun 2 Players to Start");
       return;
     }
 
     ///Blinds
-    //if (this.stepChecker.isAllowedTo("blinds")) {
-    const timerAskBlinds = () => {
-      if (!this.stepChecker.checkStep("blinds")) {
-        this.askForBets("blinds");
-      } else {
-        clearInterval(intervalId);
-      }
-    };
+    //const timerAskBlinds = () => {
+    if (!this.stepChecker.checkStep("blinds")) {
+      this.askForBets("blinds");
+    } // else {
+    // clearInterval(intervalId);
+    // }
+    //};
+    //const intervalId = setInterval(timerAskBlinds, 10000);
 
-    const intervalId = setInterval(timerAskBlinds, 10000);
-    //}
+    //desision makinb
 
     if (this.stepChecker.isAllowedTo("dealPrivateCards")) {
       this.dealtPrivateCards();
@@ -242,7 +236,7 @@ class Match {
 
     console.log("Players", JSON.stringify(this.players));
     console.log("Sockets", Socket.getSockets());
-
+    console.log("pot", this.pot);
     console.log("gameFlow", JSON.stringify(this.stepChecker.gameFlow));
   }
 }

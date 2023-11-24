@@ -60,17 +60,19 @@ class Dealer {
 
     if (foundPlayer) {
       return foundPlayer;
-    } 
-    
-    else {
-   //   console.log("Jugador no encontrado");
+    } else {
+      //   console.log("Jugador no encontrado");
       return null;
     }
   }
 
   getPlayerById(number) {
     const foundPlayer = this.players.find((myPlayer) => myPlayer.id === number);
-    return foundPlayer;
+    if (foundPlayer) {
+      return foundPlayer;
+    } else {
+      return null;
+    }
   }
 
   hasPlayerBet(playerNUmber) {
@@ -78,7 +80,7 @@ class Dealer {
     if (playerToCheck) {
       return playerToCheck.getThisGameBet() !== 0;
     } else {
-      return 0;
+      return false;
     }
   }
 
@@ -105,19 +107,35 @@ class Dealer {
         } else {
           console.log("There is not socket for player" + playerId);
         }
-      }
-      else {
-        return
+      } else {
+        return;
       }
     } catch (error) {
       console.log(error);
     }
   }
 
-  talkToAllPlayers(targetMessage) {
-    console.log("MATCH - talkToAllPlayers ");
+  talkToAllPlayersOnTable(targetMessage) {
     try {
-      const allSockets = Socket.getSocketByTorneo(this.torneoId);
+      this.players.forEach((player) => {
+        const { id } = player;
+
+        const socket = Socket.getSocket(this.torneoId, id);
+
+        if (socket) {
+          socket.socket.send(JSON.stringify({ message: targetMessage }));
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  ///Talk to all sockets in the torneo
+  talkToAllSockets(targetMessage) {
+    console.log("MATCH - talkToAllSockets ");
+    try {
+      const allSockets = Socket.getSocketsByTorneo(this.torneoId);
       if (allSockets) {
         allSockets.forEach((thisSocket) => {
           thisSocket.socket.send(JSON.stringify({ message: targetMessage }));

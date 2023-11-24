@@ -10,10 +10,10 @@ const dealtPrivateCards = {
   action: "dealtPrivateCards",
 };
 
-//Player Initial Bet
-const initialBet = {
+//Player Set Bet
+const setBet = {
   //torneoNumber:"55585548LC",
-  action: "initialBet",
+  action: "setBet",
 };
 
 //Player Initial Bet
@@ -56,7 +56,7 @@ const askCard = {
 exports.askCard = askCard;
 exports.signUp = signUp;
 exports.startGame = startGame;
-exports.initialBet = initialBet;
+exports.setBet = setBet;
 exports.dealtPrivateCards = dealtPrivateCards;
 exports.log = log;
 exports.sendMessage = sendMessage;

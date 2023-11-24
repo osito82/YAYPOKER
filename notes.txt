@@ -1,8 +1,8 @@
 Order:
 1. signUp - susgsglog
 2. startGame - sg 
--- If player 1 -> blinds - initialBet - ib
--- If player 2 -> blinds - initialBet - ib
+-- If player 1 -> blinds - setBet - sb
+-- If player 2 -> blinds - setBet - sb
 3. dealtPrivateCards - dp
 
 
@@ -15,10 +15,10 @@ signUp
   "totalChips": 1000
 }
 
- initialBet 
+ setBet 
   {
   "chipsToBet": 20,
-  "action": "initialBet"
+  "action": "setBet"
 }
 
 

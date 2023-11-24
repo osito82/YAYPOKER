@@ -7,7 +7,7 @@ class Player {
     this.chips = chips;
     this.cards = cards;
   }
-  playerNumber = 0;
+  //playerNumber = 0;
   thisGameBet = 0;
 
   setCard(card) {

@@ -24,7 +24,7 @@ wss.on("connection", (ws, req) => {
   const torneoId = urlParams.get("torneoId") ?? "default_Torneo";
   const playerName = urlParams.get("playerName") ?? randomName();
 
-  const thisSocket = { id: generateUniqueId(), name: playerName, socket: ws };
+  const thisSocket = { id: generateUniqueId(), name: playerName,  socket: ws };
 
   Socket.addSocket(thisSocket, torneoId);
 
@@ -58,7 +58,7 @@ wss.on("connection", (ws, req) => {
         return;
       }
 
-      match.signUpPlayer(jsonData, thisSocket.id);
+      match.signUp(jsonData, thisSocket.id);
     }
 
     if (jsonData && jsonData.action === "sendMessage") {
@@ -86,11 +86,11 @@ wss.on("connection", (ws, req) => {
       match.close(thisSocket, torneoId);
     }
 
-    if (jsonData && jsonData.action === "initialBet") {
-      log.add({ step: "Initial Bet" });
+    if (jsonData && jsonData.action === "setBet") {
+      log.add({ step: "Set Bet" });
       const chipsToBet = jsonData.chipsToBet;
 
-      match.initialBet(thisSocket.id, chipsToBet);
+      match.setBet(thisSocket.id, chipsToBet);
     }
 
     if (jsonData && jsonData.action === "dealtPrivateCards") {
