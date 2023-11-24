@@ -103,23 +103,33 @@ class Match {
   }
 
   askForBets(bettingFor) {
-    console.log("MATCH - askForBets");
+    // console.log("MATCH - askForBets");
 
     if (bettingFor == "blinds") {
-      ///smallBlind Ask for bet P1
-      if (!this.dealer.hasPlayerBet(1)) {
-        this.dealer.talkToPLayer(1, "P1 - Please make your bet");
+      if (this.dealer.hasPlayerBet(1) && this.dealer.hasPlayerBet(2)) {
+        this.stepChecker.grantStep("blinds");
       } else {
-        this.stepChecker.grantStep("smallBlind");
-      }
+        ///blinds Ask for bet P1
+        if (!this.dealer.hasPlayerBet(1)) {
+          this.dealer.talkToPLayer(1, "P1 - Please make your blind bet");
+        }
 
-      ///bigBlind Ask for bet P2
-      if (!this.dealer.hasPlayerBet(2)) {
-        this.dealer.talkToPLayer(2, "P2 - Please make your bet");
-      } else {
-        this.stepChecker.grantStep("bigBlind");
+        ///blinds Ask for bet P2
+        if (!this.dealer.hasPlayerBet(2)) {
+          this.dealer.talkToPLayer(2, "P2 - Please make your blind bet");
+        }
       }
     }
+  }
+
+  playerLeave(thisSocketId) {
+    const index = this.players.findIndex(
+      (player) => player.id === thisSocketId
+    );
+    if (index !== -1) {
+      this.players.splice(index, 1);
+    }
+    this.continue()
   }
 
   fold(thisSocketId) {
@@ -130,7 +140,7 @@ class Match {
       (player) => player.id === thisSocketId
     );
     if (index !== -1) {
-      this.players.splice(index, 1)[0];
+      this.players.splice(index, 1);
     }
   }
 
@@ -144,7 +154,7 @@ class Match {
     );
 
     if (index !== -1) {
-      this.players.splice(index, 1)[0];
+      this.players.splice(index, 1);
     }
 
     /// Close socket after removing user information
@@ -163,36 +173,41 @@ class Match {
       `The user ${socket.name} - ${socket.id} got disconnected`
     );
     this.stepChecker.grantStep("pause");
-    // if (this.stepChecker.checkStep("startGame")) {
-    //   this.stepChecker.grantStep("pause");
-    // }
+
+    
     setTimeout(() => {
       this.stepChecker.revokeStep("pause");
+      this.playerLeave(socket.id);
       this.dealer.talkToAllPlayers(
         `Player ${socket.name} - ${socket.id} didnt come back, lets continue`
       );
-      this.startGame();
-    }, 30000);
+      //this.startGame();
+    }, 15000);
+    this.continue()
   }
 
   continue() {
-    startGame();
+    this.startGame();
   }
 
   startGame() {
     console.log("MATCH - startGame");
 
-///Pause
+    ///Pause
     if (this.stepChecker.checkStep("pause")) {
       this.dealer.talkToAllPlayers("We are on pause");
-      return
-    } 
-   
-   ///Check Minimun Players
+      return;
+    }
+
+    ///Check Minimun Players
+
+
+
     if (
-      (!this.stepChecker.checkStep("signUp") &&
-        !this.dealer.hasMinimunPlayers()) ||
-      !this.stepChecker.checkStep("pause")
+   //   !this.stepChecker.checkStep("signUp") &&
+      !this.dealer.hasMinimunPlayers()
+      //&&
+      // this.stepChecker.checkStep("pause")
     ) {
       this.dealer.talkToAllPlayers("Minimun 2 Players to Start");
       return;
@@ -201,10 +216,7 @@ class Match {
     ///Blinds
     //if (this.stepChecker.isAllowedTo("blinds")) {
     const timerAskBlinds = () => {
-      if (
-        !this.stepChecker.checkStep("bigBlind") ||
-        !this.stepChecker.checkStep("smallBlind")
-      ) {
+      if (!this.stepChecker.checkStep("blinds")) {
         this.askForBets("blinds");
       } else {
         clearInterval(intervalId);

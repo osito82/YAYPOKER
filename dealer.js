@@ -60,8 +60,10 @@ class Dealer {
 
     if (foundPlayer) {
       return foundPlayer;
-    } else {
-      console.log("Jugador no encontrado");
+    } 
+    
+    else {
+   //   console.log("Jugador no encontrado");
       return null;
     }
   }
@@ -103,6 +105,9 @@ class Dealer {
         } else {
           console.log("There is not socket for player" + playerId);
         }
+      }
+      else {
+        return
       }
     } catch (error) {
       console.log(error);

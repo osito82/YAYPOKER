@@ -6,8 +6,7 @@ class StepChecker {
     startGame: false,
     pause: false,
     signUp: false,
-    bigBlind: false,
-    smallBlind: false,
+    blinds: false,
     dealPrivateCards: false,
   };
 
@@ -37,10 +36,10 @@ class StepChecker {
 
   isAllowedTo(step) {
     switch (step) {
-      case "bigBlind":
-      case "smallBlind":
-      case "blinds":
-        return this.checkStep("signUp");
+      // case "bigBlind":
+      // case "smallBlind":
+      // case "blinds":
+      //   return this.checkStep("signUp");
 
       case "dealPrivateCards":
         return (
