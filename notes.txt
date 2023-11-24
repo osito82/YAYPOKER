@@ -1,5 +1,5 @@
 Order:
-1. signUp - susgsglog
+1. signUp 
 2. startGame - sg 
 -- If player 1 -> smallBlind - initialBet - ib
 -- If player 2 -> bigBlind - initialBet - ib

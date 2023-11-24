@@ -42,11 +42,10 @@ class Socket {
     return this.torneoSockets;
   }
 
-
   static getSocketByTorneo(idTorneo) {
     const torneoSockets = this.torneoSockets.get(idTorneo);
     if (torneoSockets) {
-      return torneoSockets
+      return torneoSockets;
     }
     return null;
   }

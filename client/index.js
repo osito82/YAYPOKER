@@ -41,13 +41,10 @@ socket.addEventListener("open", (event) => {
         sendCommand(mockTest["dealtPrivateCards"]);
         break;
 
-
-        case "stats":
-          case "ss":
-          
-            sendCommand(mockTest["stats"]);
-            break;
-
+      case "stats":
+      case "ss":
+        sendCommand(mockTest["stats"]);
+        break;
 
       case "startGame":
       case "sg":
@@ -71,7 +68,7 @@ socket.addEventListener("open", (event) => {
         console.log("Cerrando conexión.");
         sendCommand(mockTest["close"]);
         // socket.close();  // Cierra la conexión WebSocket
-     //   rl.close();
+        //   rl.close();
         break;
 
       //DEVELOPMENT COMMANDS

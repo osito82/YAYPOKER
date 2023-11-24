@@ -53,14 +53,16 @@ class Match {
       if (this.stepChecker.checkStep("pause")) {
         this.dealer.talkToAllPlayers(`${data.name} ya volvio`);
         this.stepChecker.revokeStep("pause");
-        this.startGame();
+        this.continue();
       }
     } else {
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
+      this.dealer.talkToPLayerById(
+        player.id,
+        `Hi, ${player.name} welcome to the Poker Game`
+      );
     }
-
-    //   this.stepChecker.grantStep("signUp")
 
     if (this.players.length >= 2) {
       this.stepChecker.grantStep("signUp");
@@ -104,14 +106,14 @@ class Match {
     console.log("MATCH - askForBets");
 
     if (bettingFor == "blinds") {
-      //smallBlind Ask for bet P1
+      ///smallBlind Ask for bet P1
       if (!this.dealer.hasPlayerBet(1)) {
         this.dealer.talkToPLayer(1, "P1 - Please make your bet");
       } else {
         this.stepChecker.grantStep("smallBlind");
       }
 
-      //bigBlind Ask for bet P2
+      ///bigBlind Ask for bet P2
       if (!this.dealer.hasPlayerBet(2)) {
         this.dealer.talkToPLayer(2, "P2 - Please make your bet");
       } else {
@@ -136,12 +138,11 @@ class Match {
     const { id: thisSocketId } = thisSocket;
     console.log("MATCH - close");
 
-    //  console.log(thisSocketId, "thisSocketId");
-
     ///Remove User from Users Array
     const index = this.players.findIndex(
       (player) => player.id === thisSocketId
     );
+
     if (index !== -1) {
       this.players.splice(index, 1)[0];
     }
@@ -161,51 +162,57 @@ class Match {
     this.dealer.talkToAllPlayers(
       `The user ${socket.name} - ${socket.id} got disconnected`
     );
-    if (this.stepChecker.checkStep("startGame")) {
-      this.stepChecker.grantStep("pause");
-    }
+    this.stepChecker.grantStep("pause");
+    // if (this.stepChecker.checkStep("startGame")) {
+    //   this.stepChecker.grantStep("pause");
+    // }
     setTimeout(() => {
       this.stepChecker.revokeStep("pause");
       this.dealer.talkToAllPlayers(
         `Player ${socket.name} - ${socket.id} didnt come back, lets continue`
       );
       this.startGame();
-    }, 30000); 
+    }, 30000);
   }
-  //}
+
+  continue() {
+    startGame();
+  }
 
   startGame() {
     console.log("MATCH - startGame");
 
-    // if (this.stepChecker.checkStep("pause")) {
-    //   this.dealer.talkToAllPlayers(
-    //     "A player got disconnected lets wait one minute"
-    //   );
-    // }
-
-    //check more than 2 players
+///Pause
+    if (this.stepChecker.checkStep("pause")) {
+      this.dealer.talkToAllPlayers("We are on pause");
+      return
+    } 
+   
+   ///Check Minimun Players
     if (
-      !this.stepChecker.checkStep("signUp") &&
-      !this.dealer.hasMinimunPlayers()
+      (!this.stepChecker.checkStep("signUp") &&
+        !this.dealer.hasMinimunPlayers()) ||
+      !this.stepChecker.checkStep("pause")
     ) {
       this.dealer.talkToAllPlayers("Minimun 2 Players to Start");
+      return;
     }
 
-    //Blinds
-    if (this.stepChecker.isAllowedTo("blinds")) {
-      const timerAskBlinds = () => {
-        if (
-          !this.stepChecker.checkStep("bigBlind") ||
-          !this.stepChecker.checkStep("smallBlind")
-        ) {
-          this.askForBets("blinds");
-        } else {
-          clearInterval(intervalId);
-        }
-      };
+    ///Blinds
+    //if (this.stepChecker.isAllowedTo("blinds")) {
+    const timerAskBlinds = () => {
+      if (
+        !this.stepChecker.checkStep("bigBlind") ||
+        !this.stepChecker.checkStep("smallBlind")
+      ) {
+        this.askForBets("blinds");
+      } else {
+        clearInterval(intervalId);
+      }
+    };
 
-      const intervalId = setInterval(timerAskBlinds, 10000);
-    }
+    const intervalId = setInterval(timerAskBlinds, 10000);
+    //}
 
     if (this.stepChecker.isAllowedTo("dealPrivateCards")) {
       this.dealtPrivateCards();

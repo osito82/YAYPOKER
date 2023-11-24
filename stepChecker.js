@@ -3,8 +3,8 @@ const { signUp } = require("./mock_sockets");
 class StepChecker {
   gameFlowOriginal = {
     gameId: "",
-    startGame:false,
-    pause:false,
+    startGame: false,
+    pause: false,
     signUp: false,
     bigBlind: false,
     smallBlind: false,
@@ -41,14 +41,13 @@ class StepChecker {
       case "smallBlind":
       case "blinds":
         return this.checkStep("signUp");
-      //   break;
+
       case "dealPrivateCards":
         return (
           this.checkStep("signUp") &&
           this.checkStep("smallBlind") &&
           this.checkStep("bigBlind")
         );
-      //break;
     }
   }
 }
