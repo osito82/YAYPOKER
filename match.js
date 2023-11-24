@@ -77,7 +77,7 @@ class Match {
     console.log("MATCH - dealtPrivateCards");
     this.dealer.dealCardsEachPlayer(2);
     this.stepChecker.grantStep("dealPrivateCards");
-    log.add({ players: this.players });
+    log.add({ method: 'dealtPrivateCards' });
   }
 
   setBet(thisSocketId, chipsToBet) {
@@ -107,7 +107,6 @@ class Match {
   }
 
   askForBets(bettingFor) {
-    
     if (bettingFor == "blinds") {
       if (this.dealer.hasPlayerBet(1) && this.dealer.hasPlayerBet(2)) {
         this.stepChecker.grantStep("blinds");
@@ -220,8 +219,10 @@ class Match {
 
     //desision makinb
 
-    if (this.stepChecker.isAllowedTo("dealPrivateCards")) {
-      this.dealtPrivateCards();
+    //if (this.stepChecker.isAllowedTo("dealPrivateCards")) {
+       
+      if (!this.stepChecker.checkStep("dealPrivateCards")) {
+    this.dealtPrivateCards();
     }
 
     log.add({ dealerCards: this.dealer.showCards() });
