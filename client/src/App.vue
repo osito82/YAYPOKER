@@ -1,17 +1,18 @@
 <template>
   <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  
+  <qr>g</qr>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
+<script setup>
+import qr from './components/QR.vue'
 
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
+// export default {
+//   name: 'App',
+//   components: {
+//     QR
+//   }
+// }
 </script>
 
 <style>

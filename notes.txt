@@ -38,3 +38,6 @@ dealtPrivateCards
 }
 
 
+//Client
+https://www.npmjs.com/package/qrcode-vue3
+

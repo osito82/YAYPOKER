@@ -211,6 +211,7 @@ class Match {
             `Hey, ${player.name}+ Current ${currentBet} + MaxBet ${maxBet} is not equal to the maximum bet. Do you want - CALL - RISE - FOLD - Press Command`
           );
         });
+        
 
         if (bettingFor === "firstBetting") {
           this.stepChecker.revokeStep("firstBetting");
