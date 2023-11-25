@@ -194,21 +194,24 @@ class Match {
 
   gameOptions(bettingFor) {
     try {
+      const maxBet = Math.max(
+        ...this.players.map((player) => player.getCurrentBet())
+      );
       const currentBets = this.players.map((player) => player.getCurrentBet());
-  
-      // Verifica si todas las apuestas son iguales
+      console.log(currentBets, "currentBets", "-------------------");
       const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
-  
+      console.log(allBetsEqual, "allBetsEqual", "-------------------");
+
       if (!allBetsEqual) {
         // Si las apuestas no son iguales, notifica a los jugadores y revoca el paso si es necesario
         this.players.forEach((player) => {
           const currentBet = player.getCurrentBet();
           this.dealer.talkToPLayerById(
             player.id,
-            `Hey, ${player.name}+ Current ${currentBet}  + MaxBet ${maxBet} is not equal to the maximum bet. Do you want - CALL - RISE - FOLD - Press Command`
+            `Hey, ${player.name}+ Current ${currentBet} + MaxBet ${maxBet} is not equal to the maximum bet. Do you want - CALL - RISE - FOLD - Press Command`
           );
         });
-  
+
         if (bettingFor === "firstBetting") {
           this.stepChecker.revokeStep("firstBetting");
         }
@@ -221,36 +224,28 @@ class Match {
     } catch (error) {
       console.log(error);
     }
-  
+
     //this.dealer.talkToPLayerById(thisSocketId, "bye amigo");
+    //this.continue();
   }
 
-  
   gameOptionsOld(bettingFor) {
     try {
       const maxBet = Math.max(
         ...this.players.map((player) => player.getCurrentBet())
       );
 
-
       const currentBets = this.players.map((player) => player.getCurrentBet());
       const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
-
-
-      
 
       this.players.forEach((player) => {
         const currentBet = player.getCurrentBet();
 
         if (currentBet !== maxBet) {
-       //   allBetsEqual = false;
           this.dealer.talkToPLayerById(
             player.id,
             `Hey, ${player.name} + MaxBet ${maxBet} + Current ${currentBet} Do you want - CALL - RISE - FOLD - Press Command`
           );
-          //     if (bettingFor == "firstBetting")
-          //     this.stepChecker.revokeStep("firstBetting");
-          //return;
         }
 
         if (bettingFor == "firstBetting")
@@ -266,8 +261,6 @@ class Match {
     } catch (error) {
       console.log(error);
     }
-
-    
   }
 
   startGame() {

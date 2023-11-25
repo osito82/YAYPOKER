@@ -27,7 +27,7 @@ function generateUniqueId() {
 
 
 function randomName() {
-  const nombres = ["Osito", "Duke", "Billy", "Dixon", "Daniel", "Luis", "Kenneth", "Marco", "Uribe", "BobbyG", "Joshua", 'Adolfo'];
+  const nombres = ["Pollito", "Osito", "Duke", "Billy", "Dixon", "Daniel", "Luis", "Kenneth", "Marco", "Uribe", "BobbyG", "Joshua", 'Adolfo'];
   const indiceAleatorio = Math.floor(Math.random() * nombres.length);
   const nombreElegido = nombres[indiceAleatorio];
   return nombreElegido;
