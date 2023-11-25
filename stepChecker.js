@@ -7,6 +7,13 @@ class StepChecker {
     pause: false,
     signUp: false,
     blinds: false,
+
+    firstBetting: false,
+    flopBetting: false,
+    turnBetting: false,
+    riverBetting: false,
+    finalBetting: false,
+
     dealPrivateCards: false,
   };
 

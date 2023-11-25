@@ -7,7 +7,7 @@ const PokerCore = require("./pokerCore");
 const R = require("radash");
 const log = require("./log");
 const Socket = require("./sockets");
-const { startGame } = require("./mock_sockets");
+//const { startGame } = require("./mock_sockets");
 
 class Match {
   constructor(torneoId, gameId) {
@@ -77,7 +77,7 @@ class Match {
     console.log("MATCH - dealtPrivateCards");
     this.dealer.dealCardsEachPlayer(2);
     this.stepChecker.grantStep("dealPrivateCards");
-    log.add({ method: 'dealtPrivateCards' });
+    log.add({ method: "dealtPrivateCards" });
   }
 
   setBet(thisSocketId, chipsToBet) {
@@ -192,6 +192,84 @@ class Match {
     this.startGame();
   }
 
+  gameOptions(bettingFor) {
+    try {
+      const currentBets = this.players.map((player) => player.getCurrentBet());
+  
+      // Verifica si todas las apuestas son iguales
+      const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
+  
+      if (!allBetsEqual) {
+        // Si las apuestas no son iguales, notifica a los jugadores y revoca el paso si es necesario
+        this.players.forEach((player) => {
+          const currentBet = player.getCurrentBet();
+          this.dealer.talkToPLayerById(
+            player.id,
+            `Hey, ${player.name}+ Current ${currentBet}  + MaxBet ${maxBet} is not equal to the maximum bet. Do you want - CALL - RISE - FOLD - Press Command`
+          );
+        });
+  
+        if (bettingFor === "firstBetting") {
+          this.stepChecker.revokeStep("firstBetting");
+        }
+      } else {
+        // Si todas las apuestas son iguales, concedes el paso si es necesario
+        if (bettingFor === "firstBetting") {
+          this.stepChecker.grantStep("firstBetting");
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  
+    //this.dealer.talkToPLayerById(thisSocketId, "bye amigo");
+  }
+
+  
+  gameOptionsOld(bettingFor) {
+    try {
+      const maxBet = Math.max(
+        ...this.players.map((player) => player.getCurrentBet())
+      );
+
+
+      const currentBets = this.players.map((player) => player.getCurrentBet());
+      const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
+
+
+      
+
+      this.players.forEach((player) => {
+        const currentBet = player.getCurrentBet();
+
+        if (currentBet !== maxBet) {
+       //   allBetsEqual = false;
+          this.dealer.talkToPLayerById(
+            player.id,
+            `Hey, ${player.name} + MaxBet ${maxBet} + Current ${currentBet} Do you want - CALL - RISE - FOLD - Press Command`
+          );
+          //     if (bettingFor == "firstBetting")
+          //     this.stepChecker.revokeStep("firstBetting");
+          //return;
+        }
+
+        if (bettingFor == "firstBetting")
+          if (allBetsEqual) {
+            //       this.stepChecker.grantStep("firstBetting");
+            this.stepChecker.grantStep("firstBetting");
+          } else {
+            this.stepChecker.revokeStep("firstBetting");
+
+            //     return;
+          }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    
+  }
+
   startGame() {
     console.log("MATCH - startGame");
 
@@ -220,10 +298,16 @@ class Match {
     //desision makinb
 
     //if (this.stepChecker.isAllowedTo("dealPrivateCards")) {
-       
-      if (!this.stepChecker.checkStep("dealPrivateCards")) {
-    this.dealtPrivateCards();
+
+    if (!this.stepChecker.checkStep("firstBetting")) {
+      this.gameOptions("firstBetting");
     }
+
+    if (!this.stepChecker.checkStep("dealPrivateCards")) {
+      this.dealtPrivateCards();
+    }
+
+    //desition selector
 
     log.add({ dealerCards: this.dealer.showCards() });
 

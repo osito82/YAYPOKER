@@ -78,17 +78,23 @@ class Dealer {
   hasPlayerBet(playerNUmber) {
     const playerToCheck = this.getPlayerByNumber(playerNUmber);
     if (playerToCheck) {
-      return playerToCheck.getThisGameBet() !== 0;
+      return playerToCheck.getCurrentBet() !== 0;
     } else {
       return false;
     }
   }
 
   talkToPLayerById(idNumber, targetMessage) {
+    console.log("MATCH - talkToPLayerById " + idNumber);
     try {
-      console.log("MATCH - talkToPLayerById " + idNumber);
-      const targetSocket = Socket.getSocket(this.torneoId, idNumber);
-      targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+      const foundPLayer = this.getPlayerById(idNumber);
+
+      if (foundPLayer) {
+        const targetSocket = Socket.getSocket(this.torneoId, idNumber);
+        targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+      } else {
+        return;
+      }
     } catch (error) {
       console.log(error);
     }

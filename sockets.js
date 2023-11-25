@@ -41,7 +41,6 @@ class Socket {
       console.log(
         `Socket - removeSocket - Not Found - ${socket.name} - ${socket.id}.`
       );
-      //console.log(`Torneo con ID ${idTorneo} no encontrado.`);
     }
   }
 

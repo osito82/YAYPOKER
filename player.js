@@ -8,7 +8,7 @@ class Player {
     this.cards = cards;
   }
   //playerNumber = 0;
-  thisGameBet = 0;
+  currentBet = 0;
 
   setCard(card) {
     this.cards.push(card);
@@ -34,8 +34,8 @@ class Player {
     return this.chips;
   };
 
-  getThisGameBet = () => {
-    return this.thisGameBet;
+  getCurrentBet = () => {
+    return this.currentBet;
   };
 
   setBet(chipsToBet) {
@@ -44,7 +44,7 @@ class Player {
       return "no enough chips";
     } else {
       this.chips -= chipsToBet;
-      this.thisGameBet += chipsToBet;
+      this.currentBet += chipsToBet;
       betSet = true;
     }
     return betSet;
