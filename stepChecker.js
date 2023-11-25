@@ -3,9 +3,10 @@ const { signUp } = require("./mock_sockets");
 class StepChecker {
   gameFlowOriginal = {
     gameId: "",
+    signUp: false,
     startGame: false,
     pause: false,
-    signUp: false,
+    
     blinds: false,
 
     firstBetting: false,

@@ -28,6 +28,15 @@ class Match {
   }
 
   signUp(data, thisSocketId) {
+    ///Avoid Folders to play when startGame = true
+    if (
+      this.stepChecker.checkStep("startGame") &&
+      this.playersFold.includes(data.name)
+    ) {
+      console.log("Todo, Folders cannot get in during match in progresss");
+      return;
+    }
+
     console.log("MATCH - signUp");
 
     if (this.players.length >= 10) {
@@ -277,26 +286,31 @@ class Match {
     }
   }
 
-  startGame(thisSocket) {
+  startGame(thisSocket = {}) {
     console.log("MATCH - startGame");
 
-    /*
-
-    const foundPlayerFold = this.playersFold.find(
-      (myPlayer) => myPlayer.name == thisSocket.socket.name
-    );
-    console.log(foundPlayerFold, "----------");
-
     ///Avoid Folders to ReEnter
+    //console.log(thisSocket)
+    const foundPlayerFold = this.playersFold.find(
+      (foldPlayerNames) => foldPlayerNames == thisSocket.name
+    );
+
+    //console.log(this.playersFold, "-----------this.playersFold.");
     if (foundPlayerFold) {
-      const msg = msgBuilder("startGame", "personal", foundPlayer, {
-        date: "No Re-enter after fold",
-      });
-      this.dealer.talkToPLayerById(thisSocketId, msg);
+      console.log(foundPlayerFold, "----------");
+      console.log(thisSocket.id, "----------");
+
+      const msg = msgBuilder(
+        "startGame",
+        "personal",
+        { name: foundPlayerFold },
+        {
+          date: "No Re-enter after fold",
+        }
+      );
+      this.dealer.talkToSocketById(thisSocket.id, msg);
       return;
     }
-
-    */
 
     ///Pause
     if (this.stepChecker.checkStep("pause")) {

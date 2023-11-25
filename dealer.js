@@ -85,6 +85,7 @@ class Dealer {
   }
 
   talkToPLayerById(idNumber, targetMessage) {
+    console.log("----- ---- 00021 -- ", targetMessage);
     console.log("MATCH - talkToPLayerById " + idNumber);
     try {
       const foundPLayer = this.getPlayerById(idNumber);
@@ -94,6 +95,19 @@ class Dealer {
         targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
       } else {
         return;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  talkToSocketById(idNumber, targetMessage) {
+    console.log("MATCH - talkToSocketById ");
+    try {
+      const allSockets = Socket.getSocketsByTorneo(this.torneoId);
+      if (allSockets) {
+        const targetSocket = Socket.getSocket(this.torneoId, idNumber);
+        targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
       }
     } catch (error) {
       console.log(error);
