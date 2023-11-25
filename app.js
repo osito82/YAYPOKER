@@ -103,7 +103,7 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "startGame") {
-      match.startGame();
+      match.startGame(thisSocket);
       log.add({ step: "4. Start the Game" });
       log.add({ players: match.players });
     }

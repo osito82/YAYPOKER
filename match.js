@@ -7,7 +7,7 @@ const PokerCore = require("./pokerCore");
 const R = require("radash");
 const log = require("./log");
 const Socket = require("./sockets");
-//const { startGame } = require("./mock_sockets");
+const { msgBuilder } = require("./utils");
 
 class Match {
   constructor(torneoId, gameId) {
@@ -15,6 +15,7 @@ class Match {
     this.gameId = gameId;
     this.pot = 0;
     this.players = [];
+    this.playersFold = [];
     this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101);
 
     this.dealer = new Dealer(
@@ -135,15 +136,30 @@ class Match {
   }
 
   fold(thisSocketId) {
-    console.log("MATCH - fold");
-    this.dealer.talkToPLayerById(thisSocketId, "bye amigo");
-
-    const index = this.players.findIndex(
-      (player) => player.id === thisSocketId
+    const foundPlayer = this.players.find(
+      (myPlayer) => myPlayer.id == thisSocketId
     );
-    if (index !== -1) {
-      this.players.splice(index, 1);
+
+    if (foundPlayer && foundPlayer.cards.length > 0) {
+      //foundPlayer.setFold();
+      this.playersFold.push(foundPlayer.name);
+      const msg = msgBuilder("fold", "personal", foundPlayer, {});
+      this.dealer.talkToPLayerById(thisSocketId, msg);
+
+      const msgAll = msgBuilder("fold", "grupal", foundPlayer, {
+        screenMessage: true,
+      });
+      this.dealer.talkToAllPlayersOnTable(msgAll);
+
+      const index = this.players.findIndex(
+        (player) => player.id === thisSocketId
+      );
+
+      if (index !== -1) {
+        this.players.splice(index, 1);
+      }
     }
+
     this.continue();
   }
 
@@ -198,9 +214,7 @@ class Match {
         ...this.players.map((player) => player.getCurrentBet())
       );
       const currentBets = this.players.map((player) => player.getCurrentBet());
-      console.log(currentBets, "currentBets", "-------------------");
       const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
-      console.log(allBetsEqual, "allBetsEqual", "-------------------");
 
       if (!allBetsEqual) {
         // Si las apuestas no son iguales, notifica a los jugadores y revoca el paso si es necesario
@@ -211,7 +225,6 @@ class Match {
             `Hey, ${player.name}+ Current ${currentBet} + MaxBet ${maxBet} is not equal to the maximum bet. Do you want - CALL - RISE - FOLD - Press Command`
           );
         });
-        
 
         if (bettingFor === "firstBetting") {
           this.stepChecker.revokeStep("firstBetting");
@@ -264,8 +277,26 @@ class Match {
     }
   }
 
-  startGame() {
+  startGame(thisSocket) {
     console.log("MATCH - startGame");
+
+    /*
+
+    const foundPlayerFold = this.playersFold.find(
+      (myPlayer) => myPlayer.name == thisSocket.socket.name
+    );
+    console.log(foundPlayerFold, "----------");
+
+    ///Avoid Folders to ReEnter
+    if (foundPlayerFold) {
+      const msg = msgBuilder("startGame", "personal", foundPlayer, {
+        date: "No Re-enter after fold",
+      });
+      this.dealer.talkToPLayerById(thisSocketId, msg);
+      return;
+    }
+
+    */
 
     ///Pause
     if (this.stepChecker.checkStep("pause")) {

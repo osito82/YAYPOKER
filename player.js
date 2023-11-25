@@ -2,24 +2,24 @@ class Player {
   constructor(gameId, name, chips, cards, id) {
     this.gameId = gameId;
     this.id = id;
-    this.viewCards = false
+    this.viewCards = false;
     this.name = name;
     this.chips = chips;
     this.cards = cards;
   }
   //playerNumber = 0;
   currentBet = 0;
-
+  //fold = false
   setCard(card) {
     this.cards.push(card);
   }
 
-   countCards() {
+  countCards() {
     return this.cards.length;
   }
 
   viewCards() {
-    return this.viewCards = true;
+    return (this.viewCards = true);
   }
 
   getPlayer(playersArray, playerId) {
@@ -49,6 +49,8 @@ class Player {
     }
     return betSet;
   }
+
+  //setFold(){this.fold = true}
 
   showCards() {
     console.log("player - showCards");

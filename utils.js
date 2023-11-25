@@ -1,6 +1,4 @@
-//const { v4 } = require('uuidv4');
-const { v4: uuidv4 } = require('uuid')
-
+const { v4: uuidv4 } = require("uuid");
 
 function shuffle(array) {
   let currentIndex = array.length,
@@ -21,18 +19,34 @@ function shuffle(array) {
 
 function generateUniqueId() {
   const fullUUID = uuidv4();
-  const shortUUID = fullUUID.substr(0, 4).replace(/-/g, '');
+  const shortUUID = fullUUID.substr(0, 4).replace(/-/g, "");
   return shortUUID;
 }
 
+function msgBuilder(action, msgType, player, data) {
+  const { id: playerId, name: playerName } = player;
+  return { action, msgType, playerId: playerId, name: playerName, data };
+}
 
 function randomName() {
-  const nombres = ["Pollito", "Osito", "Duke", "Billy", "Dixon", "Daniel", "Luis", "Kenneth", "Marco", "Uribe", "BobbyG", "Joshua", 'Adolfo'];
+  const nombres = [
+    "Pollito",
+    "Osito",
+    "Duke",
+    "Billy",
+    "Dixon",
+    "Daniel",
+    "Luis",
+    "Kenneth",
+    "Marco",
+    "Uribe",
+    "BobbyG",
+    "Joshua",
+    "Adolfo",
+  ];
   const indiceAleatorio = Math.floor(Math.random() * nombres.length);
   const nombreElegido = nombres[indiceAleatorio];
   return nombreElegido;
 }
 
-
-
-module.exports = { shuffle, generateUniqueId, randomName };
+module.exports = { shuffle, generateUniqueId, randomName, msgBuilder };
