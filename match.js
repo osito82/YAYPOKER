@@ -90,8 +90,8 @@ class Match {
     log.add({ method: "dealtPrivateCards" });
   }
 
-  setBet(thisSocketId, chipsToBet) {
-    console.log("MATCH - setBet");
+  setBet(thisSocketId, chipsToBet, type = "setBet") {
+    console.log("MATCH - " + type);
     if (R.isEmpty(this.players)) {
       return;
     }
@@ -99,21 +99,33 @@ class Match {
     const foundPlayer = this.players.find(
       (myPlayer) => myPlayer.id == thisSocketId
     );
+    if (foundPlayer) {
+      foundPlayer.setBet(chipsToBet);
 
-    foundPlayer.setBet(chipsToBet);
+      this.pot = this.pot + chipsToBet;
 
-    this.pot = this.pot + chipsToBet;
-
-    this.dealer.talkToAllPlayersOnTable(
-      `${foundPlayer.name} - bet ${chipsToBet} - pot ${this.pot}`
-    );
-
-    log.add({
-      setBet: {
-        player: foundPlayer,
+      const msgAll = msgBuilder(type, "grupal", foundPlayer, {
+        screenMessage: true,
+        bet: chipsToBet,
         pot: this.pot,
-      },
-    });
+      });
+      this.dealer.talkToAllPlayersOnTable(msgAll);
+
+      // this.dealer.talkToAllPlayersOnTable(
+      //   `${foundPlayer.name} - bet ${chipsToBet} - pot ${this.pot}`
+      // );
+
+      log.add({
+        setBet: {
+          player: foundPlayer,
+          pot: this.pot,
+        },
+      });
+    }
+  }
+
+  setRise(thisSocketId, chipsToBet) {
+    this.setBet(thisSocketId, chipsToBet, "setRise");
   }
 
   askForBets(bettingFor) {
@@ -150,8 +162,8 @@ class Match {
     );
 
     if (foundPlayer && foundPlayer.cards.length > 0) {
-      //foundPlayer.setFold();
       this.playersFold.push(foundPlayer.name);
+
       const msg = msgBuilder("fold", "personal", foundPlayer, {});
       this.dealer.talkToPLayerById(thisSocketId, msg);
 
@@ -225,8 +237,9 @@ class Match {
       const currentBets = this.players.map((player) => player.getCurrentBet());
       const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
 
+      console.log(allBetsEqual, "allBetsEqual");
+
       if (!allBetsEqual) {
-        // Si las apuestas no son iguales, notifica a los jugadores y revoca el paso si es necesario
         this.players.forEach((player) => {
           const currentBet = player.getCurrentBet();
           this.dealer.talkToPLayerById(
@@ -239,7 +252,6 @@ class Match {
           this.stepChecker.revokeStep("firstBetting");
         }
       } else {
-        // Si todas las apuestas son iguales, concedes el paso si es necesario
         if (bettingFor === "firstBetting") {
           this.stepChecker.grantStep("firstBetting");
         }
@@ -290,16 +302,11 @@ class Match {
     console.log("MATCH - startGame");
 
     ///Avoid Folders to ReEnter
-    //console.log(thisSocket)
     const foundPlayerFold = this.playersFold.find(
       (foldPlayerNames) => foldPlayerNames == thisSocket.name
     );
 
-    //console.log(this.playersFold, "-----------this.playersFold.");
     if (foundPlayerFold) {
-      console.log(foundPlayerFold, "----------");
-      console.log(thisSocket.id, "----------");
-
       const msg = msgBuilder(
         "startGame",
         "personal",
@@ -328,6 +335,7 @@ class Match {
     //const timerAskBlinds = () => {
     if (!this.stepChecker.checkStep("blinds")) {
       this.askForBets("blinds");
+      return;
     } // else {
     // clearInterval(intervalId);
     // }
@@ -338,6 +346,7 @@ class Match {
 
     //if (this.stepChecker.isAllowedTo("dealPrivateCards")) {
 
+    ///firstBetting
     if (!this.stepChecker.checkStep("firstBetting")) {
       this.gameOptions("firstBetting");
     }

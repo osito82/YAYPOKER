@@ -23,6 +23,26 @@ socket.addEventListener("open", (event) => {
       case "1":
         sendCommand(mockTest["signUp"]);
         break;
+
+      /*
+
+    
+        console.log("Rise");
+        sendCommand(mockTest["rise"]);
+        break;
+*/
+
+      case "rise":
+      case "re":
+        rl.question(" - Money to Rise: ", (chipsToRiseBet) => {
+          chipsToRiseBet = Number(chipsToRiseBet);
+          mockTest.setRise.chipsToRiseBet = chipsToRiseBet;
+          sendCommand(mockTest["setRise"]);
+          promptCommand();
+        });
+
+        break;
+
       case "setBet":
       case "ib":
       case "sb":
@@ -62,13 +82,11 @@ socket.addEventListener("open", (event) => {
       case "fd":
         console.log("Fold");
         sendCommand(mockTest["fold"]);
-        // socket.close();  // Cierra la conexión WebSocket
         break;
 
       case "close":
         console.log("Cerrando conexión.");
         sendCommand(mockTest["close"]);
-        // socket.close();  // Cierra la conexión WebSocket
         //   rl.close();
         break;
 

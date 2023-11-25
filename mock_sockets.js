@@ -16,6 +16,11 @@ const setBet = {
   action: "setBet",
 };
 
+const setRise = {
+  //torneoNumber:"55585548LC",
+  action: "setRise",
+};
+
 //Player Initial Bet
 const stats = {
   //torneoNumber:"55585548LC",
@@ -63,3 +68,4 @@ exports.sendMessage = sendMessage;
 exports.fold = fold;
 exports.close = close;
 exports.stats = stats;
+exports.setRise = setRise;
