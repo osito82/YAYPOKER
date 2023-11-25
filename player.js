@@ -7,9 +7,9 @@ class Player {
     this.chips = chips;
     this.cards = cards;
   }
-  //playerNumber = 0;
+
   currentBet = 0;
-  //fold = false
+
   setCard(card) {
     this.cards.push(card);
   }
@@ -40,8 +40,8 @@ class Player {
 
   setBet(chipsToBet) {
     let betSet = false;
-    if (chipsToBet > this.chips) {
-      return "no enough chips";
+    if (Number(chipsToBet) > Number(this.chips)) {
+     // return "no enough chips";
     } else {
       this.chips -= chipsToBet;
       this.currentBet += chipsToBet;
@@ -49,8 +49,6 @@ class Player {
     }
     return betSet;
   }
-
-  //setFold(){this.fold = true}
 
   showCards() {
     console.log("player - showCards");

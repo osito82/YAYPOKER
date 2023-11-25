@@ -53,7 +53,16 @@ socket.addEventListener("open", (event) => {
           sendCommand(mockTest["setBet"]);
           promptCommand();
         });
+        break;
 
+      case "call":
+      case "cl":
+        sendCommand(mockTest["setCall"]);
+        break;
+
+      case "check":
+      case "ck":
+        sendCommand(mockTest["setCheck"]);
         break;
 
       case "dealtPrivateCards":

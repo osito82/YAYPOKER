@@ -100,27 +100,68 @@ class Match {
       (myPlayer) => myPlayer.id == thisSocketId
     );
     if (foundPlayer) {
-      foundPlayer.setBet(chipsToBet);
+      const aprovedBet = foundPlayer.setBet(chipsToBet);
 
-      this.pot = this.pot + chipsToBet;
+      if (aprovedBet) {
+        this.pot = this.pot + chipsToBet;
 
-      const msgAll = msgBuilder(type, "grupal", foundPlayer, {
+        const msgAll = msgBuilder(type, "grupal", foundPlayer, {
+          screenMessage: true,
+          bet: chipsToBet,
+          pot: this.pot,
+        });
+        this.dealer.talkToAllPlayersOnTable(msgAll);
+      } else {
+        console.log("todo - setBet  was not possible");
+      }
+    }
+  }
+
+  setCall(thisSocket) {
+    console.log("MATCH - setCall");
+
+    const maxBet = Math.max(
+      ...this.players.map((player) => player.getCurrentBet())
+    );
+
+    const foundPlayer = this.players.find(
+      (myPlayer) => myPlayer.id == thisSocket.id
+    );
+    if (foundPlayer) {
+      const currentBet = foundPlayer.getCurrentBet();
+
+      if (Number(currentBet) < Number(maxBet)) {
+        const diff = Number(maxBet) - Number(currentBet);
+        const aprovedBet = foundPlayer.setBet(diff); //modelo setbet
+
+        if (aprovedBet) {
+          this.pot = this.pot + diff;
+
+          const msgAll = msgBuilder("setCall", "grupal", foundPlayer, {
+            screenMessage: true,
+            bet: diff,
+            pot: this.pot,
+          });
+
+          this.dealer.talkToAllPlayersOnTable(msgAll);
+        } else {
+          console.log("todo - rise was not possible");
+        }
+      }
+    }
+  }
+
+  setCheck(thisSocket) {
+    console.log("setCheck");
+
+    const foundPlayer = this.players.find(
+      (myPlayer) => myPlayer.id == thisSocket.id
+    );
+    if (foundPlayer) {
+      const msgAll = msgBuilder("setCheck", "grupal", foundPlayer, {
         screenMessage: true,
-        bet: chipsToBet,
-        pot: this.pot,
       });
       this.dealer.talkToAllPlayersOnTable(msgAll);
-
-      // this.dealer.talkToAllPlayersOnTable(
-      //   `${foundPlayer.name} - bet ${chipsToBet} - pot ${this.pot}`
-      // );
-
-      log.add({
-        setBet: {
-          player: foundPlayer,
-          pot: this.pot,
-        },
-      });
     }
   }
 

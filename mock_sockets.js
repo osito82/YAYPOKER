@@ -21,18 +21,26 @@ const setRise = {
   action: "setRise",
 };
 
+const setCall = {
+  action: "setCall",
+};
+
+const setCheck = {
+  action: "setCheck",
+};
+
 //Player Initial Bet
 const stats = {
   //torneoNumber:"55585548LC",
   action: "stats",
 };
 
-//Start the game
+///Start the game
 const startGame = {
   action: "startGame",
 };
 
-//Fold
+///Fold
 const fold = {
   action: "fold",
 };
@@ -69,3 +77,5 @@ exports.fold = fold;
 exports.close = close;
 exports.stats = stats;
 exports.setRise = setRise;
+exports.setCall = setCall;
+exports.setCheck = setCheck;

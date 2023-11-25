@@ -95,13 +95,22 @@ wss.on("connection", (ws, req) => {
     if (jsonData && jsonData.action === "setRise") {
       log.add({ step: "Set Rise" });
       const chipsToRiseBet = jsonData.chipsToRiseBet;
-      console.log(jsonData.chipsToRiseBet, 'jsonData.chipsToRiseBet, 0021-454845')
       match.setRise(thisSocket.id, chipsToRiseBet);
+    }
+
+    if (jsonData && jsonData.action === "setCall") {
+      match.setCall(thisSocket, torneoId);
+      log.add({ step: "Call" });
+    }
+
+    if (jsonData && jsonData.action === "setCheck") {
+      match.setCheck(thisSocket, torneoId);
+      log.add({ step: "Check" });
     }
 
     if (jsonData && jsonData.action === "dealtPrivateCards") {
       match.dealtPrivateCards();
-      log.add({ step: "3. Dealt Private Cards" });
+      log.add({ step: "Dealt Private Cards" });
     }
 
     if (jsonData && jsonData.action === "stats") {
@@ -110,7 +119,7 @@ wss.on("connection", (ws, req) => {
 
     if (jsonData && jsonData.action === "startGame") {
       match.startGame(thisSocket);
-      log.add({ step: "4. Start the Game" });
+      log.add({ step: "Start the Game" });
       log.add({ players: match.players });
     }
 
