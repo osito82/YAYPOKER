@@ -83,11 +83,24 @@ class Match {
     return;
   }
 
-  dealtPrivateCards() {
-    console.log("MATCH - dealtPrivateCards");
+  dealtPrivateCards(thisSocketId) {
+    const foundPlayer = this.dealer.getPlayerById(thisSocketId);
+
     this.dealer.dealCardsEachPlayer(2);
-    this.stepChecker.grantStep("dealPrivateCards");
-    log.add({ method: "dealtPrivateCards" });
+    this.stepChecker.grantStep("dealtPrivateCards");
+
+    if (foundPlayer) {
+      const msg = msgBuilder("dealtPrivateCards", "personal", foundPlayer, {
+        screenMessage: true,
+        personalCards: foundPlayer.getCards(),
+      });
+      this.dealer.talkToPLayerById(thisSocketId, msg);
+      this.continue();
+    } else {
+      console.log(
+        `ERROR: Unable to MATCH - dealtPrivateCards to socket ${thisSocketId}`
+      );
+    }
   }
 
   setBet(thisSocketId, chipsToBet, type = "setBet") {
@@ -115,6 +128,7 @@ class Match {
         console.log("todo - setBet  was not possible");
       }
     }
+    this.continue();
   }
 
   setCall(thisSocket) {
@@ -127,28 +141,33 @@ class Match {
     const foundPlayer = this.players.find(
       (myPlayer) => myPlayer.id == thisSocket.id
     );
-    if (foundPlayer) {
-      const currentBet = foundPlayer.getCurrentBet();
 
-      if (Number(currentBet) < Number(maxBet)) {
-        const diff = Number(maxBet) - Number(currentBet);
-        const aprovedBet = foundPlayer.setBet(diff); //modelo setbet
+    if (!foundPlayer) {
+      return;
+    }
 
-        if (aprovedBet) {
-          this.pot = this.pot + diff;
+    const currentBet = foundPlayer.getCurrentBet();
 
-          const msgAll = msgBuilder("setCall", "grupal", foundPlayer, {
-            screenMessage: true,
-            bet: diff,
-            pot: this.pot,
-          });
+    if (currentBet < maxBet) {
+      const diff = maxBet - currentBet;
+      const aprovedBet = foundPlayer.setBet(diff);
 
-          this.dealer.talkToAllPlayersOnTable(msgAll);
-        } else {
-          console.log("todo - rise was not possible");
-        }
+      if (aprovedBet) {
+        this.pot = this.pot + diff;
+
+        const msgAll = msgBuilder("setCall", "grupal", foundPlayer, {
+          screenMessage: true,
+          bet: diff,
+          pot: this.pot,
+        });
+
+        this.dealer.talkToAllPlayersOnTable(msgAll);
+      } else {
+        console.log("todo - rise was not possible");
       }
     }
+    //  }
+    this.continue();
   }
 
   setCheck(thisSocket) {
@@ -157,6 +176,7 @@ class Match {
     const foundPlayer = this.players.find(
       (myPlayer) => myPlayer.id == thisSocket.id
     );
+
     if (foundPlayer) {
       const msgAll = msgBuilder("setCheck", "grupal", foundPlayer, {
         screenMessage: true,
@@ -278,17 +298,19 @@ class Match {
       const currentBets = this.players.map((player) => player.getCurrentBet());
       const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
 
-      console.log(allBetsEqual, "allBetsEqual");
-
       if (!allBetsEqual) {
         this.players.forEach((player) => {
           const currentBet = player.getCurrentBet();
-          this.dealer.talkToPLayerById(
-            player.id,
-            `Hey, ${player.name}+ Current ${currentBet} + MaxBet ${maxBet} is not equal to the maximum bet. Do you want - CALL - RISE - FOLD - Press Command`
-          );
+
+          if (currentBet != maxBet) {
+            this.dealer.talkToPLayerById(
+              player.id,
+              `Hey, ${player.name}+ Current ${currentBet} + MaxBet ${maxBet} is not equal to the maximum bet. Do you want - CALL - RISE - FOLD - Press Command`
+            );
+          }
         });
 
+        ///First Betting
         if (bettingFor === "firstBetting") {
           this.stepChecker.revokeStep("firstBetting");
         }
@@ -300,49 +322,15 @@ class Match {
     } catch (error) {
       console.log(error);
     }
-
-    //this.dealer.talkToPLayerById(thisSocketId, "bye amigo");
-    //this.continue();
-  }
-
-  gameOptionsOld(bettingFor) {
-    try {
-      const maxBet = Math.max(
-        ...this.players.map((player) => player.getCurrentBet())
-      );
-
-      const currentBets = this.players.map((player) => player.getCurrentBet());
-      const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
-
-      this.players.forEach((player) => {
-        const currentBet = player.getCurrentBet();
-
-        if (currentBet !== maxBet) {
-          this.dealer.talkToPLayerById(
-            player.id,
-            `Hey, ${player.name} + MaxBet ${maxBet} + Current ${currentBet} Do you want - CALL - RISE - FOLD - Press Command`
-          );
-        }
-
-        if (bettingFor == "firstBetting")
-          if (allBetsEqual) {
-            //       this.stepChecker.grantStep("firstBetting");
-            this.stepChecker.grantStep("firstBetting");
-          } else {
-            this.stepChecker.revokeStep("firstBetting");
-
-            //     return;
-          }
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    //this.continue()
   }
 
   startGame(thisSocket = {}) {
     console.log("MATCH - startGame");
 
-    ///Avoid Folders to ReEnter
+    const { id: thisSocketId } = thisSocket;
+
+    ///Avoid Folded Players to ReEnter
     const foundPlayerFold = this.playersFold.find(
       (foldPlayerNames) => foldPlayerNames == thisSocket.name
     );
@@ -356,7 +344,7 @@ class Match {
           date: "No Re-enter after fold",
         }
       );
-      this.dealer.talkToSocketById(thisSocket.id, msg);
+      this.dealer.talkToSocketById(thisSocketId, msg);
       return;
     }
 
@@ -383,20 +371,17 @@ class Match {
     //};
     //const intervalId = setInterval(timerAskBlinds, 10000);
 
-    //desision makinb
-
-    //if (this.stepChecker.isAllowedTo("dealPrivateCards")) {
+    ///Deal Private Cards
+    if (!this.stepChecker.checkStep("dealtPrivateCards")) {
+      this.dealtPrivateCards(thisSocketId);
+      return;
+    }
 
     ///firstBetting
     if (!this.stepChecker.checkStep("firstBetting")) {
       this.gameOptions("firstBetting");
+      return;
     }
-
-    if (!this.stepChecker.checkStep("dealPrivateCards")) {
-      this.dealtPrivateCards();
-    }
-
-    //desition selector
 
     log.add({ dealerCards: this.dealer.showCards() });
 

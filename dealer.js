@@ -5,7 +5,6 @@ class Dealer {
     this.gameId = gameId;
     this.torneoId = torneoId;
     this.deck = deck;
-
     this.players = players;
   }
 
@@ -20,7 +19,7 @@ class Dealer {
         if (cardToDeal) {
           player.setCard(cardToDeal);
         } else {
-          console.log("No hay cartas suficientes en el mazo.");
+          console.log("No hay cartas suficientes en el deck.");
         }
       });
     }
@@ -42,8 +41,6 @@ class Dealer {
   }
 
   dealCards() {
-    console.log("dealer - dealCards");
-
     const burnedCard = this.deck.shift();
     this.deck.push(burnedCard);
 
@@ -85,8 +82,8 @@ class Dealer {
   }
 
   talkToPLayerById(idNumber, targetMessage) {
-    console.log("----- ---- 00021 -- ", targetMessage);
-    console.log("MATCH - talkToPLayerById " + idNumber);
+    //console.log("----- ---- 00021 -- ", targetMessage);
+    //console.log("MATCH - talkToPLayerById " + idNumber);
     try {
       const foundPLayer = this.getPlayerById(idNumber);
 

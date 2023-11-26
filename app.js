@@ -109,7 +109,8 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "dealtPrivateCards") {
-      match.dealtPrivateCards();
+    //  console.log(thisSocket, 'ttthhhisss app')
+      match.dealtPrivateCards(thisSocket);
       log.add({ step: "Dealt Private Cards" });
     }
 

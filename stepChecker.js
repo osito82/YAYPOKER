@@ -15,7 +15,7 @@ class StepChecker {
     riverBetting: false,
     finalBetting: false,
 
-    dealPrivateCards: false,
+    dealtPrivateCards: false,
   };
 
   constructor(gameId) {
@@ -49,7 +49,7 @@ class StepChecker {
       // case "blinds":
       //   return this.checkStep("signUp");
 
-      case "dealPrivateCards":
+      case "dealtPrivateCards":
         return (
           this.checkStep("signUp") &&
           this.checkStep("smallBlind") &&

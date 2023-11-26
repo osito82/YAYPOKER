@@ -1,9 +1,9 @@
 class Player {
   constructor(gameId, name, chips, cards, id) {
-    this.gameId = gameId;
-    this.id = id;
-    this.viewCards = false;
     this.name = name;
+    this.id = id;
+    this.gameId = gameId;
+    this.viewCards = false;
     this.chips = chips;
     this.cards = cards;
   }
@@ -12,6 +12,10 @@ class Player {
 
   setCard(card) {
     this.cards.push(card);
+  }
+
+  getCards(){
+    return this.cards
   }
 
   countCards() {
@@ -41,7 +45,7 @@ class Player {
   setBet(chipsToBet) {
     let betSet = false;
     if (Number(chipsToBet) > Number(this.chips)) {
-     // return "no enough chips";
+      // return "no enough chips";
     } else {
       this.chips -= chipsToBet;
       this.currentBet += chipsToBet;
