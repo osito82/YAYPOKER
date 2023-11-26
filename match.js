@@ -27,7 +27,9 @@ class Match {
     this.stepChecker = new StepChecker(this.gameId);
   }
 
-  signUp(data, thisSocketId) {
+  signUp(data, thisSocket) {
+    const {id:thisSocketId} = thisSocket
+    console.log("MATCH - signUp");
     ///Avoid Folders to play when startGame = true
     if (
       this.stepChecker.checkStep("startGame") &&
@@ -36,8 +38,6 @@ class Match {
       console.log("Todo, Folders cannot get in during match in progresss");
       return;
     }
-
-    console.log("MATCH - signUp");
 
     if (this.players.length >= 10) {
       console.log("Max Ten Players");
@@ -63,7 +63,7 @@ class Match {
       if (this.stepChecker.checkStep("pause")) {
         this.dealer.talkToAllPlayersOnTable(`${data.name} ya volvio`);
         this.stepChecker.revokeStep("pause");
-        this.continue();
+        this.continue(thisSocket);
       }
     } else {
       this.players.push(player);
@@ -83,27 +83,37 @@ class Match {
     return;
   }
 
-  dealtPrivateCards(thisSocketId) {
-    const foundPlayer = this.dealer.getPlayerById(thisSocketId);
+  dealtPrivateCards(thisSocket) {
+    const {id:thisSocketId} = thisSocket
+    console.log("MATCH - dealtPrivateCards");
+    console.log(thisSocketId, '----------------- 0021 - dealtPrivateCards')
+    try {
+      const foundPlayer = this.dealer.getPlayerById(thisSocketId);
 
-    this.dealer.dealCardsEachPlayer(2);
-    this.stepChecker.grantStep("dealtPrivateCards");
+      this.dealer.dealCardsEachPlayer(2);
+      this.stepChecker.grantStep("dealtPrivateCards");
 
-    if (foundPlayer) {
-      const msg = msgBuilder("dealtPrivateCards", "personal", foundPlayer, {
-        screenMessage: true,
-        personalCards: foundPlayer.getCards(),
-      });
-      this.dealer.talkToPLayerById(thisSocketId, msg);
-      this.continue();
-    } else {
-      console.log(
-        `ERROR: Unable to MATCH - dealtPrivateCards to socket ${thisSocketId}`
-      );
+      if (foundPlayer) {
+        const msg = msgBuilder("dealtPrivateCards", "personal", foundPlayer, {
+          screenMessage: true,
+          personalCards: foundPlayer.getCards(),
+        });
+        this.dealer.talkToPLayerById(thisSocketId, msg);
+        this.continue(thisSocket);
+      }
+
+      // else {
+      //   console.log(
+      //     `ERROR: Unable to MATCH - dealtPrivateCards to socket ${thisSocketId}`
+      //   );
+      // }
+    } catch (error) {
+      console.error("Error in dealtPrivateCards:", error);
     }
   }
 
-  setBet(thisSocketId, chipsToBet, type = "setBet") {
+  setBet(thisSocket, chipsToBet, type = "setBet") {
+    const {id:thisSocketId} = thisSocket
     console.log("MATCH - " + type);
     if (R.isEmpty(this.players)) {
       return;
@@ -128,7 +138,7 @@ class Match {
         console.log("todo - setBet  was not possible");
       }
     }
-    this.continue();
+    this.continue(thisSocket);
   }
 
   setCall(thisSocket) {
@@ -166,12 +176,12 @@ class Match {
         console.log("todo - rise was not possible");
       }
     }
-    //  }
-    this.continue();
+
+    this.continue(thisSocket);
   }
 
   setCheck(thisSocket) {
-    console.log("setCheck");
+    console.log("MATCH - setCheck");
 
     const foundPlayer = this.players.find(
       (myPlayer) => myPlayer.id == thisSocket.id
@@ -186,13 +196,16 @@ class Match {
   }
 
   setRise(thisSocketId, chipsToBet) {
+    console.log("MATCH - setRise");
     this.setBet(thisSocketId, chipsToBet, "setRise");
   }
 
-  askForBets(bettingFor) {
+  askForBets(bettingFor, thisSocket) {
+    console.log("MATCH - askForBets");
     if (bettingFor == "blinds") {
       if (this.dealer.hasPlayerBet(1) && this.dealer.hasPlayerBet(2)) {
         this.stepChecker.grantStep("blinds");
+        this.continue(thisSocket);
       } else {
         ///blinds Ask for bet P1
         if (!this.dealer.hasPlayerBet(1)) {
@@ -207,17 +220,21 @@ class Match {
     }
   }
 
-  playerLeave(thisSocketId) {
+  playerLeave(thisSocket) {
+    const {id:thisSocketId} = thisSocket
+    console.log("MATCH - playerLeave");
     const index = this.players.findIndex(
       (player) => player.id === thisSocketId
     );
     if (index !== -1) {
       this.players.splice(index, 1);
     }
-    this.continue();
+    this.continue(thisSocket);
   }
 
-  fold(thisSocketId) {
+  fold(thisSocket) {
+    const {id:thisSocketId} = thisSocket
+    console.log("MATCH - fold");
     const foundPlayer = this.players.find(
       (myPlayer) => myPlayer.id == thisSocketId
     );
@@ -242,12 +259,12 @@ class Match {
       }
     }
 
-    this.continue();
+    this.continue(thisSocket);
   }
 
   close(thisSocket, torneoId) {
-    const { id: thisSocketId } = thisSocket;
     console.log("MATCH - close");
+    const { id: thisSocketId } = thisSocket;
 
     ///Remove User from Users Array
     const index = this.players.findIndex(
@@ -269,28 +286,31 @@ class Match {
     // console.log("vigilant");
   }
 
-  pause(socket) {
+  pause(thisSocket) {
+    console.log("MATCH - pause");
     this.dealer.talkToAllPlayersOnTable(
-      `The user ${socket.name} - ${socket.id} got disconnected`
+      `The user ${thisSocket.name} - ${thisSocket.id} got disconnected`
     );
     this.stepChecker.grantStep("pause");
 
     setTimeout(() => {
       this.stepChecker.revokeStep("pause");
-      this.playerLeave(socket.id);
+      this.playerLeave(thisSocket);
       this.dealer.talkToAllPlayersOnTable(
-        `Player ${socket.name} - ${socket.id} didnt come back, lets continue`
+        `Player ${thisSocket.name} - ${thisSocket.id} didnt come back, lets continue`
       );
       //this.startGame();
     }, 15000);
-    this.continue();
+    this.continue(thisSocket);
   }
 
-  continue() {
-    this.startGame();
+  continue(thisSocket) {
+    console.log("MATCH - continue");
+    this.startGame(thisSocket);
   }
 
   gameOptions(bettingFor) {
+    console.log("MATCH - gameOptions");
     try {
       const maxBet = Math.max(
         ...this.players.map((player) => player.getCurrentBet())
@@ -363,7 +383,7 @@ class Match {
     ///Blinds
     //const timerAskBlinds = () => {
     if (!this.stepChecker.checkStep("blinds")) {
-      this.askForBets("blinds");
+      this.askForBets("blinds", thisSocket);
       return;
     } // else {
     // clearInterval(intervalId);
@@ -373,7 +393,7 @@ class Match {
 
     ///Deal Private Cards
     if (!this.stepChecker.checkStep("dealtPrivateCards")) {
-      this.dealtPrivateCards(thisSocketId);
+      this.dealtPrivateCards(thisSocket);
       return;
     }
 
@@ -390,9 +410,6 @@ class Match {
 
   stats(socketId) {
     console.log(socketId);
-    //const thisPlayer = this.dealer.getPlayerById(socketId);
-    //console.log(thisPlayer)
-
     console.log("Players", JSON.stringify(this.players));
     console.log("Sockets", Socket.getSockets());
     console.log("pot", this.pot);

@@ -58,7 +58,7 @@ wss.on("connection", (ws, req) => {
         return;
       }
 
-      match.signUp(jsonData, thisSocket.id);
+      match.signUp(jsonData, thisSocket);
     }
 
     if (jsonData && jsonData.action === "sendMessage") {
@@ -78,7 +78,7 @@ wss.on("connection", (ws, req) => {
 
     if (jsonData && jsonData.action === "fold") {
       log.add({ step: "Fold" });
-      match.fold(thisSocket.id);
+      match.fold(thisSocket);
     }
 
     if (jsonData && jsonData.action === "close") {
@@ -89,7 +89,7 @@ wss.on("connection", (ws, req) => {
     if (jsonData && jsonData.action === "setBet") {
       log.add({ step: "Set Bet" });
       const chipsToBet = jsonData.chipsToBet;
-      match.setBet(thisSocket.id, chipsToBet);
+      match.setBet(thisSocket, chipsToBet);
     }
 
     if (jsonData && jsonData.action === "setRise") {
