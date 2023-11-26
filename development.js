@@ -27,7 +27,7 @@ const HighCard = ["1h", "2s", "3h"];
 //console.log(expemientoXXX)
 let contadorFullHouse = 0;
 
-for (let i = 0; i < 1000000; i++) {
+for (let i = 0; i < 1000000000; i++) {
   const xxx = [...Deck.shuffleDeck(Deck.cards, 100)];
 
 
@@ -40,6 +40,10 @@ for (let i = 0; i < 1000000; i++) {
 
   const resultado = PokerCore.betterHand(dealerCards, playerCards);
  
+  if (i % 100000 === 0) {
+    console.log(i, dealerCards, playerCards, resultado.pokerHand)
+  }
+  
  //console.log(resultado, 'xxx');
   // Verificar si el resultado tiene un full house
   if (resultado && resultado.pokerHand == 'royalFlush') {

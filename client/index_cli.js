@@ -149,9 +149,9 @@ socket.addEventListener("open", (event) => {
 });
 
 socket.addEventListener("message", (event) => {
-  console.log(`Mensaje del servidor: ${event.data}`);
+  console.log(`FROM_SERVER: ${event.data}`);
 });
 
 socket.addEventListener("close", () => {
-  console.log("Conexión cerrada");
+  console.log("FROM_SERVER_CLOSED_CONECTION");
 });

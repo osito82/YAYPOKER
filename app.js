@@ -109,7 +109,6 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "dealtPrivateCards") {
-    //  console.log(thisSocket, 'ttthhhisss app')
       match.dealtPrivateCards(thisSocket);
       log.add({ step: "Dealt Private Cards" });
     }
@@ -163,5 +162,5 @@ app.get("/status", (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.redirect("/"); // Redirige a la ruta principal
+  res.redirect("/"); 
 });

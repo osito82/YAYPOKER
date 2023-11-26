@@ -28,7 +28,7 @@ class Match {
   }
 
   signUp(data, thisSocket) {
-    const {id:thisSocketId} = thisSocket
+    const { id: thisSocketId } = thisSocket;
     console.log("MATCH - signUp");
     ///Avoid Folders to play when startGame = true
     if (
@@ -84,9 +84,9 @@ class Match {
   }
 
   dealtPrivateCards(thisSocket) {
-    const {id:thisSocketId} = thisSocket
+    const { id: thisSocketId } = thisSocket;
     console.log("MATCH - dealtPrivateCards");
-    console.log(thisSocketId, '----------------- 0021 - dealtPrivateCards')
+    console.log(thisSocketId, "----------------- 0021 - dealtPrivateCards");
     try {
       const foundPlayer = this.dealer.getPlayerById(thisSocketId);
 
@@ -113,7 +113,7 @@ class Match {
   }
 
   setBet(thisSocket, chipsToBet, type = "setBet") {
-    const {id:thisSocketId} = thisSocket
+    const { id: thisSocketId } = thisSocket;
     console.log("MATCH - " + type);
     if (R.isEmpty(this.players)) {
       return;
@@ -221,7 +221,7 @@ class Match {
   }
 
   playerLeave(thisSocket) {
-    const {id:thisSocketId} = thisSocket
+    const { id: thisSocketId } = thisSocket;
     console.log("MATCH - playerLeave");
     const index = this.players.findIndex(
       (player) => player.id === thisSocketId
@@ -233,7 +233,7 @@ class Match {
   }
 
   fold(thisSocket) {
-    const {id:thisSocketId} = thisSocket
+    const { id: thisSocketId } = thisSocket;
     console.log("MATCH - fold");
     const foundPlayer = this.players.find(
       (myPlayer) => myPlayer.id == thisSocketId
@@ -309,8 +309,8 @@ class Match {
     this.startGame(thisSocket);
   }
 
-  gameOptions(bettingFor) {
-    console.log("MATCH - gameOptions");
+  bettingCore(bettingFor) {
+    console.log("MATCH - bettingCore");
     try {
       const maxBet = Math.max(
         ...this.players.map((player) => player.getCurrentBet())
@@ -323,10 +323,20 @@ class Match {
           const currentBet = player.getCurrentBet();
 
           if (currentBet != maxBet) {
-            this.dealer.talkToPLayerById(
-              player.id,
-              `Hey, ${player.name}+ Current ${currentBet} + MaxBet ${maxBet} is not equal to the maximum bet. Do you want - CALL - RISE - FOLD - Press Command`
-            );
+            const msg = msgBuilder("bettingCore", "personal", player, {
+              screenMessage: true,
+              action: ["call", "rise", "fold"],
+              currentBet,
+              currentBet,
+              maxBet: maxBet,
+            });
+            this.dealer.talkToPLayerById(thisSocketId, msg);
+
+            const msgAll = msgBuilder("bettingCore", "grupal", player, {
+              screenMessage: true,
+              action: ["call", "rise", "fold"],
+            });
+            this.dealer.talkToAllPlayersOnTable(msgAll);
           }
         });
 
@@ -399,7 +409,7 @@ class Match {
 
     ///firstBetting
     if (!this.stepChecker.checkStep("firstBetting")) {
-      this.gameOptions("firstBetting");
+      this.bettingCore("firstBetting");
       return;
     }
 
