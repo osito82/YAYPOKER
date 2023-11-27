@@ -34,6 +34,12 @@ class Player {
     return this.id;
   };
 
+
+  getPlayerName = () => {
+    return this.name;
+  };
+
+
   getChips = () => {
     return this.chips;
   };

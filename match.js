@@ -86,9 +86,7 @@ class Match {
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
 
-      this.communicator.msgBuilder("signUp", "public", player, {
-        data: {},
-      });
+      this.communicator.msgBuilder("signUp", "public", player, {});
 
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
 
@@ -155,16 +153,11 @@ class Match {
       if (aprovedBet) {
         this.dealer.setPot(chipsToBet);
 
-        this.communicator.msgBuilder("setBet", "public", foundPlayer, {
-          data: {},
-        });
-
+        this.communicator.msgBuilder("setBet", "public", foundPlayer, {});
         this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
-
         this.log
           .Template({ name: "brakets", date: true, title: "setBet" })
           .R(this.communicator.getFullInfo());
-
       } else {
         console.log("todo - setBet  was not possible");
       }
@@ -196,13 +189,11 @@ class Match {
       if (aprovedBet) {
         this.dealer.setPot(diff);
 
-        const msgAll = msgBuilder("setCall", "grupal", foundPlayer, {
-          screenMessage: true,
-          bet: diff,
-          pot: this.dealer.getPot(),
-        });
-
-        this.dealer.talkToAllPlayersOnTable(msgAll);
+        this.communicator.msgBuilder("setCall", "public", foundPlayer, {});
+        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+        this.log
+          .Template({ name: "brakets", date: true, title: "setCall" })
+          .R(this.communicator.getFullInfo());
       } else {
         console.log("todo - rise was not possible");
       }
@@ -219,10 +210,11 @@ class Match {
     );
 
     if (foundPlayer) {
-      const msgAll = msgBuilder("setCheck", "grupal", foundPlayer, {
-        screenMessage: true,
-      });
-      this.dealer.talkToAllPlayersOnTable(msgAll);
+      this.communicator.msgBuilder("setCheck", "public", foundPlayer, {});
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+      this.log
+        .Template({ name: "brakets", date: true, title: "setCheck" })
+        .R(this.communicator.getFullInfo());
     }
   }
 
@@ -282,10 +274,11 @@ class Match {
       const msg = msgBuilder("fold", "personal", foundPlayer, {});
       this.dealer.talkToPLayerById(thisSocketId, msg);
 
-      const msgAll = msgBuilder("fold", "grupal", foundPlayer, {
-        screenMessage: true,
-      });
-      this.dealer.talkToAllPlayersOnTable(msgAll);
+      this.communicator.msgBuilder("fold", "public", foundPlayer, {});
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+      this.log
+        .Template({ name: "brakets", date: true, title: "fold" })
+        .R(this.communicator.getFullInfo());
 
       const index = this.players.findIndex(
         (player) => player.id === thisSocketId
@@ -360,20 +353,31 @@ class Match {
           const currentBet = player.getCurrentBet();
 
           if (currentBet != maxBet) {
-            const msg = msgBuilder("bettingCore", "personal", player, {
-              screenMessage: true,
+            this.communicator.msgBuilder("bettingCore", "private", player, {
+              messageForName: player.getPlayerName(),
+              messageForId: player.getPlayerId(),
               action: ["call", "rise", "fold"],
-              currentBet,
-              currentBet,
+              currentBet: currentBet,
               maxBet: maxBet,
             });
-            this.dealer.talkToPLayerById(player.getPlayerId(), msg);
+            this.dealer.talkToPLayerById(
+              player.getPlayerId(),
+              this.communicator.getMsg()
+            );
 
-            const msgAll = msgBuilder("bettingCore", "grupal", player, {
-              screenMessage: true,
+            this.communicator.msgBuilder("bettingCore", "public", player, {
+              messageForName: player.getPlayerName(),
+              messageForId: player.getPlayerId(),
               action: ["call", "rise", "fold"],
             });
-            this.dealer.talkToAllPlayersOnTable(msgAll);
+            this.dealer.talkToPlayerBUTid(
+              player.getPlayerId(),
+              this.communicator.getMsg()
+            );
+
+            this.log
+              .Template({ name: "brakets", date: true, title: "bettingCore" })
+              .R(this.communicator.getFullInfo());
           }
         });
 

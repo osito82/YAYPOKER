@@ -21,31 +21,19 @@ class Communicator {
     return censoredPlayers;
   }
 
-  playerPublic(player) {
-    if (!player) return {};
-    const { id: playerId, name: playerName } = player;
-    const chips = player.getChips();
-    const currentBet = player.getCurrentBet();
-    return { playerId, playerName, chips, currentBet };
-  }
-
-  playerPrivate(player) {
+  myPrivateInfo(player) {
     if (!player) return {};
     const { id: playerId, name: playerName } = player;
     const privateCards = player.getCards();
-    const chips = player.getChips();
-    const currentBet = player.getCurrentBet();
-    return { playerId, playerName, privateCards, chips, currentBet };
+    return { playerId, playerName, privateCards };
   }
 
   msgBuilder(action, type, player, data) {
     const pot = this.pot;
     const players = this.players;
-    let playerInfo;
+    let myPlayerInfo;
     if (type == "private") {
-      playerInfo = this.playerPrivate(player);
-    } else if (type == "public") {
-      playerInfo = this.playerPublic(player);
+      myPlayerInfo = this.myPrivateInfo(player);
     }
 
     ///For Players/System
@@ -53,7 +41,7 @@ class Communicator {
       action,
       type,
       pot: this.dealer.getPot(),
-      playerInfo,
+      myPlayerInfo,
       data,
       stepChecker: this.stepChecker.getChecker(),
       players: this.censoredPlayersInfo(players),
@@ -66,7 +54,7 @@ class Communicator {
       pot: this.dealer.getPot(),
       data,
       stepChecker: this.stepChecker.getChecker(),
-      players: this.censoredPlayersInfo(players),
+      players: players,
     };
   }
 
@@ -75,6 +63,7 @@ class Communicator {
   }
 
   getFullInfo() {
+    console.log("");
     return this.fullInfo;
   }
 }

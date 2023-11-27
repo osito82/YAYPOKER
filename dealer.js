@@ -1,18 +1,12 @@
 const Socket = require("./sockets");
 
 class Dealer {
-  constructor(
-    gameId,
-    players,
-    deck,
-    torneoId
-    , pot
-  ) {
+  constructor(gameId, players, deck, torneoId, pot) {
     this.gameId = gameId;
     this.torneoId = torneoId;
     this.deck = deck;
     this.players = players;
-       this.pot = pot;
+    this.pot = pot;
   }
 
   pot = 0;
@@ -20,7 +14,6 @@ class Dealer {
 
   setPot(chipsToBet) {
     this.pot = this.pot + chipsToBet;
-    //   console.log("------------", this.pot);
   }
 
   getPot() {
@@ -113,6 +106,29 @@ class Dealer {
     }
   }
 
+  //Sends Message to all player But not for One
+  talkToPlayerBUTid(idToOmitNumber, targetMessage) {
+    try {
+      this.players.forEach((player) => {
+        const { id } = player;
+
+        if (id && id !== idToOmitNumber) {
+          this.talkToPLayerById(id, targetMessage);
+        } else {
+          return;
+        }
+
+        //   const socket = Socket.getSocket(this.torneoId, id);
+
+        // if (socket) {
+        //   socket.socket.send(JSON.stringify({ message: targetMessage }));
+        // }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   talkToSocketById(idNumber, targetMessage) {
     console.log("DEALER - talkToSocketById ");
     try {
@@ -131,7 +147,6 @@ class Dealer {
       const foundPlayer = this.getPlayerByNumber(playerNumber);
 
       if (foundPlayer) {
-        console.log("MATCH - talkToPLayerByNumber " + playerNumber);
         const playerId = foundPlayer.id;
         const targetSocket = Socket.getSocket(this.torneoId, playerId);
         if (targetSocket) {
@@ -147,6 +162,7 @@ class Dealer {
     }
   }
 
+  ///Send Same Message to all the players who are playing
   talkToAllPlayersOnTable(targetMessage) {
     try {
       this.players.forEach((player) => {
