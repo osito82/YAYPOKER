@@ -10,21 +10,21 @@ class Player {
 
   currentBet = 0;
 
-  setCard(card) {
+  setCard = (card) => {
     this.cards.push(card);
-  }
+  };
 
-  getCards(){
-    return this.cards
-  }
+  getCards = () => {
+    return this.cards;
+  };
 
-  countCards() {
+  countCards = () => {
     return this.cards.length;
-  }
+  };
 
-  viewCards() {
+  viewCards = () => {
     return (this.viewCards = true);
-  }
+  };
 
   getPlayer(playersArray, playerId) {
     return playersArray.find((player) => player.id === playerId);
@@ -45,7 +45,6 @@ class Player {
   setBet(chipsToBet) {
     let betSet = false;
     if (Number(chipsToBet) > Number(this.chips)) {
-      // return "no enough chips";
     } else {
       this.chips -= chipsToBet;
       this.currentBet += chipsToBet;
@@ -54,10 +53,7 @@ class Player {
     return betSet;
   }
 
-  showCards() {
-    console.log("player - showCards");
-    console.log("player cards", this.cards);
-  }
+
 }
 
 module.exports = Player;

@@ -20,10 +20,10 @@ class Communicator {
   playerPrivate(player) {
     if (!player) return {};
     const { id: playerId, name: playerName } = player;
-    const cards = player.getCards();
+    const privateCards = player.getCards();
     const chips = player.getChips();
     const currentBet = player.getCurrentBet();
-    return { playerId, playerName, cards, chips, currentBet };
+    return { playerId, playerName, privateCards, chips, currentBet };
   }
 
   msgBuilder(action, type, player, data) {
@@ -35,6 +35,7 @@ class Communicator {
       playerInfo = this.playerPuplic(player);
     }
 
+    ///For Players/System
     this.msg = {
       action,
       type,
@@ -43,10 +44,24 @@ class Communicator {
       data,
       stepChecker: this.stepChecker.getChecker(),
     };
+
+    ///For OsoLog
+    this.fullInfo = {
+      action,
+      type,
+      pot,
+      Info: this.playerPrivate(player),
+      data,
+      stepChecker: this.stepChecker.getChecker(),
+    };
   }
 
-  getMsgPlayer() {
+  getMsg() {
     return this.msg;
+  }
+
+  getFullInfo() {
+    return this.fullInfo;
   }
 }
 module.exports = Communicator;

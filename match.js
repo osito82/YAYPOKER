@@ -2,17 +2,20 @@ const Player = require("./player");
 const Dealer = require("./dealer");
 const Deck = require("./deck");
 const StepChecker = require("./stepChecker");
+const osolog = require("osolog");
 
 const PokerCore = require("./pokerCore");
 
 const R = require("radash");
-const log = require("./log");
 const Socket = require("./sockets");
 const Communicator = require("./communicator");
 
 const { msgBuilder } = require("./utils");
 
 class Match {
+
+  log = new osolog();
+
   constructor(torneoId, gameId) {
     this.torneoId = torneoId;
     this.gameId = gameId;
@@ -41,6 +44,7 @@ class Match {
   signUp(data, thisSocket) {
     const { id: thisSocketId } = thisSocket;
     console.log("MATCH - signUp");
+
     ///Avoid Folders to play when startGame = true
     if (
       this.stepChecker.checkStep("startGame") &&
@@ -84,9 +88,10 @@ class Match {
         data: "newUser",
       });
 
-      //this.communicator
-      //console.log( this.communicator.getMsgPlayer(), ' this.communicator.getMsgPlayer()')
-      this.dealer.talkToPLayerById(player.id, this.communicator.getMsgPlayer());
+      this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
+      this.log
+        .Template({ name: "brakets", date: true, title: "signUp" })
+        .R(this.communicator.getFullInfo());
     }
 
     if (this.players.length >= 2) {
@@ -116,12 +121,6 @@ class Match {
         this.dealer.talkToPLayerById(thisSocketId, msg);
         this.continue(thisSocket);
       }
-
-      // else {
-      //   console.log(
-      //     `ERROR: Unable to MATCH - dealtPrivateCards to socket ${thisSocketId}`
-      //   );
-      // }
     } catch (error) {
       console.error("Error in dealtPrivateCards:", error);
     }
@@ -130,6 +129,7 @@ class Match {
   setBet(thisSocket, chipsToBet, type = "setBet") {
     const { id: thisSocketId } = thisSocket;
     console.log("MATCH - " + type);
+
     if (R.isEmpty(this.players)) {
       return;
     }
@@ -345,7 +345,7 @@ class Match {
               currentBet,
               maxBet: maxBet,
             });
-            this.dealer.talkToPLayerById(thisSocketId, msg);
+            this.dealer.talkToPLayerById(player.getPlayerId(), msg);
 
             const msgAll = msgBuilder("bettingCore", "grupal", player, {
               screenMessage: true,
@@ -428,7 +428,7 @@ class Match {
       return;
     }
 
-    log.add({ dealerCards: this.dealer.showCards() });
+    //log.add({ dealerCards: this.dealer.showCards() });
 
     this.stepChecker.grantStep("startGame");
   }

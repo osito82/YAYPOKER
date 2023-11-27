@@ -50,11 +50,6 @@ const close = {
   action: "close",
 };
 
-//Log
-const log = {
-  action: "log",
-};
-
 //SendMessage
 const sendMessage = {
   action: "sendMessage",
@@ -71,7 +66,6 @@ exports.signUp = signUp;
 exports.startGame = startGame;
 exports.setBet = setBet;
 exports.dealtPrivateCards = dealtPrivateCards;
-exports.log = log;
 exports.sendMessage = sendMessage;
 exports.fold = fold;
 exports.close = close;

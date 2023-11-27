@@ -1,5 +1,6 @@
 const express = require("express");
 const R = require("radash");
+const osolog = require("osolog");
 
 const http = require("http");
 const WebSocket = require("ws");
@@ -10,7 +11,7 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const log = require("./log");
+//const log = require("./log");
 const Match = require("./match");
 const Socket = require("./sockets");
 const Torneo = require("./torneo");
@@ -18,8 +19,10 @@ const Torneo = require("./torneo");
 const gameId = generateUniqueId();
 
 const startTime = new Date();
+const log = new osolog();
 
 wss.on("connection", (ws, req) => {
+  
   const urlParams = new URLSearchParams(req.url.substring(1));
   const torneoId = urlParams.get("torneoId") ?? "default_Torneo";
   const playerName = urlParams.get("playerName") ?? randomName();
@@ -77,40 +80,40 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "fold") {
-      log.add({ step: "Fold" });
+      log.R({ step: "Fold" });
       match.fold(thisSocket);
     }
 
     if (jsonData && jsonData.action === "close") {
-      log.add({ step: "Close" });
+      log.R({ step: "Close" });
       match.close(thisSocket, torneoId);
     }
 
     if (jsonData && jsonData.action === "setBet") {
-      log.add({ step: "Set Bet" });
+      log.R({ step: "Set Bet" });
       const chipsToBet = jsonData.chipsToBet;
       match.setBet(thisSocket, chipsToBet);
     }
 
     if (jsonData && jsonData.action === "setRise") {
-      log.add({ step: "Set Rise" });
+      log.R({ step: "Set Rise" });
       const chipsToRiseBet = jsonData.chipsToRiseBet;
       match.setRise(thisSocket.id, chipsToRiseBet);
     }
 
     if (jsonData && jsonData.action === "setCall") {
+      log.R({ step: "Set Call" });
       match.setCall(thisSocket, torneoId);
-      log.add({ step: "Call" });
     }
 
     if (jsonData && jsonData.action === "setCheck") {
+      log.R({ step: "Check" });
       match.setCheck(thisSocket, torneoId);
-      log.add({ step: "Check" });
     }
 
     if (jsonData && jsonData.action === "dealtPrivateCards") {
+      log.R({ step: "Dealt Private Cards" });
       match.dealtPrivateCards(thisSocket);
-      log.add({ step: "Dealt Private Cards" });
     }
 
     if (jsonData && jsonData.action === "stats") {
@@ -118,14 +121,8 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "startGame") {
+      log.R({ step: "Start Game" });
       match.startGame(thisSocket);
-      log.add({ step: "Start the Game" });
-      log.add({ players: match.players });
-    }
-
-    if (jsonData && jsonData.action === "log") {
-      console.log("log");
-      log.print();
     }
   });
 
@@ -162,5 +159,5 @@ app.get("/status", (req, res) => {
 });
 
 app.get("*", (req, res) => {
-  res.redirect("/"); 
+  res.redirect("/");
 });
