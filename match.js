@@ -2,11 +2,14 @@ const Player = require("./player");
 const Dealer = require("./dealer");
 const Deck = require("./deck");
 const StepChecker = require("./stepChecker");
+
 const PokerCore = require("./pokerCore");
 
 const R = require("radash");
 const log = require("./log");
 const Socket = require("./sockets");
+const Communicator = require("./communicator");
+
 const { msgBuilder } = require("./utils");
 
 class Match {
@@ -25,6 +28,14 @@ class Match {
       torneoId
     );
     this.stepChecker = new StepChecker(this.gameId);
+
+    this.communicator = new Communicator(
+      this.gameId,
+      this.torneoId,
+      this.pot,
+      this.playersFold,
+      this.stepChecker
+    );
   }
 
   signUp(data, thisSocket) {
@@ -68,10 +79,14 @@ class Match {
     } else {
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
-      this.dealer.talkToPLayerById(
-        player.id,
-        `Hi, ${player.name} welcome to the Poker Game`
-      );
+
+      this.communicator.msgBuilder("signUp", "private", player, {
+        data: "newUser",
+      });
+
+      //this.communicator
+      //console.log( this.communicator.getMsgPlayer(), ' this.communicator.getMsgPlayer()')
+      this.dealer.talkToPLayerById(player.id, this.communicator.getMsgPlayer());
     }
 
     if (this.players.length >= 2) {

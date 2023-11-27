@@ -23,6 +23,8 @@ function generateUniqueId() {
   return shortUUID;
 }
 
+
+//borrar despues communicator
 function msgBuilder(action, msgType, player, data) {
   const { id: playerId, name: playerName } = player;
   return { action, msgType, playerId: playerId, name: playerName, data };

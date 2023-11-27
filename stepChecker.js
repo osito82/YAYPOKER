@@ -24,6 +24,10 @@ class StepChecker {
     this.gameFlow.gameId = gameId;
   }
 
+  getChecker() {
+    return this.gameFlow
+  }
+
   checkStep(step) {
     return step in this.gameFlow ? this.gameFlow[step] : false;
   }
@@ -42,21 +46,21 @@ class StepChecker {
     this.gameFlow = { ...this.gameFlowOriginal };
   }
 
-  isAllowedTo(step) {
-    switch (step) {
-      // case "bigBlind":
-      // case "smallBlind":
-      // case "blinds":
-      //   return this.checkStep("signUp");
+  // isAllowedTo(step) {
+  //   switch (step) {
+  //     // case "bigBlind":
+  //     // case "smallBlind":
+  //     // case "blinds":
+  //     //   return this.checkStep("signUp");
 
-      case "dealtPrivateCards":
-        return (
-          this.checkStep("signUp") &&
-          this.checkStep("smallBlind") &&
-          this.checkStep("bigBlind")
-        );
-    }
-  }
+  //     case "dealtPrivateCards":
+  //       return (
+  //         this.checkStep("signUp") &&
+  //         this.checkStep("smallBlind") &&
+  //         this.checkStep("bigBlind")
+  //       );
+  //   }
+  // }
 }
 
 module.exports = StepChecker;
