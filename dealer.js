@@ -82,8 +82,7 @@ class Dealer {
   }
 
   talkToPLayerById(idNumber, targetMessage) {
-    //console.log("----- ---- 00021 -- ", targetMessage);
-    //console.log("MATCH - talkToPLayerById " + idNumber);
+    
     try {
       const foundPLayer = this.getPlayerById(idNumber);
 
@@ -99,7 +98,7 @@ class Dealer {
   }
 
   talkToSocketById(idNumber, targetMessage) {
-    console.log("MATCH - talkToSocketById ");
+    console.log("DEALER - talkToSocketById ");
     try {
       const allSockets = Socket.getSocketsByTorneo(this.torneoId);
       if (allSockets) {
@@ -111,12 +110,12 @@ class Dealer {
     }
   }
 
-  talkToPLayer(playerNumber, targetMessage) {
+  talkToPLayerByNumber(playerNumber, targetMessage) {
     try {
       const foundPlayer = this.getPlayerByNumber(playerNumber);
 
       if (foundPlayer) {
-        console.log("MATCH - talkToPLayer " + playerNumber);
+        console.log("MATCH - talkToPLayerByNumber " + playerNumber);
         const playerId = foundPlayer.id;
         const targetSocket = Socket.getSocket(this.torneoId, playerId);
         if (targetSocket) {

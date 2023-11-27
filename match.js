@@ -81,14 +81,12 @@ class Match {
         this.continue(thisSocket);
       }
     } else {
-
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
 
       this.communicator.msgBuilder("signUp", "private", player, {
-        data: "newUser",
+        data: {},
       });
-
       this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
       this.log
         .Template({ name: "brakets", date: true, title: "signUp" })
@@ -107,21 +105,30 @@ class Match {
   dealtPrivateCards(thisSocket) {
     const { id: thisSocketId } = thisSocket;
     console.log("MATCH - dealtPrivateCards");
-    console.log(thisSocketId, "----------------- 0021 - dealtPrivateCards");
     try {
-      const foundPlayer = this.dealer.getPlayerById(thisSocketId);
+      //    const foundPlayer = this.dealer.getPlayerById(thisSocketId);
 
       this.dealer.dealCardsEachPlayer(2);
       this.stepChecker.grantStep("dealtPrivateCards");
 
-      if (foundPlayer) {
-        const msg = msgBuilder("dealtPrivateCards", "personal", foundPlayer, {
-          screenMessage: true,
-          personalCards: foundPlayer.getCards(),
-        });
-        this.dealer.talkToPLayerById(thisSocketId, msg);
-        this.continue(thisSocket);
+      ///Sends a customized msg
+      for (const player of this.players) {
+        this.communicator.msgBuilder(
+          "dealtPrivateCards",
+          "private",
+          player,
+          {}
+        );
+
+        this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
       }
+
+      this.log
+        .Template({ name: "brakets", date: true, title: "dealtPrivateCards" })
+        .R(this.communicator.getFullInfo());
+
+      this.continue(thisSocket);
+      //     }
     } catch (error) {
       console.error("Error in dealtPrivateCards:", error);
     }
@@ -225,12 +232,18 @@ class Match {
       } else {
         ///blinds Ask for bet P1
         if (!this.dealer.hasPlayerBet(1)) {
-          this.dealer.talkToPLayer(1, "P1 - Please make your blind bet");
+          this.dealer.talkToPLayerByNumber(
+            1,
+            "P1 - Please make your blind bet"
+          );
         }
 
         ///blinds Ask for bet P2
         if (!this.dealer.hasPlayerBet(2)) {
-          this.dealer.talkToPLayer(2, "P2 - Please make your blind bet");
+          this.dealer.talkToPLayerByNumber(
+            2,
+            "P2 - Please make your blind bet"
+          );
         }
       }
     }

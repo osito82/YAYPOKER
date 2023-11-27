@@ -13,21 +13,22 @@ class Communicator {
 
   censoredPlayersInfo(players) {
     if (!players) return {};
-    //const {}
+
     const censoredPlayers = JSON.parse(JSON.stringify(players));
     censoredPlayers.forEach((player) => {
-      delete player.cards; // Eliminar el campo "cards"
+      delete player.cards;
     });
     return censoredPlayers;
   }
 
-  playerPuplic(player) {
+  playerPublic(player) {
     if (!player) return {};
     const { id: playerId, name: playerName } = player;
     const chips = player.getChips();
     const currentBet = player.getCurrentBet();
     return { playerId, playerName, chips, currentBet };
   }
+
   playerPrivate(player) {
     if (!player) return {};
     const { id: playerId, name: playerName } = player;
@@ -44,7 +45,7 @@ class Communicator {
     if (type == "private") {
       playerInfo = this.playerPrivate(player);
     } else if (type == "public") {
-      playerInfo = this.playerPuplic(player);
+      playerInfo = this.playerPublic(player);
     }
 
     ///For Players/System
@@ -63,7 +64,6 @@ class Communicator {
       action,
       type,
       pot,
-      Info: this.playerPrivate(player),
       data,
       stepChecker: this.stepChecker.getChecker(),
       players: this.censoredPlayersInfo(players),
