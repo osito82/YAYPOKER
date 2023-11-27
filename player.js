@@ -52,8 +52,6 @@ class Player {
     }
     return betSet;
   }
-
-
 }
 
 module.exports = Player;

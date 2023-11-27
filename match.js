@@ -13,7 +13,6 @@ const Communicator = require("./communicator");
 const { msgBuilder } = require("./utils");
 
 class Match {
-
   log = new osolog();
 
   constructor(torneoId, gameId) {
@@ -37,7 +36,8 @@ class Match {
       this.torneoId,
       this.pot,
       this.playersFold,
-      this.stepChecker
+      this.stepChecker,
+      this.players
     );
   }
 
@@ -81,6 +81,7 @@ class Match {
         this.continue(thisSocket);
       }
     } else {
+
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
 
@@ -406,15 +407,10 @@ class Match {
     }
 
     ///Blinds
-    //const timerAskBlinds = () => {
     if (!this.stepChecker.checkStep("blinds")) {
       this.askForBets("blinds", thisSocket);
       return;
-    } // else {
-    // clearInterval(intervalId);
-    // }
-    //};
-    //const intervalId = setInterval(timerAskBlinds, 10000);
+    }
 
     ///Deal Private Cards
     if (!this.stepChecker.checkStep("dealtPrivateCards")) {

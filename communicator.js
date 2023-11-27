@@ -1,14 +1,25 @@
 class Communicator {
-  constructor(gameId, torneoId, pot, playerFold, stepChecker) {
+  constructor(gameId, torneoId, pot, playerFold, stepChecker, players) {
     this.gameId = gameId;
     this.torneoId = torneoId;
     this.stepChecker = stepChecker;
     this.pot = pot;
     this.playerFold = playerFold;
+    this.players = players;
   }
 
   msg = {};
   player = {};
+
+  censoredPlayersInfo(players) {
+    if (!players) return {};
+    //const {}
+    const censoredPlayers = JSON.parse(JSON.stringify(players));
+    censoredPlayers.forEach((player) => {
+      delete player.cards; // Eliminar el campo "cards"
+    });
+    return censoredPlayers;
+  }
 
   playerPuplic(player) {
     if (!player) return {};
@@ -28,6 +39,7 @@ class Communicator {
 
   msgBuilder(action, type, player, data) {
     const pot = this.pot;
+    const players = this.players;
     let playerInfo;
     if (type == "private") {
       playerInfo = this.playerPrivate(player);
@@ -43,6 +55,7 @@ class Communicator {
       playerInfo,
       data,
       stepChecker: this.stepChecker.getChecker(),
+      players: this.censoredPlayersInfo(players),
     };
 
     ///For OsoLog
@@ -53,6 +66,7 @@ class Communicator {
       Info: this.playerPrivate(player),
       data,
       stepChecker: this.stepChecker.getChecker(),
+      players: this.censoredPlayersInfo(players),
     };
   }
 

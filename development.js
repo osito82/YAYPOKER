@@ -23,8 +23,7 @@ const fullHouse = ["Ah", "As", "Qh"];
 const fullHouseD = ["Ks", "Td"];
 const HighCard = ["1h", "2s", "3h"];
 
-//const expemientoXXX = PokerCore.betterHand(dealerCards, playerCards)
-//console.log(expemientoXXX)
+
 let contadorFullHouse = 0;
 
 for (let i = 0; i < 1000000000; i++) {
