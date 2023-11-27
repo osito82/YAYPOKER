@@ -1,14 +1,31 @@
 const Socket = require("./sockets");
 
 class Dealer {
-  constructor(gameId, players, deck, torneoId) {
+  constructor(
+    gameId,
+    players,
+    deck,
+    torneoId
+    , pot
+  ) {
     this.gameId = gameId;
     this.torneoId = torneoId;
     this.deck = deck;
     this.players = players;
+       this.pot = pot;
   }
 
+  pot = 0;
   cards = [];
+
+  setPot(chipsToBet) {
+    this.pot = this.pot + chipsToBet;
+    //   console.log("------------", this.pot);
+  }
+
+  getPot() {
+    return this.pot;
+  }
 
   dealCardsEachPlayer(numberOfCards = 1) {
     for (let i = 0; i < numberOfCards; i++) {
@@ -82,7 +99,6 @@ class Dealer {
   }
 
   talkToPLayerById(idNumber, targetMessage) {
-    
     try {
       const foundPLayer = this.getPlayerById(idNumber);
 

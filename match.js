@@ -18,26 +18,28 @@ class Match {
   constructor(torneoId, gameId) {
     this.torneoId = torneoId;
     this.gameId = gameId;
-    this.pot = 0;
+
     this.players = [];
     this.playersFold = [];
-    this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101);
+    this.pot = 0;
 
     this.dealer = new Dealer(
       this.gameId,
       this.players,
-      this.shuffledDeck,
-      torneoId
+      (this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)),
+      torneoId,
+      this.pot
     );
+
     this.stepChecker = new StepChecker(this.gameId);
 
     this.communicator = new Communicator(
       this.gameId,
       this.torneoId,
-      this.pot,
       this.playersFold,
       this.stepChecker,
-      this.players
+      this.players,
+      this.dealer
     );
   }
 
@@ -84,10 +86,12 @@ class Match {
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
 
-      this.communicator.msgBuilder("signUp", "private", player, {
+      this.communicator.msgBuilder("signUp", "public", player, {
         data: {},
       });
-      this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
+
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+
       this.log
         .Template({ name: "brakets", date: true, title: "signUp" })
         .R(this.communicator.getFullInfo());
@@ -149,14 +153,18 @@ class Match {
       const aprovedBet = foundPlayer.setBet(chipsToBet);
 
       if (aprovedBet) {
-        this.pot = this.pot + chipsToBet;
+        this.dealer.setPot(chipsToBet);
 
-        const msgAll = msgBuilder(type, "grupal", foundPlayer, {
-          screenMessage: true,
-          bet: chipsToBet,
-          pot: this.pot,
+        this.communicator.msgBuilder("setBet", "public", foundPlayer, {
+          data: {},
         });
-        this.dealer.talkToAllPlayersOnTable(msgAll);
+
+        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+
+        this.log
+          .Template({ name: "brakets", date: true, title: "setBet" })
+          .R(this.communicator.getFullInfo());
+
       } else {
         console.log("todo - setBet  was not possible");
       }
@@ -186,12 +194,12 @@ class Match {
       const aprovedBet = foundPlayer.setBet(diff);
 
       if (aprovedBet) {
-        this.pot = this.pot + diff;
+        this.dealer.setPot(diff);
 
         const msgAll = msgBuilder("setCall", "grupal", foundPlayer, {
           screenMessage: true,
           bet: diff,
-          pot: this.pot,
+          pot: this.dealer.getPot(),
         });
 
         this.dealer.talkToAllPlayersOnTable(msgAll);
@@ -446,7 +454,7 @@ class Match {
     console.log(socketId);
     console.log("Players", JSON.stringify(this.players));
     console.log("Sockets", Socket.getSockets());
-    console.log("pot", this.pot);
+    console.log("pot", this.dealer.getPot());
     console.log("gameFlow", JSON.stringify(this.stepChecker.gameFlow));
   }
 }

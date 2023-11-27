@@ -1,11 +1,11 @@
 class Communicator {
-  constructor(gameId, torneoId, pot, playerFold, stepChecker, players) {
+  constructor(gameId, torneoId, playerFold, stepChecker, players, dealer) {
     this.gameId = gameId;
     this.torneoId = torneoId;
     this.stepChecker = stepChecker;
-    this.pot = pot;
     this.playerFold = playerFold;
     this.players = players;
+    this.dealer = dealer;
   }
 
   msg = {};
@@ -52,7 +52,7 @@ class Communicator {
     this.msg = {
       action,
       type,
-      pot,
+      pot: this.dealer.getPot(),
       playerInfo,
       data,
       stepChecker: this.stepChecker.getChecker(),
@@ -63,7 +63,7 @@ class Communicator {
     this.fullInfo = {
       action,
       type,
-      pot,
+      pot: this.dealer.getPot(),
       data,
       stepChecker: this.stepChecker.getChecker(),
       players: this.censoredPlayersInfo(players),
