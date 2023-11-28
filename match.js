@@ -2,15 +2,13 @@ const Player = require("./player");
 const Dealer = require("./dealer");
 const Deck = require("./deck");
 const StepChecker = require("./stepChecker");
-const osolog = require("osolog");
-
-const PokerCore = require("./pokerCore");
-
-const R = require("radash");
 const Socket = require("./sockets");
 const Communicator = require("./communicator");
 
 const { msgBuilder } = require("./utils");
+
+const osolog = require("osolog");
+const R = require("radash");
 
 class Match {
   log = new osolog();
@@ -234,29 +232,42 @@ class Match {
     this.setBet(thisSocketId, chipsToBet, "setRise");
   }
 
-  askForBets(bettingFor, thisSocket) {
-    console.log("MATCH - askForBets");
-    if (bettingFor == "blinds") {
+  askForBets(thisSocket, bettingFor) {
+    console.log("MATCH - askForBets" + " " + bettingFor);
+    let dataMsg;
+
+    if (bettingFor == "blindsBetting") {
       if (this.dealer.hasPlayerBet(1) && this.dealer.hasPlayerBet(2)) {
-        this.stepChecker.grantStep("blinds");
+        this.stepChecker.grantStep("blindsBetting");
         this.continue(thisSocket);
       } else {
-        ///blinds Ask for bet P1
-        if (!this.dealer.hasPlayerBet(1)) {
-          this.dealer.talkToPLayerByNumber(
-            1,
-            "P1 - Please make your blind bet"
-          );
-        }
+        for (let i = 0; i < 2; i++) {
+          console.log(i, "------");
 
-        ///blinds Ask for bet P2
-        if (!this.dealer.hasPlayerBet(2)) {
-          this.dealer.talkToPLayerByNumber(
-            2,
-            "P2 - Please make your blind bet"
-          );
+          if (!this.dealer.hasPlayerBet(i + 1)) {
+            let thisPlayer = this.dealer.getPlayerByNumber(i + 1);
+            dataMsg = {
+              method: `askForBets - ${bettingFor}`,
+              msg: "Please make your blind bet",
+              name: thisPlayer.name,
+              id: thisPlayer.id,
+            };
+          }
         }
       }
+
+      this.players.forEach((player) => {
+        this.communicator.msgBuilder(
+          `askForBets - ${bettingFor}`,
+          "public",
+          player,
+          dataMsg
+        );
+
+        this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
+      });
+    } else {
+      this.continue(thisSocket);
     }
   }
 
@@ -350,15 +361,13 @@ class Match {
   }
 
   bettingCore(thisSocket, bettingFor) {
-    console.log("MATCH - bettingCore");
+    console.log("MATCH - bettingCore" + " " + bettingFor);
     try {
       const maxBet = Math.max(
         ...this.players.map((player) => player.getCurrentBet())
       );
       const currentBets = this.players.map((player) => player.getCurrentBet());
       const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
-
-      //poner aqui la exepcion si no son giuales
 
       if (!allBetsEqual) {
         this.players.forEach((player) => {
@@ -378,11 +387,16 @@ class Match {
               this.communicator.getMsg()
             );
 
-            this.communicator.msgBuilder("bettingCore", "public", player, {
-              messageForName: player.getPlayerName(),
-              messageForId: player.getPlayerId(),
-              action: ["call", "rise", "fold"],
-            });
+            this.communicator.msgBuilder(
+              `bettingCore ${bettingFor}`,
+              "public",
+              player,
+              {
+                messageForName: player.getPlayerName(),
+                messageForId: player.getPlayerId(),
+                action: ["call", "rise", "fold", "check"],
+              }
+            );
 
             this.dealer.talkToPlayerBUTid(
               player.getPlayerId(),
@@ -399,10 +413,18 @@ class Match {
         if (bettingFor === "firstBetting") {
           this.stepChecker.revokeStep("firstBetting");
         }
+        ///Flop Betting
+        if (bettingFor === "flopBetting") {
+          this.stepChecker.revokeStep("flopBetting");
+        }
       } else {
         if (bettingFor === "firstBetting") {
           this.stepChecker.grantStep("firstBetting");
         }
+        if (bettingFor === "flopBetting") {
+          this.stepChecker.grantStep("flopBetting");
+        }
+
         this.continue(thisSocket);
       }
     } catch (error) {
@@ -494,8 +516,8 @@ class Match {
     }
 
     ///Blinds
-    if (!this.stepChecker.checkStep("blinds")) {
-      this.askForBets("blinds", thisSocket);
+    if (!this.stepChecker.checkStep("blindsBetting")) {
+      this.askForBets(thisSocket, "blindsBetting");
       return;
     }
 
@@ -518,9 +540,15 @@ class Match {
       return;
     }
 
-    ///checkPrizes
+    ///checkPrizes - Flop
     if (!this.stepChecker.checkStep("flopCheckCards")) {
       this.checkPrizes(thisSocket);
+      return;
+    }
+
+    ///flopBetting
+    if (!this.stepChecker.checkStep("flopBetting")) {
+      this.bettingCore(thisSocket, "flopBetting");
       return;
     }
 

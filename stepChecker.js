@@ -6,14 +6,12 @@ class StepChecker {
     signUp: false,
     startGame: false,
     pause: false,
-    blinds: false,
+    blindsBetting: false,
     firstBetting: false,
     dealerFlop: false,
-    
     flopCheckCards:false, //first check then bet
-
-
     flopBetting: false,
+
     turnBetting: false,
     riverBetting: false,
     finalBetting: false,
