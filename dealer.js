@@ -1,16 +1,17 @@
 const Socket = require("./sockets");
 
 class Dealer {
-  constructor(gameId, players, deck, torneoId, pot) {
+  constructor(gameId, players, deck, torneoId, pot, cardsDealer) {
     this.gameId = gameId;
     this.torneoId = torneoId;
     this.deck = deck;
     this.players = players;
     this.pot = pot;
+    this.cardsDealer = cardsDealer;
   }
 
   pot = 0;
-  cards = [];
+  // cards = [];
 
   setPot(chipsToBet) {
     this.pot = this.pot + chipsToBet;
@@ -19,6 +20,13 @@ class Dealer {
   getPot() {
     return this.pot;
   }
+
+  //5555
+  getChipsFromPlayers = () => {
+    console.log("DEALER - getChipsFromPlayers");
+    this.players.forEach((player) => player.giveChipsToDealer());
+    //this.currentBet = 0
+  };
 
   dealCardsEachPlayer(numberOfCards = 1) {
     for (let i = 0; i < numberOfCards; i++) {
@@ -40,22 +48,25 @@ class Dealer {
       const cardToDeal = this.deck.shift();
       if (cardToDeal) {
         this.setCard(cardToDeal);
-      } else {
-        console.log("No hay cartas suficientes en el mazo.");
       }
     }
   }
 
+  getDealerCards() {
+    return this.cardsDealer;
+  }
+
+  //gift card to Dealer
   setCard(card) {
-    this.cards.push(card);
+    this.cardsDealer.push(card);
   }
 
-  dealCards() {
-    const burnedCard = this.deck.shift();
-    this.deck.push(burnedCard);
+  // dealCards() {
+  //   const burnedCard = this.deck.shift();
+  //   this.deck.push(burnedCard);
 
-    this.dealCardsEachPlayer(2);
-  }
+  //   this.dealCardsEachPlayer(2);
+  // }
 
   hasMinimunPlayers() {
     return this.players.length >= 2;
@@ -192,10 +203,6 @@ class Dealer {
     } catch (error) {
       console.log(error);
     }
-  }
-
-  showCards() {
-    return this.cards;
   }
 }
 

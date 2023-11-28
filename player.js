@@ -34,11 +34,9 @@ class Player {
     return this.id;
   };
 
-
   getPlayerName = () => {
     return this.name;
   };
-
 
   getChips = () => {
     return this.chips;
@@ -46,6 +44,11 @@ class Player {
 
   getCurrentBet = () => {
     return this.currentBet;
+  };
+
+  //5555
+  giveChipsToDealer = () => {
+    this.currentBet = 0;
   };
 
   setBet(chipsToBet) {

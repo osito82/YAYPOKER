@@ -6,10 +6,10 @@ class StepChecker {
     signUp: false,
     startGame: false,
     pause: false,
-    
     blinds: false,
-
     firstBetting: false,
+    dealerFlop: false,
+
     flopBetting: false,
     turnBetting: false,
     riverBetting: false,
@@ -25,7 +25,7 @@ class StepChecker {
   }
 
   getChecker() {
-    return this.gameFlow
+    return this.gameFlow;
   }
 
   checkStep(step) {

@@ -22,13 +22,15 @@ class Match {
     this.players = [];
     this.playersFold = [];
     this.pot = 0;
+    this.cardsDealer = [];
 
     this.dealer = new Dealer(
       this.gameId,
       this.players,
       (this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)),
       torneoId,
-      this.pot
+      this.pot,
+      this.cardsDealer
     );
 
     this.stepChecker = new StepChecker(this.gameId);
@@ -86,7 +88,12 @@ class Match {
       this.players.push(player);
       console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
 
-      this.communicator.msgBuilder("signUp", "public", player, {});
+      this.communicator.msgBuilder("signUp", "public", player, {
+        method: "signUp",
+        msg: "New PLayer",
+        name: player.name,
+        id: player.id,
+      });
 
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
 
@@ -158,6 +165,10 @@ class Match {
         this.log
           .Template({ name: "brakets", date: true, title: "setBet" })
           .R(this.communicator.getFullInfo());
+
+
+
+
       } else {
         console.log("todo - setBet  was not possible");
       }
@@ -216,6 +227,7 @@ class Match {
         .Template({ name: "brakets", date: true, title: "setCheck" })
         .R(this.communicator.getFullInfo());
     }
+    this.continue(thisSocket);
   }
 
   setRise(thisSocketId, chipsToBet) {
@@ -339,7 +351,7 @@ class Match {
     this.startGame(thisSocket);
   }
 
-  bettingCore(bettingFor) {
+  bettingCore(thisSocket, bettingFor) {
     console.log("MATCH - bettingCore");
     try {
       const maxBet = Math.max(
@@ -347,6 +359,8 @@ class Match {
       );
       const currentBets = this.players.map((player) => player.getCurrentBet());
       const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
+
+      //poner aqui la exepcion si no son giuales
 
       if (!allBetsEqual) {
         this.players.forEach((player) => {
@@ -360,6 +374,7 @@ class Match {
               currentBet: currentBet,
               maxBet: maxBet,
             });
+
             this.dealer.talkToPLayerById(
               player.getPlayerId(),
               this.communicator.getMsg()
@@ -370,6 +385,7 @@ class Match {
               messageForId: player.getPlayerId(),
               action: ["call", "rise", "fold"],
             });
+
             this.dealer.talkToPlayerBUTid(
               player.getPlayerId(),
               this.communicator.getMsg()
@@ -389,11 +405,32 @@ class Match {
         if (bettingFor === "firstBetting") {
           this.stepChecker.grantStep("firstBetting");
         }
+        this.continue(thisSocket);
       }
     } catch (error) {
       console.log(error);
     }
     //this.continue()
+  }
+
+  dealerFlop(thisSocket) {
+    console.log("MATCH - dealerFlop");
+    this.dealer.dealCardsDealer(3);
+
+    this.stepChecker.grantStep("dealerFlop");
+
+    this.communicator.msgBuilder(
+      "dealerFlop",
+      "public",
+      { player: "dealer" },
+      {}
+    );
+    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+    this.log
+      .Template({ name: "brakets", date: true, title: "dealerFlop" })
+      .R(this.communicator.getFullInfo());
+
+    this.continue(thisSocket);
   }
 
   startGame(thisSocket = {}) {
@@ -445,7 +482,14 @@ class Match {
 
     ///firstBetting
     if (!this.stepChecker.checkStep("firstBetting")) {
-      this.bettingCore("firstBetting");
+      this.bettingCore(thisSocket, "firstBetting");
+      return;
+    }
+
+    ///dealerFlop
+    if (!this.stepChecker.checkStep("dealerFlop")) {
+      this.dealer.getChipsFromPlayers()
+      this.dealerFlop(thisSocket);
       return;
     }
 

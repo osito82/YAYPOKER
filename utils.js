@@ -48,7 +48,7 @@ function randomName() {
   ];
   const indiceAleatorio = Math.floor(Math.random() * nombres.length);
   const nombreElegido = nombres[indiceAleatorio];
-  return nombreElegido;
+  return nombreElegido+'-'+((Math.random()*100).toFixed()).toString();
 }
 
 module.exports = { shuffle, generateUniqueId, randomName, msgBuilder };
