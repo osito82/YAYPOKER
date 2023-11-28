@@ -9,6 +9,9 @@ class StepChecker {
     blinds: false,
     firstBetting: false,
     dealerFlop: false,
+    
+    flopCheckCards:false, //first check then bet
+
 
     flopBetting: false,
     turnBetting: false,
@@ -16,6 +19,8 @@ class StepChecker {
     finalBetting: false,
 
     dealtPrivateCards: false,
+
+    fakeEnd:true
   };
 
   constructor(gameId) {

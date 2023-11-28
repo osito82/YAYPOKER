@@ -106,27 +106,27 @@ socket.addEventListener("open", (event) => {
         sendCommand(mockTest["log"]);
         break;
 
-      case "sm":
-      case "sendMessage":
-      case "10":
-        let playerId;
-        let msg;
-        rl.question(" - Ingrese el id del Jugador: ", (playerIdAnswer) => {
-          playerId = playerIdAnswer;
-          rl.question(
-            ` - Ingrese el mensaje para ${playerId}: `,
-            (msgAnswer) => {
-              msg = msgAnswer;
+      // case "sm":
+      // case "sendMessage":
+      // case "10":
+      //   let playerId;
+      //   let msg;
+      //   rl.question(" - Ingrese el id del Jugador: ", (playerIdAnswer) => {
+      //     playerId = playerIdAnswer;
+      //     rl.question(
+      //       ` - Ingrese el mensaje para ${playerId}: `,
+      //       (msgAnswer) => {
+      //         msg = msgAnswer;
 
-              mockTest.sendMessage.targetPlayerId = playerId;
-              mockTest.sendMessage.targetMessage = msg;
+      //         mockTest.sendMessage.targetPlayerId = playerId;
+      //         mockTest.sendMessage.targetMessage = msg;
 
-              sendCommand(mockTest["sendMessage"]);
-              promptCommand();
-            }
-          );
-        });
-        break;
+      //         sendCommand(mockTest["sendMessage"]);
+      //         promptCommand();
+      //       }
+      //     );
+      //   });
+      //   break;
 
       default:
         console.log("Comando no reconocido");

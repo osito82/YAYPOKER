@@ -165,10 +165,6 @@ class Match {
         this.log
           .Template({ name: "brakets", date: true, title: "setBet" })
           .R(this.communicator.getFullInfo());
-
-
-
-
       } else {
         console.log("todo - setBet  was not possible");
       }
@@ -433,6 +429,41 @@ class Match {
     this.continue(thisSocket);
   }
 
+  checkPrizes(thisSocket) {
+    //console.log(thisSssocket, 'thisSocket')
+    console.log("MATCH - checkPrizes");
+
+    const dealerCards = this.dealer.getDealerCards();
+    console.log(dealerCards);
+
+    if (!dealerCards || dealerCards.length < 3) {
+      return;
+    }
+
+    this.players.forEach((player) => {
+      //const foundPlayer = this.dealer.getPlayerById(thisSocket);
+      console.log(player, "playerplayerplayer");
+      if (!player) return;
+      const prize = player.checkPrize(dealerCards);
+      player.setCurrentPrize(prize);
+
+      //for (const player of this.players) {
+      this.communicator.msgBuilder("checkPrizes", "private", player, {
+        method: "checkPrizes",
+        msg: "Check your current max Prize",
+        name: player.name,
+        id: player.id,
+      });
+
+      this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
+    });
+
+    // console.log(dealerCards.length, "dealerCards.length");
+    if (dealerCards.length == 3) this.stepChecker.grantStep("flopCheckCards");
+    this.continue(thisSocket);
+    //return prize
+  }
+
   startGame(thisSocket = {}) {
     console.log("MATCH - startGame");
 
@@ -488,8 +519,15 @@ class Match {
 
     ///dealerFlop
     if (!this.stepChecker.checkStep("dealerFlop")) {
-      this.dealer.getChipsFromPlayers()
+      this.dealer.getChipsFromPlayers();
       this.dealerFlop(thisSocket);
+      return;
+    }
+
+    ///checkPrizes -- this has to go in the last place
+    if (!this.stepChecker.checkStep("flopCheckCards")) {
+      //this.dealer.getChipsFromPlayers();
+      this.checkPrizes(thisSocket);
       return;
     }
 

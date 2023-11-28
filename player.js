@@ -1,3 +1,5 @@
+const PokerCore = require("./pokerCore");
+
 class Player {
   constructor(gameId, name, chips, cards, id) {
     this.name = name;
@@ -9,10 +11,20 @@ class Player {
   }
 
   currentBet = 0;
+  currentPrize = {};
 
   setCard = (card) => {
     this.cards.push(card);
   };
+
+  setCurrentPrize = (prize) => {
+    this.currentPrize = prize;
+  };
+
+  getCurrentPrize = () => {
+    return this.currentPrize 
+  };
+
 
   getCards = () => {
     return this.cards;
@@ -49,6 +61,12 @@ class Player {
   //5555
   giveChipsToDealer = () => {
     this.currentBet = 0;
+  };
+
+  checkPrize = (dealerCards) => {
+    if (!dealerCards) return;
+    const myHand = PokerCore.betterHand(dealerCards, this.cards);
+    return myHand;
   };
 
   setBet(chipsToBet) {

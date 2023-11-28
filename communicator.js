@@ -45,7 +45,8 @@ class Communicator {
       data,
       stepChecker: this.stepChecker.getChecker(),
       players: this.censoredPlayersInfo(players),
-      dealerCards:this.dealer.getDealerCards()
+      dealerCards:this.dealer.getDealerCards(),
+    //  currentPrize:this.player.getCurrentPrize()
     };
 
     ///For OsoLog
@@ -56,7 +57,8 @@ class Communicator {
       data,
       stepChecker: this.stepChecker.getChecker(),
       players: players,
-      dealerCards:this.dealer.getDealerCards()
+      dealerCards:this.dealer.getDealerCards(),
+     // currentPrize:this.player.getCurrentPrize()
     };
   }
 
