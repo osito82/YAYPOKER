@@ -7,18 +7,29 @@ class StepChecker {
     startGame: false,
     pause: false,
     blindsBetting: false,
-    firstBetting: false,
-    dealerFlop: false,
-    flopCheckCards:false, //first check then bet
-    flopBetting: false,
-
-    turnBetting: false,
-    riverBetting: false,
-    finalBetting: false,
-
     dealtPrivateCards: false,
 
-    fakeEnd:true
+    firstBetting: false,
+
+    dealerFlop: false,
+    flopCheckCards: false, //first check then bet
+    flopBetting: false,
+
+    //dealerTurn:false
+    //turnCheckCards:false,
+    //turnBetting: false,
+
+    //dealerRiver:false
+    //riverCheckCards:false,
+    //riverBetting: false,
+
+    //dealerFinal:false
+    //finalCheckCards:false,
+
+    //select Champion
+
+
+    //fakeEnd:true
   };
 
   constructor(gameId) {

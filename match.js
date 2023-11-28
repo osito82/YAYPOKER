@@ -237,14 +237,15 @@ class Match {
     let dataMsg;
 
     if (bettingFor == "blindsBetting") {
-      if (this.dealer.hasPlayerBet(1) && this.dealer.hasPlayerBet(2)) {
+      if (
+        this.dealer.hasPlayerBetByNumber(1) &&
+        this.dealer.hasPlayerBetByNumber(2)
+      ) {
         this.stepChecker.grantStep("blindsBetting");
         this.continue(thisSocket);
       } else {
         for (let i = 0; i < 2; i++) {
-          console.log(i, "------");
-
-          if (!this.dealer.hasPlayerBet(i + 1)) {
+          if (!this.dealer.hasPlayerBetByNumber(i + 1)) {
             let thisPlayer = this.dealer.getPlayerByNumber(i + 1);
             dataMsg = {
               method: `askForBets - ${bettingFor}`,
@@ -255,8 +256,24 @@ class Match {
           }
         }
       }
+    } else if (bettingFor !== "blindsBetting") {
+      dataMsg = {
+        method: `askForBets - ${bettingFor}`,
+        msg: "Please make your bet",
+      };
+    } else {
+      this.continue(thisSocket);
+    }
 
-      this.players.forEach((player) => {
+    if (this.dealer.hasAllPlayersBet() && bettingFor == "firstBetting") {
+      this.continue(thisSocket);
+    }
+    if (this.dealer.hasAllPlayersBet() && bettingFor == "flopBetting") {
+      this.continue(thisSocket);
+    }
+
+    this.players.forEach((player) => {
+      if (this.dealer.hasPlayerBet(player)) {
         this.communicator.msgBuilder(
           `askForBets - ${bettingFor}`,
           "public",
@@ -265,10 +282,12 @@ class Match {
         );
 
         this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
-      });
-    } else {
-      this.continue(thisSocket);
-    }
+
+        this.log
+          .Template({ name: "brakets", date: true, title: "setBet" })
+          .R(this.communicator.getFullInfo());
+      }
+    });
   }
 
   playerLeave(thisSocket) {
@@ -529,6 +548,7 @@ class Match {
 
     ///firstBetting
     if (!this.stepChecker.checkStep("firstBetting")) {
+      this.askForBets(thisSocket, "firstBetting");
       this.bettingCore(thisSocket, "firstBetting");
       return;
     }
@@ -548,6 +568,7 @@ class Match {
 
     ///flopBetting
     if (!this.stepChecker.checkStep("flopBetting")) {
+      this.askForBets(thisSocket, "flopBetting");
       this.bettingCore(thisSocket, "flopBetting");
       return;
     }

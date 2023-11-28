@@ -53,7 +53,6 @@ class Dealer {
     return this.cardsDealer;
   }
 
-  //gift card to Dealer
   setCard(card) {
     this.cardsDealer.push(card);
   }
@@ -82,7 +81,7 @@ class Dealer {
     }
   }
 
-  hasPlayerBet(playerNUmber) {
+  hasPlayerBetByNumber(playerNUmber) {
     const playerToCheck = this.getPlayerByNumber(playerNUmber);
     if (playerToCheck) {
       return playerToCheck.getCurrentBet() !== 0;
@@ -90,6 +89,24 @@ class Dealer {
       return false;
     }
   }
+
+  hasPlayerBet(player) {
+    if (player) {
+      return player.getCurrentBet() !== 0;
+    } else {
+      return false;
+    }
+  }
+
+  hasAllPlayersBet = () => {
+    return this.players.forEach((player) => {
+      if (Number(player.getCurrentBet()) === 0) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+  };
 
   talkToPLayerById(idNumber, targetMessage) {
     try {
@@ -106,7 +123,7 @@ class Dealer {
     }
   }
 
-  //Sends Message to all player But not for One
+  ///Sends Message to all player But not for One
   talkToPlayerBUTid(idToOmitNumber, targetMessage) {
     try {
       this.players.forEach((player) => {
@@ -117,12 +134,6 @@ class Dealer {
         } else {
           return;
         }
-
-        //   const socket = Socket.getSocket(this.torneoId, id);
-
-        // if (socket) {
-        //   socket.socket.send(JSON.stringify({ message: targetMessage }));
-        // }
       });
     } catch (error) {
       console.log(error);
