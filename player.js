@@ -5,7 +5,6 @@ class Player {
     this.name = name;
     this.id = id;
     this.gameId = gameId;
-    this.viewCards = false;
     this.chips = chips;
     this.cards = cards;
   }
@@ -22,9 +21,8 @@ class Player {
   };
 
   getCurrentPrize = () => {
-    return this.currentPrize 
+    return this.currentPrize;
   };
-
 
   getCards = () => {
     return this.cards;
@@ -32,10 +30,6 @@ class Player {
 
   countCards = () => {
     return this.cards.length;
-  };
-
-  viewCards = () => {
-    return (this.viewCards = true);
   };
 
   getPlayer(playersArray, playerId) {
@@ -58,7 +52,6 @@ class Player {
     return this.currentBet;
   };
 
-  //5555
   giveChipsToDealer = () => {
     this.currentBet = 0;
   };

@@ -11,7 +11,6 @@ class Dealer {
   }
 
   pot = 0;
-  // cards = [];
 
   setPot(chipsToBet) {
     this.pot = this.pot + chipsToBet;
@@ -21,11 +20,9 @@ class Dealer {
     return this.pot;
   }
 
-  //5555
   getChipsFromPlayers = () => {
     console.log("DEALER - getChipsFromPlayers");
     this.players.forEach((player) => player.giveChipsToDealer());
-    //this.currentBet = 0
   };
 
   dealCardsEachPlayer(numberOfCards = 1) {
@@ -61,13 +58,6 @@ class Dealer {
     this.cardsDealer.push(card);
   }
 
-  // dealCards() {
-  //   const burnedCard = this.deck.shift();
-  //   this.deck.push(burnedCard);
-
-  //   this.dealCardsEachPlayer(2);
-  // }
-
   hasMinimunPlayers() {
     return this.players.length >= 2;
   }
@@ -79,7 +69,6 @@ class Dealer {
     if (foundPlayer) {
       return foundPlayer;
     } else {
-      //   console.log("Jugador no encontrado");
       return null;
     }
   }

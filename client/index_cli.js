@@ -149,11 +149,11 @@ socket.addEventListener("open", (event) => {
 });
 
 socket.addEventListener("message", (event) => {
-  console.log('---')
+  console.log("")
   console.log(`FROM_SERVER: ${event.data}`);
 });
 
 socket.addEventListener("close", () => {
-  console.log('---')
+  console.log("")
   console.log("FROM_SERVER_CLOSED_CONECTION");
 });

@@ -115,8 +115,6 @@ class Match {
     const { id: thisSocketId } = thisSocket;
     console.log("MATCH - dealtPrivateCards");
     try {
-      //    const foundPlayer = this.dealer.getPlayerById(thisSocketId);
-
       this.dealer.dealCardsEachPlayer(2);
       this.stepChecker.grantStep("dealtPrivateCards");
 
@@ -137,7 +135,6 @@ class Match {
         .R(this.communicator.getFullInfo());
 
       this.continue(thisSocket);
-      //     }
     } catch (error) {
       console.error("Error in dealtPrivateCards:", error);
     }
@@ -160,7 +157,13 @@ class Match {
       if (aprovedBet) {
         this.dealer.setPot(chipsToBet);
 
-        this.communicator.msgBuilder("setBet", "public", foundPlayer, {});
+        this.communicator.msgBuilder("setBet", "public", foundPlayer, {
+          method: "setBet",
+          msg: "A bet has been set",
+          name: foundPlayer.name,
+          id: foundPlayer.id,
+          bet: foundPlayer.getCurrentBet(),
+        });
         this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
         this.log
           .Template({ name: "brakets", date: true, title: "setBet" })
@@ -337,7 +340,6 @@ class Match {
       this.dealer.talkToAllPlayersOnTable(
         `Player ${thisSocket.name} - ${thisSocket.id} didnt come back, lets continue`
       );
-      //this.startGame();
     }, 15000);
     this.continue(thisSocket);
   }
@@ -406,7 +408,6 @@ class Match {
     } catch (error) {
       console.log(error);
     }
-    //this.continue()
   }
 
   dealerFlop(thisSocket) {
@@ -430,24 +431,19 @@ class Match {
   }
 
   checkPrizes(thisSocket) {
-    //console.log(thisSssocket, 'thisSocket')
     console.log("MATCH - checkPrizes");
 
     const dealerCards = this.dealer.getDealerCards();
-    console.log(dealerCards);
 
     if (!dealerCards || dealerCards.length < 3) {
       return;
     }
 
     this.players.forEach((player) => {
-      //const foundPlayer = this.dealer.getPlayerById(thisSocket);
-      console.log(player, "playerplayerplayer");
       if (!player) return;
       const prize = player.checkPrize(dealerCards);
       player.setCurrentPrize(prize);
 
-      //for (const player of this.players) {
       this.communicator.msgBuilder("checkPrizes", "private", player, {
         method: "checkPrizes",
         msg: "Check your current max Prize",
@@ -458,10 +454,8 @@ class Match {
       this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
     });
 
-    // console.log(dealerCards.length, "dealerCards.length");
     if (dealerCards.length == 3) this.stepChecker.grantStep("flopCheckCards");
     this.continue(thisSocket);
-    //return prize
   }
 
   startGame(thisSocket = {}) {
@@ -524,14 +518,11 @@ class Match {
       return;
     }
 
-    ///checkPrizes -- this has to go in the last place
+    ///checkPrizes
     if (!this.stepChecker.checkStep("flopCheckCards")) {
-      //this.dealer.getChipsFromPlayers();
       this.checkPrizes(thisSocket);
       return;
     }
-
-    //log.add({ dealerCards: this.dealer.showCards() });
 
     this.stepChecker.grantStep("startGame");
   }

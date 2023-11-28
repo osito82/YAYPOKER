@@ -29,7 +29,6 @@ class Communicator {
   }
 
   msgBuilder(action, type, player, data) {
-   // const pot = this.pot;
     const players = this.players;
     let myPlayerInfo;
     if (type == "private") {
@@ -45,8 +44,8 @@ class Communicator {
       data,
       stepChecker: this.stepChecker.getChecker(),
       players: this.censoredPlayersInfo(players),
-      dealerCards:this.dealer.getDealerCards(),
-    //  currentPrize:this.player.getCurrentPrize()
+      dealerCards: this.dealer.getDealerCards(),
+      //  currentPrize:this.player.getCurrentPrize()
     };
 
     ///For OsoLog
@@ -57,8 +56,8 @@ class Communicator {
       data,
       stepChecker: this.stepChecker.getChecker(),
       players: players,
-      dealerCards:this.dealer.getDealerCards(),
-     // currentPrize:this.player.getCurrentPrize()
+      dealerCards: this.dealer.getDealerCards(),
+      // currentPrize:this.player.getCurrentPrize()
     };
   }
 
