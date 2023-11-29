@@ -11,15 +11,15 @@ class StepChecker {
 
     firstBetting: false,
 
-    dealerFlop: false,
+    flop_dealerHand: false,
     flopCheckCards: false, //first check then bet
     flopBetting: false,
 
-    //dealerTurn:false
+    //turn_dealerHand:false
     //turnCheckCards:false,
     //turnBetting: false,
 
-    //dealerRiver:false
+    //river_dealerHand:false
     //riverCheckCards:false,
     //riverBetting: false,
 
@@ -27,7 +27,6 @@ class StepChecker {
     //finalCheckCards:false,
 
     //select Champion
-
 
     //fakeEnd:true
   };

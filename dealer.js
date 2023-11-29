@@ -81,6 +81,9 @@ class Dealer {
     }
   }
 
+
+//hasBlinds
+
   hasPlayerBetByNumber(playerNUmber) {
     const playerToCheck = this.getPlayerByNumber(playerNUmber);
     if (playerToCheck) {

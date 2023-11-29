@@ -232,38 +232,65 @@ class Match {
     this.setBet(thisSocketId, chipsToBet, "setRise");
   }
 
-  askForBets(thisSocket, bettingFor) {
-    console.log("MATCH - askForBets" + " " + bettingFor);
-    let dataMsg;
+  askForBlindBets(thisSocket) {
+    console.log("MATCH - askForBlindBets");
 
-    if (bettingFor == "blindsBetting") {
-      if (
-        this.dealer.hasPlayerBetByNumber(1) &&
-        this.dealer.hasPlayerBetByNumber(2)
-      ) {
-        this.stepChecker.grantStep("blindsBetting");
-        this.continue(thisSocket);
-      } else {
-        for (let i = 0; i < 2; i++) {
-          if (!this.dealer.hasPlayerBetByNumber(i + 1)) {
-            let thisPlayer = this.dealer.getPlayerByNumber(i + 1);
-            dataMsg = {
-              method: `askForBets - ${bettingFor}`,
-              msg: "Please make your blind bet",
-              name: thisPlayer.name,
-              id: thisPlayer.id,
-            };
-          }
-        }
-      }
-    } else if (bettingFor !== "blindsBetting") {
-      dataMsg = {
-        method: `askForBets - ${bettingFor}`,
-        msg: "Please make your bet",
-      };
-    } else {
+    if (
+      this.dealer.hasPlayerBetByNumber(1) &&
+      this.dealer.hasPlayerBetByNumber(2)
+    ) {
+      this.stepChecker.grantStep("blindsBetting");
       this.continue(thisSocket);
+    } else {
+      ///blinds Ask for bet P1
+      if (!this.dealer.hasPlayerBetByNumber(1)) {
+        let thisPlayer = this.dealer.getPlayerByNumber(1);
+        const dataMsg = {
+          method: `askForBlindBets`,
+          msg: "Please make your Small Blind bet",
+          name: thisPlayer.name,
+          id: thisPlayer.id,
+        };
+
+        this.communicator.msgBuilder(
+          `askForBlindBets`,
+          "private",
+          thisPlayer,
+          dataMsg
+        );
+
+        this.dealer.talkToPLayerById(thisPlayer.id, this.communicator.getMsg());
+      }
+
+      ///blinds Ask for bet P2
+      if (!this.dealer.hasPlayerBetByNumber(2)) {
+        let thisPlayer = this.dealer.getPlayerByNumber(2);
+        const dataMsg = {
+          method: `askForBlindBets`,
+          msg: "Please make your Big Blind bet",
+          name: thisPlayer.name,
+          id: thisPlayer.id,
+        };
+
+        this.communicator.msgBuilder(
+          `askForBlindBets`,
+          "private",
+          thisPlayer,
+          dataMsg
+        );
+
+        this.dealer.talkToPLayerById(thisPlayer.id, this.communicator.getMsg());
+      }
     }
+  }
+
+  askForBets = (thisSocket, bettingFor) => {
+    console.log("MATCH - askForBets" + " " + bettingFor);
+
+    const dataMsg = {
+      method: `askForBets - ${bettingFor}`,
+      msg: "Please make your bet",
+    };
 
     if (this.dealer.hasAllPlayersBet() && bettingFor == "firstBetting") {
       this.continue(thisSocket);
@@ -288,7 +315,7 @@ class Match {
           .R(this.communicator.getFullInfo());
       }
     });
-  }
+  };
 
   playerLeave(thisSocket) {
     const { id: thisSocketId } = thisSocket;
@@ -451,21 +478,25 @@ class Match {
     }
   }
 
-  dealerFlop(thisSocket) {
-    console.log("MATCH - dealerFlop");
-    this.dealer.dealCardsDealer(3);
+  dealerHand(thisSocket, whatHand) {
+    console.log(`MATCH - dealerHand(${whatHand})`);
+    this.dealer.dealCardsDealer(whatHand);
 
-    this.stepChecker.grantStep("dealerFlop");
+    this.stepChecker.grantStep("flop_dealerHand");
 
     this.communicator.msgBuilder(
-      "dealerFlop",
+      `dealerHand(${whatHand})`,
       "public",
       { player: "dealer" },
       {}
     );
     this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
     this.log
-      .Template({ name: "brakets", date: true, title: "dealerFlop" })
+      .Template({
+        name: "brakets",
+        date: true,
+        title: `dealerHand(${whatHand})`,
+      })
       .R(this.communicator.getFullInfo());
 
     this.continue(thisSocket);
@@ -536,7 +567,7 @@ class Match {
 
     ///Blinds
     if (!this.stepChecker.checkStep("blindsBetting")) {
-      this.askForBets(thisSocket, "blindsBetting");
+      this.askForBlindBets(thisSocket);
       return;
     }
 
@@ -553,10 +584,10 @@ class Match {
       return;
     }
 
-    ///dealerFlop
-    if (!this.stepChecker.checkStep("dealerFlop")) {
+    ///flop_dealerHand
+    if (!this.stepChecker.checkStep("flop_dealerHand")) {
       this.dealer.getChipsFromPlayers();
-      this.dealerFlop(thisSocket);
+      this.dealerHand(thisSocket, 3);
       return;
     }
 
