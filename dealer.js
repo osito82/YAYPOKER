@@ -25,7 +25,7 @@ class Dealer {
     this.players.forEach((player) => player.giveChipsToDealer());
   };
 
-  dealCardsEachPlayer(numberOfCards = 1) {
+  dealCardsEachPlayer = (numberOfCards = 1) => {
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
         if (player.countCards() == 2) return;
@@ -38,7 +38,7 @@ class Dealer {
         }
       });
     }
-  }
+  };
 
   dealCardsDealer(numberOfCards = 1) {
     for (let i = 0; i < numberOfCards; i++) {
@@ -81,17 +81,13 @@ class Dealer {
     }
   }
 
-
-//hasBlinds
-
-  hasPlayerBetByNumber(playerNUmber) {
+  hasPlayerBetByNumber = (playerNUmber) => {
     const playerToCheck = this.getPlayerByNumber(playerNUmber);
     if (playerToCheck) {
-      return playerToCheck.getCurrentBet() !== 0;
-    } else {
-      return false;
+      if (playerToCheck.getCurrentBet() == 0) return false;
+      return true;
     }
-  }
+  };
 
   hasPlayerBet(player) {
     if (player) {
@@ -102,13 +98,11 @@ class Dealer {
   }
 
   hasAllPlayersBet = () => {
-    return this.players.forEach((player) => {
-      if (Number(player.getCurrentBet()) === 0) {
-        return false;
-      } else {
-        return true;
-      }
+    const res = this.players.every((player) => {
+      return Number(player.getCurrentBet()) !== 0;
     });
+
+    return res;
   };
 
   talkToPLayerById(idNumber, targetMessage) {

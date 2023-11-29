@@ -110,7 +110,6 @@ class Match {
   }
 
   dealtPrivateCards(thisSocket) {
-    const { id: thisSocketId } = thisSocket;
     console.log("MATCH - dealtPrivateCards");
     try {
       this.dealer.dealCardsEachPlayer(2);
@@ -204,6 +203,7 @@ class Match {
           .R(this.communicator.getFullInfo());
       } else {
         console.log("todo - rise was not possible");
+        return;
       }
     }
 
@@ -293,10 +293,13 @@ class Match {
     };
 
     if (this.dealer.hasAllPlayersBet() && bettingFor == "firstBetting") {
-      this.continue(thisSocket);
+      return;
     }
     if (this.dealer.hasAllPlayersBet() && bettingFor == "flopBetting") {
-      this.continue(thisSocket);
+      return;
+    }
+    if (this.dealer.hasAllPlayersBet() && bettingFor == "turnBetting") {
+      return;
     }
 
     this.players.forEach((player) => {
@@ -309,10 +312,6 @@ class Match {
         );
 
         this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
-
-        this.log
-          .Template({ name: "brakets", date: true, title: "setBet" })
-          .R(this.communicator.getFullInfo());
       }
     });
   };
@@ -408,94 +407,119 @@ class Match {
 
   bettingCore(thisSocket, bettingFor) {
     console.log("MATCH - bettingCore" + " " + bettingFor);
-    try {
-      const maxBet = Math.max(
-        ...this.players.map((player) => player.getCurrentBet())
-      );
-      const currentBets = this.players.map((player) => player.getCurrentBet());
-      const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
 
-      if (!allBetsEqual) {
-        this.players.forEach((player) => {
-          const currentBet = player.getCurrentBet();
+    const maxBet = Math.max(
+      ...this.players.map((player) => player.getCurrentBet())
+    );
+    const currentBets = this.players.map((player) => player.getCurrentBet());
+    const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
 
-          if (currentBet != maxBet) {
-            this.communicator.msgBuilder("bettingCore", "private", player, {
-              messageForName: player.getPlayerName(),
-              messageForId: player.getPlayerId(),
-              action: ["call", "rise", "fold"],
-              currentBet: currentBet,
-              maxBet: maxBet,
-            });
-
-            this.dealer.talkToPLayerById(
-              player.getPlayerId(),
-              this.communicator.getMsg()
-            );
-
-            this.communicator.msgBuilder(
-              `bettingCore ${bettingFor}`,
-              "public",
-              player,
-              {
-                messageForName: player.getPlayerName(),
-                messageForId: player.getPlayerId(),
-                action: ["call", "rise", "fold", "check"],
-              }
-            );
-
-            this.dealer.talkToPlayerBUTid(
-              player.getPlayerId(),
-              this.communicator.getMsg()
-            );
-
-            this.log
-              .Template({ name: "brakets", date: true, title: "bettingCore" })
-              .R(this.communicator.getFullInfo());
-          }
-        });
-
-        ///First Betting
-        if (bettingFor === "firstBetting") {
-          this.stepChecker.revokeStep("firstBetting");
-        }
-        ///Flop Betting
-        if (bettingFor === "flopBetting") {
-          this.stepChecker.revokeStep("flopBetting");
-        }
-      } else {
-        if (bettingFor === "firstBetting") {
-          this.stepChecker.grantStep("firstBetting");
-        }
-        if (bettingFor === "flopBetting") {
-          this.stepChecker.grantStep("flopBetting");
-        }
-
+    if (allBetsEqual) {
+      if (bettingFor === "firstBetting") {
+        this.stepChecker.grantStep("firstBetting");
         this.continue(thisSocket);
       }
-    } catch (error) {
-      console.log(error);
+      if (bettingFor === "flopBetting") {
+        this.stepChecker.grantStep("flopBetting");
+        this.continue(thisSocket);
+      }
+      if (bettingFor === "turnBetting") {
+        this.stepChecker.grantStep("turnBetting");
+        this.continue(thisSocket);
+      }
+    } else {
+      this.players.forEach((player) => {
+        const currentBet = player.getCurrentBet();
+
+        if (currentBet && currentBet != maxBet) {
+          this.communicator.msgBuilder("bettingCore", "private", player, {
+            messageForName: player.getPlayerName(),
+            messageForId: player.getPlayerId(),
+            action: ["call", "rise", "fold"],
+            currentBet: currentBet,
+            maxBet: maxBet,
+          });
+
+          this.dealer.talkToPLayerById(
+            player.getPlayerId(),
+            this.communicator.getMsg()
+          );
+
+          this.communicator.msgBuilder(
+            `bettingCore ${bettingFor}`,
+            "public",
+            player,
+            {
+              messageForName: player.getPlayerName(),
+              messageForId: player.getPlayerId(),
+              action: ["call", "rise", "fold", "check"],
+            }
+          );
+
+          this.dealer.talkToPlayerBUTid(
+            player.getPlayerId(),
+            this.communicator.getMsg()
+          );
+
+          this.log
+            .Template({ name: "brakets", date: true, title: "bettingCore" })
+            .R(this.communicator.getFullInfo());
+        }
+        return;
+      });
+
+      ///First Betting
+      if (bettingFor === "firstBetting") {
+        this.stepChecker.revokeStep("firstBetting");
+      }
+      ///Flop Betting
+      if (bettingFor === "flopBetting") {
+        this.stepChecker.revokeStep("flopBetting");
+      }
+      ///Turn Betting
+      if (bettingFor === "turnBetting") {
+        this.stepChecker.revokeStep("turnBetting");
+      }
     }
   }
 
   dealerHand(thisSocket, whatHand) {
-    console.log(`MATCH - dealerHand(${whatHand})`);
-    this.dealer.dealCardsDealer(whatHand);
+    console.log(`MATCH - dealerHand-${whatHand}`);
+    let numberOfCards;
 
-    this.stepChecker.grantStep("flop_dealerHand");
+    switch (whatHand) {
+      case "flop":
+        numberOfCards = 3;
+        break;
+      case "turn":
+      case "river":
+        numberOfCards = 1;
+    }
+
+    this.dealer.dealCardsDealer(numberOfCards);
+
+    switch (whatHand) {
+      case "flop":
+        this.stepChecker.grantStep("flop_dealerHand");
+        break;
+      case "turn":
+        this.stepChecker.grantStep("turn_dealerHand");
+      case "river":
+        this.stepChecker.grantStep("river_dealerHand");
+    }
 
     this.communicator.msgBuilder(
-      `dealerHand(${whatHand})`,
+      `dealerHand-${whatHand}`,
       "public",
       { player: "dealer" },
-      {}
+      { method: "dealerHand" }
     );
     this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
     this.log
       .Template({
         name: "brakets",
         date: true,
-        title: `dealerHand(${whatHand})`,
+        title: `dealerHand-${whatHand}`,
       })
       .R(this.communicator.getFullInfo());
 
@@ -527,6 +551,8 @@ class Match {
     });
 
     if (dealerCards.length == 3) this.stepChecker.grantStep("flopCheckCards");
+    if (dealerCards.length == 4) this.stepChecker.grantStep("turnCheckCards");
+    if (dealerCards.length == 5) this.stepChecker.grantStep("riverCheckCards");
     this.continue(thisSocket);
   }
 
@@ -587,7 +613,7 @@ class Match {
     ///flop_dealerHand
     if (!this.stepChecker.checkStep("flop_dealerHand")) {
       this.dealer.getChipsFromPlayers();
-      this.dealerHand(thisSocket, 3);
+      this.dealerHand(thisSocket, "flop");
       return;
     }
 
@@ -601,6 +627,26 @@ class Match {
     if (!this.stepChecker.checkStep("flopBetting")) {
       this.askForBets(thisSocket, "flopBetting");
       this.bettingCore(thisSocket, "flopBetting");
+      return;
+    }
+
+    ///turn_dealerHand
+    if (!this.stepChecker.checkStep("turn_dealerHand")) {
+      this.dealer.getChipsFromPlayers();
+      this.dealerHand(thisSocket, "turn");
+      return;
+    }
+
+    ///checkPrizes - Turn
+    if (!this.stepChecker.checkStep("turnCheckCards")) {
+      this.checkPrizes(thisSocket);
+      return;
+    }
+
+    ///turnBetting
+    if (!this.stepChecker.checkStep("turnBetting")) {
+      this.askForBets(thisSocket, "turnBetting");
+      this.bettingCore(thisSocket, "turnBetting");
       return;
     }
 

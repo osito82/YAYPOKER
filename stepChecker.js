@@ -9,15 +9,20 @@ class StepChecker {
     blindsBetting: false,
     dealtPrivateCards: false,
 
+
+
+
+    //error cuando entran valores iguales
+    //creo que el askfor cards se jode cuando entran todos valores iguales
     firstBetting: false,
 
     flop_dealerHand: false,
     flopCheckCards: false, //first check then bet
     flopBetting: false,
 
-    //turn_dealerHand:false
-    //turnCheckCards:false,
-    //turnBetting: false,
+    turn_dealerHand:false,
+    turnCheckCards:false,
+    turnBetting: false,
 
     //river_dealerHand:false
     //riverCheckCards:false,
@@ -46,8 +51,10 @@ class StepChecker {
   }
 
   grantStep(step) {
+    console.log(step)
     this.gameFlow[step] = true;
-    return this;
+    console.log(this.gameFlow[step])
+    return ;
   }
 
   revokeStep(step) {
