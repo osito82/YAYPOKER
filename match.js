@@ -18,6 +18,7 @@ class Match {
     this.gameId = gameId;
 
     this.players = [];
+
     this.playersFold = [];
     this.pot = 0;
     this.cardsDealer = [];
@@ -212,18 +213,26 @@ class Match {
 
   setCheck(thisSocket) {
     console.log("MATCH - setCheck");
-
+    this.dealer.setChecked(thisSocket.id);
     const foundPlayer = this.players.find(
       (myPlayer) => myPlayer.id == thisSocket.id
     );
 
     if (foundPlayer) {
-      this.communicator.msgBuilder("setCheck", "public", foundPlayer, {});
+      this.communicator.msgBuilder("setCheck", "public", foundPlayer, {
+        method: "setCheck",
+        msg: "Check!",
+        name: foundPlayer.name,
+        id: foundPlayer.id,
+        checkPlayers: this.dealer.getPlayersChecked(),
+      });
+
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
       this.log
         .Template({ name: "brakets", date: true, title: "setCheck" })
         .R(this.communicator.getFullInfo());
     }
+
     this.continue(thisSocket);
   }
 
@@ -285,14 +294,19 @@ class Match {
   }
 
   askForBets = (thisSocket, bettingFor) => {
-    //console.log(bettingFor, '--------------------------------------------askForBets 00021--')
     console.log("MATCH - askForBets-" + bettingFor);
 
-    //const allBetsAreZero = currentBets.every((bet) => bet === 0);
+    const currentBets = this.players.map((player) => player.getCurrentBet());
+    const allBetsAreZero = currentBets.every((bet) => bet === 0);
+
+    const bettingOptions = allBetsAreZero
+      ? ["bet", "fold", "check"]
+      : ["call", "rise", "fold"];
 
     const dataMsg = {
       method: `askForBets - ${bettingFor}`,
       msg: "Please make your bet",
+      action: bettingOptions,
     };
 
     if (this.dealer.hasAllPlayersBet() && bettingFor == "firstBetting") {
@@ -306,19 +320,7 @@ class Match {
     }
 
     this.players.forEach((player) => {
-
-console.log('************************************')
-console.log(bettingFor)
-console.log(player.name)
-console.log(player.currentBet, 'current bet')
-console.log(this.dealer.hasPlayerBet(player) )
-console.log(this.stepChecker.checkStep("flop_Dealer_Hand"))
-console.log('************************************')
-      if (
-        !this.dealer.hasPlayerBet(player) 
-        //&&
-       // this.stepChecker.checkStep("hasPlayerBet")
-      ) {
+      if (!this.dealer.hasPlayerBet(player)) {
         this.communicator.msgBuilder(
           `askForBets - ${bettingFor}`,
           "public",
@@ -422,28 +424,27 @@ console.log('************************************')
 
   bettingCore = (thisSocket, bettingFor) => {
     console.log("MATCH - bettingCore-" + bettingFor);
-
     const maxBet = Math.max(
       ...this.players.map((player) => player.getCurrentBet())
     );
     const currentBets = this.players.map((player) => player.getCurrentBet());
     const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
     const allBetsAreZero = currentBets.every((bet) => bet === 0);
-    console.log("---------------------");
-    console.log(bettingFor);
-    console.log(currentBets, "---------------------");
-    console.log(allBetsEqual, allBetsAreZero, "---------------------");
-    console.log("---------------------");
-    console.log(allBetsEqual && !allBetsAreZero);
 
-    if (allBetsEqual && !allBetsAreZero) {
-      console.log("yyyyyyyyyy");
+    const bettingOptions = allBetsAreZero
+      ? ["bet", "fold", "check"]
+      : ["call", "rise", "fold"];
+
+    if (
+      (allBetsEqual && !allBetsAreZero) ||
+      (this.dealer.allPlayersCheck() &&
+        this.stepChecker.checkStep("dealtPrivateCards"))
+    ) {
       if (bettingFor === "firstBetting") {
         this.stepChecker.grantStep("firstBetting");
         this.continue(thisSocket);
       }
       if (bettingFor === "flopBetting") {
-        //console.log("xxxxxxxxxxxxxx");
         this.stepChecker.grantStep("flop_Bet_Step");
         this.continue(thisSocket);
       }
@@ -451,12 +452,10 @@ console.log('************************************')
         this.stepChecker.grantStep("turn_Bet_Step");
         this.continue(thisSocket);
       }
+      this.dealer.removeChecks();
     } else {
       this.players.forEach((player) => {
         const currentBet = player.getCurrentBet();
-        console.log("xxxxxxxxxxxxxxxx111223331111");
-        console.log(currentBet, maxBet, player.name);
-        console.log(currentBet && currentBet != maxBet);
         if (currentBet && currentBet != maxBet) {
           this.communicator.msgBuilder(
             `bettingCore-${bettingFor}`,
@@ -465,7 +464,7 @@ console.log('************************************')
             {
               messageForName: player.getPlayerName(),
               messageForId: player.getPlayerId(),
-              action: ["call", "rise", "fold"],
+              action: bettingOptions,
               currentBet: currentBet,
               maxBet: maxBet,
             }
@@ -483,7 +482,7 @@ console.log('************************************')
             {
               messageForName: player.getPlayerName(),
               messageForId: player.getPlayerId(),
-              action: ["call", "rise", "fold", "check"],
+              action: bettingOptions,
             }
           );
 
@@ -585,7 +584,8 @@ console.log('************************************')
       this.stepChecker.grantStep("flop_Check_Prize_Step");
     if (dealerCards.length == 4)
       this.stepChecker.grantStep("turn_Check_Prize_Step");
-    if (dealerCards.length == 5) this.stepChecker.grantStep("river_Check_Prize_Step");
+    if (dealerCards.length == 5)
+      this.stepChecker.grantStep("river_Check_Prize_Step");
     this.continue(thisSocket);
   }
 
@@ -656,7 +656,6 @@ console.log('************************************')
       return;
     }
 
-    //aqui nos quedamos no se marca
     ///flopBetting
     if (!this.stepChecker.checkStep("flop_Bet_Step")) {
       this.askForBets(thisSocket, "flopBetting");

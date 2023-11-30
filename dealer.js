@@ -11,6 +11,26 @@ class Dealer {
   }
 
   pot = 0;
+  playersChecked = [];
+
+  allPlayersCheck = () => {
+    return this.players.every((player) =>
+      this.playersChecked.includes(player.id)
+    );
+  };
+
+  getPlayersChecked = () => {
+    return this.playersChecked;
+  };
+
+  removeChecks = () => {
+    console.log("removeChecks");
+    this.playersChecked = [];
+  };
+
+  setChecked = (thisSocketId) => {
+    this.playersChecked.push(thisSocketId);
+  };
 
   setPot(chipsToBet) {
     this.pot = this.pot + chipsToBet;

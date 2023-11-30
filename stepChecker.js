@@ -42,9 +42,7 @@ class StepChecker {
   }
 
   grantStep(step) {
-    //console.log(step)
     this.gameFlow[step] = true;
-    //console.log
     return this;
   }
 
@@ -56,22 +54,6 @@ class StepChecker {
   reset() {
     this.gameFlow = { ...this.gameFlowOriginal };
   }
-
-  // isAllowedTo(step) {
-  //   switch (step) {
-  //     // case "bigBlind":
-  //     // case "smallBlind":
-  //     // case "blinds":
-  //     //   return this.checkStep("signUp");
-
-  //     case "dealtPrivateCards":
-  //       return (
-  //         this.checkStep("signUp") &&
-  //         this.checkStep("smallBlind") &&
-  //         this.checkStep("bigBlind")
-  //       );
-  //   }
-  // }
 }
 
 module.exports = StepChecker;
