@@ -211,7 +211,7 @@ class Match {
     this.continue(thisSocket);
   }
 
-  setCheck(thisSocket) {
+  setCheck = (thisSocket) => {
     console.log("MATCH - setCheck");
     this.dealer.setChecked(thisSocket.id);
     const foundPlayer = this.players.find(
@@ -234,7 +234,7 @@ class Match {
     }
 
     this.continue(thisSocket);
-  }
+  };
 
   setRise(thisSocketId, chipsToBet) {
     console.log("MATCH - setRise");
@@ -316,6 +316,9 @@ class Match {
       return;
     }
     if (this.dealer.hasAllPlayersBet() && bettingFor == "turnBetting") {
+      return;
+    }
+    if (this.dealer.hasAllPlayersBet() && bettingFor == "riverBetting") {
       return;
     }
 
@@ -452,6 +455,10 @@ class Match {
         this.stepChecker.grantStep("turn_Bet_Step");
         this.continue(thisSocket);
       }
+      if (bettingFor === "riverBetting") {
+        this.stepChecker.grantStep("river_Bet_Step");
+        this.continue(thisSocket);
+      }
       this.dealer.removeChecks();
     } else {
       this.players.forEach((player) => {
@@ -510,6 +517,10 @@ class Match {
       if (bettingFor === "turnBetting") {
         this.stepChecker.revokeStep("turn_Bet_Step");
       }
+      ///River Betting
+      if (bettingFor === "riverBetting") {
+        this.stepChecker.revokeStep("river_Bet_Step");
+      }
     }
   };
 
@@ -534,8 +545,10 @@ class Match {
         break;
       case "turn":
         this.stepChecker.grantStep("turn_Dealer_Hand");
+        break;
       case "river":
         this.stepChecker.grantStep("river_Dealer_Hand");
+        break;
     }
 
     this.communicator.msgBuilder(
@@ -586,6 +599,7 @@ class Match {
       this.stepChecker.grantStep("turn_Check_Prize_Step");
     if (dealerCards.length == 5)
       this.stepChecker.grantStep("river_Check_Prize_Step");
+
     this.continue(thisSocket);
   }
 
@@ -670,7 +684,7 @@ class Match {
       return;
     }
 
-    ///checkPrizes - Turn
+    ///turn_Check_Prize_Step
     if (!this.stepChecker.checkStep("turn_Check_Prize_Step")) {
       this.checkPrizes(thisSocket);
       return;
@@ -680,6 +694,26 @@ class Match {
     if (!this.stepChecker.checkStep("turn_Bet_Step")) {
       this.askForBets(thisSocket, "turnBetting");
       this.bettingCore(thisSocket, "turnBetting");
+      return;
+    }
+
+    //river_Dealer_Hand
+    if (!this.stepChecker.checkStep("river_Dealer_Hand")) {
+      this.dealer.getChipsFromPlayers();
+      this.dealerHand(thisSocket, "river");
+      return;
+    }
+
+    ///river_Check_Prize_Step
+    if (!this.stepChecker.checkStep("river_Check_Prize_Step")) {
+      this.checkPrizes(thisSocket);
+      return;
+    }
+
+    ///river_Bet_Step
+    if (!this.stepChecker.checkStep("river_Bet_Step")) {
+      this.askForBets(thisSocket, "riverBetting");
+      this.bettingCore(thisSocket, "riverBetting");
       return;
     }
 
