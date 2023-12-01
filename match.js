@@ -443,6 +443,8 @@ class Match {
       (this.dealer.allPlayersCheck() &&
         this.stepChecker.checkStep("dealtPrivateCards"))
     ) {
+      this.dealer.removeChecks();
+
       if (bettingFor === "firstBetting") {
         this.stepChecker.grantStep("firstBetting");
         this.continue(thisSocket);
@@ -459,7 +461,6 @@ class Match {
         this.stepChecker.grantStep("river_Bet_Step");
         this.continue(thisSocket);
       }
-      this.dealer.removeChecks();
     } else {
       this.players.forEach((player) => {
         const currentBet = player.getCurrentBet();
@@ -524,7 +525,7 @@ class Match {
     }
   };
 
-  dealerHand(thisSocket, whatHand) {
+  dealerHand = (thisSocket, whatHand) => {
     console.log(`MATCH - dealerHand-${whatHand}`);
     let numberOfCards;
 
@@ -535,6 +536,7 @@ class Match {
       case "turn":
       case "river":
         numberOfCards = 1;
+        break;
     }
 
     this.dealer.dealCardsDealer(numberOfCards);
@@ -567,7 +569,7 @@ class Match {
       .R(this.communicator.getFullInfo());
 
     this.continue(thisSocket);
-  }
+  };
 
   checkPrizes(thisSocket) {
     console.log("MATCH - checkPrizes");
@@ -664,13 +666,13 @@ class Match {
       return;
     }
 
-    ///checkPrizes - Flop
+    ///flop_Check_Prize_Step
     if (!this.stepChecker.checkStep("flop_Check_Prize_Step")) {
       this.checkPrizes(thisSocket);
       return;
     }
 
-    ///flopBetting
+    ///flop_Bet_Step
     if (!this.stepChecker.checkStep("flop_Bet_Step")) {
       this.askForBets(thisSocket, "flopBetting");
       this.bettingCore(thisSocket, "flopBetting");
