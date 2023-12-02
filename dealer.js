@@ -12,6 +12,23 @@ class Dealer {
 
   pot = 0;
   playersChecked = [];
+  finalHards = [];
+
+  setFinalHands = () => {
+    console.log("DEALER - setFinalHands");
+    this.players.forEach((player) => {
+      this.finalHards.push({
+        name: player.name,
+        id: player.id,
+        currentPrize: player.currentPrize,
+      });
+    });
+    console.log(this.finalHards, "finalHards");
+  };
+
+  getFinalHands = () => {
+    return this.finalHards;
+  };
 
   allPlayersCheck = () => {
     return this.players.every((player) =>

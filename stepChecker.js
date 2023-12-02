@@ -25,9 +25,10 @@ class StepChecker {
     river_Bet_Step: false,
 
 
+    finalHands:false
     //showdown
 
-    
+
     //dealerFinal:false
     //finalCheckCards:false,
   };

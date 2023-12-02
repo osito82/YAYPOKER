@@ -719,6 +719,16 @@ class Match {
       return;
     }
 
+    ///finalHands
+    if (!this.stepChecker.checkStep("finalHands")) {
+      this.dealer.setFinalHands()
+      console.log(this.dealer.getFinalHands())
+    //  this.askForBets(thisSocket, "riverBetting");
+    //  this.bettingCore(thisSocket, "riverBetting");
+      return;
+    }
+
+
     this.stepChecker.grantStep("startGame");
   }
 

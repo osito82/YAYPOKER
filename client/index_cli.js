@@ -62,6 +62,7 @@ socket.addEventListener("open", (event) => {
 
       case "check":
       case "ck":
+        case "kk":
         sendCommand(mockTest["setCheck"]);
         break;
 

@@ -40,6 +40,7 @@ detectPairs = (cartas) => {
   if (parejas.length === 1) {
     return {
       pokerHand: "pairs",
+      prizeRank: 9,
       show: parejas,
       cards: cartas,
     };
@@ -65,6 +66,7 @@ detectTwoPairs = (cartas) => {
   if (parejas.length === 2) {
     return {
       pokerHand: "twoPairs",
+      prizeRank: 8,
       show: parejas,
       cards: cartas,
     };
@@ -81,6 +83,7 @@ const detectStraightFlush = (cartas) => {
   if (isStraight && isFlush && !isRoyalFlush) {
     return {
       pokerHand: "straightFlush",
+      prizeRank: 2,
       show: cartas,
       cards: cartas,
     };
@@ -100,6 +103,7 @@ const detectFlush = (cartas) => {
   if (flusha.size === 1) {
     return {
       pokerHand: "flush",
+      prizeRank: 5,
       show: cartas,
       cards: cartas,
     };
@@ -141,6 +145,7 @@ function detectRoyalFlush(cartas) {
   if (Number(sumValues) == 60 && isFlush) {
     return {
       pokerHand: "royalFlush",
+      prizeRank: 1,
       show: cartas,
       cards: cartas,
     };
@@ -183,6 +188,7 @@ function detectStraight(cartas) {
   if (isArrayOrderedAndConsecutive(numerosOrdenados)) {
     result = {
       pokerHand: "straight",
+      prizeRank: 6,
       show: cartas,
       cards: cartas,
     };
@@ -238,6 +244,7 @@ detectHighCard = (cartas) => {
     if (miniArray[0].toString() === numberToCard(bigestNumber).toString()) {
       return {
         pokerHand: "highCard",
+        prizeRank: 10,
         show: carta,
         cards: cartas,
       };
@@ -255,6 +262,7 @@ function detectFullHouse(cartas) {
   if (isThreeSome && isPairs) {
     return {
       pokerHand: "fullHouse",
+      prizeRank: 4,
       show: cartas,
       cards: cartas,
     };
@@ -280,6 +288,7 @@ detectThreesome = (cartas) => {
   if (trio.length === 3) {
     return {
       pokerHand: "threeOfAKind",
+      prizeRank: 7,
       show: trio,
       cards: cartas,
     };
@@ -306,6 +315,7 @@ detectFourOfaKind = (cartas) => {
   if (fouroak.length === 4) {
     return {
       pokerHand: "fourOfaKind",
+      prizeRank: 3,
       show: fouroak,
       cards: cartas,
     };
@@ -313,6 +323,8 @@ detectFourOfaKind = (cartas) => {
     return false;
   }
 };
+
+
 
 class PokerCore {
   constructor() {}
@@ -387,22 +399,14 @@ class PokerCore {
         return;
       }
 
-      ////////////
-
-      //tempHand
-      //console.log(detectStraightFlush(array), "detectStraightFlush");
-      // console.log(detectPairs(array));
-      // console.log(detectThreesome(array));
-      // console.log(detectFourOfaKind(array));
-      // console.log(detectFlush(array));
-      //  console.log(detectStraight(array));
-
-      //      console.log(detectRoyalFlush(array));
     });
 
-    //  return combinationsArray;
+    
     return hand;
   }
+
+
+
 }
 
 module.exports = PokerCore;
