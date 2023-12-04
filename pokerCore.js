@@ -1,4 +1,6 @@
-//get all posible combinations from cards
+const { cardsToNumericValues, numberToCard } = require("./utils");
+
+///get all posible combinations from cards
 function combinar(arr, k) {
   const result = [];
   function combinatoria(temp, start) {
@@ -41,7 +43,7 @@ detectPairs = (cartas) => {
     return {
       pokerHand: "pairs",
       prizeRank: 9,
-      show: parejas,
+      show: parejas[0],
       cards: cartas,
     };
   } else {
@@ -118,24 +120,7 @@ function sumAllValuesArray(array) {
 }
 
 function detectRoyalFlush(cartas) {
-  const realValues = cartas.map((carta) => {
-    const valor = carta.substring(0, carta.length - 1);
-
-    switch (valor) {
-      case "T":
-        return 10;
-      case "J":
-        return 11;
-      case "Q":
-        return 12;
-      case "K":
-        return 13;
-      case "A":
-        return 14;
-      default:
-        return 0;
-    }
-  });
+  const realValues = cardsToNumericValues(cartas);
 
   let isFlush = true;
   const sumValues = sumAllValuesArray(realValues);
@@ -162,28 +147,9 @@ function isArrayOrderedAndConsecutive(arr) {
 }
 
 function detectStraight(cartas) {
-  const realValues = cartas.map((carta) => {
-    const valor = carta.substring(0, carta.length - 1);
-
-    switch (valor) {
-      case "T":
-        return 10;
-      case "J":
-        return 11;
-      case "Q":
-        return 12;
-      case "K":
-        return 13;
-      case "A":
-        return 14;
-      default:
-        return parseInt(valor, 10);
-    }
-  });
+  const realValues = cardsToNumericValues(cartas);
 
   const numerosOrdenados = realValues.slice().sort((a, b) => a - b);
-
-  let memo = [1, 2, 3, 4, 5];
 
   if (isArrayOrderedAndConsecutive(numerosOrdenados)) {
     result = {
@@ -200,43 +166,8 @@ function detectStraight(cartas) {
 }
 
 detectHighCard = (cartas) => {
-  const realValues = cartas.map((carta) => {
-    const valor = carta.substring(0, carta.length - 1);
-
-    switch (valor) {
-      case "T":
-        return 10;
-      case "J":
-        return 11;
-      case "Q":
-        return 12;
-      case "K":
-        return 13;
-      case "A":
-        return 14;
-      default:
-        return parseInt(valor, 10);
-    }
-  });
-
+  const realValues = cardsToNumericValues(cartas);
   const bigestNumber = Math.max(...realValues);
-
-  let numberToCard = (bigestNumber) => {
-    switch (bigestNumber) {
-      case 10:
-        return "T";
-      case 11:
-        return "J";
-      case 12:
-        return "Q";
-      case 13:
-        return "K";
-      case 14:
-        return "A";
-      default:
-        return bigestNumber.toString();
-    }
-  };
 
   for (const carta of cartas) {
     const miniArray = carta.split("");
@@ -324,8 +255,6 @@ detectFourOfaKind = (cartas) => {
   }
 };
 
-
-
 class PokerCore {
   constructor() {}
 
@@ -398,15 +327,10 @@ class PokerCore {
         hand = tempHand;
         return;
       }
-
     });
 
-    
     return hand;
   }
-
-
-
 }
 
 module.exports = PokerCore;

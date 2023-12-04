@@ -15,12 +15,16 @@ class Dealer {
   finalHards = [];
 
   setFinalHands = () => {
+    let currentPrize = {};
     console.log("DEALER - setFinalHands");
     this.players.forEach((player) => {
+      currentPrize = player.getCurrentPrize();
+      currentPrize.name = player.name;
+      currentPrize.playerId = player.id;
+      currentPrize.gameId = player.gameId;
+
       this.finalHards.push({
-        name: player.name,
-        id: player.id,
-        currentPrize: player.currentPrize,
+        ...currentPrize,
       });
     });
     console.log(this.finalHards, "finalHards");
