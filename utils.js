@@ -23,7 +23,7 @@ function generateUniqueId() {
   return shortUUID;
 }
 
-const cardsToNumericValues = (cartas) => {
+const cardsToSingleNumValsArray = (cartas) => {
   const realValues = cartas.map((carta) => {
     const valor = carta.substring(0, carta.length - 1);
 
@@ -43,6 +43,10 @@ const cardsToNumericValues = (cartas) => {
     }
   });
   return realValues;
+};
+
+const singleValsToSymbolsArray = (singleNumsArray) => {
+  return singleNumsArray.map((x) => numberToCard(x));
 };
 
 const numberToCard = (number) => {
@@ -67,17 +71,9 @@ function highestCardNumberFromArray(cartas) {
   return numberToCard(bigestNumber);
 }
 
-function arrayThatMatchesaCharachter(caracter, ...arrays) {
-  return (
-    arrays.find((array) =>
-      array.some((elemento) => elemento.includes(caracter))
-    ) || []
-  );
-}
-
 ///Remove all elemnets that has a copy in an array
 function notRepeatedInIntArray(array) {
-  let numbersArray = cardsToNumericValues(array);
+  let numbersArray = cardsToSingleNumValsArray(array);
   const uniqueArray = [...numbersArray].filter(
     (item) => numbersArray.indexOf(item) === numbersArray.lastIndexOf(item)
   );
@@ -115,11 +111,9 @@ function randomName() {
 const sumArrayNumbers = (array) =>
   array.reduce((suma, numero) => suma + numero, 0);
 
-//compares the singles N array VS complete AlfaNum
+///compares the singles N array VS complete AlfaNum
 const compareArraysNoOrder = (single, completeaN) => {
-  const complete = notRepeatedInIntArray(completeaN).map((x) =>
-    numberToCard(x)
-  );
+  const complete = singleValsToSymbolsArray(notRepeatedInIntArray(completeaN));
 
   if (single.length === 0 || complete.length === 0) {
     return false;
@@ -139,8 +133,8 @@ module.exports = {
   randomName,
   msgBuilder,
   notRepeatedInIntArray,
-  arrayThatMatchesaCharachter,
-  cardsToNumericValues,
+  cardsToSingleNumValsArray,
   numberToCard,
   sumArrayNumbers,
+  singleValsToSymbolsArray,
 };

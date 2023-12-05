@@ -3,8 +3,8 @@ const { flat } = require("radash");
 const {
   notRepeatedInIntArray,
   highestCardNumberFromArray,
-  cardsToNumericValues,
-  //arrayThatMatchesaCharachter,
+  cardsToSingleNumValsArray,
+  singleValsToSymbolsArray,
   numberToCard,
   compareArraysNoOrder,
   sumArrayNumbers,
@@ -32,11 +32,8 @@ function selectBestRankHands(arrayHands) {
 
 function betterPair(...pairs) {
   const allPairs = [...pairs];
-
   const flatAllPairs = flat(allPairs);
-
-  const numericArray = cardsToNumericValues(flatAllPairs);
-
+  const numericArray = cardsToSingleNumValsArray(flatAllPairs);
   return highestCardNumberFromArray(numericArray);
 }
 
@@ -52,7 +49,9 @@ function ArrayOutOfPairSingles(...arrays) {
     return suma2 - suma1;
   });
 
-  return arraysOrdenados[0].map((x) => numberToCard(x));
+  const highestSortedSingleNumArray = arraysOrdenados[0];
+
+  return singleValsToSymbolsArray(highestSortedSingleNumArray);
 }
 
 class WinnerCore {
@@ -76,7 +75,7 @@ class WinnerCore {
 
       let betterPairCard = betterPair(allPairsArray);
 
-      ///Has the best Pairs Array
+      ///Best Pairs Array
       const allPairsInfoArray =
         bestHands.filter((hand) => {
           return hand.show.some((item) => item.includes(betterPairCard));
@@ -92,17 +91,15 @@ class WinnerCore {
 
       const bestOutofPairSingles = ArrayOutOfPairSingles(...allCardsArray);
 
-      console.log(bestOutofPairSingles, "bestGameFromPairWinners");
-      console.log(allPairsInfoArray, "allPairsInfoArray");
+      //console.log(bestOutofPairSingles, "bestGameFromPairWinners");
+      //console.log(allPairsInfoArray, "allPairsInfoArray");
 
       const bestPairInfo = allPairsInfoArray.filter((info) =>
         compareArraysNoOrder(bestOutofPairSingles, info.cards)
       );
-
-      console.log(bestPairInfo, "wATCH");
+      return bestPairInfo;
     }
   }
 }
-
 
 module.exports = WinnerCore;

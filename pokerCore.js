@@ -1,4 +1,4 @@
-const { cardsToNumericValues, numberToCard } = require("./utils");
+const { cardsToSingleNumValsArray, numberToCard } = require("./utils");
 
 ///get all posible combinations from cards
 function combinar(arr, k) {
@@ -120,7 +120,7 @@ function sumAllValuesArray(array) {
 }
 
 function detectRoyalFlush(cartas) {
-  const realValues = cardsToNumericValues(cartas);
+  const realValues = cardsToSingleNumValsArray(cartas);
 
   let isFlush = true;
   const sumValues = sumAllValuesArray(realValues);
@@ -147,7 +147,7 @@ function isArrayOrderedAndConsecutive(arr) {
 }
 
 function detectStraight(cartas) {
-  const realValues = cardsToNumericValues(cartas);
+  const realValues = cardsToSingleNumValsArray(cartas);
 
   const numerosOrdenados = realValues.slice().sort((a, b) => a - b);
 
@@ -166,7 +166,7 @@ function detectStraight(cartas) {
 }
 
 detectHighCard = (cartas) => {
-  const realValues = cardsToNumericValues(cartas);
+  const realValues = cardsToSingleNumValsArray(cartas);
   const bigestNumber = Math.max(...realValues);
 
   for (const carta of cartas) {

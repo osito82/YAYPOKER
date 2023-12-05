@@ -2,7 +2,6 @@
 const {
   notRepeatedInIntArray,
   highestCardNumberFromArray,
-  arrayThatMatchesaCharachter,
 } = require("./utils");
 
 //const { shuffle } = require("./utils");
@@ -30,7 +29,7 @@ const HighCard = ["1h", "2s", "3h"];
 
 let bestHands = [];
 
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 1000; i++) {
   const deck = [...Deck.shuffleDeck(Deck.cards, 100)];
 
   const deal = (number, cardsPractice) => {
