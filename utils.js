@@ -58,7 +58,7 @@ const numberToCard = (number) => {
     case 14:
       return "A";
     default:
-      return Number(number);
+      return number.toString();
   }
 };
 
@@ -112,8 +112,28 @@ function randomName() {
   return nombreElegido + "-" + (Math.random() * 100).toFixed().toString();
 }
 
+const sumArrayNumbers = (array) =>
+  array.reduce((suma, numero) => suma + numero, 0);
+
+//compares the singles N array VS complete AlfaNum
+const compareArraysNoOrder = (single, completeaN) => {
+  const complete = notRepeatedInIntArray(completeaN).map((x) =>
+    numberToCard(x)
+  );
+
+  if (single.length === 0 || complete.length === 0) {
+    return false;
+  }
+
+  const sortedSingle = single.slice().sort();
+  const sortedComplete = complete.slice().sort();
+
+  return sortedSingle.every((value, index) => value === sortedComplete[index]);
+};
+
 module.exports = {
   shuffle,
+  compareArraysNoOrder,
   highestCardNumberFromArray,
   generateUniqueId,
   randomName,
@@ -122,4 +142,5 @@ module.exports = {
   arrayThatMatchesaCharachter,
   cardsToNumericValues,
   numberToCard,
+  sumArrayNumbers,
 };

@@ -30,7 +30,7 @@ const HighCard = ["1h", "2s", "3h"];
 
 let bestHands = [];
 
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < 50; i++) {
   const deck = [...Deck.shuffleDeck(Deck.cards, 100)];
 
   const deal = (number, cardsPractice) => {
@@ -42,10 +42,12 @@ for (let i = 0; i < 5; i++) {
 
   const resultado = PokerCore.betterHand(dealerCards, playerCards);
 
-  //if (resultado.pokerHand == "pairs") 
+  if (resultado.pokerHand == "pairs") 
   bestHands.push(resultado);
 }
 
 //console.dir(bestHands);
 
-console.log(WinnerCore.Winner(bestHands))
+console.log(
+  WinnerCore.Winner(bestHands)
+, '0000 0021  WinnerCore.Winner(bestHands)')
