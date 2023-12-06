@@ -22,10 +22,12 @@ function generateUniqueId() {
   const shortUUID = fullUUID.substr(0, 4).replace(/-/g, "");
   return shortUUID;
 }
-
 const cardsToSingleNumValsArray = (cartas) => {
+  //console.log(cartas, '123')
   const realValues = cartas.map((carta) => {
-    const valor = carta.substring(0, carta.length - 1);
+    const valor = carta.slice(0, -1);
+
+    // Handle "10" separately
 
     switch (valor) {
       case "T":
@@ -39,6 +41,7 @@ const cardsToSingleNumValsArray = (cartas) => {
       case "A":
         return 14;
       default:
+        // Convert string to number for other cases
         return parseInt(valor, 10);
     }
   });
@@ -69,6 +72,11 @@ const numberToCard = (number) => {
 function highestCardNumberFromArray(cartas) {
   const bigestNumber = Math.max(...cartas);
   return numberToCard(bigestNumber);
+}
+
+function uniqueElementsArray(arr) {
+  return arr.filter((item,
+      index) => arr.indexOf(item) === index);
 }
 
 ///Remove all elemnets that has a copy in an array
@@ -137,4 +145,5 @@ module.exports = {
   numberToCard,
   sumArrayNumbers,
   singleValsToSymbolsArray,
+  uniqueElementsArray
 };

@@ -29,7 +29,8 @@ const HighCard = ["1h", "2s", "3h"];
 
 let bestHands = [];
 
-for (let i = 0; i < 1000; i++) {
+
+for (let i = 0; i < 100; i++) {
   const deck = [...Deck.shuffleDeck(Deck.cards, 100)];
 
   const deal = (number, cardsPractice) => {
@@ -41,8 +42,13 @@ for (let i = 0; i < 1000; i++) {
 
   const resultado = PokerCore.betterHand(dealerCards, playerCards);
 
-  if (resultado.pokerHand == "pairs") 
+  // if (resultado.pokerHand == "pairs") 
+  // bestHands.push(resultado);
+
+
+  if (resultado.pokerHand == "twoPairs") 
   bestHands.push(resultado);
+  
 }
 
 //console.dir(bestHands);
