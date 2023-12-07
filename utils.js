@@ -22,6 +22,15 @@ function generateUniqueId() {
   const shortUUID = fullUUID.substr(0, 4).replace(/-/g, "");
   return shortUUID;
 }
+
+
+
+const cardsToNoSymbolValsArray = (cartas) => {
+  //console.log(cartas, '123')
+  return cartas.map(carta =>  carta.slice(0, -1))
+
+};
+
 const cardsToSingleNumValsArray = (cartas) => {
   //console.log(cartas, '123')
   const realValues = cartas.map((carta) => {
@@ -133,17 +142,27 @@ const compareArraysNoOrder = (single, completeaN) => {
   return sortedSingle.every((value, index) => value === sortedComplete[index]);
 };
 
+//creates a flatMap in an only numers array
+const flatToGetNUmbersArray = (singleNumbersArray) => {singleNumbersArray.flatMap(item => {
+  if (Array.isArray(item)) {
+    return item; // If it's an array, return its elements
+  } else {
+    return [item]; // If it's a single number, return it in an array
+  }
+});}
+
 module.exports = {
   shuffle,
   compareArraysNoOrder,
   highestCardNumberFromArray,
   generateUniqueId,
-  randomName,
+  randomName,flatToGetNUmbersArray,
   msgBuilder,
   notRepeatedInIntArray,
   cardsToSingleNumValsArray,
   numberToCard,
   sumArrayNumbers,
   singleValsToSymbolsArray,
-  uniqueElementsArray
+  uniqueElementsArray,
+  cardsToNoSymbolValsArray
 };

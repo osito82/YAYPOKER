@@ -5,9 +5,11 @@ const {
   highestCardNumberFromArray,
   cardsToSingleNumValsArray,
   singleValsToSymbolsArray,
-  numberToCard,
+  cardsToNoSymbolValsArray,
   uniqueElementsArray,
   compareArraysNoOrder,
+  numberToCard,
+  flatToGetNUmbersArray,
   sumArrayNumbers,
 } = require("./utils");
 
@@ -49,8 +51,6 @@ function betterTwoPairs(...pairs) {
     uniqueElementsArray(x).sort((a, b) => b - a)
   );
 
-  console.log(singles, "fourSingles");
-
   let izq = 0;
   let der = 0;
 
@@ -72,21 +72,12 @@ function betterTwoPairs(...pairs) {
 
   let maxPair = [izq, der];
 
-  console.log(maxPair, "maxPair");
   const fourSimbols = [
     ...singleValsToSymbolsArray(maxPair),
     ...singleValsToSymbolsArray(maxPair),
   ].sort();
 
-  //osito
-  console.log(fourSimbols, "fourSimbols");
-
-  //console.log(ArrayOutOfPairSingles(fourSingles))
-  //const allPairs = [...pairs];
-  //  const flatAllPairs = flat(allPairs);
-  //  console.log(allPairs, 'xxx')
-  //  const numericArray = cardsToSingleNumValsArray(flatAllPairs);
-  // return highestCardNumberFromArray(numericArray);
+  return fourSimbols;
 }
 
 function ArrayOutOfPairSingles(...arrays) {
@@ -163,24 +154,36 @@ class WinnerCore {
       });
 
       let betterTwoPairsCard = betterTwoPairs(allPairsArray);
-      let singlesNumArray = betterTwoPairsCard;
 
-      //console.log(betterTwoPairsCard, "singlesNumArxxxxxxxray");
-      /*
-        ///Best Pairs Array
-        const allPairsInfoArray =
-          bestHands.filter((hand) => {
-            return hand.show.some((item) => item.includes(betterPairCard));
-          }) || [];
-  
-        allPairsInfoArray.forEach((bestHand) => {
-          allCardsArray.push(bestHand.cards);
-        });
-  
-        if (allPairsInfoArray.length == 1) {
-          return allPairsInfoArray[0];
-        }
-    */
+      const allTwoPairsInfoArray =
+        bestHands.filter((hand) => {
+          const twoPairsFromHand = cardsToNoSymbolValsArray(hand.show.flat());
+          return (
+            twoPairsFromHand.sort().toString() ===
+            betterTwoPairsCard.sort().toString()
+          );
+        }) || [];
+
+      allTwoPairsInfoArray.forEach((bestHand) => {
+        allCardsArray.push(bestHand.cards);
+      });
+
+      if (allTwoPairsInfoArray.length == 1) {
+        return allTwoPairsInfoArray[0];
+      }
+
+      const bestOutofPairSingles = ArrayOutOfPairSingles(...allCardsArray);
+
+      const unTieBestGame = betterTwoPairsCard.concat(bestOutofPairSingles);
+
+      const allTwoPairsInfoArrayUnTie =
+        bestHands.filter((hand) => {
+          const myCards = cardsToNoSymbolValsArray(hand.cards.flat());
+
+          return myCards.sort().toString() === unTieBestGame.sort().toString();
+        }) || [];
+
+      return allTwoPairsInfoArrayUnTie;
     }
   }
 }
