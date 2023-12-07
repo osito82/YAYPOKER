@@ -25,10 +25,12 @@ const fullHouse = ["Ah", "As", "Qh"];
 const fullHouseD = ["Ks", "Td"];
 const HighCard = ["1h", "2s", "3h"];
 
+//let contadorFullHouse = 0;
 
 let bestHands = [];
 
-for (let i = 0; i < 50000; i++) {
+
+for (let i = 0; i < 1000000; i++) {
   const deck = [...Deck.shuffleDeck(Deck.cards, 100)];
 
   const deal = (number, cardsPractice) => {
@@ -40,12 +42,24 @@ for (let i = 0; i < 50000; i++) {
 
   const resultado = PokerCore.betterHand(dealerCards, playerCards);
 
-  if (resultado.pokerHand == "twoPairs") bestHands.push(resultado);
+  //  if (resultado.pokerHand == "pairs") 
+  //  bestHands.push(resultado);
+
+
+  // if (resultado.pokerHand == "twoPairs") 
+  // bestHands.push(resultado);
+  
+
+   if (resultado.pokerHand == "threeOfAKind") 
+   bestHands.push(resultado);
+
+//bestThreeKindArray
+
+  
 }
 
 //console.dir(bestHands);
 
 console.log(
-  WinnerCore.Winner(bestHands),
-  "0000 0021  WinnerCore.Winner(bestHands)"
-);
+  WinnerCore.Winner(bestHands)
+, '0000 0021  WinnerCore.Winner(bestHands)')

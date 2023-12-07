@@ -12,6 +12,7 @@ const {
   flatToGetNUmbersArray,
   sumArrayNumbers,
 } = require("./utils");
+const { max } = require("radash");
 
 function selectBestRankHands(arrayHands) {
   const arrayRanks = [];
@@ -38,6 +39,20 @@ function betterPair(...pairs) {
   const flatAllPairs = R.flat(allPairs);
   const numericArray = cardsToSingleNumValsArray(flatAllPairs);
   return highestCardNumberFromArray(numericArray);
+}
+
+function betterThreeOfAKind(cards) {
+  let bestThreeKind = [];
+  if (!cards) {
+    return [];
+  }
+
+  bestThreeKind = highestCardNumberFromArray(
+    cardsToSingleNumValsArray(cards.map((btk) => btk[0]))
+  );
+
+  const bestThreeKindArray = [bestThreeKind, bestThreeKind, bestThreeKind];
+  return bestThreeKindArray;
 }
 
 function betterTwoPairs(...pairs) {
@@ -80,6 +95,7 @@ function betterTwoPairs(...pairs) {
   return fourSimbols;
 }
 
+///Gets the Best Pair after moving out repeated
 function ArrayOutOfPairSingles(...arrays) {
   let arraysWithNoRepeated = arrays.map((array) =>
     notRepeatedInIntArray(array)
@@ -112,6 +128,7 @@ class WinnerCore {
     if (bestHands[0].pokerHand == "pairs") {
       let allPairsArray = [];
       let allCardsArray = [];
+
       bestHands.forEach((bestHand) => {
         allPairsArray.push(...bestHand.show);
       });
@@ -133,9 +150,6 @@ class WinnerCore {
       }
 
       const bestOutofPairSingles = ArrayOutOfPairSingles(...allCardsArray);
-
-      //console.log(bestOutofPairSingles, "bestGameFromPairWinners");
-      //console.log(allPairsInfoArray, "allPairsInfoArray");
 
       const bestPairInfo = allPairsInfoArray.filter((info) =>
         compareArraysNoOrder(bestOutofPairSingles, info.cards)
@@ -184,6 +198,55 @@ class WinnerCore {
         }) || [];
 
       return allTwoPairsInfoArrayUnTie;
+    }
+
+    //===========================================threeOfAKind
+    if (bestHands[0].pokerHand == "threeOfAKind") {
+      console.log("threeOfAKind");
+      let allThreeOfAKindArray = [];
+
+      bestHands.forEach((bestHand) => {
+        allThreeOfAKindArray.push(bestHand.show);
+      });
+
+      let betterThreeOfAKindCards = betterThreeOfAKind(allThreeOfAKindArray);
+
+      const allThreeOfAKindInfoArray =
+        bestHands.filter((hand) => {
+          const threeOfAKindFromHand = cardsToNoSymbolValsArray(
+            hand.show.flat()
+          );
+          return (
+            threeOfAKindFromHand.sort().toString() ===
+            betterThreeOfAKindCards.sort().toString()
+          );
+        }) || [];
+
+      allThreeOfAKindInfoArray.forEach((bestHand) => {
+        allThreeOfAKindArray.push(bestHand.cards);
+      });
+
+      if (allThreeOfAKindArray.length == 1) {
+        return allThreeOfAKindInfoArray[0];
+      }
+
+      const bestOutof3oAKSingles = ArrayOutOfPairSingles(
+        ...allThreeOfAKindArray
+      );
+
+      const unTieBest3oAKGame = bestOutof3oAKSingles.concat(
+        betterThreeOfAKindCards
+      );
+      const all3ofAKInfoArrayUnTie =
+        bestHands.filter((hand) => {
+          const myCards = cardsToNoSymbolValsArray(hand.cards.flat());
+
+          return (
+            myCards.sort().toString() === unTieBest3oAKGame.sort().toString()
+          );
+        }) || [];
+
+      return all3ofAKInfoArrayUnTie;
     }
   }
 }
