@@ -13,7 +13,6 @@ function shuffle(array) {
       array[currentIndex],
     ];
   }
-
   return array;
 }
 
@@ -23,12 +22,9 @@ function generateUniqueId() {
   return shortUUID;
 }
 
-
-
 const cardsToNoSymbolValsArray = (cartas) => {
   //console.log(cartas, '123')
-  return cartas.map(carta =>  carta.slice(0, -1))
-
+  return cartas.map((carta) => carta.slice(0, -1));
 };
 
 const cardsToSingleNumValsArray = (cartas) => {
@@ -78,14 +74,30 @@ const numberToCard = (number) => {
   }
 };
 
+function selectArrayWithBiggestNumbers(arrays) {
+  if (!arrays || arrays.length === 0) {
+    return null;
+  }
+
+  let arrayConMaxNumeros = arrays[0];
+  for (const currentArray of arrays) {
+    const sumaActual = currentArray.reduce((sum, num) => sum + num, 0);
+    const sumaMaxima = arrayConMaxNumeros.reduce((sum, num) => sum + num, 0);
+    if (sumaActual > sumaMaxima) {
+      arrayConMaxNumeros = currentArray;
+    }
+  }
+
+  return arrayConMaxNumeros;
+}
+
 function highestCardNumberFromArray(cartas) {
   const bigestNumber = Math.max(...cartas);
   return numberToCard(bigestNumber);
 }
 
 function uniqueElementsArray(arr) {
-  return arr.filter((item,
-      index) => arr.indexOf(item) === index);
+  return arr.filter((item, index) => arr.indexOf(item) === index);
 }
 
 ///Remove all elemnets that has a copy in an array
@@ -143,26 +155,24 @@ const compareArraysNoOrder = (single, completeaN) => {
 };
 
 //creates a flatMap in an only numers array
-const flatToGetNUmbersArray = (singleNumbersArray) => {singleNumbersArray.flatMap(item => {
-  if (Array.isArray(item)) {
-    return item; // If it's an array, return its elements
-  } else {
-    return [item]; // If it's a single number, return it in an array
-  }
-});}
-
+const flatToGetNUmbersArray = (singleNumbersArray) => {
+  singleNumbersArray.flatMap((item) => {
+    if (Array.isArray(item)) {
+      return item; 
+    } else {
+      return [item]; 
+    }
+  });
+};
 
 //Get biggest array according to it items sum
 function getHigherSumArrayContent(arrays) {
-    let sumaMaxima = -Infinity;
+  let sumaMaxima = -Infinity;
   let arregloMaximo = null;
 
-  
   for (const arreglo of arrays) {
-  
     const sumaActual = arreglo.reduce((acc, num) => acc + num, 0);
 
-  
     if (sumaActual > sumaMaxima) {
       sumaMaxima = sumaActual;
       arregloMaximo = arreglo;
@@ -172,13 +182,13 @@ function getHigherSumArrayContent(arrays) {
   return arregloMaximo;
 }
 
-
 module.exports = {
   shuffle,
   compareArraysNoOrder,
   highestCardNumberFromArray,
   generateUniqueId,
-  randomName,flatToGetNUmbersArray,
+  randomName,
+  flatToGetNUmbersArray,
   msgBuilder,
   notRepeatedInIntArray,
   cardsToSingleNumValsArray,
@@ -187,5 +197,6 @@ module.exports = {
   singleValsToSymbolsArray,
   uniqueElementsArray,
   cardsToNoSymbolValsArray,
-  getHigherSumArrayContent
+  getHigherSumArrayContent,
+  selectArrayWithBiggestNumbers,
 };

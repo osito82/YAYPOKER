@@ -8,6 +8,7 @@ const {
   cardsToNoSymbolValsArray,
   uniqueElementsArray,
   compareArraysNoOrder,
+  selectArrayWithBiggestNumbers,
   numberToCard,
   getHigherSumArrayContent,
   flatToGetNUmbersArray,
@@ -283,6 +284,35 @@ class WinnerCore {
         }) || [];
 
       return allStraightInfoArray;
+    }
+
+    //===========================================flush
+    if (bestHands[0].pokerHand == "flush") {
+      console.log("flush");
+      let allFlushArray = [];
+
+      bestHands.forEach((bestHand) => {
+        allFlushArray.push(bestHand.show);
+      });
+
+      const onlyNumbers = allFlushArray.map((x) =>
+        cardsToSingleNumValsArray(x)
+      );
+
+      const bestArray = selectArrayWithBiggestNumbers(onlyNumbers);
+      const betterFlushCards = singleValsToSymbolsArray(bestArray);
+
+      const allFlushInfoArray =
+        bestHands.filter((hand) => {
+          const flushFromHand = cardsToNoSymbolValsArray(hand.show.flat());
+
+          return (
+            flushFromHand.sort().toString() ===
+            betterFlushCards.sort().toString()
+          );
+        }) || [];
+
+      return allFlushInfoArray;
     }
   }
 }
