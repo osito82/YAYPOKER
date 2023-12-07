@@ -151,6 +151,28 @@ const flatToGetNUmbersArray = (singleNumbersArray) => {singleNumbersArray.flatMa
   }
 });}
 
+
+//Get biggest array according to it items sum
+function getHigherSumArrayContent(arrays) {
+    let sumaMaxima = -Infinity;
+  let arregloMaximo = null;
+
+  
+  for (const arreglo of arrays) {
+  
+    const sumaActual = arreglo.reduce((acc, num) => acc + num, 0);
+
+  
+    if (sumaActual > sumaMaxima) {
+      sumaMaxima = sumaActual;
+      arregloMaximo = arreglo;
+    }
+  }
+
+  return arregloMaximo;
+}
+
+
 module.exports = {
   shuffle,
   compareArraysNoOrder,
@@ -164,5 +186,6 @@ module.exports = {
   sumArrayNumbers,
   singleValsToSymbolsArray,
   uniqueElementsArray,
-  cardsToNoSymbolValsArray
+  cardsToNoSymbolValsArray,
+  getHigherSumArrayContent
 };

@@ -9,6 +9,7 @@ const {
   uniqueElementsArray,
   compareArraysNoOrder,
   numberToCard,
+  getHigherSumArrayContent,
   flatToGetNUmbersArray,
   sumArrayNumbers,
 } = require("./utils");
@@ -39,6 +40,17 @@ function betterPair(...pairs) {
   const flatAllPairs = R.flat(allPairs);
   const numericArray = cardsToSingleNumValsArray(flatAllPairs);
   return highestCardNumberFromArray(numericArray);
+}
+
+//must work for flush
+function betterStraight(cards) {
+  const numerics = cards.map((x) =>
+    cardsToSingleNumValsArray(x).sort((a, b) => b - a)
+  );
+  const maxSumIntArray = getHigherSumArrayContent(numerics);
+  const maxSumSymArray = singleValsToSymbolsArray(maxSumIntArray);
+
+  return maxSumSymArray;
 }
 
 function betterThreeOfAKind(cards) {
@@ -247,6 +259,30 @@ class WinnerCore {
         }) || [];
 
       return all3ofAKInfoArrayUnTie;
+    }
+
+    //===========================================straight
+    if (bestHands[0].pokerHand == "straight") {
+      console.log("straight");
+      let allstraightArray = [];
+
+      bestHands.forEach((bestHand) => {
+        allstraightArray.push(bestHand.show);
+      });
+
+      let betterStraightCards = betterStraight(allstraightArray);
+
+      const allStraightInfoArray =
+        bestHands.filter((hand) => {
+          const straightFromHand = cardsToNoSymbolValsArray(hand.show.flat());
+
+          return (
+            straightFromHand.sort().toString() ===
+            betterStraightCards.sort().toString()
+          );
+        }) || [];
+
+      return allStraightInfoArray;
     }
   }
 }

@@ -30,7 +30,7 @@ const HighCard = ["1h", "2s", "3h"];
 let bestHands = [];
 
 
-for (let i = 0; i < 1000000; i++) {
+for (let i = 0; i < 10000; i++) {
   const deck = [...Deck.shuffleDeck(Deck.cards, 100)];
 
   const deal = (number, cardsPractice) => {
@@ -50,11 +50,11 @@ for (let i = 0; i < 1000000; i++) {
   // bestHands.push(resultado);
   
 
-   if (resultado.pokerHand == "threeOfAKind") 
+  //  if (resultado.pokerHand == "threeOfAKind") 
+  //  bestHands.push(resultado);
+
+   if (resultado.pokerHand == "straight") 
    bestHands.push(resultado);
-
-//bestThreeKindArray
-
   
 }
 
