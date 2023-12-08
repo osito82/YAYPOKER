@@ -26,7 +26,7 @@ function selectBestRankHands(arrayHands) {
   }
 
   arrayHands.forEach((hand) => {
-    arrayRanks.push(hand.prizeRank);
+    if (!arrayRanks.includes(hand.prizeRank)) arrayRanks.push(hand.prizeRank);
   });
 
   const minimun = Math.min(...arrayRanks);
@@ -226,6 +226,31 @@ class WinnerCore {
       );
 
       return bestPairInfo;
+    }
+
+    //===========================================highCard
+    if (bestHands[0].pokerHand == "highCard") {
+      console.log("highCard");
+      let allHighCardArray = [];
+
+      bestHands.forEach((bestHand) => {
+        allHighCardArray.push(bestHand.cards);
+      });
+
+      const bestHighCardArray = selectArrayWithBiggestNumbers(allHighCardArray);
+
+      const betterHighCards = cardsToNoSymbolValsArray(bestHighCardArray);
+
+      const allHighInfoArray =
+        bestHands.filter((hand) => {
+          const highFromHand = cardsToNoSymbolValsArray(hand.cards.flat());
+
+          return (
+            highFromHand.sort().toString() === betterHighCards.sort().toString()
+          );
+        }) || [];
+
+      return allHighInfoArray;
     }
 
     //===========================================twoPairs
@@ -450,6 +475,58 @@ class WinnerCore {
         }) || [];
 
       return allFourofAkindInfoArrayUnTie;
+    }
+
+    //===========================================straightFlush
+    if (bestHands[0].pokerHand == "straightFlush") {
+      console.log("straightFlush");
+      let allstraightFlushArray = [];
+
+      bestHands.forEach((bestHand) => {
+        allstraightFlushArray.push(bestHand.show);
+      });
+
+      let betterStraightFlushCards = betterStraight(allstraightFlushArray);
+
+      const allStraightFlushArrayInfoArray =
+        bestHands.filter((hand) => {
+          const straightFlushFromHand = cardsToNoSymbolValsArray(
+            hand.show.flat()
+          );
+
+          return (
+            straightFlushFromHand.sort().toString() ===
+            betterStraightFlushCards.sort().toString()
+          );
+        }) || [];
+
+      return allStraightFlushArrayInfoArray;
+    }
+
+    //===========================================royalFlush
+    if (bestHands[0].pokerHand == "royalFlush") {
+      console.log("royalFlush");
+      let allRoyalFlushArray = [];
+
+      bestHands.forEach((bestHand) => {
+        allRoyalFlushArray.push(bestHand.show);
+      });
+
+      let betterRoyaltFlushCards = betterStraight(allRoyalFlushArray);
+
+      const allRoyalFlushArrayInfoArray =
+        bestHands.filter((hand) => {
+          const straightFlushFromHand = cardsToNoSymbolValsArray(
+            hand.show.flat()
+          );
+
+          return (
+            straightFlushFromHand.sort().toString() ===
+            betterRoyaltFlushCards.sort().toString()
+          );
+        }) || [];
+
+      return allRoyalFlushArrayInfoArray;
     }
   }
 }

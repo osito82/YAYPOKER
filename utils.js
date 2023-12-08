@@ -47,25 +47,8 @@ const singleSymbolsToNumsArray = (cartas) => {
 };
 
 const cardsToSingleNumValsArray = (cartas) => {
-  const realValues = cartas.map((carta) => {
-    const valor = carta.slice(0, -1);
-
-    switch (valor) {
-      case "T":
-        return 10;
-      case "J":
-        return 11;
-      case "Q":
-        return 12;
-      case "K":
-        return 13;
-      case "A":
-        return 14;
-      default:
-        return parseInt(valor, 10);
-    }
-  });
-  return realValues;
+  const noSymbol = cardsToNoSymbolValsArray(cartas);
+  return singleSymbolsToNumsArray(noSymbol);
 };
 
 const singleValsToSymbolsArray = (singleNumsArray) => {
