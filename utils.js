@@ -158,11 +158,16 @@ const compareArraysNoOrder = (single, completeaN) => {
 const flatToGetNUmbersArray = (singleNumbersArray) => {
   singleNumbersArray.flatMap((item) => {
     if (Array.isArray(item)) {
-      return item; 
+      return item;
     } else {
-      return [item]; 
+      return [item];
     }
   });
+};
+
+//creates a flat of Symbols Array
+const flatToGetSymbolsArray = (singleSymbolsArray) => {
+  return cardsToNoSymbolValsArray(singleSymbolsArray.flat());
 };
 
 //Get biggest array according to it items sum
@@ -199,4 +204,5 @@ module.exports = {
   cardsToNoSymbolValsArray,
   getHigherSumArrayContent,
   selectArrayWithBiggestNumbers,
+  flatToGetSymbolsArray,
 };

@@ -186,7 +186,7 @@ detectHighCard = (cartas) => {
 };
 
 function detectFullHouse(cartas) {
-  const isThreeSome = detectThreesome(cartas);
+  const isThreeSome = detectThreeOfAKind(cartas);
 
   const isPairs = detectPairs(cartas);
 
@@ -194,7 +194,7 @@ function detectFullHouse(cartas) {
     return {
       pokerHand: "fullHouse",
       prizeRank: 4,
-      show: cartas,
+      show: [isThreeSome.show, isPairs.show],
       cards: cartas,
     };
   } else {
@@ -202,7 +202,7 @@ function detectFullHouse(cartas) {
   }
 }
 
-detectThreesome = (cartas) => {
+detectThreeOfAKind = (cartas) => {
   const conteoCartas = {};
   let trio = [];
 
@@ -304,7 +304,7 @@ class PokerCore {
         return;
       }
 
-      tempHand = detectThreesome(array);
+      tempHand = detectThreeOfAKind(array);
       if (tempHand && tempHand.pokerHand == "threeOfAKind") {
         hand = tempHand;
         return;

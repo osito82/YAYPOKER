@@ -12,9 +12,9 @@ const {
   numberToCard,
   getHigherSumArrayContent,
   flatToGetNUmbersArray,
+  flatToGetSymbolsArray,
   sumArrayNumbers,
 } = require("./utils");
-const { max } = require("radash");
 
 function selectBestRankHands(arrayHands) {
   const arrayRanks = [];
@@ -54,6 +54,7 @@ function betterStraight(cards) {
   return maxSumSymArray;
 }
 
+//Get higher array of 3 items
 function betterThreeOfAKind(cards) {
   let bestThreeKind = [];
   if (!cards) {
@@ -66,6 +67,41 @@ function betterThreeOfAKind(cards) {
 
   const bestThreeKindArray = [bestThreeKind, bestThreeKind, bestThreeKind];
   return bestThreeKindArray;
+}
+
+function betterFullHouse(cards) {
+  let singlesFromThree = [];
+  let singlesFromTwo = [];
+  cards.map((x) => {
+    singlesFromThree.push(x[0][0]);
+  });
+
+  const biggestThreeRepresent = highestCardNumberFromArray(
+    cardsToSingleNumValsArray(singlesFromThree)
+  );
+
+  const bestFH3 = cards.filter((trio) =>
+    cardsToNoSymbolValsArray(trio[0]).includes(biggestThreeRepresent)
+  );
+
+  if (bestFH3.length == 1) {
+    const bestfullHouse = [...bestFH3[0]];
+    return flatToGetSymbolsArray(bestfullHouse);
+  }
+
+  bestFH3.map((x) => {
+    singlesFromTwo.push(x[1][0]);
+  });
+
+  const biggestTwoRepresent = highestCardNumberFromArray(
+    cardsToSingleNumValsArray(singlesFromTwo)
+  );
+
+  const bestFullHouseTwoParts = bestFH3.filter((duo) =>
+    cardsToNoSymbolValsArray(duo[1]).includes(biggestTwoRepresent)
+  );
+
+  return flatToGetSymbolsArray(bestFullHouseTwoParts[0]);
 }
 
 function betterTwoPairs(...pairs) {
@@ -313,6 +349,19 @@ class WinnerCore {
         }) || [];
 
       return allFlushInfoArray;
+    }
+
+    //===========================================fullHouse
+    if (bestHands[0].pokerHand == "fullHouse") {
+      console.log("fullHouse");
+      let allFullHouseArray = [];
+
+      bestHands.forEach((bestHand) => {
+        allFullHouseArray.push(bestHand.show);
+      });
+
+      let betterFullHouseHand = betterFullHouse(allFullHouseArray);
+      console.log(betterFullHouseHand);
     }
   }
 }
