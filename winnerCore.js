@@ -360,8 +360,19 @@ class WinnerCore {
         allFullHouseArray.push(bestHand.show);
       });
 
-      let betterFullHouseHand = betterFullHouse(allFullHouseArray);
-      console.log(betterFullHouseHand);
+      const betterFullHouseHand = betterFullHouse(allFullHouseArray);
+
+      const allFullHouseInfoArray =
+        bestHands.filter((hand) => {
+          const flushFromHand = cardsToNoSymbolValsArray(hand.show.flat());
+
+          return (
+            flushFromHand.sort().toString() ===
+            betterFullHouseHand.sort().toString()
+          );
+        }) || [];
+
+      return allFullHouseInfoArray;
     }
   }
 }
