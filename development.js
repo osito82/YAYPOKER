@@ -29,7 +29,7 @@ const HighCard = ["1h", "2s", "3h"];
 
 let bestHands = [];
 
-for (let i = 0; i < 990000; i++) {
+for (let i = 0; i < 900000 / 2.5; i++) {
   const deck = [...Deck.shuffleDeck(Deck.cards, 100)];
 
   const deal = (number, cardsPractice) => {
@@ -42,30 +42,26 @@ for (let i = 0; i < 990000; i++) {
   const resultado = PokerCore.betterHand(dealerCards, playerCards);
 
   //9
-  //  if (resultado.pokerHand == "pairs")
-  //  bestHands.push(resultado);
+  //  if (resultado.pokerHand == "pairs")  bestHands.push(resultado);
 
   //8
-  // if (resultado.pokerHand == "twoPairs")
-  // bestHands.push(resultado);
+  // if (resultado.pokerHand == "twoPairs") bestHands.push(resultado);
 
   //7
-  //  if (resultado.pokerHand == "threeOfAKind")
-  //  bestHands.push(resultado);
+  //  if (resultado.pokerHand == "threeOfAKind")   bestHands.push(resultado);
 
   //6
-  //if (resultado.pokerHand == "straight")
-  //bestHands.push(resultado);
+  //if (resultado.pokerHand == "straight") bestHands.push(resultado);
 
   //5
-  // if (resultado.pokerHand == "flush")
-  // bestHands.push(resultado);
+  // if (resultado.pokerHand == "flush") bestHands.push(resultado);
 
   //4
-  if (resultado.pokerHand == "fullHouse") bestHands.push(resultado);
+  //if (resultado.pokerHand == "fullHouse") bestHands.push(resultado);
 
   //3
   //fourOfaKind
+  if (resultado.pokerHand == "fourOfaKind") bestHands.push(resultado);
 
   //2
   //straightFlush

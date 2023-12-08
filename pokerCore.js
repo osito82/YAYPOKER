@@ -148,7 +148,6 @@ function isArrayOrderedAndConsecutive(arr) {
 
 function detectStraight(cartas) {
   const realValues = cardsToSingleNumValsArray(cartas);
-
   const numerosOrdenados = realValues.slice().sort((a, b) => a - b);
 
   if (isArrayOrderedAndConsecutive(numerosOrdenados)) {
@@ -187,7 +186,6 @@ detectHighCard = (cartas) => {
 
 function detectFullHouse(cartas) {
   const isThreeSome = detectThreeOfAKind(cartas);
-
   const isPairs = detectPairs(cartas);
 
   if (isThreeSome && isPairs) {
@@ -208,7 +206,6 @@ detectThreeOfAKind = (cartas) => {
 
   for (const carta of cartas) {
     const valor = carta.substring(0, carta.length - 1);
-
     conteoCartas[valor] = (conteoCartas[valor] || 0) + 1;
 
     if (conteoCartas[valor] === 3) {
@@ -234,7 +231,6 @@ detectFourOfaKind = (cartas) => {
 
   for (const carta of cartas) {
     const valor = carta.substring(0, carta.length - 1);
-    const simbolo = carta.substring(carta.length - 1);
 
     conteoCartas[valor] = (conteoCartas[valor] || 0) + 1;
 

@@ -23,16 +23,32 @@ function generateUniqueId() {
 }
 
 const cardsToNoSymbolValsArray = (cartas) => {
-  //console.log(cartas, '123')
   return cartas.map((carta) => carta.slice(0, -1));
 };
 
+const singleSymbolsToNumsArray = (cartas) => {
+  const realValues = cartas.map((carta) => {
+    switch (carta) {
+      case "T":
+        return 10;
+      case "J":
+        return 11;
+      case "Q":
+        return 12;
+      case "K":
+        return 13;
+      case "A":
+        return 14;
+      default:
+        return parseInt(carta, 10);
+    }
+  });
+  return realValues;
+};
+
 const cardsToSingleNumValsArray = (cartas) => {
-  //console.log(cartas, '123')
   const realValues = cartas.map((carta) => {
     const valor = carta.slice(0, -1);
-
-    // Handle "10" separately
 
     switch (valor) {
       case "T":
@@ -46,7 +62,6 @@ const cardsToSingleNumValsArray = (cartas) => {
       case "A":
         return 14;
       default:
-        // Convert string to number for other cases
         return parseInt(valor, 10);
     }
   });
@@ -105,6 +120,14 @@ function notRepeatedInIntArray(array) {
   let numbersArray = cardsToSingleNumValsArray(array);
   const uniqueArray = [...numbersArray].filter(
     (item) => numbersArray.indexOf(item) === numbersArray.lastIndexOf(item)
+  );
+
+  return uniqueArray;
+}
+
+function notRepeatedSymbolnArray(array) {
+  const uniqueArray = [...array].filter(
+    (item) => array.indexOf(item) === array.lastIndexOf(item)
   );
 
   return uniqueArray;
@@ -203,6 +226,8 @@ module.exports = {
   uniqueElementsArray,
   cardsToNoSymbolValsArray,
   getHigherSumArrayContent,
+  notRepeatedSymbolnArray,
   selectArrayWithBiggestNumbers,
   flatToGetSymbolsArray,
+  singleSymbolsToNumsArray,
 };

@@ -12,6 +12,8 @@ const {
   numberToCard,
   getHigherSumArrayContent,
   flatToGetNUmbersArray,
+  singleSymbolsToNumsArray,
+  notRepeatedSymbolnArray,
   flatToGetSymbolsArray,
   sumArrayNumbers,
 } = require("./utils");
@@ -67,6 +69,26 @@ function betterThreeOfAKind(cards) {
 
   const bestThreeKindArray = [bestThreeKind, bestThreeKind, bestThreeKind];
   return bestThreeKindArray;
+}
+
+function betteraFourOfaKind(cards) {
+  let singlesFromFour = [];
+
+  cards.map((x) => {
+    singlesFromFour.push(x[0]);
+  });
+
+  const biggestFourRepresent = highestCardNumberFromArray(
+    cardsToSingleNumValsArray(singlesFromFour)
+  );
+
+  const bestFourOfAKind = [
+    biggestFourRepresent,
+    biggestFourRepresent,
+    biggestFourRepresent,
+    biggestFourRepresent,
+  ];
+  return bestFourOfAKind;
 }
 
 function betterFullHouse(cards) {
@@ -184,7 +206,6 @@ class WinnerCore {
 
       let betterPairCard = betterPair(allPairsArray);
 
-      ///Best Pairs Array
       const allPairsInfoArray =
         bestHands.filter((hand) => {
           return hand.show.some((item) => item.includes(betterPairCard));
@@ -203,6 +224,7 @@ class WinnerCore {
       const bestPairInfo = allPairsInfoArray.filter((info) =>
         compareArraysNoOrder(bestOutofPairSingles, info.cards)
       );
+
       return bestPairInfo;
     }
 
@@ -373,6 +395,61 @@ class WinnerCore {
         }) || [];
 
       return allFullHouseInfoArray;
+    }
+
+    //===========================================fourOfaKind
+    if (bestHands[0].pokerHand == "fourOfaKind") {
+      console.log("fourOfaKind");
+      let allFourOfaKindArray = [];
+      let biggestSymbolOutOf4oak = [];
+
+      bestHands.forEach((bestHand) => {
+        allFourOfaKindArray.push(bestHand.show);
+      });
+
+      const betterFourofAKindHand = betteraFourOfaKind(allFourOfaKindArray);
+
+      const allFourofAkindInfoArray =
+        bestHands.filter((hand) => {
+          const fourOfaKindFromHand = cardsToNoSymbolValsArray(
+            hand.show.flat()
+          );
+
+          return (
+            fourOfaKindFromHand.sort().toString() ===
+            betterFourofAKindHand.sort().toString()
+          );
+        }) || [];
+
+      if (allFourofAkindInfoArray.length == 1) {
+        return allFourofAkindInfoArray;
+      }
+
+      biggestSymbolOutOf4oak = highestCardNumberFromArray(
+        singleSymbolsToNumsArray(
+          allFourofAkindInfoArray
+            .map((x) =>
+              notRepeatedSymbolnArray(cardsToNoSymbolValsArray(x.cards))
+            )
+            .flat()
+        )
+      );
+
+      const unTie4ofAK = [...betterFourofAKindHand, biggestSymbolOutOf4oak];
+
+      const allFourofAkindInfoArrayUnTie =
+        bestHands.filter((hand) => {
+          const fourOfaKindFromHand = cardsToNoSymbolValsArray(
+            hand.cards.flat()
+          );
+
+          return (
+            fourOfaKindFromHand.sort().toString() ===
+            unTie4ofAK.sort().toString()
+          );
+        }) || [];
+
+      return allFourofAkindInfoArrayUnTie;
     }
   }
 }
