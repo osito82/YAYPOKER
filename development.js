@@ -43,13 +43,13 @@ for (let i = 0; i < 500000/15; i++) {
 
   //10
   //highCard
-  if (resultado.pokerHand == "highCard") bestHands.push(resultado);
+  //if (resultado.pokerHand == "highCard") bestHands.push(resultado);
 
   //9
     //if (resultado.pokerHand == "pairs")  bestHands.push(resultado);
 
   //8
-   //if (resultado.pokerHand == "twoPairs") bestHands.push(resultado);
+   if (resultado.pokerHand == "twoPairs") bestHands.push(resultado);
 
   //7
     //if (resultado.pokerHand == "threeOfAKind")   bestHands.push(resultado);

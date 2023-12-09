@@ -22,10 +22,12 @@ function generateUniqueId() {
   return shortUUID;
 }
 
+///[ 'Ks', '8c', 'Js', 'Td', 'Qc' ] =>  [ 'K', '8', 'J', 'T', 'Q' ]
 const cardsToNoSymbolValsArray = (cartas) => {
   return cartas.map((carta) => carta.slice(0, -1));
 };
 
+///[ 'K', '8', 'J', 'T', 'Q' ] => [ 13, 8, 11, 10, 12 ]
 const singleSymbolsToNumsArray = (cartas) => {
   const realValues = cartas.map((carta) => {
     switch (carta) {
@@ -46,15 +48,18 @@ const singleSymbolsToNumsArray = (cartas) => {
   return realValues;
 };
 
+///[ 'Ks', '8c', 'Js', 'Td', 'Qc' ] =>   [ 13, 8, 11, 10, 12 ]
 const cardsToSingleNumValsArray = (cartas) => {
   const noSymbol = cardsToNoSymbolValsArray(cartas);
   return singleSymbolsToNumsArray(noSymbol);
 };
 
+///[ 13, 8, 11, 10, 12 ] => [ 'K', '8', 'J', 'T', 'Q' ]
 const singleValsToSymbolsArray = (singleNumsArray) => {
   return singleNumsArray.map((x) => numberToCard(x));
 };
 
+///10 => 'T'
 const numberToCard = (number) => {
   switch (number) {
     case 10:
@@ -72,11 +77,11 @@ const numberToCard = (number) => {
   }
 };
 
+/// [[ 13, 8, 11, 10, 12 ], [ 1, 4, 11, 5, 3 ]] => [ 13, 8, 11, 10, 12 ]
 function selectArrayWithBiggestNumbers(arrays) {
   if (!arrays || arrays.length === 0) {
     return null;
   }
-
   let arrayConMaxNumeros = arrays[0];
   for (const currentArray of arrays) {
     const sumaActual = currentArray.reduce((sum, num) => sum + num, 0);
@@ -85,20 +90,22 @@ function selectArrayWithBiggestNumbers(arrays) {
       arrayConMaxNumeros = currentArray;
     }
   }
-
   return arrayConMaxNumeros;
 }
 
+/// [ 1, 4, 11, 5, 3 ]] => 11
 function highestCardNumberFromArray(cartas) {
   const bigestNumber = Math.max(...cartas);
   return numberToCard(bigestNumber);
 }
 
+///[ 4, 4, 8, 8 ] => [ 4, 8 ]
 function uniqueElementsArray(arr) {
   return arr.filter((item, index) => arr.indexOf(item) === index);
 }
 
 ///Remove all elemnets that has a copy in an array
+///[ 'Ks', '8c', '8s', 'Js', 'Td', 'Qc' ]
 function notRepeatedInIntArray(array) {
   let numbersArray = cardsToSingleNumValsArray(array);
   const uniqueArray = [...numbersArray].filter(
@@ -108,11 +115,11 @@ function notRepeatedInIntArray(array) {
   return uniqueArray;
 }
 
+///[ 'K', 'K', 'K', '8', 'K' ] => [ '8' ]
 function notRepeatedSymbolnArray(array) {
   const uniqueArray = [...array].filter(
     (item) => array.indexOf(item) === array.lastIndexOf(item)
   );
-
   return uniqueArray;
 }
 
@@ -143,6 +150,7 @@ function randomName() {
   return nombreElegido + "-" + (Math.random() * 100).toFixed().toString();
 }
 
+/// [ 1, 4, 11, 5, 3 ] => 24
 const sumArrayNumbers = (array) =>
   array.reduce((suma, numero) => suma + numero, 0);
 
@@ -172,11 +180,13 @@ const flatToGetNUmbersArray = (singleNumbersArray) => {
 };
 
 //creates a flat of Symbols Array
+/// [ [ 'As', 'Ah', 'Ac' ], [ 'Jc', 'Jh' ] ] => [ 'A', 'A', 'A', 'J', 'J' ]
 const flatToGetSymbolsArray = (singleSymbolsArray) => {
   return cardsToNoSymbolValsArray(singleSymbolsArray.flat());
 };
 
 //Get biggest array according to it items sum
+/// [[ 1, 4, 2, 5, 3 ],[ 6, 7, 8, 9, 10 ]] => [ 6, 7, 8, 9, 10 ]
 function getHigherSumArrayContent(arrays) {
   let sumaMaxima = -Infinity;
   let arregloMaximo = null;
