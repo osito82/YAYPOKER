@@ -39,12 +39,10 @@
 <script setup>
 import QRCodeVue3 from "qrcode-vue3";
 
-//import { ref } from 'vue';
-
-//const msg = ref('Hello, World!'); // Example data
-
-// const updateMessage = () => {
-//   msg.value = 'Updated Message!';
-// };
-
+// export default {
+//   name: 'QRCodeVue3Example',
+//   components: {
+//     QRCodeVue3
+// //   },
+// }
 </script>
