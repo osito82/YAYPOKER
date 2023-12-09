@@ -1,5 +1,3 @@
-const { signUp } = require("./mock_sockets");
-
 class StepChecker {
   gameFlowOriginal = {
     gameId: "",
@@ -12,7 +10,7 @@ class StepChecker {
     firstBetting: false,
 
     flop_Dealer_Hand: false,
-    flop_Check_Prize_Step: false, //first check then bet
+    flop_Check_Prize_Step: false,
     flop_Bet_Step: false,
 
     turn_Dealer_Hand: false,
@@ -24,12 +22,8 @@ class StepChecker {
     river_Bet_Step: false,
 
     finalHands: false,
-    showDown:false
-
-    
-
-    //dealerFinal:false
-    //finalCheckCards:false,
+    showDown: false,
+    winner: false,
   };
 
   constructor(gameId) {

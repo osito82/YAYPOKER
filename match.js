@@ -9,6 +9,7 @@ const { msgBuilder } = require("./utils");
 
 const osolog = require("osolog");
 const R = require("radash");
+const WinnerCore = require("./winnerCore");
 
 class Match {
   log = new osolog();
@@ -446,6 +447,28 @@ class Match {
     this.continue(thisSocket);
   };
 
+  winner = (finalHands, thisSocket) => {
+    const winner = WinnerCore.Winner(finalHands);
+
+    this.communicator.msgBuilder(
+      `winner`,
+      "public",
+      { player: "all" },
+      { method: "winner", winner: winner }
+    );
+    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+    this.log
+      .Template({
+        name: "brakets",
+        date: true,
+        title: `winner`,
+      })
+      .R(this.communicator.getFullInfo());
+
+    this.stepChecker.grantStep("winner");
+    this.continue(thisSocket);
+  };
+
   bettingCore = (thisSocket, bettingFor) => {
     console.log("MATCH - bettingCore-" + bettingFor);
     const maxBet = Math.max(
@@ -754,8 +777,18 @@ class Match {
     ///showDown
     if (!this.stepChecker.checkStep("showDown")) {
       const finalHands = this.dealer.getFinalHands();
-      this.showDown(finalHands,thisSocket);
+      this.showDown(finalHands, thisSocket);
       return;
+    }
+
+    ///winner
+    if (!this.stepChecker.checkStep("winner")) {
+      const finalHands = this.dealer.getFinalHands();
+      this.winner(finalHands, thisSocket);
+      //osito
+      //chips transfer
+      return;
+      //
     }
 
     this.stepChecker.grantStep("startGame");
