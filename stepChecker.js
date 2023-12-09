@@ -19,15 +19,14 @@ class StepChecker {
     turn_Check_Prize_Step: false,
     turn_Bet_Step: false,
 
-    //////bbbbbbbb
-    river_Dealer_Hand:false,
-    river_Check_Prize_Step:false,
+    river_Dealer_Hand: false,
+    river_Check_Prize_Step: false,
     river_Bet_Step: false,
 
+    finalHands: false,
+    showDown:false
 
-    finalHands:false
-    //showdown
-
+    
 
     //dealerFinal:false
     //finalCheckCards:false,

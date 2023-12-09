@@ -107,6 +107,7 @@ class Match {
       this.stepChecker.revokeStep("signUp");
     }
 
+    this.continue(thisSocket);
     return;
   }
 
@@ -425,6 +426,26 @@ class Match {
     this.startGame(thisSocket);
   }
 
+  showDown = (finalHands, thisSocket) => {
+    this.communicator.msgBuilder(
+      `showDown`,
+      "public",
+      { player: "all" },
+      { method: "showDown", showDown: finalHands }
+    );
+    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+    this.log
+      .Template({
+        name: "brakets",
+        date: true,
+        title: `showDown`,
+      })
+      .R(this.communicator.getFullInfo());
+
+    this.stepChecker.grantStep("showDown");
+    this.continue(thisSocket);
+  };
+
   bettingCore = (thisSocket, bettingFor) => {
     console.log("MATCH - bettingCore-" + bettingFor);
     const maxBet = Math.max(
@@ -721,13 +742,21 @@ class Match {
 
     ///finalHands
     if (!this.stepChecker.checkStep("finalHands")) {
-      this.dealer.setFinalHands()
-      console.log(this.dealer.getFinalHands())
-    //  this.askForBets(thisSocket, "riverBetting");
-    //  this.bettingCore(thisSocket, "riverBetting");
+      this.dealer.getChipsFromPlayers();
+      this.dealer.setFinalHands();
+
+      this.stepChecker.grantStep("finalHands");
+      this.continue(thisSocket);
+
       return;
     }
 
+    ///showDown
+    if (!this.stepChecker.checkStep("showDown")) {
+      const finalHands = this.dealer.getFinalHands();
+      this.showDown(finalHands,thisSocket);
+      return;
+    }
 
     this.stepChecker.grantStep("startGame");
   }

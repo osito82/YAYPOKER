@@ -12,7 +12,7 @@ class Dealer {
 
   pot = 0;
   playersChecked = [];
-  finalHards = [];
+  finalHands = [];
 
   setFinalHands = () => {
     let currentPrize = {};
@@ -23,15 +23,17 @@ class Dealer {
       currentPrize.playerId = player.id;
       currentPrize.gameId = player.gameId;
 
-      this.finalHards.push({
+      this.finalHands.push({
         ...currentPrize,
       });
     });
-    console.log(this.finalHards, "finalHards");
+        //osito
+
+
   };
 
   getFinalHands = () => {
-    return this.finalHards;
+    return this.finalHands;
   };
 
   allPlayersCheck = () => {
@@ -74,9 +76,7 @@ class Dealer {
         const cardToDeal = this.deck.shift();
         if (cardToDeal) {
           player.setCard(cardToDeal);
-        } else {
-          console.log("No hay cartas suficientes en el deck.");
-        }
+        } 
       });
     }
   };
