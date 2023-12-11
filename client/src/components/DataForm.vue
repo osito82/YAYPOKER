@@ -1,18 +1,28 @@
 <!-- src/components/MyForm.vue -->
 <template>
-  <form @submit.prevent="submitForm">
-    <label for="name">Name:</label>
-    <input type="text" id="name" v-model="name" />
+  <form class="my-form" @submit.prevent="submitForm">
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input type="text" id="name" v-model="name" />
+    </div>
 
-    <label for="secretCode">Secret Code:</label>
-    <input type="password" id="secretCode" v-model="secretCode" />
+    <div class="form-group">
+      <label for="secretCode">Secret Code:</label>
+      <input type="password" id="secretCode" v-model="secretCode" />
+    </div>
 
-    <button @click="startGame">New Game</button>
+    <div class="button-group">
+      <button @click="startGame">New Game</button>
+    </div>
 
-    <label for="gameCode">Game Code:</label>
-    <input id="gameCode" v-model="gameCode" />
+    <div class="form-group">
+      <label for="gameCode">Game Code:</label>
+      <input id="gameCode" v-model="gameCode" />
+    </div>
 
-    <button type="submit">Join a Game</button>
+    <div class="button-group">
+      <button type="submit">Join a Game</button>
+    </div>
   </form>
 </template>
 
@@ -44,3 +54,38 @@ const startGame = () => {
   router.push({ name: "game", params: { gameCode: pokerStore.getGameCode } });
 };
 </script>
+
+
+<style scoped>
+.my-form {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+label {
+  font-size: 18px;
+  margin-bottom: 5px;
+  margin-right: 10px;
+  margin-left: 15px;
+}
+
+input {
+  padding: 8px;
+  font-size: 16px;
+}
+
+.button-group {
+  margin-top: 10px;
+}
+
+button {
+  margin-left: 10px;
+  padding: 9px;
+  font-size: 16px;
+}
+</style>
