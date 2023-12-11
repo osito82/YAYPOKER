@@ -11,7 +11,6 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-//const log = require("./log");
 const Match = require("./match");
 const Socket = require("./sockets");
 const Torneo = require("./torneo");
@@ -26,8 +25,9 @@ wss.on("connection", (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1));
   const torneoId = urlParams.get("torneoId") ?? "default_Torneo";
   const playerName = urlParams.get("playerName") ?? randomName();
+  const secretCode = urlParams.get("secretCode") ?? generateUniqueId(10);
 
-  const thisSocket = { id: generateUniqueId(), name: playerName, socket: ws };
+  const thisSocket = { id: generateUniqueId(), name: playerName, secretCode: secretCode, socket: ws };
 
   Socket.addSocket(thisSocket, torneoId);
 
@@ -54,6 +54,7 @@ wss.on("connection", (ws, req) => {
 
     if (jsonData && jsonData.action === "signUp") {
       jsonData.name = playerName;
+      jsonData.secretCode = secretCode;
 
       if (!torneoId || !Torneo.torneoExists(torneoId)) {
         console.log("no torneo Id");

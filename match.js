@@ -66,13 +66,14 @@ class Match {
     const player = new Player(
       this.gameId,
       data.name,
+      data.secretCode,
       data.totalChips,
       [],
       thisSocketId
     );
 
     const existingPlayerIndex = this.players.findIndex(
-      (s) => s.name === data.name
+      (s) => (s.name === data.name && s.secretCode === data.secretCode)
     );
 
     if (existingPlayerIndex !== -1) {

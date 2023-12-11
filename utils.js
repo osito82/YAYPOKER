@@ -16,9 +16,9 @@ function shuffle(array) {
   return array;
 }
 
-function generateUniqueId() {
+function generateUniqueId(long=4) {
   const fullUUID = uuidv4();
-  const shortUUID = fullUUID.substr(0, 4).replace(/-/g, "");
+  const shortUUID = fullUUID.substr(0, long).replace(/-/g, "");
   return shortUUID;
 }
 
