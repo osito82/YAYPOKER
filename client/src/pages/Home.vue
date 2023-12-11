@@ -1,19 +1,25 @@
 <script setup>
-import HelloWorld from '../components/HelloWorld.vue'
+import Logo from '../components/Logo.vue'
 import qrCode from '../components/qrCode.vue'
 import DataForm from '../components/DataForm.vue';
+
+
+import Card from '../components/Card.vue';
+import CardBack from '../components/CardBack.vue';
+
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <!-- <HelloWorld msg="Vite + Vue" /> -->
+
+    
+    <Card :numSymbol="'Tc'" />
+<br>
+    <Card :numSymbol="'Ah'" />
+
+
+    <br>
+    <CardBack/>
+   <Logo /> 
   <DataForm />
   <qrCode />
 </template>
