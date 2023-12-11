@@ -1,6 +1,9 @@
-function generateUniqueId() {
-  const fullUUID = uuidv4();
-  const shortUUID = fullUUID.substr(0, 4).replace(/-/g, "");
+//const { v4: uuidv4 } = require("uuid");
+import {  v4 } from 'uuid'
+
+function generateUniqueId(long=4) {
+  const fullUUID = v4();
+  const shortUUID = fullUUID.substr(0, long).replace(/-/g, "");
   return shortUUID;
 }
 

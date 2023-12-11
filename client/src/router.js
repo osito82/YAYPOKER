@@ -1,19 +1,21 @@
 // src/router.js
-import { createRouter, createWebHistory } from 'vue-router';
-import Home from './pages/Home.vue'
-import About from './pages/About.vue'
+import { createRouter, createWebHistory } from "vue-router";
+import Home from "./pages/Home.vue";
+import About from "./pages/About.vue";
+import Game from "./pages/Game.vue";
 
 const routes = [
   {
-    path: '/',
- //   component: () => import('./pages/Home.vue'),
- component:Home
+    name: "home",
+    path: "/",
+    component: Home,
   },
   {
-    path: '/about',
- ///   component: () => import('./pages/About.vue'),
- component:About
+    name: "game",
+    path: "/game/:gameCode",
+    component: Game,
   },
+  { name: "about", path: "/about", component: About },
 ];
 
 const router = createRouter({

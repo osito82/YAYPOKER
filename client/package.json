@@ -11,6 +11,7 @@
   "dependencies": {
     "pinia": "^2.1.7",
     "qrcode-vue3": "^1.6.8",
+    "uuid": "^9.0.1",
     "vue": "^3.3.8",
     "vue-router": "^4.2.5"
   },
