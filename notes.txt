@@ -1,0 +1,43 @@
+Order:
+1. signUp 
+2. startGame - sg 
+-- If player 1 -> blinds - setBet - sb
+-- If player 2 -> blinds - setBet - sb
+
+
+
+JSON EXAMPLES
+
+signUp 
+  {
+  "name": "osito",
+  "action": "signUp",
+  "totalChips": 1000
+}
+
+ setBet 
+  {
+  "chipsToBet": 20,
+  "action": "setBet"
+}
+
+
+ log 
+  {
+  "action": "log"
+}
+
+ startGame 
+ {
+  "action": "startGame"
+}
+
+dealtPrivateCards 
+ {
+  "action": "dealtPrivateCards"
+}
+
+
+//Client
+https://www.npmjs.com/package/qrcode-vue3
+

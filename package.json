@@ -4,6 +4,8 @@
   "description": "Poker API",
   "main": "app.js",
   "scripts": {
+    "start": "nodemon app.js",
+    "start_client": "nodemon index_cli.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -16,7 +18,10 @@
   "dependencies": {
     "express": "^4.18.2",
     "http": "^0.0.1-security",
+    "nodemon": "^3.0.1",
+    "osolog": "^1.0.6",
     "radash": "^11.0.0",
+    "uuidv4": "^6.2.13",
     "ws": "^8.14.2"
   }
 }
