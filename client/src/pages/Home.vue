@@ -11,8 +11,17 @@ import CardBack from '../components/CardBack.vue';
 
 <template>
 
-    
-        
+    s
+  
+    <div class="bg-blue-500 text-white p-4">
+      <h1 class="text-2xl font-bold">¡Hola, mundo con Tailwind CSS y Vue 3!</h1>
+    </div>
+  
+  
+
+  
+
+
    <Logo /> 
   <DataForm />
   
