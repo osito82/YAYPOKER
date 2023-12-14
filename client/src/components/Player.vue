@@ -1,29 +1,20 @@
-<!-- src/components/PlayerInfo.vue -->
-
-<!-- <template>
-    <div class="container">
-  
-    </div>
-  </template> -->
-
 <template>
-
-    <div class="playerContainer">
-    <div v-if="showFront" class="cardsContainer">
+  <div id="playerContainer" class="flex items-center justify-between mb-3 max-w-max">
+    
+    <div id="cards" v-if="showFront" class="flex ">
       <Card v-for="card in playerCards" :key="card.id" :numSymbol="card" />
     </div>
 
-    <div v-if="!showFront" class="cardsContainer">
+    <div id="coverCards" v-if="!showFront" class="flex ">
       <CardBack v-for="card in playerCards" :key="card.id" />
     </div>
 
-    <div class="playerData">
-      <div class="nameContainer">
-        <strong> {{ playerName }} </strong>
-      </div>
+    <div id="playerInfo" class="flex flex-col min-w-150 ml-4">
 
-      <div class="info-item">
-        <strong> {{ playerChips }} Chips</strong>
+      <div class="mb-5 text-xl font-semibold">{{ playerName }}</div>
+
+      <div class="info-item mb-5">
+        <strong>{{ playerChips }} Chips</strong>
       </div>
 
       <div class="info-item">
@@ -51,8 +42,16 @@ const showFront = computed(() => {
 });
 </script>
 
+
+
 <style scoped>
-.playerContainer {
+</style>
+
+
+<!-- 
+<style scoped>
+
+  .playerContainer {
   display: flex;
   flex-direction: row;
   margin-bottom: 20px;
@@ -89,4 +88,4 @@ const showFront = computed(() => {
   width: 150px;
   margin-right: 25px;
 }
-</style>
+</style> -->

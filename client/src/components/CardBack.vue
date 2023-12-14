@@ -1,7 +1,7 @@
 <template>
   <div
     class="card lg:w-24 lg:h-32 bg-white rounded-lg flex flex-col justify-center items-center"
-    :style="{ transform: `scale(${scale})` }"
+    :style="{ transform: `scale(${scale / 100})` }"
   />
 </template>
 
@@ -12,7 +12,7 @@ const props = defineProps({
   numSymbol: String,
   scale: Number,
 });
-const scale = computed(() => (props.scale ? props.scale : 1));
+const scale = computed(() => (props.scale ? props.scale : 100));
 </script>
 
 <style scoped>
