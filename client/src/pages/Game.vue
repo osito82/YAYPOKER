@@ -10,17 +10,20 @@
       <div id="main_holder" class="flex flex-row flex-wrap py-2 bg-pink-500">
         <main
           role="main"
-          class="w-full sm:w-2/3 md:w-3/4 pt-1 px-2 bg-yellow-300 mx-auto flex justify-center"
+          class="w-full sm:w-2/3 md:w-3/4 pt-4 px-2 bg-yellow-300 mx-auto flex justify-center"
         >
-          <div class="flex justify-center items-center w-4/5 bg-blue-200 space-x-14 ">
+          <div
+            id="comunityCards"
+            class="flex justify-center items-center w-4/5 bg-blue-500 space-x-14 h-[70%] min-h-min-content "
+          >
             <Card :scale="150" :numSymbol="'Tc'" />
             <Card :numSymbol="'Ah'" :scale="150" />
             <CardBack :scale="150" /><CardBack :scale="150" /><CardBack :scale="150" />
           </div>
         </main>
 
-        <aside class="w-full sm:w-1/3 md:w-1/4 px-1 bg-blue-100">
-          <div id="players" class="top-0 p-1 w-full bg-red-100">
+        <aside class="w-full sm:w-1/3 md:w-1/4 px-1 bg-blue-100  ">
+          <div id="players" class="top-0 p-4 w-full bg-red-500 " >
             <Player
               :playerName="'Osito'"
               :playerChips="1000"
