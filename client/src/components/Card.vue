@@ -1,15 +1,26 @@
 <template>
+  
   <div
-    :style="{ transform: `scale(${scaleValue / 100})` }"
-    class="lg:w-24 max-w-xs lg:h-32 bg-white rounded-lg flex flex-col justify-center items-center"
-  >
-    <div class="text-red-600 text-7xl items-center custom-line-height">
+        :class="`${sizeOption.height} max-w-xs ${sizeOption.width} bg-white rounded-lg flex flex-col justify-center items-center`"
+      >
+    <div v-if="color == 'red'" :class="`text-red-600 ${sizeOption.textSize} items-center custom-line-height`">
       {{ numSymbol.letter }}
     </div>
 
-    <div class="text-red-600 text-7xl items-center custom-line-height">
+    <div v-if="color == 'red'" :class="`text-red-600 ${sizeOption.textSize} items-center custom-line-height`">
       {{ numSymbol.symbol }}
     </div>
+
+
+    <div v-if="color == 'black'" :class="`text-black ${sizeOption.textSize} items-center custom-line-height`">
+      {{ numSymbol.letter }}
+    </div>
+
+    <div v-if="color == 'black'" :class="`text-black ${sizeOption.textSize} items-center custom-line-height`">
+      {{ numSymbol.symbol }}
+    </div>
+
+
   </div>
 </template>
 
@@ -17,12 +28,38 @@
 import { ref, computed, defineProps } from "vue";
 
 const props = defineProps({
-  numSymbol: String,
-  scale: Number,
+  numSymbol: Object,
+  size: String  
 });
 
 import { simbolConverter, whatColor } from "../vutils.js";
-const scaleValue = computed(() => (props.scale ? props.scale : 100));
+
+
+const sizeOption = computed(() => { 
+  switch (props.size) {
+    case 'large':
+      return {
+        textSize: 'text-7xl',
+        height: 'lg:h-32',
+        width: 'lg:w-24',
+      };
+    case 'small':
+      return {
+        textSize: 'text-4xl',
+        height: 'lg:h-16',
+        width: 'lg:w-12',
+      };
+    default:
+      // Valores predeterminados si props.sizeOption no coincide con 'large' ni 'small'
+      return {
+        textSize: 'text-7xl',
+        height: 'lg:h-32',
+        width: 'lg:w-24',
+      };
+  }
+});
+
+
 const numSymbol = computed(() => simbolConverter(props.numSymbol));
 const color = computed(() => whatColor(props.numSymbol));
 </script>
