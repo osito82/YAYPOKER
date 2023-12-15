@@ -24,6 +24,11 @@ const props = defineProps({
 
 const sizeOption = computed(() => {
   switch (props.size) {
+    case 'extraLarge':
+      return {        
+        height: 'lg:h-60',
+        width: 'lg:w-44',
+      };
     case "large":
       return {
         height: "lg:h-32",
@@ -54,8 +59,7 @@ const sizeOption = computed(() => {
 
 .rayas {
   width: 90%;
-  height: 90%;
-  
+  height: 90%;  
   border-radius: 15px;
   background: repeating-linear-gradient(
     45deg,
@@ -66,7 +70,6 @@ const sizeOption = computed(() => {
   );
   z-index: 100;
 }
-
 
 .centered {
   margin: auto;

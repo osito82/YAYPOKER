@@ -15,27 +15,55 @@
 
         <div
           id="comunityCards"
-          class="flex bottom-3  w-4/5 bg-blue-600 space-x-14 justify-center  min-h-fit"
+          class="flex bottom-3  w-4/5 bg-blue-600 space-x-4 justify-center mb-6  "
         >
-          <Card :size="'large'" :numSymbol="'Tc'" />
-          <Card :size="'small'" :numSymbol="'Tc'" />
-          <Card :numSymbol="'Ah'" :scale="150" />
-          <CardBack :size="'large'"/><CardBack :size="'large'"/><CardBack :size="'large'"/>
+          <Card :size="'extraLarge'" :numSymbol="'Tc'" />
+          <Card :size="'extraLarge'" :numSymbol="'Tc'" />
+          <Card :size="'extraLarge'" :numSymbol="'Ah'" />
+          <CardBack :size="'extraLarge'"/><CardBack :size="'extraLarge'"/>
         </div>
       
         <div
           id="mySpace"
-          class="flex bottom-3  w-4/5 bg-orange-600 space-x-14 justify-center  min-h-fit"
+          class="flex bottom-3  w-4/5 bg-green-600 space-x-4   "
         >
-          <Card :scale="150" :numSymbol="'Tc'" />
-          <Card :numSymbol="'Ah'" :scale="150" />
-          <CardBack :size="'large'"/><CardBack :size="'large'"/><CardBack :size="'large'"/>
+
+        <div
+        id="myCards"
+        class="flex bottom-3 bg-gray-600 space-x-4 left-0   "
+      >
+
+          <Card :size="'extraLarge'"  :numSymbol="'Tc'" />
+          <Card :size="'extraLarge'"  :numSymbol="'Ah'"  />
+
+</div>
+
+      <div
+        id="myCards"
+        class="flex bottom-3 bg-gray-600 space-x-4 left-0   "
+      >
+
+        numbers
+
+</div>
+
+
+
+
         </div>
       </main>
       
 
         <aside class="w-full sm:w-1/3 md:w-1/4 px-1 bg-blue-100  ">
-          <div id="players" class="top-0 p-4 w-full bg-red-500 " >
+          
+          <div id="players" class="top-0 p-4 w-full bg-red-500 border border-black" >
+          
+          
+            <fieldset class='p-3 '>
+              <legend>A Legend Title</legend>
+              Blah blah. Blah blah.
+            </fieldset>
+
             <Player
               :playerName="'Osito'"
               :playerChips="1000"

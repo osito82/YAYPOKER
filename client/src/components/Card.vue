@@ -37,6 +37,12 @@ import { simbolConverter, whatColor } from "../vutils.js";
 
 const sizeOption = computed(() => { 
   switch (props.size) {
+    case 'extraLarge':
+      return {
+        textSize: 'text-9xl',
+        height: 'lg:h-60',
+        width: 'lg:w-44',
+      };
     case 'large':
       return {
         textSize: 'text-7xl',

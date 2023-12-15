@@ -17,11 +17,11 @@
     </div>
 
     <div id="cards" v-if="showFront" class="flex space-x-2">
-      <Card v-for="card in playerCards" :key="card.id" :numSymbol="card" />
+      <Card v-for="card in playerCards" :key="card.id" :numSymbol="card" :size="'large'"  />
     </div>
 
     <div id="coverCards" v-if="!showFront" class="flex space-x-2">
-      <CardBack v-for="card in playerCards" :key="card.id" />
+      <CardBack v-for="card in playerCards" :key="card.id" :size="'large'" />
     </div>
   </div>
 </template>
