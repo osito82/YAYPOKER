@@ -1,4 +1,17 @@
 <template>
+
+
+
+  <div>
+    <h1>Conexión al WebSocket</h1>
+    <p v-if="socket && socket.readyState === WebSocket.OPEN">Conectado al WebSocket</p>
+    <p v-else>Desconectado del WebSocket</p>
+
+    <button @click="connectSocket">Conectar al WebSocket</button>
+    <button @click="disconnectSocket">Desconectar del WebSocket</button>
+  </div>
+
+
   <Logo />
   <div>
     <div class="container mx-auto bg-red-100">
@@ -9,57 +22,34 @@
 
       <div id="main_holder" class="flex flex-row flex-wrap py-2 h-max bg-pink-500">
         <main
-        role="main"
-        class="w-full sm:w-2/3 md:w-3/4 pt-4 px-2 h-auto bg-yellow-300 mx-auto flex justify-center flex-col items-center  "
-      >
-
-        <div
-          id="comunityCards"
-          class="flex bottom-3  w-4/5 bg-blue-600 space-x-4 justify-center mb-6  "
+          role="main"
+          class="w-full sm:w-2/3 md:w-3/4 pt-4 px-2 h-auto bg-yellow-300 mx-auto flex justify-center flex-col items-center"
         >
-          <Card :size="'extraLarge'" :numSymbol="'Tc'" />
-          <Card :size="'extraLarge'" :numSymbol="'Tc'" />
-          <Card :size="'extraLarge'" :numSymbol="'Ah'" />
-          <CardBack :size="'extraLarge'"/><CardBack :size="'extraLarge'"/>
-        </div>
-      
-        <div
-          id="mySpace"
-          class="flex bottom-3  w-4/5 bg-green-600 space-x-4   "
-        >
+          <div
+            id="comunityCards"
+            class="flex bottom-3 w-4/5 bg-blue-600 space-x-4 justify-center mb-6"
+          >
+            <Card :size="'extraLarge'" :numSymbol="'Tc'" />
+            <Card :size="'extraLarge'" :numSymbol="'Tc'" />
+            <Card :size="'extraLarge'" :numSymbol="'Ah'" />
+            <CardBack :size="'extraLarge'" /><CardBack :size="'extraLarge'" />
+          </div>
 
-        <div
-        id="myCards"
-        class="flex bottom-3 bg-gray-600 space-x-4 left-0   "
-      >
+          <div id="mySpace" class="flex bottom-3 w-4/5 bg-green-600 space-x-4">
+            <div id="myCards" class="flex bottom-3 bg-gray-600 space-x-4 left-0">
+              <Card :size="'extraLarge'" :numSymbol="'Tc'" />
+              <Card :size="'extraLarge'" :numSymbol="'Ah'" />
+            </div>
 
-          <Card :size="'extraLarge'"  :numSymbol="'Tc'" />
-          <Card :size="'extraLarge'"  :numSymbol="'Ah'"  />
+            <div id="myCards" class="flex bottom-3 bg-gray-600 space-x-4 left-0">
+              numbers
+            </div>
+          </div>
+        </main>
 
-</div>
-
-      <div
-        id="myCards"
-        class="flex bottom-3 bg-gray-600 space-x-4 left-0   "
-      >
-
-        numbers
-
-</div>
-
-
-
-
-        </div>
-      </main>
-      
-
-        <aside class="w-full sm:w-1/3 md:w-1/4 px-1 bg-blue-100  ">
-          
-          <div id="players" class="top-0 p-4 w-full bg-red-500 border border-black" >
-          
-          
-            <fieldset class='p-3 '>
+        <aside class="w-full sm:w-1/3 md:w-1/4 px-1 bg-blue-100">
+          <div id="players" class="top-0 p-4 w-full bg-red-500 border border-black">
+            <fieldset class="p-3">
               <legend>A Legend Title</legend>
               Blah blah. Blah blah.
             </fieldset>
@@ -110,6 +100,10 @@ import CardBack from "../components/CardBack.vue";
 import { usePokerStore } from "../store/pokerStore";
 import { useRoute } from "vue-router";
 import { computed, defineProps, onMounted, onUpdated, watch, ref, nextTick } from "vue";
+
+import useSockets from '../use/useSockets';
+
+const { socket, connectSocket, disconnectSocket } = useSockets("ws://localhost:8888");
 
 const route = useRoute();
 const pokerStore = usePokerStore();
