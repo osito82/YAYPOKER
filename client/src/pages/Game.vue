@@ -12,9 +12,7 @@
   <div>
     <div class="container mx-auto bg-red-100">
       <!-- BANNER -->
-      <div id="banner" class="sticky top-0 h-300 bg-slate-600 p-3">
-        <DataForm />
-      </div>
+  
 
       <div id="main_holder" class="flex flex-row flex-wrap py-2 h-max bg-pink-500">
         <main
@@ -96,13 +94,20 @@ import CardBack from "../components/CardBack.vue";
 import { usePokerStore } from "../store/pokerStore";
 import { useRoute } from "vue-router";
 import { computed, defineProps, onMounted, onUpdated, watch, ref, nextTick } from "vue";
-
 import useSockets from "../use/useSockets";
 
-const { socket, connectSocket, disconnectSocket } = useSockets("ws://localhost:8888");
 
-const route = useRoute();
 const pokerStore = usePokerStore();
+const route = useRoute();
+//const gameCode = route.params.gameCode;
+
+//console.log(pokerStore.getGameCredentials, 'okerStore.getGameCredentials')
+//console.log('Game Credentials:', pokerStore.getGameCredentials);
+
+
+
+
+//const route = useRoute();
 </script>
 
 <style scoped></style>

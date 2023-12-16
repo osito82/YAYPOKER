@@ -1,35 +1,39 @@
-// socketComposable.js
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import { usePokerStore } from "../store/pokerStore";
 
-export default function useWebSocket(url) {
+export default function useWebSocket(url, options) {
+  ///////////////////////////////////////////////////////////
+
+  const socketUrl = new URL(url);
+  if (options) {
+    console.log(options);
+    Object.keys(options).forEach((key) => {
+      socketUrl.searchParams.set(key, options[key]);
+    });
+  }
+
   const socket = ref(null);
 
-  const connectSocket = () => {
-    // Establecer conexión al WebSocket
-    socket.value = new WebSocket(url);
+  const pokerStore = usePokerStore();
 
-    // Manejar eventos o realizar acciones adicionales al conectar
-    // socket.value.addEventListener('message', (event) => {
-    //   console.log('Mensaje recibido:', event.data);
-    // });
+  const connectSocket = () => {
+    socket.value = new WebSocket(socketUrl);
+
+    socket.value.addEventListener("open", () => {
+      console.log("Conection is stablished");
+    });
+
+    socket.value.addEventListener("message", (event) => {
+      console.log("Mensaje recibido:", event.data);
+    });
   };
 
   const disconnectSocket = () => {
-    // Cerrar la conexión del WebSocket cuando el componente se destruye
     if (socket.value) {
       socket.value.close();
     }
   };
 
-  // Conectar el WebSocket cuando el componente se monta
-  onMounted(() => {
-    connectSocket();
-  });
-
-  // Desconectar el WebSocket cuando el componente se destruye
-  onBeforeUnmount(() => {
-    disconnectSocket();
-  });
 
   return {
     socket,

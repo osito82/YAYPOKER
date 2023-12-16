@@ -21,30 +21,35 @@ const startTime = new Date();
 const log = new osolog();
 
 wss.on("connection", (ws, req) => {
-  
   const urlParams = new URLSearchParams(req.url.substring(1));
-  const torneoId = urlParams.get("torneoId") ?? "default_Torneo";
+
+console.log(urlParams, 'urlParams')
+
+  const torneoId = urlParams.get("gameCode") ?? "default_Torneo";
   const playerName = urlParams.get("playerName") ?? randomName();
   const secretCode = urlParams.get("secretCode") ?? generateUniqueId(10);
 
-  const thisSocket = { id: generateUniqueId(), name: playerName, secretCode: secretCode, socket: ws };
+  const thisSocket = {
+    id: generateUniqueId(25),
+    name: playerName,
+    secretCode: secretCode,
+    socket: ws
+  };
 
   Socket.addSocket(thisSocket, torneoId);
 
   const thisMatch = new Match(torneoId, gameId);
-
-  setInterval(() => thisMatch.vigilant(), 2500);
+  //    setInterval(() => thisMatch.vigilant(), 2500);
 
   Torneo.addMatch(thisMatch, torneoId);
-
   let match = Torneo.getMatch(torneoId, gameId);
 
   ws.on("message", (data) => {
     let jsonData;
-
     if (data) {
       try {
         jsonData = JSON.parse(data);
+        //  console.log(jsonData, "=======================================");
       } catch (error) {
         console.error("Error al analizar el JSON:", error);
         ws.send(JSON.stringify({ error: "Formato JSON no válido" }));
@@ -158,6 +163,17 @@ app.get("/status", (req, res) => {
     },
   });
 });
+
+// app.get('/game/:id', (req, res) => {
+//   // El valor después de "game/" estará disponible en req.params.id
+//   const gameId = req.params.id;
+
+//   // Haz algo con el valor, por ejemplo, imprímelo en la consola
+//   console.log('Game ID:', gameId);
+
+//   // Envía una respuesta al cliente
+//   res.send(`El ID del juego es: ${gameId}`);
+// });
 
 app.get("*", (req, res) => {
   res.redirect("/");

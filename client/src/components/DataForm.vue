@@ -1,27 +1,56 @@
-<!-- src/components/MyForm.vue -->
 <template>
+  {{ pokerStore.getConnected }}
   <form class="my-form" @submit.prevent="submitForm">
-    <div class="form-group">
-      <label for="playerName">Player Name:</label>
-      <input type="text" id="playerName" v-model="gameCredentials.playerName" />
+    <div class="flex flex-row">
+      <div class="form-group">
+        <label for="playerName">Player Name:</label>
+        <input
+          type="text"
+          :disabled="pokerStore.getConnected"
+          id="playerName"
+          v-model="gameCredentials.playerName"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="secretCode">Secret Code:</label>
+        <input
+          type="password"
+          :disabled="pokerStore.getConnected"
+          id="secretCode"
+          v-model="gameCredentials.secretCode"
+        />
+      </div>
+
+      <div class="button-group">
+        <button :disabled="pokerStore.getConnected" @click="connect(true, 'newGame')">
+          New Game
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label for="gameCode">Game Code:</label>
+        <input
+          id="gameCode"
+          :disabled="pokerStore.getConnected"
+          v-model="gameCredentials.gameCode"
+        />
+      </div>
+
+      <div class="button-group">
+        <button
+          :disabled="pokerStore.getConnected || gameCredentials.gameCode == ''"
+          @click="connect(true, 'joinGame')"
+        >
+          Join a Game
+        </button>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="secretCode">Secret Code:</label>
-      <input type="password" id="secretCode" v-model="gameCredentials.secretCode" />
-    </div>
-
-    <div class="button-group">
-      <button @click="startGame">New Game</button>
-    </div>
-
-    <div class="form-group">
-      <label for="gameCode">Game Code:</label>
-      <input id="gameCode" v-model="gameCredentials.gameCode" />
-    </div>
-
-    <div class="button-group">
-      <button type="submit">Join a Game</button>
+    <div class="flex flex-row">
+      <div class="button-group">
+        <button @click="connect(false, 'exitGame')">Exit Game</button>
+      </div>
     </div>
   </form>
 </template>
@@ -31,11 +60,13 @@ import { ref, computed, reactive, onMounted, watch, onBeforeUnmount } from "vue"
 import { generateUniqueId } from "../vutils.js";
 import { useRoute } from "vue-router";
 import router from "../router";
+import useSockets from "../use/useSockets";
 import { usePokerStore } from "../store/pokerStore";
 const route = useRoute();
 
 const pokerStore = usePokerStore();
 
+const isConnected = ref(false);
 const gameCredentials = reactive({
   playerName: "",
   secretCode: "",
@@ -53,43 +84,55 @@ watch(gameCredentials, (newGameCredentials) => {
     newGameCredentials.playerName
   );
 
-
-  localStorage.setItem('gameCode', newGameCredentials.gameCode );
-  localStorage.setItem('secretCode', newGameCredentials.secretCode );
-  localStorage.setItem('playerName', newGameCredentials.playerName );
-
-
+  localStorage.setItem("gameCode", newGameCredentials.gameCode);
+  localStorage.setItem("secretCode", newGameCredentials.secretCode);
+  localStorage.setItem("playerName", newGameCredentials.playerName);
 });
 
-onBeforeUnmount(() => {
+onBeforeUnmount(() => {});
 
-});
+const connect = (onOff, type = "newGame") => {
+  //console.log(onOff), 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 
-const startGame = () => {
-  gameCode.value = generateUniqueId(10);
-  pokerStore.setGameCredentials(gameCode.value, secretCode.value, playerName.value);
+  //if (gameCredentials.gameCode == "") gameCredentials.gameCode = generateUniqueId(10);
+
+  if (type == "newGame") {
+    gameCredentials.gameCode = generateUniqueId(10);
+  }
+
+  const { socket, connectSocket, disconnectSocket } = useSockets(
+    `ws://localhost:8888`,
+    gameCredentials
+  );
+
+  if (!onOff) {
+    disconnectSocket();
+    pokerStore.setConnected(false);
+    return;
+  }
 
   router.push({
     name: "game",
-    params: { gameCode: pokerStore.getGameCredentials.gameCode },
+    params: { gameCode: gameCredentials.gameCode },
   });
+
+  connectSocket();
+
+  pokerStore.setConnected(true);
+  pokerStore.setGameCredentials(
+    gameCredentials.gameCode,
+    gameCredentials.secretCode,
+    gameCredentials.playerName
+  );
 };
 
 onMounted(() => {
+  const gameCodeLS = localStorage.getItem("gameCode");
+  const secretCodeLS = localStorage.getItem("secretCode");
+  const playerNameLS = localStorage.getItem("playerName");
 
-  const gameCodeLS = localStorage.getItem('gameCode');
-  const secretCodeLS = localStorage.getItem('secretCode');
-  const playerNameLS = localStorage.getItem('playerName');
-
-  gameCredentials.secretCode = secretCodeLS
-  gameCredentials.playerName = playerNameLS
-  // hola.value = storedGameCode || route.params.gameCode || '';
-  // pokerStore.updateUserPokerSot({ gameCode: hola.value });
-
-
-
-  const gameCode = route.params.gameCode;
-    gameCredentials.gameCode = gameCode;
+  gameCredentials.secretCode = secretCodeLS;
+  gameCredentials.playerName = playerNameLS;
 });
 </script>
 
@@ -116,13 +159,15 @@ input {
   font-size: 16px;
 }
 
-.button-group {
-  margin-top: 10px;
-}
-
 button {
   margin-left: 10px;
   padding: 9px;
   font-size: 16px;
+  background-color: blue;
+}
+
+button:disabled {
+
+  background-color: rgb(72, 72, 80);
 }
 </style>

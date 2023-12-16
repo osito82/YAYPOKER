@@ -3,26 +3,30 @@ const pinia = createPinia();
 
 export const usePokerStore = defineStore({
   id: "pokerStore",
-  // gameCode: "",
   state: () => ({
+    conected: false,
     gameCredentials: {
-      secretCode:"",
+      secretCode: "",
       gameCode: "",
       playerName: "",
     },
   }),
   getters: {
     getGameCredentials(state) {
-      //   return state.gameCode;
-      return state.gameCredentials; //
+      return state.gameCredentials;
+    },
+    getConnected(state) {
+      return state.conected;
     },
   },
   actions: {
+    setConnected(status) {
+      this.conected = status;
+    },
     setGameCredentials(gameCode, secretCode, playerName) {
       this.gameCredentials.playerName = playerName;
       this.gameCredentials.gameCode = gameCode;
       this.gameCredentials.secretCode = secretCode;
-
     },
   },
 });
