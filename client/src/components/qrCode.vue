@@ -46,6 +46,6 @@ const forceRender = async () => {
 
 const computedGameCode = computed(() => {
   forceRender();
-  return "http://localhost:5173/game/" + pokerStore.getGameCode;
+  return "http://localhost:5173/game/" + pokerStore.getGameCredentials.gameCode;
 });
 </script>

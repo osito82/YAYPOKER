@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted, watch } from "vue";
+import { ref, computed, reactive, onMounted, watch, onBeforeUnmount } from "vue";
 import { generateUniqueId } from "../vutils.js";
 import { useRoute } from "vue-router";
 import router from "../router";
@@ -52,6 +52,17 @@ watch(gameCredentials, (newGameCredentials) => {
     newGameCredentials.secretCode,
     newGameCredentials.playerName
   );
+
+
+  localStorage.setItem('gameCode', newGameCredentials.gameCode );
+  localStorage.setItem('secretCode', newGameCredentials.secretCode );
+  localStorage.setItem('playerName', newGameCredentials.playerName );
+
+
+});
+
+onBeforeUnmount(() => {
+
 });
 
 const startGame = () => {
@@ -65,6 +76,18 @@ const startGame = () => {
 };
 
 onMounted(() => {
+
+  const gameCodeLS = localStorage.getItem('gameCode');
+  const secretCodeLS = localStorage.getItem('secretCode');
+  const playerNameLS = localStorage.getItem('playerName');
+
+  gameCredentials.secretCode = secretCodeLS
+  gameCredentials.playerName = playerNameLS
+  // hola.value = storedGameCode || route.params.gameCode || '';
+  // pokerStore.updateUserPokerSot({ gameCode: hola.value });
+
+
+
   const gameCode = route.params.gameCode;
     gameCredentials.gameCode = gameCode;
 });
