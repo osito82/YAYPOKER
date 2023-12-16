@@ -2,13 +2,13 @@
 <template>
   <form class="my-form" @submit.prevent="submitForm">
     <div class="form-group">
-      <label for="name">Name:</label>
-      <input type="text" id="name" v-model="name" />
+      <label for="playerName">Player Name:</label>
+      <input type="text" id="playerName" v-model="gameCredentials.playerName" />
     </div>
 
     <div class="form-group">
       <label for="secretCode">Secret Code:</label>
-      <input type="password" id="secretCode" v-model="secretCode" />
+      <input type="password" id="secretCode" v-model="gameCredentials.secretCode" />
     </div>
 
     <div class="button-group">
@@ -17,7 +17,7 @@
 
     <div class="form-group">
       <label for="gameCode">Game Code:</label>
-      <input id="gameCode" v-model="gameCode" />
+      <input id="gameCode" v-model="gameCredentials.gameCode" />
     </div>
 
     <div class="button-group">
@@ -27,34 +27,48 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, reactive, onMounted, watch } from "vue";
 import { generateUniqueId } from "../vutils.js";
+import { useRoute } from "vue-router";
 import router from "../router";
 import { usePokerStore } from "../store/pokerStore";
+const route = useRoute();
 
 const pokerStore = usePokerStore();
 
-let name = ref("");
-let secretCode = ref("");
-let gameCode = ref("");
-
-//let stateOne = ref("1");
-//let stateTwo = ref("2");
+const gameCredentials = reactive({
+  playerName: "",
+  secretCode: "",
+  gameCode: "",
+});
 
 const submitForm = () => {
-  console.log("Name:", name.value);
-  console.log("Secret Code:", secretCode.value);
-  console.log("Game Code:", gameCode.value);
+  console.log("gameCredentials:", gameCredentials);
 };
+
+watch(gameCredentials, (newGameCredentials) => {
+  pokerStore.setGameCredentials(
+    newGameCredentials.gameCode,
+    newGameCredentials.secretCode,
+    newGameCredentials.playerName
+  );
+});
 
 const startGame = () => {
   gameCode.value = generateUniqueId(10);
-  pokerStore.setGameCode(gameCode.value);
+  pokerStore.setGameCredentials(gameCode.value, secretCode.value, playerName.value);
 
-  router.push({ name: "game", params: { gameCode: pokerStore.getGameCode } });
+  router.push({
+    name: "game",
+    params: { gameCode: pokerStore.getGameCredentials.gameCode },
+  });
 };
-</script>
 
+onMounted(() => {
+  const gameCode = route.params.gameCode;
+    gameCredentials.gameCode = gameCode;
+});
+</script>
 
 <style scoped>
 .my-form {

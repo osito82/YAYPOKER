@@ -17,7 +17,6 @@
 import { ref, computed, defineProps } from "vue";
 
 const props = defineProps({
-  numSymbol: Object,
   size: String,
 });
 

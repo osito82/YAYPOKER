@@ -1,4 +1,7 @@
 <script setup>
+import { usePokerStore } from "../store/pokerStore";
+const pokerStore = usePokerStore();
+
 import { ref } from 'vue'
 
 defineProps({
@@ -10,6 +13,8 @@ const count = ref(0)
 
 <template>
   <h1 class="logo">Oso Poker</h1>
+
+{{ pokerStore.getGameCredentials }}
 
 </template>
 

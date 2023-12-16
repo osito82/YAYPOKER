@@ -1,20 +1,28 @@
 import { createPinia, defineStore } from "pinia";
 const pinia = createPinia();
 
-export const usePokerStore = defineStore({id: 'pokerStore',
- // gameCode: "",
+export const usePokerStore = defineStore({
+  id: "pokerStore",
+  // gameCode: "",
   state: () => ({
-    gameCode: '',
+    gameCredentials: {
+      secretCode:"",
+      gameCode: "",
+      playerName: "",
+    },
   }),
   getters: {
-    getGameCode(state) {
-   //   return state.gameCode;
-   return state.gameCode; //
+    getGameCredentials(state) {
+      //   return state.gameCode;
+      return state.gameCredentials; //
     },
   },
   actions: {
-    setGameCode(gameCode) {
-      this.gameCode = gameCode;
+    setGameCredentials(gameCode, secretCode, playerName) {
+      this.gameCredentials.playerName = playerName;
+      this.gameCredentials.gameCode = gameCode;
+      this.gameCredentials.secretCode = secretCode;
+
     },
   },
 });

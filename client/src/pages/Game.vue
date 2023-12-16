@@ -1,22 +1,18 @@
 <template>
-
-
-
   <div>
     <h1>Conexión al WebSocket</h1>
-    <p v-if="socket && socket.readyState === WebSocket.OPEN">Conectado al WebSocket</p>
-    <p v-else>Desconectado del WebSocket</p>
+    <!-- <p v-if="socket && socket.readyState === WebSocket.OPEN">Conectado al WebSocket</p> -->
+    <!-- <p v-else>Desconectado del WebSocket</p> -->
 
     <button @click="connectSocket">Conectar al WebSocket</button>
     <button @click="disconnectSocket">Desconectar del WebSocket</button>
   </div>
 
-
   <Logo />
   <div>
     <div class="container mx-auto bg-red-100">
       <!-- BANNER -->
-      <div id="banner" class="sticky top-0 h-300 bg-blue-200 p-3">
+      <div id="banner" class="sticky top-0 h-300 bg-slate-600 p-3">
         <DataForm />
       </div>
 
@@ -101,20 +97,12 @@ import { usePokerStore } from "../store/pokerStore";
 import { useRoute } from "vue-router";
 import { computed, defineProps, onMounted, onUpdated, watch, ref, nextTick } from "vue";
 
-import useSockets from '../use/useSockets';
+import useSockets from "../use/useSockets";
 
 const { socket, connectSocket, disconnectSocket } = useSockets("ws://localhost:8888");
 
 const route = useRoute();
 const pokerStore = usePokerStore();
-
-//pokerStore.getGameCode"
-
-onMounted(() => {
-  pokerStore.setGameCode(route.params.gameCode);
-  // console.log("route.query",  route.params.gameCode);
-  //updateGameCode();
-});
 </script>
 
 <style scoped></style>
