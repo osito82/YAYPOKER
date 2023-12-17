@@ -23,11 +23,9 @@ const log = new osolog();
 wss.on("connection", (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1));
 
-console.log(urlParams, 'urlParams')
-
-  const torneoId = urlParams.get("gameCode") ?? "default_Torneo";
-  const playerName = urlParams.get("playerName") ?? randomName();
-  const secretCode = urlParams.get("secretCode") ?? generateUniqueId(10);
+  const torneoId = (urlParams.get("gameCode") ?? "default_Torneo").slice(0, 25);
+  const playerName = (urlParams.get("playerName") ?? randomName()).slice(0, 25);
+  const secretCode = (urlParams.get("secretCode") ?? generateUniqueId(10)).slice(0, 25);
 
   const thisSocket = {
     id: generateUniqueId(25),

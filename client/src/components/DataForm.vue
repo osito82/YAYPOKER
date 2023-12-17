@@ -1,62 +1,78 @@
 <template>
-  {{ pokerStore.getConnected }}
-  <form class="my-form" @submit.prevent="submitForm">
-    <div class="flex flex-row">
+  <div class=" w-full sm:w-full md:w-full p-3 flex flex-col sm:flex-col bg-fuchsia-500">
+    <form
+      class="flex  flex-row items-center justify-between space-x-3"
+      @submit.prevent="submitForm"
+    >
       <div class="form-group">
-        <label for="playerName">Player Name:</label>
+        <label for="playerName" class="text-lg mb-2 mr-1 ml-4">Player Name:</label>
         <input
+          maxlength="20"
           type="text"
           :disabled="pokerStore.getConnected"
           id="playerName"
           v-model="gameCredentials.playerName"
+          class="p-2 text-lg"
         />
       </div>
 
       <div class="form-group">
-        <label for="secretCode">Secret Code:</label>
+        <label for="secretCode" class="text-lg mb-2 mr-2">Secret Code:</label>
         <input
+          maxlength="20"
           type="password"
           :disabled="pokerStore.getConnected"
           id="secretCode"
           v-model="gameCredentials.secretCode"
+          class="p-2 text-lg"
         />
       </div>
 
-      <div class="button-group">
-        <button :disabled="pokerStore.getConnected" @click="connect(true, 'newGame')">
+      <div class="flex items-center">
+        <button
+          :disabled="pokerStore.getConnected"
+          @click="connect(true, 'newGame')"
+          class="p-2 text-sm bg-blue-500 text-white"
+        >
           New Game
         </button>
       </div>
 
       <div class="form-group">
-        <label for="gameCode">Game Code:</label>
+        <label for="gameCode" class="text-lg mb-2 mr-2">Game Code:</label>
         <input
+          maxlength="20"
           id="gameCode"
           :disabled="pokerStore.getConnected"
           v-model="gameCredentials.gameCode"
+          class="p-2 text-lg"
         />
       </div>
 
-      <div class="button-group">
+      <div class="flex items-center">
         <button
-          :disabled="pokerStore.getConnected || gameCredentials.gameCode == ''"
+          :disabled="pokerStore.getConnected || gameCredentials.gameCode === ''"
           @click="connect(true, 'joinGame')"
+          class="p-2 text-sm bg-blue-500 text-white"
         >
           Join a Game
         </button>
       </div>
-    </div>
 
-    <div class="flex flex-row">
-      <div class="button-group">
-        <button @click="connect(false, 'exitGame')">Exit Game</button>
+      <div class="flex items-center">
+        <button
+          @click="connect(false, 'exitGame')"
+          class="p-2 text-sm bg-blue-500 text-white"
+        >
+          Exit Game
+        </button>
       </div>
-    </div>
-  </form>
+    </form>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted, watch, onBeforeUnmount } from "vue";
+import { ref, reactive, onMounted, watch, onBeforeUnmount } from "vue";
 import { generateUniqueId } from "../vutils.js";
 import { useRoute } from "vue-router";
 import router from "../router";
@@ -66,7 +82,6 @@ const route = useRoute();
 
 const pokerStore = usePokerStore();
 
-const isConnected = ref(false);
 const gameCredentials = reactive({
   playerName: "",
   secretCode: "",
@@ -89,13 +104,7 @@ watch(gameCredentials, (newGameCredentials) => {
   localStorage.setItem("playerName", newGameCredentials.playerName);
 });
 
-onBeforeUnmount(() => {});
-
 const connect = (onOff, type = "newGame") => {
-  //console.log(onOff), 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-
-  //if (gameCredentials.gameCode == "") gameCredentials.gameCode = generateUniqueId(10);
-
   if (type == "newGame") {
     gameCredentials.gameCode = generateUniqueId(10);
   }
@@ -133,41 +142,16 @@ onMounted(() => {
 
   gameCredentials.secretCode = secretCodeLS;
   gameCredentials.playerName = playerNameLS;
+  gameCredentials.gameCode = gameCodeLS;
+
+  gameCredentials.gameCode = route.params.gameCode;
 });
 </script>
 
 <style scoped>
-.my-form {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-}
-
-.form-group {
-  margin-bottom: 10px;
-}
-
-label {
-  font-size: 18px;
-  margin-bottom: 5px;
-  margin-right: 10px;
-  margin-left: 15px;
-}
-
-input {
-  padding: 8px;
-  font-size: 16px;
-}
-
-button {
-  margin-left: 10px;
-  padding: 9px;
-  font-size: 16px;
-  background-color: blue;
-}
 
 button:disabled {
-
   background-color: rgb(72, 72, 80);
 }
+
 </style>
