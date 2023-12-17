@@ -20,8 +20,21 @@
       <Card v-for="card in playerCards" :key="card.id" :numSymbol="card" :size="'large'"  />
     </div>
 
+
+    <Card
+    v-for="(card, index) in playerCards"
+    :key="index"
+    :size="'large'"
+    :numSymbol="card || ''"
+  />
+
     <div id="coverCards" v-if="!showFront" class="flex space-x-2">
-      <CardBack v-for="card in playerCards" :key="card.id" :size="'large'" />
+      
+      <CardSpace
+      v-for="index in 2 - playerCards.length"
+      :size="'large'"
+      :key="`space-${index}`"
+    />
     </div>
   </div>
 </template>
@@ -29,6 +42,7 @@
 <script setup>
 import Card from "../components/Card.vue";
 import CardBack from "../components/CardBack.vue";
+import CardSpace from "../components/CardSpace.vue";
 import { ref, computed } from "vue";
 
 const props = defineProps({
@@ -38,7 +52,7 @@ const props = defineProps({
   playerCards: Array,
   showCards: Boolean,
 });
-
+const playerCards = ref([ "Ah"]); // Array de cartas comunitarias (5 elementos)
 const showFront = computed(() => {
   return props.showCards;
 });

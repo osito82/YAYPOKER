@@ -12,7 +12,6 @@
   <div>
     <div class="container mx-auto bg-red-100">
       <!-- BANNER -->
-  
 
       <div id="main_holder" class="flex flex-row flex-wrap py-2 h-max bg-pink-500">
         <main
@@ -23,11 +22,20 @@
             id="comunityCards"
             class="flex bottom-3 w-4/5 bg-blue-600 space-x-4 justify-center mb-6"
           >
-            <Card :size="'extraLarge'" :numSymbol="'Tc'" />
-            <Card :size="'extraLarge'" :numSymbol="'Tc'" />
-            <Card :size="'extraLarge'" :numSymbol="'Ah'" />
-            <CardBack :size="'extraLarge'" /><CardBack :size="'extraLarge'" />
+            
+            <Card
+              v-for="(card, index) in communityCards"
+              :key="index"
+              :size="'extraLarge'"
+              :numSymbol="card || ''"
+            />
+            <CardSpace
+              v-for="index in 5 - communityCards.length"
+              :size="'extraLarge'"
+              :key="`space-${index}`"
+            />
           </div>
+
 
           <div id="mySpace" class="flex bottom-3 w-4/5 bg-green-600 space-x-4">
             <div id="myCards" class="flex bottom-3 bg-gray-600 space-x-4 left-0">
@@ -86,16 +94,19 @@
 <script setup>
 import Logo from "../components/Logo.vue";
 import qrCode from "../components/qrCode.vue";
-import DataForm from "../components/DataForm.vue";
 
 import Player from "../components/Player.vue";
 import Card from "../components/Card.vue";
+import CardSpace from "../components/CardSpace.vue";
 import CardBack from "../components/CardBack.vue";
 import { usePokerStore } from "../store/pokerStore";
 import { useRoute } from "vue-router";
 import { computed, defineProps, onMounted, onUpdated, watch, ref, nextTick } from "vue";
 import useSockets from "../use/useSockets";
 
+const communityCards = ref(["Tc", "Tc", "Ah"]); // Array de cartas comunitarias (5 elementos)
+
+const showDealerSpace = ref(true);
 
 const pokerStore = usePokerStore();
 const route = useRoute();
@@ -104,10 +115,16 @@ const route = useRoute();
 //console.log(pokerStore.getGameCredentials, 'okerStore.getGameCredentials')
 //console.log('Game Credentials:', pokerStore.getGameCredentials);
 
-
-
-
 //const route = useRoute();
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Estilo para el espacio de la carta del dealer */
+.cardSpace {
+  width: 100px;
+  height: 150px;
+  background-color: #df0808; /* Puedes ajustar el color según tu preferencia */
+  border-radius: 8px;
+  margin-right: 10px;
+}
+</style>
