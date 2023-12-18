@@ -1,7 +1,7 @@
 <template>
-  <div class=" w-full sm:w-full md:w-full p-3 flex flex-col sm:flex-col bg-fuchsia-500">
+  <div class="w-full sm:w-full md:w-full p-3 flex flex-col sm:flex-col bg-fuchsia-500">
     <form
-      class="flex  flex-row items-center justify-between space-x-3"
+      class="flex flex-row items-center justify-between space-x-3"
       @submit.prevent="submitForm"
     >
       <div class="form-group">
@@ -109,7 +109,7 @@ const connect = (onOff, type = "newGame") => {
     gameCredentials.gameCode = generateUniqueId(10);
   }
 
-  const { socket, connectSocket, disconnectSocket } = useSockets(
+  const { socket, connectSocket, disconnectSocket, sendMessage } = useSockets(
     `ws://localhost:8888`,
     gameCredentials
   );
@@ -149,9 +149,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-
 button:disabled {
   background-color: rgb(72, 72, 80);
 }
-
 </style>

@@ -51,10 +51,12 @@
 
         <aside class="w-full sm:w-1/3 md:w-1/4 px-1 bg-blue-100">
           <div id="players" class="top-0 p-4 w-full bg-red-500 border border-black">
-            <fieldset class="p-3">
-              <legend>A Legend Title</legend>
-              Blah blah. Blah blah.
-            </fieldset>
+ 
+
+
+{{ 'silomon 4547' }}
+{{ pokerStore.getSocketMessage }}
+
 
             <Player
               :playerName="'Osito'"
