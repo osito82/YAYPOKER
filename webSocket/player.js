@@ -1,10 +1,11 @@
 const PokerCore = require("./pokerCore");
 
 class Player {
-  constructor(gameId, name, chips, cards, id) {
+  constructor(gameId, name, secretCode, chips, cards, id) {
     this.name = name;
     this.id = id;
     this.gameId = gameId;
+    this.secretCode = secretCode
     this.chips = chips;
     this.cards = cards;
   }
