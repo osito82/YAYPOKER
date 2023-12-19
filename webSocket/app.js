@@ -75,7 +75,7 @@ wss.on("connection", (ws, req) => {
       const targetSocket = Socket.getSocket(torneoId, targetPlayerId);
 
       if (targetSocket && targetSocket.socket) {
-        targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+        targetSocket.socket.send(JSON.stringify({ message: {displayMsg: targetMessage} }));
       } else {
         console.log(
           `Jugador con ID ${targetPlayerId} no encontrado o sin socket`

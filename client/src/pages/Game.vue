@@ -12,7 +12,8 @@
   <div>
     <div class="container mx-auto bg-red-100">
       <!-- BANNER -->
-
+<MessageBox :message="getKeyData(pokerStore.getSocketMessage, 'displayMsg')" />
+{{ console.log(pokerStore.getSocketMessage) }}
       <div id="main_holder" class="flex flex-row flex-wrap py-2 h-max bg-pink-500">
         <main
           role="main"
@@ -101,11 +102,12 @@ import Player from "../components/Player.vue";
 import Card from "../components/Card.vue";
 import CardSpace from "../components/CardSpace.vue";
 import CardBack from "../components/CardBack.vue";
+import MessageBox from "../components/MessageBox.vue"
 import { usePokerStore } from "../store/pokerStore";
 import { useRoute } from "vue-router";
 import { computed, defineProps, onMounted, onUpdated, watch, ref, nextTick } from "vue";
 import useSockets from "../use/useSockets";
-
+import { getKeyData } from "../vutils.js";
 const communityCards = ref(["Tc", "Tc", "Ah"]); // Array de cartas comunitarias (5 elementos)
 
 const showDealerSpace = ref(true);

@@ -73,7 +73,7 @@ class Match {
     );
 
     const existingPlayerIndex = this.players.findIndex(
-      (s) => (s.name === data.name && s.secretCode === data.secretCode)
+      (s) => s.name === data.name && s.secretCode === data.secretCode
     );
 
     if (existingPlayerIndex !== -1) {
@@ -681,7 +681,11 @@ class Match {
 
     ///Check Minimun Players
     if (!this.dealer.hasMinimunPlayers()) {
-      this.dealer.talkToAllPlayersOnTable("Minimun 2 Players to Start");
+      this.communicator.msgBuilder("startGame", "public", null, {
+        displayMsg: "Minimun 2 Players to Start",
+      });
+
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
       return;
     }
 
