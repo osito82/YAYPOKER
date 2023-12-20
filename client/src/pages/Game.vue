@@ -60,6 +60,21 @@
 {{ pokerStore.getPLayers }}
 
 
+
+<Player
+v-for="(player, index) in pokerStore.getPLayers"
+:key="index"
+
+:playerName="player.name"
+:playerChips="player.chips"
+:showCards="true"
+:playerAction="'All in'"
+:playerCards="player.playerCards"
+
+/>
+
+
+
             <Player
               :playerName="'Osito'"
               :playerChips="1000"

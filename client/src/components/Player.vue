@@ -1,4 +1,5 @@
 <template>
+  {{ props }}
   <div id="playerContainer" class="flex  items-center justify-between mb-3 max-w-max ">
     
 
@@ -16,9 +17,9 @@
       </div>
     </div>
 
-    <div id="cards" v-if="showFront" class="flex space-x-2">
+    <!-- <div id="cards" v-if="showFront" class="flex space-x-2">
       <Card v-for="card in playerCards" :key="card.id" :numSymbol="card" :size="'large'"  />
-    </div>
+    </div> -->
 
 
     <Card
@@ -49,10 +50,15 @@ const props = defineProps({
   playerName: String,
   playerChips: Number,
   playerAction: String,
-  playerCards: Array,
+  
+  playerCards: {
+    type: Array,
+    default: () => ['5d', 'Ts'] // Inicialización predeterminada como un array vacío
+  },
+
   showCards: Boolean,
 });
-const playerCards = ref([ "Ah"]); // Array de cartas comunitarias (5 elementos)
+
 const showFront = computed(() => {
   return props.showCards;
 });
