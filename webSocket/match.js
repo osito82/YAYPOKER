@@ -81,7 +81,11 @@ class Match {
       console.log(`Usuario ${data.name} se ha reconectado.`);
 
       if (this.stepChecker.checkStep("pause")) {
-        this.dealer.talkToAllPlayersOnTable(`${data.name} ya volvio`);
+        this.communicator.msgBuilder("startGame", "public", null, {
+          displayMsg: `${data.name} is Back!`,
+        });
+        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+
         this.stepChecker.revokeStep("pause");
         this.continue(thisSocket);
       }
@@ -408,17 +412,22 @@ class Match {
 
   pause(thisSocket) {
     console.log("MATCH - pause");
-    this.dealer.talkToAllPlayersOnTable(
-      `The user ${thisSocket.name} - ${thisSocket.id} got disconnected`
-    );
+
+    this.communicator.msgBuilder("startGame", "public", null, {
+      displayMsg: `The user ${thisSocket.name} got disconnected`,
+    });
+    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+
     this.stepChecker.grantStep("pause");
 
     setTimeout(() => {
       this.stepChecker.revokeStep("pause");
       this.playerLeave(thisSocket);
-      this.dealer.talkToAllPlayersOnTable(
-        `Player ${thisSocket.name} - ${thisSocket.id} didnt come back, lets continue`
-      );
+
+      this.communicator.msgBuilder("startGame", "public", null, {
+        displayMsg: `Player ${thisSocket.name} did not come back, let's continue`,
+      });
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
     }, 15000);
     this.continue(thisSocket);
   }
@@ -675,7 +684,11 @@ class Match {
 
     ///Pause
     if (this.stepChecker.checkStep("pause")) {
-      this.dealer.talkToAllPlayersOnTable("We are on pause");
+      this.communicator.msgBuilder("startGame", "public", null, {
+        displayMsg: "We are on pause",
+      });
+
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
       return;
     }
 

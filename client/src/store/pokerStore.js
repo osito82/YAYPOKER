@@ -4,16 +4,18 @@ const pinia = createPinia();
 export const usePokerStore = defineStore({
   id: "pokerStore",
   state: () => ({
-    socketMessage: "",
+    socketMessage: null,
     conected: false,
     gameCredentials: {
       secretCode: "",
       gameCode: "",
       playerName: "",
     },
+    players: null,
+    displayMsg: null,
   }),
   getters: {
-    getSocketMessage(state){
+    getSocketMessage(state) {
       return state.socketMessage;
     },
     getGameCredentials(state) {
@@ -22,11 +24,36 @@ export const usePokerStore = defineStore({
     getConnected(state) {
       return state.conected;
     },
+    getPLayers(state) {
+      return state.players;
+    },
+    getDisplayMsg(state) {
+      return state.displayMsg;
+    },
+
+
   },
   actions: {
     setSocketMessage(message) {
-      this.socketMessage = message
+      if (!message) this.socketMessage = {};
+      const msgObj = JSON.parse(message);
+
+      //     this.socketMessage = msgObj;
+
+      const {
+        message: {
+          data: { displayMsg },
+        },
+      } = msgObj;
+      this.displayMsg = displayMsg;
+
+
+      const {
+        message: { players },
+      } = msgObj;
+      this.players = players;
     },
+
     setConnected(status) {
       this.conected = status;
     },
@@ -35,7 +62,6 @@ export const usePokerStore = defineStore({
       this.gameCredentials.gameCode = gameCode;
       this.gameCredentials.secretCode = secretCode;
     },
-
   },
 });
 

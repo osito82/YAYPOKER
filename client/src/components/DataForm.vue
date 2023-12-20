@@ -1,4 +1,5 @@
 <template>
+  {{ pokerStore.getSocketMessage }}
   <div class="w-full sm:w-full md:w-full p-3 flex flex-col sm:flex-col bg-fuchsia-500">
     <form
       class="flex flex-row items-center justify-between space-x-3"
