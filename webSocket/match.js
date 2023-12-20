@@ -365,10 +365,10 @@ class Match {
     if (foundPlayer && foundPlayer.cards.length > 0) {
       this.playersFold.push(foundPlayer.name);
 
-      const msg = msgBuilder("fold", "personal", foundPlayer, {});
-      this.dealer.talkToPLayerById(thisSocketId, msg);
+      this.communicator.msgBuilder("fold", "personal", foundPlayer, {});
+      this.dealer.talkToPLayerById(thisSocketId, this.communicator.getMsg());
 
-      this.communicator.msgBuilder("fold", "public", foundPlayer, {});
+      this.communicator.msgBuilder("fold", "public", foundPlayer , {});
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
       this.log
         .Template({ name: "brakets", date: true, title: "fold" })
@@ -670,7 +670,7 @@ class Match {
     );
 
     if (foundPlayerFold) {
-      const msg = msgBuilder(
+      this.communicator.msgBuilder(
         "startGame",
         "personal",
         { name: foundPlayerFold },
@@ -678,7 +678,7 @@ class Match {
           date: "No Re-enter after fold",
         }
       );
-      this.dealer.talkToSocketById(thisSocketId, msg);
+      this.dealer.talkToSocketById(thisSocketId, this.communicator.getMsg());
       return;
     }
 
