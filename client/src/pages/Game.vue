@@ -18,6 +18,19 @@
     <main class="flex-grow flex flex-col items-center justify-center p-4 relative">
       <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-green-800/20 via-black to-black opacity-60"></div>
 
+      <!-- Action Log (Left Side) -->
+      <div class="absolute left-6 top-24 w-64 z-40 hidden lg:block">
+         <div class="bg-black/60 backdrop-blur-md rounded-2xl border border-white/10 p-4 shadow-2xl">
+            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3 border-b border-white/5 pb-2">Dealer History</h3>
+            <div class="space-y-3">
+               <div v-for="log in pokerStore.getDealerLog" :key="log.id" class="text-xs animate-in fade-in slide-in-from-left duration-500">
+                  <span class="text-gray-500 font-mono mr-2">»</span>
+                  <span :class="log.type === 'private' ? 'text-blue-400 italic' : 'text-gray-200'">{{ log.text }}</span>
+               </div>
+            </div>
+         </div>
+      </div>
+
       <!-- Poker Table -->
       <div class="relative bg-green-900 border-[16px] border-yellow-950 rounded-[180px] w-full max-w-6xl h-[520px] shadow-[0_0_150px_rgba(0,0,0,1)] flex flex-col justify-between p-16 mb-12">
         
@@ -74,7 +87,7 @@
       </div>
     </main>
 
-    <!-- CONTROL CONSOLE (FOOTER) -->
+    <!-- CONTROL CONSOLE -->
     <footer class="bg-gray-900 border-t-4 border-yellow-600/20 p-8 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] z-50">
       <div class="max-w-7xl mx-auto flex flex-col xl:flex-row items-center justify-between gap-10">
         
@@ -82,11 +95,11 @@
         <div class="flex items-center space-x-6 min-w-[250px]">
            <div v-if="isMyTurn" class="flex items-center text-yellow-500">
               <div class="w-4 h-4 bg-yellow-500 rounded-full mr-3 animate-ping"></div>
-              <span class="text-2xl font-black uppercase italic tracking-widest">IT'S YOUR TURN!</span>
+              <span class="text-2xl font-black uppercase italic tracking-widest">YOUR TURN!</span>
            </div>
            <div v-else class="text-gray-600 flex items-center font-bold uppercase tracking-widest">
               <svg class="animate-spin h-6 w-6 mr-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-              Waiting for others...
+              Waiting...
            </div>
         </div>
 
@@ -100,7 +113,7 @@
             Post Blind
           </button>
 
-          <!-- Standard Buttons (Only if not blind) -->
+          <!-- Standard Buttons -->
           <div v-if="isMyTurn && !canBlind" class="flex gap-4">
             <button v-if="canFold || options.includes('fold')" @click="sendAction('fold')" class="btn-casino bg-red-800 border-red-950 hover:bg-red-700">Fold</button>
             <button v-if="canCheck || options.includes('check')" @click="sendAction('check')" class="btn-casino bg-gray-700 border-gray-900 hover:bg-gray-600">Check</button>
