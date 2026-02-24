@@ -6,17 +6,16 @@ class Dealer {
     this.torneoId = torneoId;
     this.deck = deck;
     this.players = players;
-    this.pot = pot;
-    this.cardsDealer = cardsDealer;
+    this.pot = pot || 0;
+    this.cardsDealer = cardsDealer || [];
+    this.playersChecked = [];
+    this.finalHands = [];
   }
-
-  pot = 0;
-  playersChecked = [];
-  finalHands = [];
 
   setFinalHands = () => {
     let currentPrize = {};
     console.log("DEALER - setFinalHands");
+    this.finalHands = []; // Clear previous hands
     this.players.forEach((player) => {
       currentPrize = player.getCurrentPrize();
       currentPrize.name = player.name;
@@ -27,9 +26,6 @@ class Dealer {
         ...currentPrize,
       });
     });
-        //osito
-
-
   };
 
   getFinalHands = () => {
@@ -37,8 +33,14 @@ class Dealer {
   };
 
   allPlayersCheck = () => {
-    return this.players.every((player) =>
-      this.playersChecked.includes(player.id)
+    const activePlayers = this.players.filter(p => p.connected && !p.folded);
+    const maxBet = Math.max(...activePlayers.map(p => p.getCurrentBet()));
+    
+    // Una ronda termina si:
+    // 1. Todos los jugadores activos han igualado la apuesta máxima.
+    // 2. Todos los jugadores activos han tenido la oportunidad de actuar (están en playersChecked).
+    return activePlayers.every(p => 
+      p.getCurrentBet() === maxBet && this.playersChecked.includes(p.id)
     );
   };
 
@@ -47,16 +49,18 @@ class Dealer {
   };
 
   removeChecks = () => {
-    console.log("removeChecks");
+    console.log("DEALER - removeChecks");
     this.playersChecked = [];
   };
 
   setChecked = (thisSocketId) => {
-    this.playersChecked.push(thisSocketId);
+    if (!this.playersChecked.includes(thisSocketId)) {
+      this.playersChecked.push(thisSocketId);
+    }
   };
 
   setPot(chipsToBet) {
-    this.pot = this.pot + chipsToBet;
+    this.pot = Number(this.pot) + Number(chipsToBet);
   }
 
   getPot() {
@@ -71,12 +75,14 @@ class Dealer {
   dealCardsEachPlayer = (numberOfCards = 1) => {
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
-        if (player.countCards() == 2) return;
-
-        const cardToDeal = this.deck.shift();
-        if (cardToDeal) {
-          player.setCard(cardToDeal);
-        } 
+        if (player.connected && !player.folded) {
+          if (player.countCards() < 2) {
+            const cardToDeal = this.deck.shift();
+            if (cardToDeal) {
+              player.setCard(cardToDeal);
+            }
+          }
+        }
       });
     }
   };
@@ -98,7 +104,7 @@ class Dealer {
     this.cardsDealer.push(card);
   }
 
-  hasMinimunPlayers() {
+  hasMinimumPlayers() {
     const connectedPlayers = this.players.filter(p => p.connected);
     return connectedPlayers.length >= 2;
   }
@@ -114,8 +120,8 @@ class Dealer {
     }
   }
 
-  getPlayerById(number) {
-    const foundPlayer = this.players.find((myPlayer) => myPlayer.id === number);
+  getPlayerById(id) {
+    const foundPlayer = this.players.find((myPlayer) => myPlayer.id === id);
     if (foundPlayer) {
       return foundPlayer;
     } else {
@@ -123,12 +129,12 @@ class Dealer {
     }
   }
 
-  hasPlayerBetByNumber = (playerNUmber) => {
-    const playerToCheck = this.getPlayerByNumber(playerNUmber);
+  hasPlayerBetByNumber = (playerNumber) => {
+    const playerToCheck = this.getPlayerByNumber(playerNumber);
     if (playerToCheck) {
-      if (playerToCheck.getCurrentBet() == 0) return false;
-      return true;
+      return playerToCheck.getCurrentBet() !== 0;
     }
+    return false;
   };
 
   hasPlayerBet(player) {
@@ -140,33 +146,41 @@ class Dealer {
   }
 
   hasAllPlayersBet = () => {
-    const res = this.players.every((player) => {
+    const activePlayers = this.players.filter(p => p.connected && !p.folded);
+    return activePlayers.every((player) => {
       return Number(player.getCurrentBet()) !== 0;
     });
-
-    return res;
   };
 
-  talkToPLayerById(idNumber, targetMessage) {
+  talkToSocketById(socketId, targetMessage) {
     try {
-      const foundPLayer = this.getPlayerById(idNumber);
-
-      if (foundPLayer) {
-        const targetSocket = Socket.getSocket(this.torneoId, idNumber);
+      const allSockets = Socket.getSocketsByTorneo(this.torneoId);
+      if (allSockets) {
+        const targetSocket = allSockets.find((s) => s.id === socketId);
         if (targetSocket && targetSocket.socket) {
           targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
-        } else {
-          console.warn(`Socket not found for player ${idNumber}`);
         }
-      } else {
-        return;
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error in talkToSocketById:", error);
     }
   }
 
-  ///Sends Message to all player But not for One
+  talkToPLayerById(idNumber, targetMessage) {
+    try {
+      const foundPlayer = this.getPlayerById(idNumber);
+
+      if (foundPlayer) {
+        const targetSocket = Socket.getSocket(this.torneoId, idNumber);
+        if (targetSocket && targetSocket.socket) {
+          targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+        }
+      }
+    } catch (error) {
+      console.log("Error in talkToPLayerById:", error);
+    }
+  }
+
   talkToPlayerBUTid(idToOmitNumber, targetMessage) {
     try {
       this.players.forEach((player) => {
@@ -174,68 +188,25 @@ class Dealer {
 
         if (id && id !== idToOmitNumber) {
           this.talkToPLayerById(id, targetMessage);
-        } else {
-          return;
         }
       });
     } catch (error) {
-      console.log(error);
+      console.log("Error in talkToPlayerBUTid:", error);
     }
   }
 
-  talkToSocketById(idNumber, targetMessage) {
-    console.log("DEALER - talkToSocketById ");
-    try {
-      const allSockets = Socket.getSocketsByTorneo(this.torneoId);
-      if (allSockets) {
-        const targetSocket = Socket.getSocket(this.torneoId, idNumber);
-        targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  talkToPLayerByNumber(playerNumber, targetMessage) {
-    try {
-      const foundPlayer = this.getPlayerByNumber(playerNumber);
-
-      if (foundPlayer) {
-        const playerId = foundPlayer.id;
-        const targetSocket = Socket.getSocket(this.torneoId, playerId);
-        if (targetSocket) {
-          targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
-        } else {
-          console.log("There is not socket for player" + playerId);
-        }
-      } else {
-        return;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  ///Send Same Message to all the players who are playing
   talkToAllPlayersOnTable(targetMessage) {
     try {
       this.players.forEach((player) => {
         const { id } = player;
-
-        const socket = Socket.getSocket(this.torneoId, id);
-
-        if (socket) {
-          socket.socket.send(JSON.stringify({ message: targetMessage }));
-        }
+        this.talkToPLayerById(id, targetMessage);
       });
     } catch (error) {
-      console.log(error);
+      console.log("Error in talkToAllPlayersOnTable:", error);
     }
   }
 
-  ///Talk to all sockets in the torneo
   talkToAllSockets(targetMessage) {
-    console.log("MATCH - talkToAllSockets ");
     try {
       const allSockets = Socket.getSocketsByTorneo(this.torneoId);
       if (allSockets) {
@@ -244,7 +215,7 @@ class Dealer {
         });
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error in talkToAllSockets:", error);
     }
   }
 }

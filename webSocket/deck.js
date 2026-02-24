@@ -9,9 +9,9 @@ class Deck {
 ];
 
   static shuffleDeck = (deck, times = 1) => {
-    let shuffledDeck = [];
+    let shuffledDeck = [...deck];
 
-    shuffledDeck = shuffle(deck);
+    shuffledDeck = shuffle(shuffledDeck);
     if (times > 1) {
       for (let i = 0; i < times; i++) {
         shuffledDeck = shuffle(shuffledDeck);

@@ -29,10 +29,10 @@ function selectBestRankHands(arrayHands) {
     if (!arrayRanks.includes(hand.prizeRank)) arrayRanks.push(hand.prizeRank);
   });
 
-  const minimun = Math.min(...arrayRanks);
+  const minimum = Math.min(...arrayRanks);
 
   const bestHands = arrayHands.filter((hand) => {
-    return hand.prizeRank == minimun;
+    return hand.prizeRank == minimum;
   });
 
   return bestHands;
