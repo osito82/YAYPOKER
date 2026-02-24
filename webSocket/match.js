@@ -19,6 +19,7 @@ class Match {
     this.gameId = gameId;
 
     this.players = [];
+    this.pauseTimeouts = new Map(); // Para gestionar reconexiones
 
     this.playersFold = [];
     this.pot = 0;
@@ -47,7 +48,7 @@ class Match {
 
   signUp(data, thisSocket) {
     const { id: thisSocketId } = thisSocket;
-    console.log("MATCH - signUp");
+    console.log(`MATCH - signUp: ${data.name} [${thisSocketId}]`);
 
     ///Avoid Folders to play when startGame = true
     if (
@@ -58,46 +59,64 @@ class Match {
       return;
     }
 
-    if (this.players.length >= 10) {
-      console.log("Max Ten Players");
-      return;
-    }
-
-    const player = new Player(
-      this.gameId,
-      data.name,
-      data.secretCode,
-      data.totalChips,
-      [],
-      thisSocketId
-    );
-
-    
-
+    // Buscar si ya existe un jugador con ese nombre (reconexión)
     const existingPlayerIndex = this.players.findIndex(
-      (s) => s.name === data.name && s.secretCode === data.secretCode
+      (s) => s.name === data.name
     );
 
     if (existingPlayerIndex !== -1) {
-      this.players[existingPlayerIndex].id = player.id;
-      console.log(`Usuario ${data.name} se ha reconectado.`);
+      // CANCELAR EXPULSIÓN: Si había un timeout de pausa para este jugador, lo quitamos
+      if (this.pauseTimeouts.has(data.name)) {
+        clearTimeout(this.pauseTimeouts.get(data.name));
+        this.pauseTimeouts.delete(data.name);
+        console.log(`MATCH - Timeout de expulsión cancelado para ${data.name}`);
+      }
+
+      // Re-vincular el jugador existente con el nuevo socket ID
+      this.players[existingPlayerIndex].id = thisSocketId;
+      this.players[existingPlayerIndex].setLastAction("Reconnected");
+      this.players[existingPlayerIndex].setConnected(true);
+      
+      console.log(`Usuario ${data.name} se ha reconectado con ID: ${thisSocketId}`);
 
       if (this.stepChecker.checkStep("pause")) {
+        this.stepChecker.revokeStep("pause");
         this.communicator.msgBuilder("startGame", "public", null, {
           displayMsg: `${data.name} is Back!`,
         });
         this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
-
-        this.stepChecker.revokeStep("pause");
-        this.continue(thisSocket);
       }
+      
+      // Confirmar ID al jugador
+      this.communicator.msgBuilder("signUp", "private", this.players[existingPlayerIndex], {
+        method: "signUp",
+        msg: "Welcome back!",
+        id: thisSocketId,
+      });
+      this.dealer.talkToPLayerById(thisSocketId, this.communicator.getMsg());
+
     } else {
+      // Nuevo jugador
+      if (this.players.length >= 10) {
+        console.log("Max Ten Players");
+        return;
+      }
+
+      const player = new Player(
+        this.gameId,
+        data.name,
+        data.secretCode,
+        data.totalChips,
+        [],
+        thisSocketId
+      );
+
       this.players.push(player);
-      console.log(`Nuevo usuario ${data.name} ha sido agregado.`);
+      console.log(`Nuevo usuario ${data.name} agregado. Total: ${this.players.length}`);
 
       this.communicator.msgBuilder("signUp", "public", player, {
         method: "signUp",
-        msg: "New PLayer",
+        msg: `Welcome ${player.name} to the table!`,
         name: player.name,
         id: player.id,
       });
@@ -162,6 +181,7 @@ class Match {
       const aprovedBet = foundPlayer.setBet(chipsToBet);
 
       if (aprovedBet) {
+        foundPlayer.setLastAction(type === "setBet" ? "Bet" : "Raise");
         this.dealer.setPot(chipsToBet);
 
         this.communicator.msgBuilder("setBet", "public", foundPlayer, {
@@ -204,6 +224,7 @@ class Match {
       const aprovedBet = foundPlayer.setBet(diff);
 
       if (aprovedBet) {
+        foundPlayer.setLastAction("Call");
         this.dealer.setPot(diff);
 
         this.communicator.msgBuilder("setCall", "public", foundPlayer, {});
@@ -228,6 +249,7 @@ class Match {
     );
 
     if (foundPlayer) {
+      foundPlayer.setLastAction("Check");
       this.communicator.msgBuilder("setCheck", "public", foundPlayer, {
         method: "setCheck",
         msg: "Check!",
@@ -245,9 +267,9 @@ class Match {
     this.continue(thisSocket);
   };
 
-  setRise(thisSocketId, chipsToBet) {
+  setRise(thisSocket, chipsToBet) {
     console.log("MATCH - setRise");
-    this.setBet(thisSocketId, chipsToBet, "setRise");
+    this.setBet(thisSocket, chipsToBet, "setRise");
   }
 
   askForBlindBets(thisSocket) {
@@ -265,38 +287,42 @@ class Match {
         let thisPlayer = this.dealer.getPlayerByNumber(1);
         const dataMsg = {
           method: `askForBlindBets`,
-          msg: "Please make your Small Blind bet",
+          msg: `Waiting for ${thisPlayer.name} to post Small Blind`,
           name: thisPlayer.name,
           id: thisPlayer.id,
         };
 
-        this.communicator.msgBuilder(
-          `askForBlindBets`,
-          "private",
-          thisPlayer,
-          dataMsg
-        );
+        // Public info
+        this.communicator.msgBuilder(`askForBlindBets`, "public", thisPlayer, dataMsg);
+        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
 
+        // Private prompt
+        this.communicator.msgBuilder(`askForBlindBets`, "private", thisPlayer, {
+          ...dataMsg,
+          msg: "Please make your Small Blind bet (10 chips)"
+        });
         this.dealer.talkToPLayerById(thisPlayer.id, this.communicator.getMsg());
       }
 
       ///blinds Ask for bet P2
-      if (!this.dealer.hasPlayerBetByNumber(2)) {
+      if (this.dealer.hasPlayerBetByNumber(1) && !this.dealer.hasPlayerBetByNumber(2)) {
         let thisPlayer = this.dealer.getPlayerByNumber(2);
         const dataMsg = {
           method: `askForBlindBets`,
-          msg: "Please make your Big Blind bet",
+          msg: `Waiting for ${thisPlayer.name} to post Big Blind`,
           name: thisPlayer.name,
           id: thisPlayer.id,
         };
 
-        this.communicator.msgBuilder(
-          `askForBlindBets`,
-          "private",
-          thisPlayer,
-          dataMsg
-        );
+        // Public info
+        this.communicator.msgBuilder(`askForBlindBets`, "public", thisPlayer, dataMsg);
+        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
 
+        // Private prompt
+        this.communicator.msgBuilder(`askForBlindBets`, "private", thisPlayer, {
+          ...dataMsg,
+          msg: "Please make your Big Blind bet (20 chips)"
+        });
         this.dealer.talkToPLayerById(thisPlayer.id, this.communicator.getMsg());
       }
     }
@@ -305,34 +331,19 @@ class Match {
   askForBets = (thisSocket, bettingFor) => {
     console.log("MATCH - askForBets-" + bettingFor);
 
-    const currentBets = this.players.map((player) => player.getCurrentBet());
-    const allBetsAreZero = currentBets.every((bet) => bet === 0);
-
-    const bettingOptions = allBetsAreZero
-      ? ["bet", "fold", "check"]
-      : ["call", "rise", "fold"];
-
-    const dataMsg = {
-      method: `askForBets - ${bettingFor}`,
-      msg: "Please make your bet",
-      action: bettingOptions,
-    };
-
-    if (this.dealer.hasAllPlayersBet() && bettingFor == "firstBetting") {
-      return;
-    }
-    if (this.dealer.hasAllPlayersBet() && bettingFor == "flopBetting") {
-      return;
-    }
-    if (this.dealer.hasAllPlayersBet() && bettingFor == "turnBetting") {
-      return;
-    }
-    if (this.dealer.hasAllPlayersBet() && bettingFor == "riverBetting") {
-      return;
-    }
-
     this.players.forEach((player) => {
-      if (!this.dealer.hasPlayerBet(player)) {
+      // SOLO si está conectado y no ha foldeado
+      if (player.connected && !player.folded && !this.dealer.hasPlayerBet(player)) {
+        const currentBets = this.players.map((p) => p.getCurrentBet());
+        const allBetsAreZero = currentBets.every((bet) => bet === 0);
+        const bettingOptions = allBetsAreZero ? ["bet", "fold", "check"] : ["call", "rise", "fold"];
+
+        const dataMsg = {
+          method: `askForBets - ${bettingFor}`,
+          msg: "Please make your bet",
+          action: bettingOptions,
+        };
+
         this.communicator.msgBuilder(
           `askForBets - ${bettingFor}`,
           "public",
@@ -364,25 +375,20 @@ class Match {
       (myPlayer) => myPlayer.id == thisSocketId
     );
 
-    if (foundPlayer && foundPlayer.cards.length > 0) {
+    if (foundPlayer && !foundPlayer.folded) {
       this.playersFold.push(foundPlayer.name);
+      foundPlayer.setLastAction("Fold");
+      foundPlayer.setFolded(true);
 
       this.communicator.msgBuilder("fold", "personal", foundPlayer, {});
       this.dealer.talkToPLayerById(thisSocketId, this.communicator.getMsg());
 
       this.communicator.msgBuilder("fold", "public", foundPlayer , {});
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+      
       this.log
         .Template({ name: "brakets", date: true, title: "fold" })
         .R(this.communicator.getFullInfo());
-
-      const index = this.players.findIndex(
-        (player) => player.id === thisSocketId
-      );
-
-      if (index !== -1) {
-        this.players.splice(index, 1);
-      }
     }
 
     this.continue(thisSocket);
@@ -413,7 +419,11 @@ class Match {
   }
 
   pause(thisSocket) {
-    console.log("MATCH - pause");
+    console.log(`MATCH - pause: ${thisSocket.name}`);
+    const player = this.players.find(p => p.name === thisSocket.name);
+    if (player) {
+      player.setConnected(false);
+    }
 
     this.communicator.msgBuilder("startGame", "public", null, {
       displayMsg: `The user ${thisSocket.name} got disconnected`,
@@ -422,7 +432,8 @@ class Match {
 
     this.stepChecker.grantStep("pause");
 
-    setTimeout(() => {
+    // Guardar el timeout para poder cancelarlo si vuelve
+    const timeout = setTimeout(() => {
       this.stepChecker.revokeStep("pause");
       this.playerLeave(thisSocket);
 
@@ -431,6 +442,8 @@ class Match {
       });
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
     }, 15000);
+
+    this.pauseTimeouts.set(thisSocket.name, timeout);
     this.continue(thisSocket);
   }
 
@@ -482,11 +495,15 @@ class Match {
   };
 
   bettingCore = (thisSocket, bettingFor) => {
-    console.log("MATCH - bettingCore-" + bettingFor);
+    console.log(`MATCH - bettingCore-${bettingFor} | Pot: ${this.dealer.getPot()}`);
+    
+    // FILTRAR: Solo jugadores conectados y que no hayan foldeado
+    const activePlayers = this.players.filter(p => p.connected && !p.folded);
+
     const maxBet = Math.max(
-      ...this.players.map((player) => player.getCurrentBet())
+      ...activePlayers.map((player) => player.getCurrentBet())
     );
-    const currentBets = this.players.map((player) => player.getCurrentBet());
+    const currentBets = activePlayers.map((player) => player.getCurrentBet());
     const allBetsEqual = currentBets.every((bet) => bet === currentBets[0]);
     const allBetsAreZero = currentBets.every((bet) => bet === 0);
 
@@ -494,11 +511,17 @@ class Match {
       ? ["bet", "fold", "check"]
       : ["call", "rise", "fold"];
 
-    if (
-      (allBetsEqual && !allBetsAreZero) ||
-      (this.dealer.allPlayersCheck() &&
-        this.stepChecker.checkStep("dealtPrivateCards"))
-    ) {
+    // Determinar quién falta por actuar (de los activos)
+    const playersToAct = activePlayers.filter(player => {
+      const currentBet = player.getCurrentBet();
+      const hasChecked = this.dealer.getPlayersChecked().includes(player.id);
+      return (currentBet < maxBet) || (maxBet === 0 && !hasChecked);
+    });
+
+    console.log(`MATCH - Active Players: ${activePlayers.length}, To act: ${playersToAct.length}`);
+
+    if (playersToAct.length === 0 && (allBetsEqual || this.dealer.allPlayersCheck())) {
+      console.log(`MATCH - bettingCore-${bettingFor} COMPLETED`);
       this.dealer.removeChecks();
 
       if (bettingFor === "firstBetting") {
@@ -518,66 +541,46 @@ class Match {
         this.continue(thisSocket);
       }
     } else {
-      this.players.forEach((player) => {
-        const currentBet = player.getCurrentBet();
-        if (currentBet && currentBet != maxBet) {
-          this.communicator.msgBuilder(
-            `bettingCore-${bettingFor}`,
-            "private",
-            player,
-            {
-              messageForName: player.getPlayerName(),
-              messageForId: player.getPlayerId(),
-              action: bettingOptions,
-              currentBet: currentBet,
-              maxBet: maxBet,
-            }
-          );
+      // Aún faltan jugadores por actuar
+      playersToAct.forEach((player) => {
+        this.communicator.msgBuilder(
+          `bettingCore-${bettingFor}`,
+          "private",
+          player,
+          {
+            messageForName: player.getPlayerName(),
+            messageForId: player.getPlayerId(),
+            action: bettingOptions,
+            currentBet: player.getCurrentBet(),
+            maxBet: maxBet,
+          }
+        );
 
-          this.dealer.talkToPLayerById(
-            player.getPlayerId(),
-            this.communicator.getMsg()
-          );
+        this.dealer.talkToPLayerById(
+          player.getPlayerId(),
+          this.communicator.getMsg()
+        );
 
-          this.communicator.msgBuilder(
-            `bettingCore-${bettingFor}`,
-            "public",
-            player,
-            {
-              messageForName: player.getPlayerName(),
-              messageForId: player.getPlayerId(),
-              action: bettingOptions,
-            }
-          );
+        this.communicator.msgBuilder(
+          `bettingCore-${bettingFor}`,
+          "public",
+          player,
+          {
+            messageForName: player.getPlayerName(),
+            messageForId: player.getPlayerId(),
+            action: bettingOptions,
+          }
+        );
 
-          this.dealer.talkToPlayerBUTid(
-            player.getPlayerId(),
-            this.communicator.getMsg()
-          );
-
-          this.log
-            .Template({ name: "brakets", date: true, title: "bettingCore" })
-            .R(this.communicator.getFullInfo());
-        }
-        return;
+        this.dealer.talkToPlayerBUTid(
+          player.getPlayerId(),
+          this.communicator.getMsg()
+        );
       });
 
-      ///First Betting
-      if (bettingFor === "firstBetting") {
-        this.stepChecker.revokeStep("firstBetting");
-      }
-      ///Flop Betting
-      if (bettingFor === "flopBetting") {
-        this.stepChecker.revokeStep("flop_Bet_Step");
-      }
-      ///Turn Betting
-      if (bettingFor === "turnBetting") {
-        this.stepChecker.revokeStep("turn_Bet_Step");
-      }
-      ///River Betting
-      if (bettingFor === "riverBetting") {
-        this.stepChecker.revokeStep("river_Bet_Step");
-      }
+      this.log
+        .Template({ name: "brakets", date: true, title: "bettingCore" })
+        .R(this.communicator.getFullInfo());
     }
   };
 
@@ -662,7 +665,7 @@ class Match {
   }
 
   startGame(thisSocket = {}) {
-    console.log("MATCH - startGame");
+    console.log("MATCH - startGame - Current Step Checker State:", JSON.stringify(this.stepChecker.getChecker()));
 
     const { id: thisSocketId } = thisSocket;
 

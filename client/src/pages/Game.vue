@@ -27,6 +27,24 @@
       <!-- Background Texture (Optional) -->
       <div class="absolute inset-0 bg-green-900 opacity-50 pointer-events-none"></div>
 
+      <!-- Dealer Message Box (Top Left) -->
+      <div class="absolute top-4 left-4 z-30 w-64 bg-black bg-opacity-60 rounded-lg p-3 border border-gray-700 shadow-xl pointer-events-none">
+        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Dealer Info</h3>
+        <div class="space-y-2">
+          <div 
+            v-for="log in pokerStore.getDealerLog" 
+            :key="log.id" 
+            class="text-sm transition-opacity duration-500"
+            :class="log.type === 'private' ? 'text-blue-300 italic' : 'text-gray-200'"
+          >
+            {{ log.text }}
+          </div>
+          <div v-if="pokerStore.getDealerLog.length === 0" class="text-sm text-gray-600">
+            Waiting for game start...
+          </div>
+        </div>
+      </div>
+
       <!-- Poker Table -->
       <div
         class="relative bg-green-800 border-8 border-yellow-900 rounded-[100px] w-full max-w-6xl h-[600px] shadow-2xl flex flex-col justify-between p-8"
@@ -42,7 +60,7 @@
             :playerAction="player.lastAction"
             :playerCards="player.cards || []"
             :showCards="player.showCards"
-            :isActive="player.isActive"
+            :isActive="pokerStore.getActivePlayerId === player.id"
           />
         </div>
 
@@ -53,8 +71,8 @@
             POT: ${{ pokerStore.getPot }}
           </div>
 
-          <!-- Message Box / Game Status -->
-          <div v-if="pokerStore.getDisplayMsg" class="text-yellow-200 font-semibold text-lg animate-pulse">
+          <!-- Message Box / Game Status (Central) -->
+          <div v-if="pokerStore.getDisplayMsg" class="text-yellow-200 font-bold text-2xl animate-pulse text-center max-w-md drop-shadow-md">
             {{ pokerStore.getDisplayMsg }}
           </div>
 
@@ -83,7 +101,7 @@
             :playerAction="myPlayer.lastAction"
             :playerCards="myPlayer.cards || []"
             :showCards="true"
-            :isActive="myPlayer.isActive"
+            :isActive="pokerStore.getActivePlayerId === myPlayer.id"
             class="scale-110"
           /> 
           <div v-else class="text-gray-400 font-bold">Waiting for player...</div>
@@ -94,19 +112,21 @@
     <!-- Footer Controls -->
     <footer class="bg-gray-800 p-4 border-t border-gray-700">
       <div class="container mx-auto flex justify-center items-center space-x-4">
-        <button @click="sendAction('check')" class="btn-control bg-gray-600 hover:bg-gray-500">Check</button>
-        <button @click="sendAction('call')" class="btn-control bg-blue-600 hover:bg-blue-500">Call</button>
-        <div class="flex flex-col items-center space-y-1">
-             <button @click="sendAction('raise')" class="btn-control bg-yellow-600 hover:bg-yellow-500">Raise</button>
-             <input type="number" v-model="raiseAmount" class="w-20 bg-gray-700 text-white text-center rounded text-sm" placeholder="Amt" />
+        <!-- Blind Bet Button -->
+        <button v-if="canBlind" @click="sendAction('blind')" class="btn-control bg-purple-600 hover:bg-purple-500">Post Blind</button>
+
+        <button v-if="canCheck" @click="sendAction('check')" class="btn-control bg-gray-600 hover:bg-gray-500">Check</button>
+        <button v-if="canCall" @click="sendAction('call')" class="btn-control bg-blue-600 hover:bg-blue-500">Call</button>
+        
+        <div v-if="canBet || canRaise" class="flex flex-col items-center space-y-1">
+             <button @click="sendAction(canBet ? 'bet' : 'raise')" class="btn-control bg-yellow-600 hover:bg-yellow-500">
+                {{ canBet ? 'Bet' : 'Raise' }}
+             </button>
+             <input type="number" v-model="betAmount" class="w-20 bg-gray-700 text-white text-center rounded text-sm" placeholder="Amt" />
         </div>
        
-        <button @click="sendAction('fold')" class="btn-control bg-red-600 hover:bg-red-500">Fold</button>
+        <button v-if="canFold" @click="sendAction('fold')" class="btn-control bg-red-600 hover:bg-red-500">Fold</button>
       </div>
-      <!-- Debug/Info -->
-      <!-- <div class="text-center mt-2 text-xs text-gray-500">
-        Game Code: {{ gameCode }} | Player: {{ playerName }}
-      </div> -->
     </footer>
   </div>
 </template>
@@ -129,12 +149,19 @@ const pokerStore = usePokerStore();
 
 // Game State Setup
 const gameCode = route.params.gameCode || "default_Torneo";
-// Use provided player name or generate a random one
-const playerName = route.query.playerName || `Guest_${Math.floor(Math.random() * 1000)}`;
+
+// Persistir nombre para reconexiones
+const getSavedName = () => {
+  const saved = localStorage.getItem(`poker_name_${gameCode}`);
+  if (saved) return saved;
+  const newName = route.query.playerName || `Guest_${Math.floor(Math.random() * 1000)}`;
+  localStorage.setItem(`poker_name_${gameCode}`, newName);
+  return newName;
+};
+
+const playerName = getSavedName();
 const secretCode = uuidv4();
 
-// WebSocket Setup
-// Assuming the backend is on localhost:8888 based on analysis
 const wsUrl = "ws://localhost:8888"; 
 const connectionOptions = {
   gameCode,
@@ -144,34 +171,21 @@ const connectionOptions = {
 
 const { socket, connectSocket, disconnectSocket, sendMessage } = useWebSocket(wsUrl, connectionOptions);
 
-const isConnected = ref(false);
-const raiseAmount = ref(100);
-
-// Watch for socket state
-// Note: useSockets might need to expose connection state reactively. 
-// For now, we rely on pokerStore.conected or manual check.
-// But useSockets doesn't expose a reactive 'isConnected'. 
-// We can hook into the socket's events if exposed, or check pokerStore if the socket hook updates it.
-// Looking at useSockets.js, it doesn't update a reactive ref for connection status explicitly other than logging.
-// However, pokerStore has 'conected' state.
-// Let's assume useSockets or the app logic should update the store.
-// useSockets.js sets store.setConnected? No, it only logs.
-// I will implement a check or modify useSockets later, but for now let's just toggle.
+const isConnected = computed(() => pokerStore.getConnected);
+const betAmount = ref(100);
 
 const toggleConnection = () => {
   if (isConnected.value) {
     disconnectSocket();
-    isConnected.value = false;
   } else {
     connectSocket();
-    // Simulate connection success for UI immediately (real status should come from event)
-    setTimeout(() => isConnected.value = true, 500);
   }
 };
 
 onMounted(() => {
-  connectSocket();
-  isConnected.value = true;
+  if (!isConnected.value) {
+    connectSocket();
+  }
 });
 
 onBeforeUnmount(() => {
@@ -180,19 +194,23 @@ onBeforeUnmount(() => {
 
 // Computed Players
 const allPlayers = computed(() => pokerStore.getPLayers || []);
+const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName));
+const opponents = computed(() => allPlayers.value.filter(p => p.id !== myPlayer.value?.id));
 
-const myPlayer = computed(() => {
-  return allPlayers.value.find(p => p.name === playerName);
-});
+// Interaction Logic
+const isMyTurn = computed(() => pokerStore.getActivePlayerId === myPlayer.value?.id);
+const options = computed(() => pokerStore.getBettingOptions || []);
 
-const opponents = computed(() => {
-  return allPlayers.value.filter(p => p.name !== playerName);
-});
-
+const canCheck = computed(() => isMyTurn.value && options.value.includes('check'));
+const canCall = computed(() => isMyTurn.value && options.value.includes('call'));
+const canFold = computed(() => isMyTurn.value && options.value.includes('fold'));
+const canBet = computed(() => isMyTurn.value && options.value.includes('bet'));
+const canRaise = computed(() => isMyTurn.value && options.value.includes('rise'));
+const canBlind = computed(() => isMyTurn.value && options.value.includes('blind'));
 
 // Actions
 const sendAction = (action) => {
-  if (!isConnected.value) return;
+  if (!isConnected.value || !isMyTurn.value) return;
 
   switch (action) {
     case 'check':
@@ -204,8 +222,15 @@ const sendAction = (action) => {
     case 'fold':
       sendMessage({ action: 'fold' });
       break;
+    case 'bet':
+      sendMessage({ action: 'setBet', chipsToBet: betAmount.value });
+      break;
     case 'raise':
-      sendMessage({ action: 'setRise', chipsToRiseBet: raiseAmount.value });
+      sendMessage({ action: 'setRise', chipsToRiseBet: betAmount.value });
+      break;
+    case 'blind':
+      const isSmallBlind = pokerStore.getDisplayMsg.toLowerCase().includes('small');
+      sendMessage({ action: 'setBet', chipsToBet: isSmallBlind ? 10 : 20 });
       break;
   }
 };
@@ -214,6 +239,6 @@ const sendAction = (action) => {
 
 <style scoped>
 .btn-control {
-  @apply px-6 py-3 rounded font-bold shadow-lg transform transition hover:-translate-y-1 active:scale-95 text-white;
+  @apply px-6 py-3 rounded font-bold shadow-lg transform transition hover:-translate-y-1 active:scale-95 text-white disabled:opacity-50 disabled:cursor-not-allowed;
 }
 </style>

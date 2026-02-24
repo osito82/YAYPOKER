@@ -19,6 +19,7 @@ export default function useWebSocket(url, options) {
 
     socket.value.addEventListener("open", () => {
       console.log("Conexión establecida");
+      pokerStore.setConnected(true);
 
       // Llamas a sendMessage después de que la conexión está establecida
       sendMessage({
@@ -31,11 +32,22 @@ export default function useWebSocket(url, options) {
       console.log("Mensaje recibido:", event.data);
       pokerStore.setSocketMessage(event.data);
     });
+
+    socket.value.addEventListener("close", () => {
+      console.log("Conexión cerrada");
+      pokerStore.setConnected(false);
+    });
+
+    socket.value.addEventListener("error", (error) => {
+      handleSocketError(error);
+      pokerStore.setConnected(false);
+    });
   };
 
   const disconnectSocket = () => {
     if (socket.value) {
       socket.value.close();
+      pokerStore.setConnected(false);
     }
   };
 

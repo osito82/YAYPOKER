@@ -8,6 +8,9 @@ class Player {
     this.secretCode = secretCode
     this.chips = chips;
     this.cards = cards;
+    this.lastAction = "";
+    this.connected = true;
+    this.folded = false;
   }
 
   currentBet = 0;
@@ -51,6 +54,19 @@ class Player {
 
   getCurrentBet = () => {
     return this.currentBet;
+  };
+
+  setLastAction = (action) => {
+    this.lastAction = action;
+  };
+
+  setConnected = (status) => {
+    this.connected = status;
+  };
+
+  setFolded = (status) => {
+    this.folded = status;
+    if (status) this.cards = [];
   };
 
   giveChipsToDealer = () => {

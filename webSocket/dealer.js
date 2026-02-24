@@ -99,7 +99,8 @@ class Dealer {
   }
 
   hasMinimunPlayers() {
-    return this.players.length >= 2;
+    const connectedPlayers = this.players.filter(p => p.connected);
+    return connectedPlayers.length >= 2;
   }
 
   getPlayerByNumber(number) {
@@ -152,7 +153,11 @@ class Dealer {
 
       if (foundPLayer) {
         const targetSocket = Socket.getSocket(this.torneoId, idNumber);
-        targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+        if (targetSocket && targetSocket.socket) {
+          targetSocket.socket.send(JSON.stringify({ message: targetMessage }));
+        } else {
+          console.warn(`Socket not found for player ${idNumber}`);
+        }
       } else {
         return;
       }
