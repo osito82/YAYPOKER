@@ -3,11 +3,9 @@
     :class="[
       sizeOption.width,
       sizeOption.height,
-      'bg-white rounded-lg shadow-md border border-gray-300 relative select-none overflow-hidden flex justify-center items-center',
+      'border-2 border-dashed border-yellow-500 rounded-lg bg-black bg-opacity-20 flex justify-center items-center',
     ]"
-  >
-    <div class="rayas"></div>
-  </div>
+  ></div>
 </template>
 
 <script setup>
@@ -44,20 +42,4 @@ const sizeOption = computed(() => {
 </script>
 
 <style scoped>
-.rayas {
-  width: 90%;
-  height: 90%;
-  border-radius: 6px;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 5px,
-    #183b5a 5px,
-    #183b5a 10px
-  );
-}
-
-.centered {
-  margin: auto;
-}
 </style>
