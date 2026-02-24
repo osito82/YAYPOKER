@@ -1,11 +1,15 @@
 <template>
   <div
-    :class="[sizeOption.width, sizeOption.height, 'card', sizeOption.borderWidth, 'flex']"
+    :class="[
+      sizeOption.width,
+      sizeOption.height,
+      'border-2 border-dashed border-yellow-500 rounded-lg bg-black bg-opacity-20 flex justify-center items-center',
+    ]"
   ></div>
 </template>
 
 <script setup>
-import { ref, computed, defineProps } from "vue";
+import { computed, defineProps } from "vue";
 
 const props = defineProps({
   size: String,
@@ -15,43 +19,27 @@ const sizeOption = computed(() => {
   switch (props.size) {
     case "extraLarge":
       return {
-        height: "lg:h-60",
-        width: "lg:w-44",
-        borderWidth: "border-8",
+        height: "h-48",
+        width: "w-32",
       };
     case "large":
       return {
-        height: "lg:h-32",
-        width: "lg:w-24",
-        borderWidth: "border-4",
+        height: "h-36",
+        width: "w-24",
       };
     case "small":
       return {
-        height: "lg:h-16",
-        width: "lg:w-12",
-        borderWidth: "border-4",
+        height: "h-20",
+        width: "w-14",
       };
     default:
       return {
-        height: "lg:h-32",
-        width: "lg:w-24",
-        borderWidth: "border-4",
+        height: "h-36",
+        width: "w-24",
       };
   }
 });
 </script>
 
 <style scoped>
-.card {
-  background-color: transparent;
-  border-color: yellow;
-
-
-  position: relative;
-}
-
-.centered {
-  margin: auto;
-  text-align: center;
-}
 </style>

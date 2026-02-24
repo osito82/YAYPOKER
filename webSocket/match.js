@@ -72,6 +72,8 @@ class Match {
       thisSocketId
     );
 
+    
+
     const existingPlayerIndex = this.players.findIndex(
       (s) => s.name === data.name && s.secretCode === data.secretCode
     );

@@ -3,76 +3,61 @@
     :class="[
       sizeOption.width,
       sizeOption.height,
-      'card',
-      'bg-white',
-      'rounded-lg',
-      'flex',
+      'bg-white rounded-lg shadow-md border border-gray-300 relative select-none overflow-hidden flex justify-center items-center',
     ]"
   >
-    <div class="rayas centered"></div>
+    <div class="rayas"></div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, defineProps } from "vue";
+import { computed, defineProps } from "vue";
 
 const props = defineProps({
   size: String,
 });
 
-
 const sizeOption = computed(() => {
   switch (props.size) {
-    case 'extraLarge':
-      return {        
-        height: 'lg:h-60',
-        width: 'lg:w-44',
+    case "extraLarge":
+      return {
+        height: "h-48",
+        width: "w-32",
       };
     case "large":
       return {
-        height: "lg:h-32",
-        width: "lg:w-24",
+        height: "h-36",
+        width: "w-24",
       };
     case "small":
       return {
-        height: "lg:h-16",
-        width: "lg:w-12",
+        height: "h-20",
+        width: "w-14",
       };
     default:
       return {
-        height: "lg:h-32",
-        width: "lg:w-24",
+        height: "h-36",
+        width: "w-24",
       };
   }
 });
 </script>
 
 <style scoped>
-.card {
-  background-color: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 15px;
-  position: relative;
-  
-}
-
 .rayas {
   width: 90%;
-  height: 90%;  
-  border-radius: 15px;
+  height: 90%;
+  border-radius: 6px;
   background: repeating-linear-gradient(
     45deg,
     transparent,
     transparent 5px,
     #183b5a 5px,
-    #183b5a 15px
+    #183b5a 10px
   );
-  z-index: 100;
 }
 
 .centered {
   margin: auto;
-  text-align: center;
-  
 }
 </style>

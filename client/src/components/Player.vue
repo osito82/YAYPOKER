@@ -1,41 +1,46 @@
 <template>
-  {{ props }}
-  <div id="playerContainer" class="flex  items-center justify-between mb-3 max-w-max ">
-    
-
-
-    <div id="playerInfo" class="flex flex-col min-w-150 mr-4">
-
-      <div class="mb-5 text-xl font-semibold">{{ playerName }}</div>
-
-      <div class="info-item mb-5">
-        <strong>{{ playerChips }} Chips</strong>
+  <div
+    class="flex flex-col items-center p-2 rounded-lg bg-gray-800 bg-opacity-80 shadow-lg text-white w-40 transition-all duration-300 border-2"
+    :class="isActive ? 'border-yellow-400 scale-105' : 'border-transparent'"
+  >
+    <!-- Player Name & Avatar Placeholder -->
+    <div class="flex flex-col items-center mb-2">
+      <div
+        class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-xl font-bold mb-1 border-2 border-gray-400"
+      >
+        {{ playerName.charAt(0).toUpperCase() }}
       </div>
-
-      <div class="info-item">
-        <strong>{{ playerAction }}</strong>
+      <div class="font-semibold text-sm truncate w-full text-center">
+        {{ playerName }}
       </div>
     </div>
 
-    <!-- <div id="cards" v-if="showFront" class="flex space-x-2">
-      <Card v-for="card in playerCards" :key="card.id" :numSymbol="card" :size="'large'"  />
-    </div> -->
+    <!-- Cards -->
+    <div class="flex -space-x-4 mb-2 h-16 items-center justify-center">
+      <template v-if="showCards && playerCards && playerCards.length > 0">
+        <Card
+          v-for="(card, index) in playerCards"
+          :key="index"
+          :size="'small'"
+          :numSymbol="card || ''"
+          class="transform hover:-translate-y-2 transition-transform"
+        />
+      </template>
+      <template v-else>
+        <!-- Show Backs -->
+         <CardBack :size="'small'" />
+         <CardBack :size="'small'" class="-ml-4" />
+      </template>
+    </div>
 
-
-    <Card
-    v-for="(card, index) in playerCards"
-    :key="index"
-    :size="'large'"
-    :numSymbol="card || ''"
-  />
-
-    <div id="coverCards" v-if="!showFront" class="flex space-x-2">
-      
-      <CardSpace
-      v-for="index in 2 - playerCards.length"
-      :size="'large'"
-      :key="`space-${index}`"
-    />
+    <!-- Chips & Action -->
+    <div class="w-full text-center">
+      <div class="text-yellow-400 font-mono text-sm">
+        ${{ playerChips }}
+      </div>
+      <div v-if="playerAction" class="text-xs text-gray-300 mt-1 italic">
+        {{ playerAction }}
+      </div>
     </div>
   </div>
 </template>
@@ -43,26 +48,24 @@
 <script setup>
 import Card from "../components/Card.vue";
 import CardBack from "../components/CardBack.vue";
-import CardSpace from "../components/CardSpace.vue";
-import { ref, computed } from "vue";
+import { defineProps } from "vue";
 
 const props = defineProps({
-  playerName: String,
-  playerChips: Number,
+  playerName: { type: String, default: "Player" },
+  playerChips: { type: Number, default: 0 },
   playerAction: String,
-  
   playerCards: {
     type: Array,
-    default: () => ['5d', 'Ts'] // Inicialización predeterminada como un array vacío
+    default: () => [],
   },
-
-  showCards: Boolean,
-});
-
-const showFront = computed(() => {
-  return props.showCards;
+  showCards: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: false }, // New prop to highlight active player
 });
 </script>
+
+<style scoped>
+</style>
+
 
 
 

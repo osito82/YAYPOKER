@@ -1,77 +1,95 @@
 <template>
-  
   <div
-        :class="`${sizeOption.height} max-w-xs ${sizeOption.width} bg-white rounded-lg flex flex-col justify-center items-center`"
-      >
-    <div v-if="color == 'red'" :class="`text-red-600 ${sizeOption.textSize} items-center custom-line-height`">
-      {{ numSymbol.letter }}
+    :class="[
+      sizeOption.height,
+      sizeOption.width,
+      'bg-white rounded-lg shadow-md border border-gray-300 relative select-none overflow-hidden transition-transform hover:-translate-y-1',
+    ]"
+  >
+    <!-- Top Left -->
+    <div
+      class="absolute top-1 left-1 flex flex-col items-center leading-none"
+      :class="colorClass"
+    >
+      <span :class="sizeOption.cornerText" class="font-bold">{{
+        numSymbol.letter
+      }}</span>
+      <span :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
     </div>
 
-    <div v-if="color == 'red'" :class="`text-red-600 ${sizeOption.textSize} items-center custom-line-height`">
-      {{ numSymbol.symbol }}
+    <!-- Center -->
+    <div
+      class="absolute inset-0 flex justify-center items-center"
+      :class="colorClass"
+    >
+      <span :class="sizeOption.centerSymbol">{{ numSymbol.symbol }}</span>
     </div>
 
-
-    <div v-if="color == 'black'" :class="`text-black ${sizeOption.textSize} items-center custom-line-height`">
-      {{ numSymbol.letter }}
+    <!-- Bottom Right (Rotated) -->
+    <div
+      class="absolute bottom-1 right-1 flex flex-col items-center leading-none transform rotate-180"
+      :class="colorClass"
+    >
+      <span :class="sizeOption.cornerText" class="font-bold">{{
+        numSymbol.letter
+      }}</span>
+      <span :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
     </div>
-
-    <div v-if="color == 'black'" :class="`text-black ${sizeOption.textSize} items-center custom-line-height`">
-      {{ numSymbol.symbol }}
-    </div>
-
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed, defineProps } from "vue";
+import { computed, defineProps } from "vue";
+import { simbolConverter, whatColor } from "../vutils.js";
 
 const props = defineProps({
   numSymbol: String,
-  size: String  
+  size: String,
 });
 
-import { simbolConverter, whatColor } from "../vutils.js";
-
-
-const sizeOption = computed(() => { 
+const sizeOption = computed(() => {
   switch (props.size) {
-    case 'extraLarge':
+    case "extraLarge":
       return {
-        textSize: 'text-9xl',
-        height: 'lg:h-60',
-        width: 'lg:w-44',
+        cornerText: "text-2xl",
+        cornerSymbol: "text-xl",
+        centerSymbol: "text-6xl",
+        height: "h-48", // ~12rem
+        width: "w-32", // ~8rem
       };
-    case 'large':
+    case "large":
       return {
-        textSize: 'text-7xl',
-        height: 'lg:h-32',
-        width: 'lg:w-24',
+        cornerText: "text-xl",
+        cornerSymbol: "text-lg",
+        centerSymbol: "text-5xl",
+        height: "h-36", // ~9rem
+        width: "w-24", // ~6rem
       };
-    case 'small':
+    case "small":
       return {
-        textSize: 'text-4xl',
-        height: 'lg:h-16',
-        width: 'lg:w-12',
+        cornerText: "text-xs",
+        cornerSymbol: "text-[10px]",
+        centerSymbol: "text-2xl",
+        height: "h-20", // ~5rem
+        width: "w-14", // ~3.5rem
       };
     default:
-      // Valores predeterminados si props.sizeOption no coincide con 'large' ni 'small'
       return {
-        textSize: 'text-7xl',
-        height: 'lg:h-32',
-        width: 'lg:w-24',
+        cornerText: "text-xl",
+        cornerSymbol: "text-lg",
+        centerSymbol: "text-5xl",
+        height: "h-36",
+        width: "w-24",
       };
   }
 });
 
-
-const numSymbol = computed(() => simbolConverter(props.numSymbol));
-const color = computed(() => whatColor(props.numSymbol));
+const numSymbol = computed(() => simbolConverter(props.numSymbol || "Ah"));
+const color = computed(() => whatColor(props.numSymbol || "Ah"));
+const colorClass = computed(() =>
+  color.value === "red" ? "text-red-600" : "text-black"
+);
 </script>
 
 <style scoped>
-.custom-line-height {
-  line-height: 0.75;
-}
 </style>

@@ -1,32 +1,19 @@
-<script setup>
-import { usePokerStore } from "../store/pokerStore";
-const pokerStore = usePokerStore();
-import DataForm from "../components/DataForm.vue";
-import { ref } from "vue";
-
-defineProps({
-  msg: String,
-});
-
-const count = ref(0);
-</script>
-
 <template>
-  <div id="logo" class="bg-red-400 flex flex-row">
-    <div class="w-1/5 sm:w-1/4 md:w-1/5 pt-4 px-2 bg-yellow-300">
-      <h1>Oso Poker</h1>
+  <div class="flex items-center justify-center bg-gray-900 p-2 rounded-lg border border-gray-700 shadow-md">
+    <div class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600 mr-2">
+      ♠
     </div>
-    <div id="banner" class="w-full sm:w-full md:w-full bg-blue-300">
-      <DataForm />
+    <div class="text-xl font-bold text-white tracking-wider uppercase font-mono">
+      Oso<span class="text-yellow-500">Poker</span>
+    </div>
+    <div class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-400 ml-2">
+      ♦
     </div>
   </div>
-
-  {{ pokerStore.getGameCredentials }}
 </template>
 
+<script setup>
+</script>
+
 <style scoped>
-.logo {
-  padding: 1em;
-  background-color: blueviolet;
-}
 </style>

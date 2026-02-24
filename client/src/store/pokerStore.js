@@ -11,7 +11,9 @@ export const usePokerStore = defineStore({
       gameCode: "",
       playerName: "",
     },
-    players: null,
+    players: [],
+    communityCards: [],
+    pot: 0,
     displayMsg: null,
   }),
   getters: {
@@ -25,33 +27,53 @@ export const usePokerStore = defineStore({
       return state.conected;
     },
     getPLayers(state) {
-      return state.players;
+      return state.players || [];
+    },
+    getCommunityCards(state) {
+      return state.communityCards || [];
+    },
+    getPot(state) {
+      return state.pot || 0;
     },
     getDisplayMsg(state) {
       return state.displayMsg;
     },
-
-
   },
   actions: {
     setSocketMessage(message) {
-      if (!message) this.socketMessage = {};
-      const msgObj = JSON.parse(message);
+      if (!message) return;
+      
+      try {
+        const msgObj = JSON.parse(message);
+        this.socketMessage = msgObj;
 
-      //     this.socketMessage = msgObj;
+        // Extract display message
+        if (msgObj.message?.data?.displayMsg) {
+          this.displayMsg = msgObj.message.data.displayMsg;
+        }
 
-      const {
-        message: {
-          data: { displayMsg },
-        },
-      } = msgObj;
-      this.displayMsg = displayMsg;
+        // Extract players
+        if (msgObj.message?.players) {
+          this.players = msgObj.message.players;
+        }
 
+        // Extract community cards (assuming they might be in message or data)
+        if (msgObj.message?.communityCards) {
+          this.communityCards = msgObj.message.communityCards;
+        } else if (msgObj.message?.data?.communityCards) {
+          this.communityCards = msgObj.message.data.communityCards;
+        }
 
-      const {
-        message: { players },
-      } = msgObj;
-      this.players = players;
+        // Extract pot
+        if (msgObj.message?.pot !== undefined) {
+          this.pot = msgObj.message.pot;
+        } else if (msgObj.message?.data?.pot !== undefined) {
+          this.pot = msgObj.message.data.pot;
+        }
+
+      } catch (e) {
+        console.error("Error parsing socket message", e);
+      }
     },
 
     setConnected(status) {
