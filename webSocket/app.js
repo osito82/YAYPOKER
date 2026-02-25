@@ -138,9 +138,12 @@ wss.on("connection", (ws, req) => {
 
 app.get("/", (req, res) => res.send("Poker!"));
 const port = 8888;
-server.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
-});
+
+if (require.main === module) {
+  server.listen(port, () => {
+    console.log(`Servidor escuchando en http://localhost:${port}`);
+  });
+}
 
 app.get("/status", (req, res) => {
   const uptimeInMilliseconds = new Date() - startTime;
@@ -165,3 +168,5 @@ app.get("/status", (req, res) => {
 app.get("*", (req, res) => {
   res.redirect("/");
 });
+
+module.exports = { app, server, wss };
