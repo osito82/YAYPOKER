@@ -100,7 +100,7 @@ const joinGame = () => {
 
 const createGame = () => {
   if (playerName.value.trim().length > 0) {
-    const newCode = `TABLE-${Math.floor(1000 + Math.random() * 9000)}`;
+    const newCode = gameCode.value.trim() || `TABLE-${Math.floor(1000 + Math.random() * 9000)}`;
     router.push({
       name: "game",
       params: { gameCode: newCode },

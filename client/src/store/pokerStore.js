@@ -15,29 +15,25 @@ export const usePokerStore = defineStore({
     communityCards: [],
     pot: 0,
     displayMsg: null,
+    dealerLog: [],
+    activePlayerId: null,
+    bettingOptions: [],
+    currentMaxBet: 0,
+    myInfo: {
+      id: null,
+      cards: []
+    }
   }),
   getters: {
-    getSocketMessage(state) {
-      return state.socketMessage;
-    },
-    getGameCredentials(state) {
-      return state.gameCredentials;
-    },
-    getConnected(state) {
-      return state.conected;
-    },
-    getPLayers(state) {
-      return state.players || [];
-    },
-    getCommunityCards(state) {
-      return state.communityCards || [];
-    },
-    getPot(state) {
-      return state.pot || 0;
-    },
-    getDisplayMsg(state) {
-      return state.displayMsg;
-    },
+    getSocketMessage: (state) => state.socketMessage,
+    getConnected: (state) => state.conected,
+    getPLayers: (state) => state.players || [],
+    getCommunityCards: (state) => state.communityCards || [],
+    getPot: (state) => state.pot || 0,
+    getDisplayMsg: (state) => state.displayMsg,
+    getDealerLog: (state) => state.dealerLog,
+    getActivePlayerId: (state) => state.activePlayerId,
+    getBettingOptions: (state) => state.bettingOptions
   },
   actions: {
     setSocketMessage(message) {
@@ -45,34 +41,63 @@ export const usePokerStore = defineStore({
       
       try {
         const msgObj = JSON.parse(message);
-        this.socketMessage = msgObj;
+        const gameData = msgObj.message;
+        if (!gameData) return;
 
-        // Extract display message
-        if (msgObj.message?.data?.displayMsg) {
-          this.displayMsg = msgObj.message.data.displayMsg;
+        console.log("POKER_STORE - Received:", gameData.action, gameData);
+
+        // Update ID and private info immediately if available
+        if (gameData.myPlayerInfo) {
+          if (gameData.myPlayerInfo.playerId) {
+            this.myInfo.id = gameData.myPlayerInfo.playerId;
+            console.log("POKER_STORE - My ID confirmed:", this.myInfo.id);
+          }
+          if (gameData.myPlayerInfo.privateCards) {
+            this.myInfo.cards = gameData.myPlayerInfo.privateCards;
+          }
         }
 
-        // Extract players
-        if (msgObj.message?.players) {
-          this.players = msgObj.message.players;
+        // Update display message
+        const newMsg = gameData.data?.displayMsg ?? gameData.data?.msg ?? null;
+        if (newMsg !== null) {
+          this.displayMsg = newMsg;
+          if (newMsg) {
+            this.dealerLog.unshift({
+              id: Date.now(),
+              text: newMsg,
+              type: gameData.type || 'public'
+            });
+            if (this.dealerLog.length > 10) this.dealerLog.pop();
+          }
         }
 
-        // Extract community cards (assuming they might be in message or data)
-        if (msgObj.message?.communityCards) {
-          this.communityCards = msgObj.message.communityCards;
-        } else if (msgObj.message?.data?.communityCards) {
-          this.communityCards = msgObj.message.data.communityCards;
+        // Update Players
+        if (gameData.players) {
+          this.players = gameData.players.map(p => {
+            if (p.id === this.myInfo.id) {
+               return { ...p, cards: this.myInfo.cards };
+            }
+            return p;
+          });
         }
 
-        // Extract pot
-        if (msgObj.message?.pot !== undefined) {
-          this.pot = msgObj.message.pot;
-        } else if (msgObj.message?.data?.pot !== undefined) {
-          this.pot = msgObj.message.data.pot;
+        // Update Table State
+        if (gameData.pot !== undefined) this.pot = gameData.pot;
+        if (gameData.dealerCards) this.communityCards = gameData.dealerCards;
+
+        // Handle Actions and Turns
+        if (gameData.action === "askForBlindBets") {
+          this.activePlayerId = gameData.data.id;
+          this.bettingOptions = ["blind"];
+        } else if (gameData.action?.startsWith("bettingCore")) {
+          this.activePlayerId = gameData.data?.messageForId;
+          this.bettingOptions = gameData.data?.action || [];
+        } else if (gameData.action === "signUp" && gameData.type === "private") {
+          this.myInfo.id = gameData.data?.id;
         }
 
       } catch (e) {
-        console.error("Error parsing socket message", e);
+        console.error("POKER_STORE - Error parsing message", e);
       }
     },
 

@@ -15,8 +15,6 @@ const Match = require("./match");
 const Socket = require("./sockets");
 const Torneo = require("./torneo");
 
-const gameId = generateUniqueId();
-
 const startTime = new Date();
 const log = new osolog();
 
@@ -36,11 +34,13 @@ wss.on("connection", (ws, req) => {
 
   Socket.addSocket(thisSocket, torneoId);
 
-  const thisMatch = new Match(torneoId, gameId);
-  //    setInterval(() => thisMatch.vigilant(), 2500);
-
-  Torneo.addMatch(thisMatch, torneoId);
-  let match = Torneo.getMatch(torneoId, gameId);
+  // Intentar obtener el match existente o crear uno nuevo si no existe
+  let match = Torneo.getMatch(torneoId);
+  if (!match) {
+    const newGameId = generateUniqueId();
+    match = new Match(torneoId, newGameId);
+    Torneo.addMatch(match, torneoId);
+  }
 
   ws.on("message", (data) => {
     let jsonData;
@@ -102,7 +102,7 @@ wss.on("connection", (ws, req) => {
     if (jsonData && jsonData.action === "setRise") {
       log.R({ step: "Set Rise" });
       const chipsToRiseBet = jsonData.chipsToRiseBet;
-      match.setRise(thisSocket.id, chipsToRiseBet);
+      match.setRise(thisSocket, chipsToRiseBet);
     }
 
     if (jsonData && jsonData.action === "setCall") {
@@ -161,17 +161,6 @@ app.get("/status", (req, res) => {
     },
   });
 });
-
-// app.get('/game/:id', (req, res) => {
-//   // El valor después de "game/" estará disponible en req.params.id
-//   const gameId = req.params.id;
-
-//   // Haz algo con el valor, por ejemplo, imprímelo en la consola
-//   console.log('Game ID:', gameId);
-
-//   // Envía una respuesta al cliente
-//   res.send(`El ID del juego es: ${gameId}`);
-// });
 
 app.get("*", (req, res) => {
   res.redirect("/");

@@ -91,7 +91,7 @@ class Match {
 
       this.communicator.msgBuilder("signUp", "public", player, {
         method: "signUp",
-        msg: "New PLayer",
+        msg: `Welcome ${player.name} to the table!`,
         name: player.name,
         id: player.id,
       });
@@ -105,6 +105,9 @@ class Match {
 
     if (this.players.length >= 2) {
       this.stepChecker.grantStep("signUp");
+      if (this.stepChecker.checkStep("pause") && this.dealer.hasMinimumPlayers()) {
+        this.stepChecker.revokeStep("pause");
+      }
     } else {
       this.stepChecker.revokeStep("signUp");
     }
@@ -679,9 +682,10 @@ class Match {
       return;
     }
 
-    ///Check Minimun Players
-    if (!this.dealer.hasMinimunPlayers()) {
-      this.dealer.talkToAllPlayersOnTable("Minimun 2 Players to Start");
+    ///Check Minimum Players
+    const connectedPlayersCount = this.players.filter(p => p.connected).length;
+    if (!this.dealer.hasMinimumPlayers()) {
+      this.dealer.talkToAllPlayersOnTable(`Minimum 2 Players to Start. Connected: ${connectedPlayersCount}/${this.players.length}`);
       return;
     }
 

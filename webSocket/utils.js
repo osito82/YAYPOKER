@@ -147,7 +147,8 @@ function randomName() {
   ];
   const indiceAleatorio = Math.floor(Math.random() * nombres.length);
   const nombreElegido = nombres[indiceAleatorio];
-  return nombreElegido + "-" + (Math.random() * 100).toFixed().toString();
+  // Usar timestamp para asegurar unicidad absoluta
+  return nombreElegido + "-" + Date.now().toString().slice(-4);
 }
 
 /// [ 1, 4, 11, 5, 3 ] => 24
