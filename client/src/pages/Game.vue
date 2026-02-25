@@ -88,6 +88,7 @@ const gameCode = route.params.gameCode || "default_Torneo";
 
 // Logic for name/uuid generation
 const getSavedName = () => {
+  //console.log(route.query.playerName, '------')
   if (route.query.playerName) return route.query.playerName;
   const saved = sessionStorage.getItem(`poker_name_${gameCode}`);
   if (saved) return saved;

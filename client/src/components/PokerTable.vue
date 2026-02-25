@@ -25,17 +25,25 @@
         </template>
       </div>
     </div>
-
+   
     <!-- LAYER 2: Players -->
     <div id="player-seats-overlay" class="absolute inset-0 z-20 pointer-events-none">
        <div v-for="(p, i) in opponents" :id="'player-seat-' + i" :key="p.id" 
             class="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-auto"
             :style="getSeatPosition(i, opponents.length)">
-         <PlayerSeat v-bind="p" :id="'player-avatar-' + p.id" :isActive="activePlayerId === p.id" />
+       
+        <PlayerSeat
+  :playerName="p.name"
+  :playerChips="p.chips"
+  :playerAction="p.action"
+  :showCards="p.showCards || false"
+  :isActive="activePlayerId === p.id"
+/>
        </div>
     </div>
 
   </div>
+
 </template>
 
 <script setup>
@@ -53,6 +61,9 @@ const props = defineProps({
 });
 
 const getSeatPosition = (index, total) => {
+  //console.log(this.opponents, 'xxxx')
+    console.log('Opponents array (plain):', JSON.parse(JSON.stringify(props.opponents)));
+
   // Elliptical positioning for stadium shape
   const angle = (index / total) * 2 * Math.PI;
   // X radius is slightly less than 50% to stay on screen

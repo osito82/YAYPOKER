@@ -1,77 +1,47 @@
 <template>
-  <div class="relative group">
-    <!-- Active Player Glow -->
-    <div v-if="isActive" class="absolute -inset-4 bg-yellow-500/20 rounded-[2.5rem] blur-2xl animate-pulse"></div>
+  <div :id="'seat-wrapper-' + playerName" class="relative group flex flex-col items-center">
     
-    <!-- Seat Container -->
+    <!-- Active Turn Ring -->
+    <div v-if="isActive" class="absolute -inset-2 bg-yellow-500/20 rounded-full blur-md animate-pulse"></div>
+    
+    <!-- Player Avatar/Icon Circle -->
     <div
-      class="relative flex flex-col items-center p-4 rounded-3xl bg-gray-900/80 backdrop-blur-md border-2 w-44 transition-all duration-500 shadow-2xl"
-      :class="isActive ? 'border-yellow-500/50 scale-110 z-10' : 'border-white/5 opacity-80'"
+      :id="'avatar-' + playerName"
+      class="relative w-14 h-14 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border-2 flex items-center justify-center shadow-xl transition-all duration-500 z-10"
+      :class="isActive ? 'border-yellow-500 scale-110 shadow-yellow-500/20' : 'border-white/10 opacity-80'"
     >
-      <!-- Player Info Header -->
-      <div class="flex flex-col items-center mb-4 w-full">
-        <div
-          class="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-xl font-black mb-2 border border-white/10 shadow-inner group-hover:scale-110 transition-transform"
-        >
-          <span class="bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400">
-            {{ playerName.charAt(0).toUpperCase() }}
-          </span>
-        </div>
-        <div class="font-black text-[11px] uppercase tracking-widest truncate w-full text-center text-gray-300">
-          {{ playerName }}
-        </div>
+      <span class="text-lg font-black text-white/80 uppercase">{{ playerName.charAt(0) }}</span>
+      
+      <!-- Mini Action Badge (Floats on avatar) -->
+      <div v-if="playerAction" class="absolute -bottom-1 bg-blue-600 px-2 py-0.5 rounded-full border border-blue-400 shadow-lg z-20">
+        <span class="text-[7px] font-black text-white uppercase tracking-tighter">{{ playerAction }}</span>
       </div>
+    </div>
 
-      <!-- Cards Area -->
-      <div class="flex -space-x-6 mb-4 h-20 items-center justify-center perspective-1000">
-        <template v-if="showCards && playerCards && playerCards.length > 0">
-          <Card
-            v-for="(card, index) in playerCards"
-            :key="index"
-            :size="'small'"
-            :numSymbol="card || ''"
-            class="transform transition-all duration-300 hover:-translate-y-4 hover:rotate-0"
-            :style="{ transform: `rotate(${(index - 0.5) * 10}deg)` }"
-          />
-        </template>
-        <template v-else>
-           <CardBack :size="'small'" class="rotate-[-5deg]" />
-           <CardBack :size="'small'" class="rotate-[5deg]" />
-        </template>
-      </div>
+    <!-- Player Name Label (Glassmorphic) -->
+    <div class="mt-2 bg-black/60 backdrop-blur-md border border-white/5 px-3 py-0.5 rounded-full shadow-lg z-10">
+      <span class="text-[9px] font-bold text-gray-200 truncate max-w-[80px] block">{{ playerName }}</span>
+    </div>
 
-      <!-- Financials & Actions -->
-      <div class="w-full bg-black/40 p-2 rounded-xl border border-white/5 text-center">
-        <div class="text-yellow-500 font-mono font-black text-sm tracking-tighter">
-          ${{ playerChips }}
-        </div>
-        <div v-if="playerAction" class="text-[9px] text-blue-400 font-black uppercase tracking-tighter mt-1 animate-pulse">
-          {{ playerAction }}
-        </div>
-      </div>
+    <!-- Chip Count -->
+    <div class="mt-1">
+      <span class="text-[10px] font-mono font-black text-yellow-500 shadow-sm">${{ playerChips }}</span>
+    </div>
+
+    <!-- Hidden Cards Placeholder (For visual rhythm) -->
+    <div v-if="!showCards" class="flex -space-x-2 mt-1 opacity-40 group-hover:opacity-100 transition-opacity">
+      <div class="w-4 h-6 bg-gray-800 border border-white/10 rounded-sm rotate-[-10deg]"></div>
+      <div class="w-4 h-6 bg-gray-800 border border-white/10 rounded-sm rotate-[10deg]"></div>
     </div>
   </div>
 </template>
 
 <script setup>
-import Card from "../components/Card.vue";
-import CardBack from "../components/CardBack.vue";
-
 defineProps({
-  playerName: { type: String, default: "Player" },
+  playerName: { type: String, default: "Guest" },
   playerChips: { type: Number, default: 0 },
-  playerAction: String,
-  playerCards: {
-    type: Array,
-    default: () => [],
-  },
+  playerAction: { type: String, default: "" },
   showCards: { type: Boolean, default: false },
-  isActive: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: false }
 });
 </script>
-
-<style scoped>
-.perspective-1000 {
-  perspective: 1000px;
-}
-</style>
