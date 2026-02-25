@@ -311,6 +311,30 @@ class Match {
     }
   }
 
+  pause(thisSocket) {
+    const socketId = typeof thisSocket === "string" ? thisSocket : thisSocket.id;
+    const foundPlayer = this.players.find((p) => p.id === socketId);
+    if (foundPlayer) {
+      foundPlayer.setConnected(false);
+      this.stepChecker.grantStep("pause");
+
+      this.communicator.msgBuilder("pause", "public", foundPlayer, {
+        displayMsg: `${foundPlayer.name} disconnected. Game paused.`,
+      });
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+
+      const timeout = setTimeout(() => {
+        this.playerLeave(thisSocket);
+        this.pauseTimeouts.delete(foundPlayer.name);
+      }, 60000); // 1 minute
+      this.pauseTimeouts.set(foundPlayer.name, timeout);
+    }
+  }
+
+  close(thisSocket) {
+    this.playerLeave(thisSocket);
+  }
+
   playerLeave(thisSocket) {
     const index = this.players.findIndex(p => p.id === thisSocket.id);
     if (index !== -1) this.players.splice(index, 1);
