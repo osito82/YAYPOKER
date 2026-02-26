@@ -138,7 +138,7 @@ watch(() => pokerStore.getActivePlayerId, (id) => {
 onMounted(() => { if (!isConnected.value) connectSocket(); });
 onBeforeUnmount(() => disconnectSocket());
 
-const allPlayers = computed(() => pokerStore.getPLayers || []);
+const allPlayers = computed(() => pokerStore.getPlayers || []);
 const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName));
 const opponents = computed(() => allPlayers.value.filter(p => p.id !== myPlayer.value?.id));
 const isMyTurn = computed(() => pokerStore.getActivePlayerId === myPlayer.value?.id);
