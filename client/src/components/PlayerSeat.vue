@@ -7,8 +7,8 @@
     <!-- Player Avatar/Icon Circle -->
     <div
       :id="'avatar-' + playerName"
-      class="relative w-14 h-14 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border-2 flex items-center justify-center shadow-xl transition-all duration-500 z-10"
-      :class="isActive ? 'border-yellow-500 scale-110 shadow-yellow-500/20' : 'border-white/10 opacity-80'"
+      class="relative w-14 h-14 rounded-full bg-gradient-to-br border-2 flex items-center justify-center shadow-xl transition-all duration-500 z-10"
+      :class="isActive ? 'from-yellow-600 to-yellow-900 border-yellow-400 scale-110 shadow-yellow-500/40' : 'from-gray-700 to-gray-900 border-white/10 opacity-80'"
     >
       <span class="text-lg font-black text-white/80 uppercase">{{ playerName.charAt(0) }}</span>
       

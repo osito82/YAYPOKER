@@ -53,33 +53,33 @@ const sizeOption = computed(() => {
       return {
         cornerText: "text-2xl",
         cornerSymbol: "text-xl",
-        centerSymbol: "text-6xl",
-        height: "h-48", // ~12rem
-        width: "w-32", // ~8rem
+        centerSymbol: "text-7xl",
+        height: "h-56", // Increased from h-48
+        width: "w-40", // Increased from w-32
       };
     case "large":
       return {
-        cornerText: "text-xl",
-        cornerSymbol: "text-lg",
-        centerSymbol: "text-5xl",
-        height: "h-36", // ~9rem
-        width: "w-24", // ~6rem
+        cornerText: "text-2xl",
+        cornerSymbol: "text-xl",
+        centerSymbol: "text-6xl",
+        height: "h-44", // Increased from h-36
+        width: "w-32", // Increased from w-24
       };
     case "small":
       return {
-        cornerText: "text-xs",
-        cornerSymbol: "text-[10px]",
-        centerSymbol: "text-2xl",
-        height: "h-20", // ~5rem
-        width: "w-14", // ~3.5rem
+        cornerText: "text-sm",
+        cornerSymbol: "text-xs",
+        centerSymbol: "text-3xl",
+        height: "h-24", // Increased from h-20
+        width: "w-16", // Increased from w-14
       };
     default:
       return {
-        cornerText: "text-xl",
-        cornerSymbol: "text-lg",
-        centerSymbol: "text-5xl",
-        height: "h-36",
-        width: "w-24",
+        cornerText: "text-2xl",
+        cornerSymbol: "text-xl",
+        centerSymbol: "text-6xl",
+        height: "h-44",
+        width: "w-32",
       };
   }
 });

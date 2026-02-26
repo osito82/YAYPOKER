@@ -1,41 +1,43 @@
 <template>
-  <div id="poker-action-hud" class="fixed bottom-0 left-0 right-0 z-50 p-3 pointer-events-none">
-    <div id="hud-main-container" class="max-w-5xl mx-auto flex items-center justify-between gap-4 pointer-events-auto bg-gray-900/90 backdrop-blur-2xl border border-white/10 p-2 px-5 rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+  <div id="poker-action-hud" class="fixed bottom-0 left-0 right-0 z-50 p-2 md:p-3 pointer-events-none">
+    <div id="hud-main-container" 
+         class="max-w-5xl mx-auto flex flex-wrap md:flex-nowrap items-center justify-center md:justify-between gap-2 md:gap-4 pointer-events-auto bg-gray-900/90 backdrop-blur-2xl border p-2 px-3 md:px-5 rounded-2xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)] transition-all duration-500"
+         :class="isMyTurn ? 'border-yellow-500/50 bg-gray-800/95 shadow-[0_-10px_40px_rgba(234,179,8,0.2)]' : 'border-white/10'">
       
       <!-- INFO SECTOR -->
-      <div id="hud-user-info" class="flex items-center gap-4 border-r border-white/10 pr-5">
+      <div id="hud-user-info" class="flex items-center gap-4 md:border-r border-white/10 md:pr-5">
         <div class="flex flex-col">
           <span id="label-stack" class="text-[7px] font-black text-gray-500 uppercase tracking-widest">Your Chips</span>
-          <span id="display-balance" class="text-lg font-mono font-black text-white leading-none">${{ balance }}</span>
+          <span id="display-balance" class="text-base md:text-lg font-mono font-black text-white leading-none">${{ balance }}</span>
         </div>
       </div>
 
       <!-- CARDS SECTOR -->
-      <div id="hud-cards-display" class="flex gap-1 items-center px-4 border-r border-white/10">
+      <div id="hud-cards-display" class="flex gap-1 items-center px-2 md:px-4 md:border-r border-white/10">
         <template v-if="playerCards && playerCards.length > 0">
           <Card 
             v-for="(card, i) in playerCards" 
             :key="i" 
             size="small" 
             :numSymbol="card"
-            class="shadow-lg transform hover:scale-110 transition-transform cursor-default" 
+            class="shadow-lg transform hover:scale-110 transition-transform cursor-default scale-90 md:scale-100" 
           />
         </template>
         <template v-else>
           <div class="flex -space-x-2 opacity-20">
-            <div class="w-8 h-12 bg-gray-800 border border-white/10 rounded-md"></div>
-            <div class="w-8 h-12 bg-gray-800 border border-white/10 rounded-md"></div>
+            <div class="w-6 h-10 md:w-8 md:h-12 bg-gray-800 border border-white/10 rounded-md"></div>
+            <div class="w-6 h-10 md:w-8 md:h-12 bg-gray-800 border border-white/10 rounded-md"></div>
           </div>
         </template>
       </div>
 
-      <!-- RAISE SECTOR (Functionality Restored) -->
+      <!-- RAISE SECTOR -->
       <div v-if="isMyTurn && (options.includes('bet') || options.includes('rise'))" 
-           id="hud-raise-controls" class="flex items-center gap-4 px-2 flex-grow justify-center">
+           id="hud-raise-controls" class="flex items-center gap-2 md:gap-4 px-2 flex-grow justify-center min-w-full md:min-w-0 order-first md:order-none mb-2 md:mb-0">
         
-        <div class="flex flex-col items-end min-w-[60px]">
+        <div class="flex flex-col items-end min-w-[50px] md:min-w-[60px]">
           <span id="label-raise-to" class="text-[7px] font-black text-yellow-500 uppercase">Raise To</span>
-          <span id="display-raise-amount" class="text-md font-mono font-bold text-white leading-none">${{ betAmount }}</span>
+          <span id="display-raise-amount" class="text-sm md:text-md font-mono font-bold text-white leading-none">${{ betAmount }}</span>
         </div>
 
         <input id="input-bet-range" 
@@ -43,7 +45,7 @@
                :value="betAmount" 
                @input="$emit('update:betAmount', Number($event.target.value))"
                :min="minBet" :max="maxBet"
-               class="w-24 md:w-40 h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer accent-yellow-500 border border-white/5">
+               class="w-32 md:w-40 h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer accent-yellow-500 border border-white/5">
 
         <div id="quick-bet-group" class="flex gap-1">
           <button id="btn-quick-half" @click="$emit('setQuickBet', 0.5)" class="chip-btn-tiny">1/2</button>
@@ -53,10 +55,10 @@
       </div>
 
       <!-- ACTIONS SECTOR -->
-      <div id="hud-actions-group" class="flex gap-2 items-center">
+      <div id="hud-actions-group" class="flex gap-1 md:gap-2 items-center">
         <template v-if="canBlind">
            <button id="btn-action-blind" @click="$emit('action', 'blind')" 
-             class="btn-compact bg-purple-600 border-purple-500 text-white font-black px-6 hover:bg-purple-500">
+             class="btn-compact bg-purple-600 border-purple-500 text-white font-black px-4 md:px-6 hover:bg-purple-500">
              Post Blind
            </button>
         </template>
@@ -68,12 +70,12 @@
           
           <button id="btn-action-primary" 
                   @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')" 
-                  class="btn-compact bg-yellow-500 text-black border-yellow-600 font-black px-6 hover:bg-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                  class="btn-compact bg-yellow-500 text-black border-yellow-600 font-black px-4 md:px-6 hover:bg-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
             {{ options.includes('bet') ? 'BET' : 'RAISE' }}
           </button>
         </template>
         
-        <div v-else id="hud-waiting-status" class="flex items-center gap-2 px-4">
+        <div v-else id="hud-waiting-status" class="flex items-center gap-2 px-2 md:px-4">
            <div class="w-1.5 h-1.5 bg-gray-600 rounded-full animate-pulse"></div>
            <span class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Opponents Turn</span>
         </div>
