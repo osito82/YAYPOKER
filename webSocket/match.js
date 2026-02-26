@@ -25,6 +25,8 @@ class Match {
     this.playersFold = [];
     this.pot = 0;
     this.cardsDealer = [];
+    
+    this.activePlayerId = null; // Track who is expected to act
 
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101);
     this.shuffledDeck = initialDeck;
@@ -104,24 +106,26 @@ class Match {
   }
 
   setBet(thisSocket, chipsToBet, type = "setBet") {
+    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) {
+       this.log.Template({ name: "brakets", title: "MATCH - Action Rejected", date: true }).R({ player: thisSocket.name, reason: "Not your turn", expected: this.activePlayerId });
+       return;
+    }
+
     const foundPlayer = this.players.find(p => p.id == thisSocket.id);
     if (foundPlayer) {
-      // If it's a 'Rise', chipsToBet is the total new amount
-      // If it's a blind from askForBlindBets, we might need to handle it differently 
-      // but for now let's assume UI/Blinds logic sends the absolute amount intended for this turn.
-      
+      const amount = Number(chipsToBet);
       const currentBetBefore = foundPlayer.getCurrentBet();
-      const success = foundPlayer.setTotalBet(chipsToBet);
+      const success = foundPlayer.setTotalBet(amount);
 
       if (success) {
-        const addedChips = chipsToBet - currentBetBefore;
+        this.activePlayerId = null; // Clear turn
+        const addedChips = amount - currentBetBefore;
         foundPlayer.setLastAction(type === "setBet" ? "Bet" : "Raise");
         this.dealer.setPot(addedChips);
         
-        if (chipsToBet > this.dealer.getCurrentHighestBet()) {
-          this.dealer.setCurrentHighestBet(chipsToBet);
+        if (amount > this.dealer.getCurrentHighestBet()) {
+          this.dealer.setCurrentHighestBet(amount);
           this.dealer.setLastRaiser(foundPlayer.id);
-          // When someone raises, we MUST allow others to act again
           this.dealer.removeChecks();
         }
 
@@ -135,7 +139,7 @@ class Match {
         });
 
         this.communicator.msgBuilder("setBet", "public", foundPlayer, {
-          displayMsg: `${foundPlayer.name} ${type === "setBet" ? "bets" : "raises to"} ${chipsToBet}`,
+          displayMsg: `${foundPlayer.name} ${type === "setBet" ? "bets" : "raises to"} ${amount}`,
           name: foundPlayer.name,
           bet: foundPlayer.getCurrentBet(),
         });
@@ -146,6 +150,8 @@ class Match {
   }
 
   setCall(thisSocket) {
+    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return;
+
     const maxBet = this.dealer.getCurrentHighestBet();
     const foundPlayer = this.players.find(p => p.id == thisSocket.id);
     if (foundPlayer) {
@@ -154,6 +160,7 @@ class Match {
       
       if (diff >= 0) {
         if (foundPlayer.setTotalBet(maxBet)) {
+          this.activePlayerId = null;
           foundPlayer.setLastAction("Call");
           this.dealer.setPot(diff);
           this.dealer.setChecked(foundPlayer.id);
@@ -173,10 +180,12 @@ class Match {
   }
 
   setCheck = (thisSocket) => {
+    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return;
+
     const foundPlayer = this.players.find(p => p.id == thisSocket.id);
     if (foundPlayer) {
-      // Can only check if current bet matches highest bet
       if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
+        this.activePlayerId = null;
         this.dealer.setChecked(thisSocket.id);
         foundPlayer.setLastAction("Check");
         this.log.Template({ name: "brakets", title: "MATCH - CHECK", date: true }).R({ player: foundPlayer.name });
@@ -201,6 +210,7 @@ class Match {
       let p = (p1 && p1.getCurrentBet() === 0) ? p1 : p2;
       if (p) {
         const isSB = (p === p1);
+        this.activePlayerId = p.id;
         this.log.Template({ name: "brakets", title: "MATCH - Asking Blinds", date: true }).R({ player: p.name, type: isSB ? "SB" : "BB" });
         this.communicator.msgBuilder(`askForBlindBets`, "public", p, { displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})` });
         this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
@@ -211,8 +221,11 @@ class Match {
   }
 
   fold(thisSocket) {
-        const foundPlayer = this.players.find(p => p.id == thisSocket.id);
+    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return;
+
+    const foundPlayer = this.players.find(p => p.id == thisSocket.id);
     if (foundPlayer && !foundPlayer.folded) {
+      this.activePlayerId = null;
       foundPlayer.setLastAction("Fold");
       foundPlayer.setFolded(true);
       this.playersFold.push(foundPlayer.name);
@@ -233,6 +246,7 @@ class Match {
   winner = (winnerPlayer, isFold = false) => {
     if (this.stepChecker.checkStep("winner")) return;
     this.stepChecker.grantStep("winner");
+    this.activePlayerId = null;
 
     const pot = this.dealer.getPot();
     winnerPlayer.chips += pot;
@@ -256,12 +270,12 @@ class Match {
         handName: isFold ? "Fold" : winningHand?.pokerHand || "High Card",
         winningCards: isFold ? [] : winningHand?.show || []
       },
-      allHands: finalHands, // Para que el front pueda mostrar qué tenían los demás
+      allHands: finalHands, 
       isFold: isFold
     });
     this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
 
-    setTimeout(() => { this.restartMatch(); }, 15000); // 15 segundos para el anuncio
+    setTimeout(() => { this.restartMatch(); }, 15000); 
   };
 
   restartMatch() {
@@ -271,6 +285,7 @@ class Match {
     this.pot = 0;
     this.cardsDealer = [];
     this.playersFold = [];
+    this.activePlayerId = null;
     this.players.forEach(p => {
       p.cards = [];
       p.currentBet = 0;
@@ -304,6 +319,7 @@ class Match {
   }
 
   const maxBet = this.dealer.getCurrentHighestBet();
+  const checkedPlayers = this.dealer.getPlayersChecked();
   
   let sorted = [...activePlayers];
   
@@ -325,11 +341,19 @@ class Match {
   }
   
   const playersToAct = sorted.filter(p => 
-    (p.getCurrentBet() < maxBet) || !this.dealer.getPlayersChecked().includes(p.id)
+    (p.getCurrentBet() < maxBet) || !checkedPlayers.includes(p.id)
   );
+
+  this.log.Template({ name: "brakets", title: `MATCH - Debug Betting ${bettingFor}`, date: true }).R({
+    maxBet,
+    checkedCount: checkedPlayers.length,
+    checkedPlayers: checkedPlayers.map(id => this.players.find(pl => pl.id === id)?.name),
+    playersToAct: playersToAct.map(p => p.name)
+  });
 
   if (playersToAct.length === 0) {
     this.log.Template({ name: "brakets", title: `MATCH - Betting Round ${bettingFor} Finished`, date: true }).R({ pot: this.dealer.getPot() });
+    this.activePlayerId = null;
     this.dealer.removeChecks();
     this.dealer.setCurrentHighestBet(0);
     this.dealer.setLastRaiser(null);
@@ -344,12 +368,10 @@ class Match {
     this.continue(thisSocket);
   } else if (playersToAct.length > 0) {
     const p = playersToAct[0];
-    const opts = maxBet === 0 ? ["bet", "fold", "check"] : ["call", "rise", "fold"];
+    this.activePlayerId = p.id;
+    const opts = maxBet === 0 ? ["bet", "fold", "check"] : ["call", "raise", "fold"];
     
-    // Si ya igualó la apuesta máxima pero aún no ha "chequeado" formalmente en esta ronda
-    // (por ejemplo BB en primera ronda de apuestas si nadie subió), 
-    // podrías permitirle "check" en vez de forzar call.
-    if (maxBet > 0 && p.getCurrentBet() === maxBet && !this.dealer.getPlayersChecked().includes(p.id)) {
+    if (maxBet > 0 && p.getCurrentBet() === maxBet && !checkedPlayers.includes(p.id)) {
         if (!opts.includes("check")) opts.push("check");
     }
 
