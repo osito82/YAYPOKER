@@ -32,6 +32,7 @@ wss.on("connection", (ws, req) => {
     socket: ws
   };
 
+  console.log(`APP - New Connection: ${playerName} (${thisSocket.id}) in Torneo: ${torneoId}`);
   Socket.addSocket(thisSocket, torneoId);
 
   // Intentar obtener el match existente o crear uno nuevo si no existe
@@ -40,6 +41,7 @@ wss.on("connection", (ws, req) => {
     const newGameId = generateUniqueId();
     match = new Match(torneoId, newGameId);
     Torneo.addMatch(match, torneoId);
+    console.log(`APP - Created new match: ${newGameId}`);
   }
 
   ws.on("message", (data) => {
@@ -47,7 +49,7 @@ wss.on("connection", (ws, req) => {
     if (data) {
       try {
         jsonData = JSON.parse(data);
-        //  console.log(jsonData, "=======================================");
+        console.log(`APP - Message from ${playerName}:`, jsonData.action);
       } catch (error) {
         console.error("Error al analizar el JSON:", error);
         ws.send(JSON.stringify({ error: "Formato JSON no válido" }));
@@ -131,16 +133,19 @@ wss.on("connection", (ws, req) => {
   });
 
   ws.on("close", () => {
-    console.log("Cliente desconectado");
+    console.log(`APP - Client disconnected: ${playerName}`);
     match.pause(thisSocket);
   });
 });
 
 app.get("/", (req, res) => res.send("Poker!"));
 const port = 8888;
-server.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
-});
+
+if (require.main === module) {
+  server.listen(port, () => {
+    console.log(`Servidor escuchando en http://localhost:${port}`);
+  });
+}
 
 app.get("/status", (req, res) => {
   const uptimeInMilliseconds = new Date() - startTime;
@@ -165,3 +170,5 @@ app.get("/status", (req, res) => {
 app.get("*", (req, res) => {
   res.redirect("/");
 });
+
+module.exports = { app, server, wss };

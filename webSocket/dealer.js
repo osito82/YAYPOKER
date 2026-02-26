@@ -73,13 +73,17 @@ class Dealer {
   };
 
   dealCardsEachPlayer = (numberOfCards = 1) => {
+    console.log(`DEALER - Dealing ${numberOfCards} cards to each player. Deck size: ${this.deck.length}`);
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
         if (player.connected && !player.folded) {
           if (player.countCards() < 2) {
             const cardToDeal = this.deck.shift();
             if (cardToDeal) {
+              console.log(`DEALER - Dealing ${cardToDeal} to ${player.name}`);
               player.setCard(cardToDeal);
+            } else {
+              console.log("DEALER - ERROR: Deck is empty!");
             }
           }
         }

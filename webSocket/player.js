@@ -1,7 +1,7 @@
 const PokerCore = require("./pokerCore");
 
 class Player {
-  constructor(gameId, name, secretCode, chips, cards, id) {
+  constructor(gameId, name, secretCode, chips, cards, id, playerNumber) {
     this.name = name;
     this.id = id;
     this.gameId = gameId;
@@ -11,6 +11,7 @@ class Player {
     this.lastAction = "";
     this.connected = true;
     this.folded = false;
+    this.playerNumber = playerNumber;
   }
 
   currentBet = 0;

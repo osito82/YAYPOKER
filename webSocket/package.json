@@ -6,7 +6,8 @@
   "scripts": {
     "start": "nodemon app.js",
     "start_cli": "nodemon index_cli.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    
+        "test": "vitest"
   },
   "keywords": [
     "poker",
@@ -23,5 +24,9 @@
     "radash": "^11.0.0",
     "uuidv4": "^6.2.13",
     "ws": "^8.15.1"
+  },
+  "devDependencies": {
+    "chai": "^6.2.2",
+    "mocha": "^11.7.5"
   }
 }

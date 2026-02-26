@@ -1,3 +1,4 @@
+// match 2
 const Player = require("./player");
 const Dealer = require("./dealer");
 const Deck = require("./deck");
@@ -25,10 +26,13 @@ class Match {
     this.pot = 0;
     this.cardsDealer = [];
 
+    const initialDeck = Deck.shuffleDeck(Deck.cards, 101);
+    this.shuffledDeck = initialDeck;
+
     this.dealer = new Dealer(
       this.gameId,
       this.players,
-      (this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)),
+      initialDeck,
       torneoId,
       this.pot,
       this.cardsDealer
@@ -46,48 +50,46 @@ class Match {
     );
   }
 
+  
   signUp(data, thisSocket) {
-    const { id: thisSocketId } = thisSocket;
-    console.log(`MATCH - signUp: ${data.name}`);
+  const { id: thisSocketId } = thisSocket;
+  const existingPlayerIndex = this.players.findIndex((s) => s.name === data.name);
 
-    const existingPlayerIndex = this.players.findIndex((s) => s.name === data.name);
-
-    if (existingPlayerIndex !== -1) {
-      if (this.pauseTimeouts.has(data.name)) {
-        clearTimeout(this.pauseTimeouts.get(data.name));
-        this.pauseTimeouts.delete(data.name);
-      }
-      this.players[existingPlayerIndex].id = thisSocketId;
-      this.players[existingPlayerIndex].setConnected(true);
-      this.stepChecker.revokeStep("pause");
-      
-      this.communicator.msgBuilder("signUp", "private", this.players[existingPlayerIndex], {
-        method: "signUp",
-        msg: "Welcome back!",
-        id: thisSocketId,
-      });
-      this.dealer.talkToPLayerById(thisSocketId, this.communicator.getMsg());
-    } else {
-      if (this.players.length >= 10) return;
-      const player = new Player(this.gameId, data.name, data.secretCode, data.totalChips, [], thisSocketId);
-      this.players.push(player);
-
-      this.communicator.msgBuilder("signUp", "public", player, { msg: `Welcome ${player.name}!` });
-      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
-
-      this.communicator.msgBuilder("signUp", "private", player, { method: "signUp", id: thisSocketId });
-      this.dealer.talkToPLayerById(thisSocketId, this.communicator.getMsg());
-    }
-
-    if (this.players.length >= 2) this.stepChecker.grantStep("signUp");
-    this.continue(thisSocket);
+  let player;
+  if (existingPlayerIndex !== -1) {
+    player = this.players[existingPlayerIndex];
+    player.id = thisSocketId;
+    player.setConnected(true);
+    this.stepChecker.revokeStep("pause");
+  } else {
+    if (this.players.length >= 10) return;
+    const playerNumber = this.players.length + 1;
+    player = new Player(this.gameId, data.name, data.secretCode, data.totalChips, [], thisSocketId, playerNumber);
+    player.setConnected(true); 
+    this.players.push(player);
   }
 
+  this.communicator.msgBuilder("signUp", "public", player, { msg: `Welcome ${player.name}!` });
+  this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+  this.communicator.msgBuilder("signUp", "private", player, { method: "signUp", id: thisSocketId });
+  this.dealer.talkToPLayerById(thisSocketId, this.communicator.getMsg());
+
+  const connectedPlayers = this.players.filter(p => p.connected);
+  if (connectedPlayers.length >= 2 && !this.stepChecker.checkStep("blindsBetting")) {
+    console.log("MATCH - Enough players, starting blinds");
+    this.stepChecker.grantStep("signUp");
+    this.askForBlindBets(thisSocket); 
+  }
+}
+
   dealtPrivateCards(thisSocket) {
+    console.log("MATCH - Dealing private cards...");
     try {
       this.dealer.dealCardsEachPlayer(2);
       this.stepChecker.grantStep("dealtPrivateCards");
+      this.dealer.removeChecks(); 
       for (const player of this.players) {
+        console.log(`MATCH - Sending private cards to ${player.name} (${player.cards.length} cards)`);
         this.communicator.msgBuilder("dealtPrivateCards", "private", player, {});
         this.dealer.talkToPLayerById(player.id, this.communicator.getMsg());
       }
@@ -103,7 +105,11 @@ class Match {
       if (foundPlayer.setBet(chipsToBet)) {
         foundPlayer.setLastAction(type === "setBet" ? "Bet" : "Raise");
         this.dealer.setPot(chipsToBet);
-        this.dealer.removeChecks();
+        
+        if (this.stepChecker.checkStep("blindsBetting")) {
+           this.dealer.removeChecks();
+        }
+
         this.dealer.setChecked(foundPlayer.id);
         this.communicator.msgBuilder("setBet", "public", foundPlayer, {
           displayMsg: `${foundPlayer.name} bets ${chipsToBet}`,
@@ -149,13 +155,18 @@ class Match {
   setRise(thisSocket, chipsToBet) { this.setBet(thisSocket, chipsToBet, "setRise"); }
 
   askForBlindBets(thisSocket) {
-    if (this.dealer.hasPlayerBetByNumber(1) && this.dealer.hasPlayerBetByNumber(2)) {
+    const p1 = this.players[0];
+    const p2 = this.players[1];
+
+    if (p1 && p2 && p1.getCurrentBet() > 0 && p2.getCurrentBet() > 0) {
+      console.log("MATCH - Blinds finished");
       this.stepChecker.grantStep("blindsBetting");
       this.continue(thisSocket);
     } else {
-      let p = !this.dealer.hasPlayerBetByNumber(1) ? this.dealer.getPlayerByNumber(1) : this.dealer.getPlayerByNumber(2);
+      let p = (p1 && p1.getCurrentBet() === 0) ? p1 : p2;
       if (p) {
-        const isSB = !this.dealer.hasPlayerBetByNumber(1);
+        const isSB = (p === p1);
+        console.log(`MATCH - Asking for ${isSB ? 'SB' : 'BB'} to ${p.name}`);
         this.communicator.msgBuilder(`askForBlindBets`, "public", p, { displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})` });
         this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
         this.communicator.msgBuilder(`askForBlindBets`, "private", p, { id: p.id, displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind` });
@@ -165,7 +176,7 @@ class Match {
   }
 
   fold(thisSocket) {
-    const foundPlayer = this.players.find(p => p.id == thisSocket.id);
+        const foundPlayer = this.players.find(p => p.id == thisSocket.id);
     if (foundPlayer && !foundPlayer.folded) {
       foundPlayer.setLastAction("Fold");
       foundPlayer.setFolded(true);
@@ -178,6 +189,7 @@ class Match {
   }
 
   continue(thisSocket) {
+    
     setTimeout(() => { this.startGame(thisSocket); }, 1000);
   }
 
@@ -225,32 +237,70 @@ class Match {
   }
 
   bettingCore = (thisSocket, bettingFor) => {
-    if (this.stepChecker.checkStep("winner")) return;
-    const activePlayers = this.players.filter(p => p.connected && !p.folded);
+    
+  if (this.stepChecker.checkStep("winner")) return;
+  
+  const activePlayers = this.players.filter(p => p.connected && !p.folded);
 
-    if (activePlayers.length === 1) {
-      this.winner(activePlayers[0], true);
-      return;
+  if (activePlayers.length === 1) {
+    this.winner(activePlayers[0], true);
+    return;
+  }
+
+  const maxBet = Math.max(...activePlayers.map(p => p.getCurrentBet()));
+  
+  let sorted = [...activePlayers];
+  
+  if (bettingFor === "firstBetting") {
+    const bbPosition = activePlayers.length === 2 ? 1 : 2;
+    if (activePlayers.length > bbPosition + 1) {
+      sorted = [
+        ...activePlayers.slice(bbPosition + 1),
+        ...activePlayers.slice(0, bbPosition + 1)
+      ];
+    } else {
+      sorted = [...activePlayers];
     }
+  } else {
+    sorted = [
+      ...activePlayers.slice(1),
+      ...activePlayers.slice(0, 1)
+    ];
+  }
+  
+  const playersToAct = sorted.filter(p => 
+    (p.getCurrentBet() < maxBet) || !this.dealer.getPlayersChecked().includes(p.id)
+  );
 
-    const maxBet = Math.max(...activePlayers.map(p => p.getCurrentBet()));
-    let sorted = (bettingFor !== "firstBetting" && activePlayers.length === 2) ? [activePlayers[1], activePlayers[0]] : [...activePlayers];
-    const playersToAct = sorted.filter(p => (p.getCurrentBet() < maxBet) || !this.dealer.getPlayersChecked().includes(p.id));
-
-    if (playersToAct.length === 0 && this.dealer.allPlayersCheck()) {
-      this.dealer.removeChecks();
-      const steps = { firstBetting: "firstBetting", flopBetting: "flop_Bet_Step", turnBetting: "turn_Bet_Step", riverBetting: "river_Bet_Step" };
-      this.stepChecker.grantStep(steps[bettingFor]);
-      this.continue(thisSocket);
-    } else if (playersToAct.length > 0) {
-      const p = playersToAct[0];
-      const opts = maxBet === 0 ? ["bet", "fold", "check"] : ["call", "rise", "fold"];
-      this.communicator.msgBuilder(`bettingCore-${bettingFor}`, "private", p, { messageForId: p.id, action: opts, displayMsg: "Your turn" });
-      this.dealer.talkToPLayerById(p.id, this.communicator.getMsg());
-      this.communicator.msgBuilder(`bettingCore-${bettingFor}`, "public", p, { messageForId: p.id, action: opts, displayMsg: `Waiting for ${p.name}` });
-      this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg());
-    }
-  };
+  if (playersToAct.length === 0 && this.dealer.allPlayersCheck()) {
+    this.dealer.removeChecks();
+    const steps = { 
+      firstBetting: "firstBetting", 
+      flopBetting: "flop_Bet_Step", 
+      turnBetting: "turn_Bet_Step", 
+      riverBetting: "river_Bet_Step" 
+    };
+    this.stepChecker.grantStep(steps[bettingFor]);
+    this.continue(thisSocket);
+  } else if (playersToAct.length > 0) {
+    const p = playersToAct[0];
+    const opts = maxBet === 0 ? ["bet", "fold", "check"] : ["call", "rise", "fold"];
+    
+    this.communicator.msgBuilder(`bettingCore-${bettingFor}`, "private", p, { 
+      messageForId: p.id, 
+      action: opts, 
+      displayMsg: "Your turn" 
+    });
+    this.dealer.talkToPLayerById(p.id, this.communicator.getMsg());
+    
+    this.communicator.msgBuilder(`bettingCore-${bettingFor}`, "public", p, { 
+      messageForId: p.id, 
+      action: opts, 
+      displayMsg: `Waiting for ${p.name}` 
+    });
+    this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg());
+  }
+};
 
   dealerHand = (thisSocket, whatHand) => {
     this.dealer.dealCardsDealer(whatHand === "flop" ? 3 : 1);
@@ -272,7 +322,9 @@ class Match {
   }
 
   startGame(thisSocket = {}) {
+        
     if (this.stepChecker.checkStep("pause")) return;
+
     if (!this.dealer.hasMinimumPlayers()) {
       this.communicator.msgBuilder("startGame", "public", null, { displayMsg: "Waiting for players..." });
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());

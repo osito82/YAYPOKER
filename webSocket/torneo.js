@@ -6,15 +6,34 @@ class Torneo {
   }
 
   static addMatch(match, idTorneo) {
-    // Solo guardamos un match por torneo por ahora para simplificar
+    
     if (!this.torneos.has(idTorneo)) {
-      this.torneos.set(idTorneo, match);
-      console.log(`Torneo ${idTorneo} creado con match ${match.gameId}`);
+      this.torneos.set(idTorneo, []);
+    }
+
+    const torneoMatches = this.torneos.get(idTorneo);
+
+    const matchExists = torneoMatches.some(
+      (existingMatch) => existingMatch.gameId === match.gameId
+    );
+
+    if (!matchExists) {
+      const nuevaLista = [...torneoMatches, match];
+      this.torneos.set(idTorneo, nuevaLista);
+    } else {
+      console.warn(
+        `El partido con ID ${match.gameId} ya existe en el torneo ${idTorneo}. No se añadió duplicado.`
+      );
     }
   }
 
   static getMatch(idTorneo) {
-    return this.torneos.get(idTorneo);
+    const torneoMatches = this.torneos.get(idTorneo);
+
+    if (torneoMatches && torneoMatches.length > 0) {
+      return torneoMatches[0];
+    }
+    return null;
   }
 
   static torneoExists(idTorneo) {
