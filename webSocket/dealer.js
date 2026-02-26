@@ -1,6 +1,9 @@
 const Socket = require("./sockets");
+const osolog = require("osolog");
 
 class Dealer {
+  log = new osolog();
+
   constructor(gameId, players, deck, torneoId, pot, cardsDealer) {
     this.gameId = gameId;
     this.torneoId = torneoId;
@@ -14,8 +17,8 @@ class Dealer {
 
   setFinalHands = () => {
     let currentPrize = {};
-    console.log("DEALER - setFinalHands");
-    this.finalHands = []; // Clear previous hands
+    this.log.Template({ name: "brakets", title: "DEALER - Final Hands", date: true }).R({ gameId: this.gameId });
+    this.finalHands = []; 
     this.players.forEach((player) => {
       currentPrize = player.getCurrentPrize();
       currentPrize.name = player.name;
@@ -35,10 +38,6 @@ class Dealer {
   allPlayersCheck = () => {
     const activePlayers = this.players.filter(p => p.connected && !p.folded);
     const maxBet = Math.max(...activePlayers.map(p => p.getCurrentBet()));
-    
-    // Una ronda termina si:
-    // 1. Todos los jugadores activos han igualado la apuesta máxima.
-    // 2. Todos los jugadores activos han tenido la oportunidad de actuar (están en playersChecked).
     return activePlayers.every(p => 
       p.getCurrentBet() === maxBet && this.playersChecked.includes(p.id)
     );
@@ -49,7 +48,6 @@ class Dealer {
   };
 
   removeChecks = () => {
-    console.log("DEALER - removeChecks");
     this.playersChecked = [];
   };
 
@@ -68,22 +66,19 @@ class Dealer {
   }
 
   getChipsFromPlayers = () => {
-    console.log("DEALER - getChipsFromPlayers");
+    this.log.Template({ name: "brakets", title: "DEALER - Collecting Chips", date: true }).R({ currentPot: this.pot });
     this.players.forEach((player) => player.giveChipsToDealer());
   };
 
   dealCardsEachPlayer = (numberOfCards = 1) => {
-    console.log(`DEALER - Dealing ${numberOfCards} cards to each player. Deck size: ${this.deck.length}`);
+    this.log.Template({ name: "brakets", title: "DEALER - Dealing Players", date: true }).R({ count: numberOfCards, deckLeft: this.deck.length });
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
         if (player.connected && !player.folded) {
           if (player.countCards() < 2) {
             const cardToDeal = this.deck.shift();
             if (cardToDeal) {
-              console.log(`DEALER - Dealing ${cardToDeal} to ${player.name}`);
               player.setCard(cardToDeal);
-            } else {
-              console.log("DEALER - ERROR: Deck is empty!");
             }
           }
         }
@@ -92,6 +87,7 @@ class Dealer {
   };
 
   dealCardsDealer(numberOfCards = 1) {
+    this.log.Template({ name: "brakets", title: "DEALER - Dealing Table", date: true }).R({ count: numberOfCards, deckLeft: this.deck.length });
     for (let i = 0; i < numberOfCards; i++) {
       const cardToDeal = this.deck.shift();
       if (cardToDeal) {

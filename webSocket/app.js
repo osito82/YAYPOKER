@@ -32,7 +32,7 @@ wss.on("connection", (ws, req) => {
     socket: ws
   };
 
-  console.log(`APP - New Connection: ${playerName} (${thisSocket.id}) in Torneo: ${torneoId}`);
+  log.Template({ name: "brakets", title: "SERVER - New Connection", date: true }).R({ playerName, id: thisSocket.id, torneo: torneoId });
   Socket.addSocket(thisSocket, torneoId);
 
   // Intentar obtener el match existente o crear uno nuevo si no existe
@@ -41,7 +41,7 @@ wss.on("connection", (ws, req) => {
     const newGameId = generateUniqueId();
     match = new Match(torneoId, newGameId);
     Torneo.addMatch(match, torneoId);
-    console.log(`APP - Created new match: ${newGameId}`);
+    log.Template({ name: "brakets", title: "SERVER - Match Created", date: true }).R({ newGameId, torneoId });
   }
 
   ws.on("message", (data) => {
@@ -49,7 +49,7 @@ wss.on("connection", (ws, req) => {
     if (data) {
       try {
         jsonData = JSON.parse(data);
-        console.log(`APP - Message from ${playerName}:`, jsonData.action);
+        log.Template({ name: "brakets", title: `INCOMING - ${jsonData.action}`, date: true }).R({ from: playerName });
       } catch (error) {
         console.error("Error al analizar el JSON:", error);
         ws.send(JSON.stringify({ error: "Formato JSON no válido" }));
@@ -62,7 +62,7 @@ wss.on("connection", (ws, req) => {
       jsonData.secretCode = secretCode;
 
       if (!torneoId || !Torneo.torneoExists(torneoId)) {
-        console.log("no torneo Id");
+        log.Template({ name: "brakets", title: "SERVER - Error", date: true }).R({ msg: "Torneo not found during signUp", torneoId });
         ws.close();
         return;
       }
@@ -79,46 +79,37 @@ wss.on("connection", (ws, req) => {
       if (targetSocket && targetSocket.socket) {
         targetSocket.socket.send(JSON.stringify({ message: {displayMsg: targetMessage} }));
       } else {
-        console.log(
-          `Jugador con ID ${targetPlayerId} no encontrado o sin socket`
-        );
+        log.Template({ name: "brakets", title: "SERVER - Chat Error", date: true }).R({ msg: "Target not found", targetPlayerId });
       }
     }
 
     if (jsonData && jsonData.action === "fold") {
-      log.R({ step: "Fold" });
       match.fold(thisSocket);
     }
 
     if (jsonData && jsonData.action === "close") {
-      log.R({ step: "Close" });
       match.close(thisSocket, torneoId);
     }
 
     if (jsonData && jsonData.action === "setBet") {
-      log.R({ step: "Set Bet" });
       const chipsToBet = jsonData.chipsToBet;
       match.setBet(thisSocket, chipsToBet);
     }
 
     if (jsonData && jsonData.action === "setRise") {
-      log.R({ step: "Set Rise" });
       const chipsToRiseBet = jsonData.chipsToRiseBet;
       match.setRise(thisSocket, chipsToRiseBet);
     }
 
     if (jsonData && jsonData.action === "setCall") {
-      log.R({ step: "Set Call" });
       match.setCall(thisSocket, torneoId);
     }
 
     if (jsonData && jsonData.action === "setCheck") {
-      log.R({ step: "Check" });
       match.setCheck(thisSocket, torneoId);
     }
 
     if (jsonData && jsonData.action === "dealtPrivateCards") {
-      log.R({ step: "Dealt Private Cards" });
       match.dealtPrivateCards(thisSocket);
     }
 
@@ -127,13 +118,12 @@ wss.on("connection", (ws, req) => {
     }
 
     if (jsonData && jsonData.action === "startGame") {
-      log.R({ step: "Start Game" });
       match.startGame(thisSocket);
     }
   });
 
   ws.on("close", () => {
-    console.log(`APP - Client disconnected: ${playerName}`);
+    log.Template({ name: "brakets", title: "SERVER - Disconnection", date: true }).R({ playerName });
     match.pause(thisSocket);
   });
 });
@@ -143,7 +133,7 @@ const port = 8888;
 
 if (require.main === module) {
   server.listen(port, () => {
-    console.log(`Servidor escuchando en http://localhost:${port}`);
+    log.Template({ name: "brakets", title: "SERVER - Listening", date: true }).R({ port, url: `http://localhost:${port}` });
   });
 }
 
