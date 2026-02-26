@@ -6,8 +6,7 @@
   "scripts": {
     "start": "nodemon app.js",
     "start_cli": "nodemon index_cli.js",
-    
-        "test": "vitest"
+    "test": "vitest"
   },
   "keywords": [
     "poker",
@@ -17,16 +16,17 @@
   "author": "Guillermo Salazar",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.2",
+    "express": "^5.2.1",
     "http": "^0.0.1-security",
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.1.14",
     "osolog": "^1.0.6",
-    "radash": "^11.0.0",
+    "radash": "^12.1.1",
     "uuidv4": "^6.2.13",
-    "ws": "^8.15.1"
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "chai": "^6.2.2",
-    "mocha": "^11.7.5"
+    "mocha": "^11.7.5",
+    "vitest": "^4.0.18"
   }
 }

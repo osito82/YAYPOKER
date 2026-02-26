@@ -12,9 +12,9 @@ class Player {
     this.connected = true;
     this.folded = false;
     this.playerNumber = playerNumber;
+    this.currentBet = 0;
   }
 
-  currentBet = 0;
   currentPrize = {};
 
   setCard = (card) => {
@@ -99,6 +99,20 @@ class Player {
     this.chips -= diff;
     this.currentBet = totalAmount;
     return true;
+  }
+
+  toJson() {
+    return {
+      id: this.id,
+      name: this.name,
+      chips: this.chips,
+      currentBet: this.currentBet,
+      folded: this.folded,
+      connected: this.connected,
+      lastAction: this.lastAction,
+      playerNumber: this.playerNumber,
+      currentPrize: this.currentPrize
+    };
   }
 }
 

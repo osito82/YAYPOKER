@@ -12,13 +12,8 @@ class Communicator {
   player = {};
 
   censoredPlayersInfo(players) {
-    if (!players) return {};
-
-    const censoredPlayers = JSON.parse(JSON.stringify(players));
-    censoredPlayers.forEach((player) => {
-      delete player.cards;
-    });
-    return censoredPlayers;
+    if (!players) return [];
+    return players.map(p => p.toJson());
   }
 
   myPrivateInfo(player) {
@@ -40,6 +35,7 @@ class Communicator {
       action,
       type,
       pot: this.dealer.getPot(),
+      currentHighestBet: this.dealer.getCurrentHighestBet(),
       myPlayerInfo,
       data,
       stepChecker: this.stepChecker.getChecker(),
@@ -53,9 +49,14 @@ class Communicator {
       action,
       type,
       pot: this.dealer.getPot(),
+      currentHighestBet: this.dealer.getCurrentHighestBet(),
       data,
       stepChecker: this.stepChecker.getChecker(),
-      players: players,
+      players: players.map(p => {
+          const info = p.toJson();
+          info.cards = p.getCards();
+          return info;
+      }),
       dealerCards: this.dealer.getDealerCards(),
       // currentPrize:this.player.getCurrentPrize()
     };
