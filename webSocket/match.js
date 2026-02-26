@@ -369,10 +369,20 @@ class Match {
   } else if (playersToAct.length > 0) {
     const p = playersToAct[0];
     this.activePlayerId = p.id;
-    const opts = maxBet === 0 ? ["bet", "fold", "check"] : ["call", "raise", "fold"];
     
-    if (maxBet > 0 && p.getCurrentBet() === maxBet && !checkedPlayers.includes(p.id)) {
-        if (!opts.includes("check")) opts.push("check");
+    let opts = [];
+    if (maxBet === 0) {
+      // Nadie ha apostado aún en esta calle
+      opts = ["check", "bet", "fold"];
+    } else {
+      if (p.getCurrentBet() < maxBet) {
+        // Alguien apostó más que yo
+        opts = ["fold", "call", "raise"];
+      } else {
+        // Ya igualé la apuesta máxima (ej. BB pre-flop o después de un Call mutuo)
+        // Se puede hacer Check para pasar o Raise para subir
+        opts = ["check", "raise", "fold"];
+      }
     }
 
     this.log.Template({ name: "brakets", title: "MATCH - Waiting Player Act", date: true }).R({ player: p.name, options: opts });

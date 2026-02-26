@@ -99,7 +99,6 @@ const gameCode = route.params.gameCode || "default_Torneo";
 
 // Logic for name/uuid generation
 const getSavedName = () => {
-  //console.log(route.query.playerName, '------')
   if (route.query.playerName) return route.query.playerName;
   const saved = sessionStorage.getItem(`poker_name_${gameCode}`);
   if (saved) return saved;
@@ -115,29 +114,11 @@ const connectionOptions = { gameCode, playerName, secretCode };
 
 const { socket, connectSocket, disconnectSocket, sendMessage } = useWebSocket(wsUrl, connectionOptions);
 
+// 1. BASIC COMPUTEDS
 const isConnected = computed(() => pokerStore.getConnected);
-const minBet = computed(() => 20);
-// Ensure myPlayer exists before accessing chips
-const maxBet = computed(() => myPlayer.value?.chips || 1000);
-const betAmount = ref(minBet.value);
+const currentMaxBetOnTable = computed(() => pokerStore.getCurrentHighestBet || 0);
 
-const setQuickBet = (m) => {
-  if (m === 'all') betAmount.value = maxBet.value;
-  else {
-    // Basic pot sizing logic - simplistic for now
-    let a = Math.max(minBet.value, (pokerStore.getPot || 0) * m);
-    betAmount.value = Math.min(a, maxBet.value);
-  }
-};
-
-// Reset bet amount when turn changes to me
-watch(() => pokerStore.getActivePlayerId, (id) => {
-  if (id === myPlayer.value?.id) betAmount.value = minBet.value;
-});
-
-onMounted(() => { if (!isConnected.value) connectSocket(); });
-onBeforeUnmount(() => disconnectSocket());
-
+// 2. PLAYER LOGIC COMPUTEDS (Must be before watchers)
 const allPlayers = computed(() => pokerStore.getPlayers || []);
 const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName));
 const opponents = computed(() => allPlayers.value.filter(p => p.id !== myPlayer.value?.id));
@@ -145,18 +126,62 @@ const isMyTurn = computed(() => pokerStore.getActivePlayerId === myPlayer.value?
 const options = computed(() => pokerStore.getBettingOptions || []);
 const canBlind = computed(() => isMyTurn.value && options.value.includes('blind'));
 
+// 3. DYNAMIC BETTING LIMITS
+const minBet = computed(() => {
+  return currentMaxBetOnTable.value > 0 ? currentMaxBetOnTable.value + 20 : 20;
+});
+
+const maxBet = computed(() => {
+  const stack = myPlayer.value?.chips || 0;
+  const alreadyBet = myPlayer.value?.currentBet || 0;
+  return stack + alreadyBet;
+});
+
+// 4. REACTIVE STATE
+const betAmount = ref(minBet.value);
+
+// 5. ACTIONS & WATCHERS
+const setQuickBet = (m) => {
+  if (m === 'all') betAmount.value = maxBet.value;
+  else {
+    const callAmount = Math.max(0, currentMaxBetOnTable.value - (myPlayer.value?.currentBet || 0));
+    let a = currentMaxBetOnTable.value + (pokerStore.getPot + callAmount) * m;
+    betAmount.value = Math.min(Math.max(minBet.value, Math.round(a)), maxBet.value);
+  }
+};
+
+watch(isMyTurn, (newVal) => {
+  if (newVal) {
+    betAmount.value = Math.min(minBet.value, maxBet.value);
+  }
+});
+
+watch(currentMaxBetOnTable, (newMax) => {
+    if (isMyTurn.value && betAmount.value < minBet.value) {
+        betAmount.value = Math.min(minBet.value, maxBet.value);
+    }
+});
+
 const sendAction = (action) => {
   if (!isConnected.value) return;
   switch (action) {
     case 'check': sendMessage({ action: 'setCheck' }); break;
     case 'call': sendMessage({ action: 'setCall' }); break;
     case 'fold': sendMessage({ action: 'fold' }); break;
-    case 'bet': sendMessage({ action: 'setBet', chipsToBet: betAmount.value }); break;
-    case 'raise': sendMessage({ action: 'setRise', chipsToRiseBet: betAmount.value }); break;
+    case 'bet': 
+    case 'raise': 
+      sendMessage({ 
+        action: action === 'bet' ? 'setBet' : 'setRise', 
+        [action === 'bet' ? 'chipsToBet' : 'chipsToRiseBet']: betAmount.value 
+      }); 
+      break;
     case 'blind':
       const isS = pokerStore.getDisplayMsg?.toLowerCase().includes('small');
       sendMessage({ action: 'setBet', chipsToBet: isS ? 10 : 20 });
       break;
   }
 };
+
+onMounted(() => { if (!isConnected.value) connectSocket(); });
+onBeforeUnmount(() => disconnectSocket());
 </script>

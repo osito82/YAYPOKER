@@ -37,12 +37,18 @@
           <span id="display-raise-amount" class="text-sm md:text-md font-mono font-bold text-white leading-none">${{ betAmount }}</span>
         </div>
 
-        <input id="input-bet-range" 
-               type="range" 
-               :value="betAmount" 
-               @input="$emit('update:betAmount', Number($event.target.value))"
-               :min="minBet" :max="maxBet"
-               class="w-32 md:w-40 h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer accent-yellow-500 border border-white/5">
+        <div class="flex flex-col items-center gap-1">
+          <input id="input-bet-range" 
+                 type="range" 
+                 :value="betAmount" 
+                 @input="$emit('update:betAmount', Math.max(minBet, Number($event.target.value)))"
+                 :min="minBet" :max="maxBet"
+                 class="w-32 md:w-40 h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer accent-yellow-500 border border-white/5">
+          <div class="flex justify-between w-full px-1">
+            <span class="text-[6px] text-gray-500 font-bold font-mono">${{ minBet }}</span>
+            <span class="text-[6px] text-gray-500 font-bold font-mono">${{ maxBet }}</span>
+          </div>
+        </div>
 
         <div id="quick-bet-group" class="flex gap-1">
           <button @click="$emit('setQuickBet', 0.5)" class="px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[8px] font-bold text-gray-500 hover:text-white hover:bg-white/10 transition-all uppercase tracking-tight">1/2</button>
