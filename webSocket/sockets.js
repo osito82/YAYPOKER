@@ -1,76 +1,74 @@
 class Socket {
-  static torneoSockets = new Map();
+  static torneoSockets = new Map()
 
   static addSocket(socket, idTorneo) {
-    const { id, name } = socket;
+    const { id, name } = socket
 
     if (!this.torneoSockets.has(idTorneo)) {
-      this.torneoSockets.set(idTorneo, []);
+      this.torneoSockets.set(idTorneo, [])
     }
 
-    const torneoSockets = this.torneoSockets.get(idTorneo);
-    const existingSocketIndex = torneoSockets.findIndex((s) => s.name === name);
+    const torneoSockets = this.torneoSockets.get(idTorneo)
+    const existingSocketIndex = torneoSockets.findIndex((s) => s.name === name)
 
     if (existingSocketIndex !== -1) {
-      torneoSockets[existingSocketIndex] = socket;
-      console.log(`Socket - addSocket - Reconnected - ${name} - ${id}`);
+      torneoSockets[existingSocketIndex] = socket
+      console.log(`Socket - addSocket - Reconnected - ${name} - ${id}`)
     } else {
-      torneoSockets.push(socket);
-      console.log(`Socket - addSocket - Connected - ${name} - ${id}.`);
+      torneoSockets.push(socket)
+      console.log(`Socket - addSocket - Connected - ${name} - ${id}.`)
     }
   }
 
   static removeSocket(socket, idTorneo) {
     if (this.torneoSockets.has(idTorneo)) {
-      const torneoSockets = this.torneoSockets.get(idTorneo);
-      const socketIndex = torneoSockets.findIndex(
-        (s) => s.name === socket.name
-      );
+      const torneoSockets = this.torneoSockets.get(idTorneo)
+      const socketIndex = torneoSockets.findIndex((s) => s.name === socket.name)
 
       if (socketIndex !== -1) {
-        torneoSockets.splice(socketIndex, 1);
+        torneoSockets.splice(socketIndex, 1)
         console.log(
-          `Socket - removeSocket - Removed - ${socket.name} - ${socket.id}.`
-        );
+          `Socket - removeSocket - Removed - ${socket.name} - ${socket.id}.`,
+        )
       } else {
         console.log(
-          `Socket - removeSocket - Not Found in Torneo - ${socket.name} - ${socket.id}.`
-        );
+          `Socket - removeSocket - Not Found in Torneo - ${socket.name} - ${socket.id}.`,
+        )
       }
     } else {
       console.log(
-        `Socket - removeSocket - Not Found - ${socket.name} - ${socket.id}.`
-      );
+        `Socket - removeSocket - Not Found - ${socket.name} - ${socket.id}.`,
+      )
     }
   }
 
   static getSockets() {
-    return this.torneoSockets;
+    return this.torneoSockets
   }
 
   static getSocketsByTorneo(idTorneo) {
-    const torneoSockets = this.torneoSockets.get(idTorneo);
+    const torneoSockets = this.torneoSockets.get(idTorneo)
     if (torneoSockets) {
-      return torneoSockets;
+      return torneoSockets
     }
-    return null;
+    return null
   }
 
   static getSocket(idTorneo, id) {
-    const torneoSockets = this.torneoSockets.get(idTorneo);
+    const torneoSockets = this.torneoSockets.get(idTorneo)
     if (torneoSockets) {
-      return torneoSockets.find((socket) => socket.id === id);
+      return torneoSockets.find((socket) => socket.id === id)
     }
-    return null;
+    return null
   }
 
   static socketExists(idTorneo, id) {
-    const torneoSockets = this.torneoSockets.get(idTorneo);
+    const torneoSockets = this.torneoSockets.get(idTorneo)
     if (torneoSockets) {
-      return torneoSockets.some((socket) => socket.id === id);
+      return torneoSockets.some((socket) => socket.id === id)
     }
-    return false;
+    return false
   }
 }
 
-module.exports = Socket;
+module.exports = Socket

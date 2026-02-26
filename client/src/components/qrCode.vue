@@ -1,6 +1,5 @@
 <template>
   <div>
-    
     <QRCodeVue3
       v-if="renderComponent"
       :width="300"
@@ -30,22 +29,30 @@
 </template>
 
 <script setup>
-import QRCodeVue3 from "qrcode-vue3";
-import { computed, defineProps, onMounted, onUpdated, watch, ref, nextTick } from "vue";
-import { usePokerStore } from "../store/pokerStore";
+import QRCodeVue3 from 'qrcode-vue3'
+import {
+  computed,
+  defineProps,
+  onMounted,
+  onUpdated,
+  watch,
+  ref,
+  nextTick,
+} from 'vue'
+import { usePokerStore } from '../store/pokerStore'
 
-const pokerStore = usePokerStore();
+const pokerStore = usePokerStore()
 
-const renderComponent = ref(true);
+const renderComponent = ref(true)
 
 const forceRender = async () => {
-  renderComponent.value = false;
-  await nextTick();
-  renderComponent.value = true;
-};
+  renderComponent.value = false
+  await nextTick()
+  renderComponent.value = true
+}
 
 const computedGameCode = computed(() => {
-  forceRender();
-  return "http://localhost:5173/game/" + pokerStore.getGameCredentials.gameCode;
-});
+  forceRender()
+  return 'http://localhost:5173/game/' + pokerStore.getGameCredentials.gameCode
+})
 </script>

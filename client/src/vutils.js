@@ -1,26 +1,26 @@
 //const { v4: uuidv4 } = require("uuid");
-import { v4 } from "uuid";
+import { v4 } from 'uuid'
 
 function generateUniqueId(long = 4) {
-  const fullUUID = v4();
-  const shortUUID = fullUUID.substr(0, long).replace(/-/g, "");
-  return shortUUID;
+  const fullUUID = v4()
+  const shortUUID = fullUUID.substr(0, long).replace(/-/g, '')
+  return shortUUID
 }
 
 const simbolConverter = (simbol) => {
-  const number = {};
+  const number = {}
 
-  const letter = simbol.charAt(0);
-  const symbol = simbol.charAt(simbol.length - 1);
+  const letter = simbol.charAt(0)
+  const symbol = simbol.charAt(simbol.length - 1)
 
-  const letterMod = letterToNumber(letter);
-  const symbolMod = letterToSymbol(symbol);
+  const letterMod = letterToNumber(letter)
+  const symbolMod = letterToSymbol(symbol)
 
-  number.letter = letterMod;
-  number.symbol = symbolMod;
+  number.letter = letterMod
+  number.symbol = symbolMod
 
-  return number;
-};
+  return number
+}
 
 // function getKeyData(objeto, key) {
 //   if (!objeto) return;
@@ -44,38 +44,38 @@ const simbolConverter = (simbol) => {
 // }
 
 const whatColor = (symbol) => {
-  const symbolC = symbol.charAt(symbol.length - 1);
+  const symbolC = symbol.charAt(symbol.length - 1)
   switch (symbolC) {
-    case "s":
-    case "c":
-      return "black";
-    case "h":
-    case "d":
-      return "red";
+    case 's':
+    case 'c':
+      return 'black'
+    case 'h':
+    case 'd':
+      return 'red'
   }
-};
+}
 
 const letterToSymbol = (letter) => {
   switch (letter) {
-    case "s":
-      return "♠";
-    case "h":
-      return "♥";
-    case "c":
-      return "♣";
-    case "d":
-      return "♦";
+    case 's':
+      return '♠'
+    case 'h':
+      return '♥'
+    case 'c':
+      return '♣'
+    case 'd':
+      return '♦'
   }
-};
+}
 
 const letterToNumber = (letter) => {
   switch (letter) {
-    case "T":
-      return "10";
+    case 'T':
+      return '10'
     default:
-      return letter.toString();
+      return letter.toString()
   }
-};
+}
 
 export {
   generateUniqueId,
@@ -84,4 +84,4 @@ export {
   letterToNumber,
   whatColor,
   //getKeyData,
-};
+}

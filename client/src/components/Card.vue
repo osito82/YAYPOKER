@@ -39,57 +39,56 @@
 </template>
 
 <script setup>
-import { computed, defineProps } from "vue";
-import { simbolConverter, whatColor } from "../vutils.js";
+import { computed, defineProps } from 'vue'
+import { simbolConverter, whatColor } from '../vutils.js'
 
 const props = defineProps({
   numSymbol: String,
   size: String,
-});
+})
 
 const sizeOption = computed(() => {
   switch (props.size) {
-    case "extraLarge":
+    case 'extraLarge':
       return {
-        cornerText: "text-2xl",
-        cornerSymbol: "text-xl",
-        centerSymbol: "text-7xl",
-        height: "h-56", // Increased from h-48
-        width: "w-40", // Increased from w-32
-      };
-    case "large":
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
+        centerSymbol: 'text-7xl',
+        height: 'h-56', // Increased from h-48
+        width: 'w-40', // Increased from w-32
+      }
+    case 'large':
       return {
-        cornerText: "text-2xl",
-        cornerSymbol: "text-xl",
-        centerSymbol: "text-6xl",
-        height: "h-44", // Increased from h-36
-        width: "w-32", // Increased from w-24
-      };
-    case "small":
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
+        centerSymbol: 'text-6xl',
+        height: 'h-44', // Increased from h-36
+        width: 'w-32', // Increased from w-24
+      }
+    case 'small':
       return {
-        cornerText: "text-sm",
-        cornerSymbol: "text-xs",
-        centerSymbol: "text-3xl",
-        height: "h-24", // Increased from h-20
-        width: "w-16", // Increased from w-14
-      };
+        cornerText: 'text-sm',
+        cornerSymbol: 'text-xs',
+        centerSymbol: 'text-3xl',
+        height: 'h-24', // Increased from h-20
+        width: 'w-16', // Increased from w-14
+      }
     default:
       return {
-        cornerText: "text-2xl",
-        cornerSymbol: "text-xl",
-        centerSymbol: "text-6xl",
-        height: "h-44",
-        width: "w-32",
-      };
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
+        centerSymbol: 'text-6xl',
+        height: 'h-44',
+        width: 'w-32',
+      }
   }
-});
+})
 
-const numSymbol = computed(() => simbolConverter(props.numSymbol || "Ah"));
-const color = computed(() => whatColor(props.numSymbol || "Ah"));
+const numSymbol = computed(() => simbolConverter(props.numSymbol || 'Ah'))
+const color = computed(() => whatColor(props.numSymbol || 'Ah'))
 const colorClass = computed(() =>
-  color.value === "red" ? "text-red-600" : "text-black"
-);
+  color.value === 'red' ? 'text-red-600' : 'text-black',
+)
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

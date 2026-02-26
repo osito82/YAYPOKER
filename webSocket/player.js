@@ -1,104 +1,104 @@
-const PokerCore = require("./pokerCore");
+const PokerCore = require('./pokerCore')
 
 class Player {
   constructor(gameId, name, secretCode, chips, cards, id, playerNumber) {
-    this.name = name;
-    this.id = id;
-    this.gameId = gameId;
+    this.name = name
+    this.id = id
+    this.gameId = gameId
     this.secretCode = secretCode
-    this.chips = chips;
-    this.cards = cards;
-    this.lastAction = "";
-    this.connected = true;
-    this.folded = false;
-    this.playerNumber = playerNumber;
-    this.currentBet = 0;
+    this.chips = chips
+    this.cards = cards
+    this.lastAction = ''
+    this.connected = true
+    this.folded = false
+    this.playerNumber = playerNumber
+    this.currentBet = 0
   }
 
-  currentPrize = {};
+  currentPrize = {}
 
   setCard = (card) => {
-    this.cards.push(card);
-  };
+    this.cards.push(card)
+  }
 
   setCurrentPrize = (prize) => {
-    this.currentPrize = prize;
-  };
+    this.currentPrize = prize
+  }
 
   getCurrentPrize = () => {
-    return this.currentPrize;
-  };
+    return this.currentPrize
+  }
 
   getCards = () => {
-    return this.cards;
-  };
+    return this.cards
+  }
 
   countCards = () => {
-    return this.cards.length;
-  };
+    return this.cards.length
+  }
 
   getPlayer(playersArray, playerId) {
-    return playersArray.find((player) => player.id === playerId);
+    return playersArray.find((player) => player.id === playerId)
   }
 
   getPlayerId = () => {
-    return this.id;
-  };
+    return this.id
+  }
 
   getPlayerName = () => {
-    return this.name;
-  };
+    return this.name
+  }
 
   getChips = () => {
-    return this.chips;
-  };
+    return this.chips
+  }
 
   getCurrentBet = () => {
-    return this.currentBet;
-  };
+    return this.currentBet
+  }
 
   setLastAction = (action) => {
-    this.lastAction = action;
-  };
+    this.lastAction = action
+  }
 
   setConnected = (status) => {
-    this.connected = status;
-  };
+    this.connected = status
+  }
 
   setFolded = (status) => {
-    this.folded = status;
-    if (status) this.cards = [];
-  };
+    this.folded = status
+    if (status) this.cards = []
+  }
 
   giveChipsToDealer = () => {
-    this.currentBet = 0;
-  };
+    this.currentBet = 0
+  }
 
   checkPrize = (dealerCards) => {
-    if (!dealerCards) return;
-    const myHand = PokerCore.betterHand(dealerCards, this.cards);
-    return myHand;
-  };
+    if (!dealerCards) return
+    const myHand = PokerCore.betterHand(dealerCards, this.cards)
+    return myHand
+  }
 
   setBet(chipsToBet) {
-    let betSet = false;
+    let betSet = false
     if (Number(chipsToBet) > Number(this.chips)) {
     } else {
-      this.chips -= chipsToBet;
-      this.currentBet += chipsToBet;
-      betSet = true;
+      this.chips -= chipsToBet
+      this.currentBet += chipsToBet
+      betSet = true
     }
-    return betSet;
+    return betSet
   }
 
   setTotalBet(totalAmount) {
-    const diff = totalAmount - this.currentBet;
-    if (diff < 0) return false;
-    if (diff > this.chips) return false;
+    const diff = totalAmount - this.currentBet
+    if (diff < 0) return false
+    if (diff > this.chips) return false
 
-    this.chips -= diff;
-    this.currentBet = totalAmount;
-    return true;
+    this.chips -= diff
+    this.currentBet = totalAmount
+    return true
   }
 
   toJson() {
@@ -111,9 +111,9 @@ class Player {
       connected: this.connected,
       lastAction: this.lastAction,
       playerNumber: this.playerNumber,
-      currentPrize: this.currentPrize
-    };
+      currentPrize: this.currentPrize,
+    }
   }
 }
 
-module.exports = Player;
+module.exports = Player

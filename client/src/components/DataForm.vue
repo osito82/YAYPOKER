@@ -27,34 +27,33 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { generateUniqueId } from "../vutils.js";
-import router from "../router";
-import { usePokerStore } from "../store/pokerStore";
+import { ref } from 'vue'
+import { generateUniqueId } from '../vutils.js'
+import router from '../router'
+import { usePokerStore } from '../store/pokerStore'
 
-const pokerStore = usePokerStore();
+const pokerStore = usePokerStore()
 
-let name = ref("");
-let secretCode = ref("");
-let gameCode = ref("");
+let name = ref('')
+let secretCode = ref('')
+let gameCode = ref('')
 
 //let stateOne = ref("1");
 //let stateTwo = ref("2");
 
 const submitForm = () => {
-  console.log("Name:", name.value);
-  console.log("Secret Code:", secretCode.value);
-  console.log("Game Code:", gameCode.value);
-};
+  console.log('Name:', name.value)
+  console.log('Secret Code:', secretCode.value)
+  console.log('Game Code:', gameCode.value)
+}
 
 const startGame = () => {
-  gameCode.value = generateUniqueId(10);
-  pokerStore.setGameCode(gameCode.value);
+  gameCode.value = generateUniqueId(10)
+  pokerStore.setGameCode(gameCode.value)
 
-  router.push({ name: "game", params: { gameCode: pokerStore.getGameCode } });
-};
+  router.push({ name: 'game', params: { gameCode: pokerStore.getGameCode } })
+}
 </script>
-
 
 <style scoped>
 .my-form {

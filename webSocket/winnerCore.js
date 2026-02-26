@@ -1,5 +1,5 @@
 ///Select the best hands in an array of winner
-const R = require("radash");
+const R = require('radash')
 const {
   notRepeatedInIntArray,
   highestCardNumberFromArray,
@@ -16,519 +16,511 @@ const {
   notRepeatedSymbolnArray,
   flatToGetSymbolsArray,
   sumArrayNumbers,
-} = require("./utils");
+} = require('./utils')
 
 function selectBestRankHands(arrayHands) {
-  const arrayRanks = [];
+  const arrayRanks = []
 
   if (arrayHands.length === 0) {
-    return [];
+    return []
   }
 
   arrayHands.forEach((hand) => {
-    if (!arrayRanks.includes(hand.prizeRank)) arrayRanks.push(hand.prizeRank);
-  });
+    if (!arrayRanks.includes(hand.prizeRank)) arrayRanks.push(hand.prizeRank)
+  })
 
-  const minimum = Math.min(...arrayRanks);
+  const minimum = Math.min(...arrayRanks)
 
   const bestHands = arrayHands.filter((hand) => {
-    return hand.prizeRank == minimum;
-  });
+    return hand.prizeRank == minimum
+  })
 
-  return bestHands;
+  return bestHands
 }
 
 function betterPair(...pairs) {
-  const allPairs = [...pairs];
-  const flatAllPairs = R.flat(allPairs);
-  const numericArray = cardsToSingleNumValsArray(flatAllPairs);
-  return highestCardNumberFromArray(numericArray);
+  const allPairs = [...pairs]
+  const flatAllPairs = R.flat(allPairs)
+  const numericArray = cardsToSingleNumValsArray(flatAllPairs)
+  return highestCardNumberFromArray(numericArray)
 }
 
 //must work for flush
 function betterStraight(cards) {
   const numerics = cards.map((x) =>
-    cardsToSingleNumValsArray(x).sort((a, b) => b - a)
-  );
-  const maxSumIntArray = getHigherSumArrayContent(numerics);
-  const maxSumSymArray = singleValsToSymbolsArray(maxSumIntArray);
+    cardsToSingleNumValsArray(x).sort((a, b) => b - a),
+  )
+  const maxSumIntArray = getHigherSumArrayContent(numerics)
+  const maxSumSymArray = singleValsToSymbolsArray(maxSumIntArray)
 
-  return maxSumSymArray;
+  return maxSumSymArray
 }
 
 //Get higher array of 3 items
 function betterThreeOfAKind(cards) {
-  let bestThreeKind = [];
+  let bestThreeKind = []
   if (!cards) {
-    return [];
+    return []
   }
 
   bestThreeKind = highestCardNumberFromArray(
-    cardsToSingleNumValsArray(cards.map((btk) => btk[0]))
-  );
+    cardsToSingleNumValsArray(cards.map((btk) => btk[0])),
+  )
 
-  const bestThreeKindArray = [bestThreeKind, bestThreeKind, bestThreeKind];
-  return bestThreeKindArray;
+  const bestThreeKindArray = [bestThreeKind, bestThreeKind, bestThreeKind]
+  return bestThreeKindArray
 }
 
 function betteraFourOfaKind(cards) {
-  let singlesFromFour = [];
+  let singlesFromFour = []
 
   cards.map((x) => {
-    singlesFromFour.push(x[0]);
-  });
+    singlesFromFour.push(x[0])
+  })
 
   const biggestFourRepresent = highestCardNumberFromArray(
-    cardsToSingleNumValsArray(singlesFromFour)
-  );
+    cardsToSingleNumValsArray(singlesFromFour),
+  )
 
   const bestFourOfAKind = [
     biggestFourRepresent,
     biggestFourRepresent,
     biggestFourRepresent,
     biggestFourRepresent,
-  ];
-  return bestFourOfAKind;
+  ]
+  return bestFourOfAKind
 }
 
 function betterFullHouse(cards) {
-  let singlesFromThree = [];
-  let singlesFromTwo = [];
+  let singlesFromThree = []
+  let singlesFromTwo = []
   cards.map((x) => {
-    singlesFromThree.push(x[0][0]);
-  });
+    singlesFromThree.push(x[0][0])
+  })
 
   const biggestThreeRepresent = highestCardNumberFromArray(
-    cardsToSingleNumValsArray(singlesFromThree)
-  );
+    cardsToSingleNumValsArray(singlesFromThree),
+  )
 
   const bestFH3 = cards.filter((trio) =>
-    cardsToNoSymbolValsArray(trio[0]).includes(biggestThreeRepresent)
-  );
+    cardsToNoSymbolValsArray(trio[0]).includes(biggestThreeRepresent),
+  )
 
   if (bestFH3.length == 1) {
-    const bestfullHouse = [...bestFH3[0]];
-    return flatToGetSymbolsArray(bestfullHouse);
+    const bestfullHouse = [...bestFH3[0]]
+    return flatToGetSymbolsArray(bestfullHouse)
   }
 
   bestFH3.map((x) => {
-    singlesFromTwo.push(x[1][0]);
-  });
+    singlesFromTwo.push(x[1][0])
+  })
 
   const biggestTwoRepresent = highestCardNumberFromArray(
-    cardsToSingleNumValsArray(singlesFromTwo)
-  );
+    cardsToSingleNumValsArray(singlesFromTwo),
+  )
 
   const bestFullHouseTwoParts = bestFH3.filter((duo) =>
-    cardsToNoSymbolValsArray(duo[1]).includes(biggestTwoRepresent)
-  );
+    cardsToNoSymbolValsArray(duo[1]).includes(biggestTwoRepresent),
+  )
 
-  return flatToGetSymbolsArray(bestFullHouseTwoParts[0]);
+  return flatToGetSymbolsArray(bestFullHouseTwoParts[0])
 }
 
 function betterTwoPairs(...pairs) {
-  const fourWSymbol = pairs[0].map((pair) => pair.join().split(","));
+  const fourWSymbol = pairs[0].map((pair) => pair.join().split(','))
 
-  const fourSingleNumbers = fourWSymbol.map((x) =>
-    cardsToSingleNumValsArray(x)
-  );
+  const fourSingleNumbers = fourWSymbol.map((x) => cardsToSingleNumValsArray(x))
 
   const singles = fourSingleNumbers.map((x) =>
-    uniqueElementsArray(x).sort((a, b) => b - a)
-  );
+    uniqueElementsArray(x).sort((a, b) => b - a),
+  )
 
-  let izq = 0;
-  let der = 0;
+  let izq = 0
+  let der = 0
 
   for (let i = 0; i < singles.length; i++) {
-    const currentPair = singles[i];
+    const currentPair = singles[i]
 
     if (currentPair[0] > izq) {
-      izq = currentPair[0];
+      izq = currentPair[0]
     }
   }
 
   for (let i = 0; i < singles.length; i++) {
-    const currentPair = singles[i];
+    const currentPair = singles[i]
 
     if (currentPair[0] == izq && currentPair[1] > der) {
-      der = currentPair[1];
+      der = currentPair[1]
     }
   }
 
-  let maxPair = [izq, der];
+  let maxPair = [izq, der]
 
   const fourSimbols = [
     ...singleValsToSymbolsArray(maxPair),
     ...singleValsToSymbolsArray(maxPair),
-  ].sort();
+  ].sort()
 
-  return fourSimbols;
+  return fourSimbols
 }
 
 ///Gets the Best Pair after moving out repeated
 function ArrayOutOfPairSingles(...arrays) {
-  let arraysWithNoRepeated = arrays.map((array) =>
-    notRepeatedInIntArray(array)
-  );
+  let arraysWithNoRepeated = arrays.map((array) => notRepeatedInIntArray(array))
 
   const arraysOrdenados = arraysWithNoRepeated.sort((array1, array2) => {
-    const suma1 = sumArrayNumbers(array1);
-    const suma2 = sumArrayNumbers(array2);
+    const suma1 = sumArrayNumbers(array1)
+    const suma2 = sumArrayNumbers(array2)
 
-    return suma2 - suma1;
-  });
+    return suma2 - suma1
+  })
 
-  const highestSortedSingleNumArray = arraysOrdenados[0];
+  const highestSortedSingleNumArray = arraysOrdenados[0]
 
-  return singleValsToSymbolsArray(highestSortedSingleNumArray);
+  return singleValsToSymbolsArray(highestSortedSingleNumArray)
 }
 
 class WinnerCore {
   constructor() {}
   static Winner(handsObj) {
-    console.log("****************** THE WINNER ******************");
+    console.log('****************** THE WINNER ******************')
 
-    const bestHands = selectBestRankHands(handsObj);
+    const bestHands = selectBestRankHands(handsObj)
 
     if (bestHands.length == 1) {
-      return bestHands;
+      return bestHands
     }
 
     //===========================================Pairs
-    if (bestHands[0].pokerHand == "pairs") {
-      let allPairsArray = [];
-      let allCardsArray = [];
+    if (bestHands[0].pokerHand == 'pairs') {
+      let allPairsArray = []
+      let allCardsArray = []
 
       bestHands.forEach((bestHand) => {
-        allPairsArray.push(...bestHand.show);
-      });
+        allPairsArray.push(...bestHand.show)
+      })
 
-      let betterPairCard = betterPair(allPairsArray);
+      let betterPairCard = betterPair(allPairsArray)
 
       const allPairsInfoArray =
         bestHands.filter((hand) => {
-          return hand.show.some((item) => item.includes(betterPairCard));
-        }) || [];
+          return hand.show.some((item) => item.includes(betterPairCard))
+        }) || []
 
       allPairsInfoArray.forEach((bestHand) => {
-        allCardsArray.push(bestHand.cards);
-      });
+        allCardsArray.push(bestHand.cards)
+      })
 
       if (allPairsInfoArray.length == 1) {
-        return allPairsInfoArray[0];
+        return allPairsInfoArray[0]
       }
 
-      const bestOutofPairSingles = ArrayOutOfPairSingles(...allCardsArray);
+      const bestOutofPairSingles = ArrayOutOfPairSingles(...allCardsArray)
 
       const bestPairInfo = allPairsInfoArray.filter((info) =>
-        compareArraysNoOrder(bestOutofPairSingles, info.cards)
-      );
+        compareArraysNoOrder(bestOutofPairSingles, info.cards),
+      )
 
-      return bestPairInfo;
+      return bestPairInfo
     }
 
     //===========================================highCard
-    if (bestHands[0].pokerHand == "highCard") {
-      console.log("highCard");
-      let allHighCardArray = [];
+    if (bestHands[0].pokerHand == 'highCard') {
+      console.log('highCard')
+      let allHighCardArray = []
 
       bestHands.forEach((bestHand) => {
-        allHighCardArray.push(bestHand.cards);
-      });
+        allHighCardArray.push(bestHand.cards)
+      })
 
-      const bestHighCardArray = selectArrayWithBiggestNumbers(allHighCardArray);
+      const bestHighCardArray = selectArrayWithBiggestNumbers(allHighCardArray)
 
-      const betterHighCards = cardsToNoSymbolValsArray(bestHighCardArray);
+      const betterHighCards = cardsToNoSymbolValsArray(bestHighCardArray)
 
       const allHighInfoArray =
         bestHands.filter((hand) => {
-          const highFromHand = cardsToNoSymbolValsArray(hand.cards.flat());
+          const highFromHand = cardsToNoSymbolValsArray(hand.cards.flat())
 
           return (
             highFromHand.sort().toString() === betterHighCards.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
-      return allHighInfoArray;
+      return allHighInfoArray
     }
 
     //===========================================twoPairs
-    if (bestHands[0].pokerHand == "twoPairs") {
-      console.log("twoPairs");
-      let allPairsArray = [];
-      let allCardsArray = [];
+    if (bestHands[0].pokerHand == 'twoPairs') {
+      console.log('twoPairs')
+      let allPairsArray = []
+      let allCardsArray = []
 
       bestHands.forEach((bestHand) => {
-        allPairsArray.push(bestHand.show);
-      });
+        allPairsArray.push(bestHand.show)
+      })
 
-      let betterTwoPairsCard = betterTwoPairs(allPairsArray);
+      let betterTwoPairsCard = betterTwoPairs(allPairsArray)
 
       const allTwoPairsInfoArray =
         bestHands.filter((hand) => {
-          const twoPairsFromHand = cardsToNoSymbolValsArray(hand.show.flat());
+          const twoPairsFromHand = cardsToNoSymbolValsArray(hand.show.flat())
           return (
             twoPairsFromHand.sort().toString() ===
             betterTwoPairsCard.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
       allTwoPairsInfoArray.forEach((bestHand) => {
-        allCardsArray.push(bestHand.cards);
-      });
+        allCardsArray.push(bestHand.cards)
+      })
 
       if (allTwoPairsInfoArray.length == 1) {
-        return allTwoPairsInfoArray[0];
+        return allTwoPairsInfoArray[0]
       }
 
-      const bestOutofPairSingles = ArrayOutOfPairSingles(...allCardsArray);
+      const bestOutofPairSingles = ArrayOutOfPairSingles(...allCardsArray)
 
-      const unTieBestGame = betterTwoPairsCard.concat(bestOutofPairSingles);
+      const unTieBestGame = betterTwoPairsCard.concat(bestOutofPairSingles)
 
       const allTwoPairsInfoArrayUnTie =
         bestHands.filter((hand) => {
-          const myCards = cardsToNoSymbolValsArray(hand.cards.flat());
+          const myCards = cardsToNoSymbolValsArray(hand.cards.flat())
 
-          return myCards.sort().toString() === unTieBestGame.sort().toString();
-        }) || [];
+          return myCards.sort().toString() === unTieBestGame.sort().toString()
+        }) || []
 
-      return allTwoPairsInfoArrayUnTie;
+      return allTwoPairsInfoArrayUnTie
     }
 
     //===========================================threeOfAKind
-    if (bestHands[0].pokerHand == "threeOfAKind") {
-      console.log("threeOfAKind");
-      let allThreeOfAKindArray = [];
+    if (bestHands[0].pokerHand == 'threeOfAKind') {
+      console.log('threeOfAKind')
+      let allThreeOfAKindArray = []
 
       bestHands.forEach((bestHand) => {
-        allThreeOfAKindArray.push(bestHand.show);
-      });
+        allThreeOfAKindArray.push(bestHand.show)
+      })
 
-      let betterThreeOfAKindCards = betterThreeOfAKind(allThreeOfAKindArray);
+      let betterThreeOfAKindCards = betterThreeOfAKind(allThreeOfAKindArray)
 
       const allThreeOfAKindInfoArray =
         bestHands.filter((hand) => {
           const threeOfAKindFromHand = cardsToNoSymbolValsArray(
-            hand.show.flat()
-          );
+            hand.show.flat(),
+          )
           return (
             threeOfAKindFromHand.sort().toString() ===
             betterThreeOfAKindCards.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
       allThreeOfAKindInfoArray.forEach((bestHand) => {
-        allThreeOfAKindArray.push(bestHand.cards);
-      });
+        allThreeOfAKindArray.push(bestHand.cards)
+      })
 
       if (allThreeOfAKindArray.length == 1) {
-        return allThreeOfAKindInfoArray[0];
+        return allThreeOfAKindInfoArray[0]
       }
 
       const bestOutof3oAKSingles = ArrayOutOfPairSingles(
-        ...allThreeOfAKindArray
-      );
+        ...allThreeOfAKindArray,
+      )
 
       const unTieBest3oAKGame = bestOutof3oAKSingles.concat(
-        betterThreeOfAKindCards
-      );
+        betterThreeOfAKindCards,
+      )
       const all3ofAKInfoArrayUnTie =
         bestHands.filter((hand) => {
-          const myCards = cardsToNoSymbolValsArray(hand.cards.flat());
+          const myCards = cardsToNoSymbolValsArray(hand.cards.flat())
 
           return (
             myCards.sort().toString() === unTieBest3oAKGame.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
-      return all3ofAKInfoArrayUnTie;
+      return all3ofAKInfoArrayUnTie
     }
 
     //===========================================straight
-    if (bestHands[0].pokerHand == "straight") {
-      console.log("straight");
-      let allstraightArray = [];
+    if (bestHands[0].pokerHand == 'straight') {
+      console.log('straight')
+      let allstraightArray = []
 
       bestHands.forEach((bestHand) => {
-        allstraightArray.push(bestHand.show);
-      });
+        allstraightArray.push(bestHand.show)
+      })
 
-      let betterStraightCards = betterStraight(allstraightArray);
+      let betterStraightCards = betterStraight(allstraightArray)
 
       const allStraightInfoArray =
         bestHands.filter((hand) => {
-          const straightFromHand = cardsToNoSymbolValsArray(hand.show.flat());
+          const straightFromHand = cardsToNoSymbolValsArray(hand.show.flat())
 
           return (
             straightFromHand.sort().toString() ===
             betterStraightCards.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
-      return allStraightInfoArray;
+      return allStraightInfoArray
     }
 
     //===========================================flush
-    if (bestHands[0].pokerHand == "flush") {
-      console.log("flush");
-      let allFlushArray = [];
+    if (bestHands[0].pokerHand == 'flush') {
+      console.log('flush')
+      let allFlushArray = []
 
       bestHands.forEach((bestHand) => {
-        allFlushArray.push(bestHand.show);
-      });
+        allFlushArray.push(bestHand.show)
+      })
 
-      const onlyNumbers = allFlushArray.map((x) =>
-        cardsToSingleNumValsArray(x)
-      );
+      const onlyNumbers = allFlushArray.map((x) => cardsToSingleNumValsArray(x))
 
-      const bestArray = selectArrayWithBiggestNumbers(onlyNumbers);
-      const betterFlushCards = singleValsToSymbolsArray(bestArray);
+      const bestArray = selectArrayWithBiggestNumbers(onlyNumbers)
+      const betterFlushCards = singleValsToSymbolsArray(bestArray)
 
       const allFlushInfoArray =
         bestHands.filter((hand) => {
-          const flushFromHand = cardsToNoSymbolValsArray(hand.show.flat());
+          const flushFromHand = cardsToNoSymbolValsArray(hand.show.flat())
 
           return (
             flushFromHand.sort().toString() ===
             betterFlushCards.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
-      return allFlushInfoArray;
+      return allFlushInfoArray
     }
 
     //===========================================fullHouse
-    if (bestHands[0].pokerHand == "fullHouse") {
-      console.log("fullHouse");
-      let allFullHouseArray = [];
+    if (bestHands[0].pokerHand == 'fullHouse') {
+      console.log('fullHouse')
+      let allFullHouseArray = []
 
       bestHands.forEach((bestHand) => {
-        allFullHouseArray.push(bestHand.show);
-      });
+        allFullHouseArray.push(bestHand.show)
+      })
 
-      const betterFullHouseHand = betterFullHouse(allFullHouseArray);
+      const betterFullHouseHand = betterFullHouse(allFullHouseArray)
 
       const allFullHouseInfoArray =
         bestHands.filter((hand) => {
-          const flushFromHand = cardsToNoSymbolValsArray(hand.show.flat());
+          const flushFromHand = cardsToNoSymbolValsArray(hand.show.flat())
 
           return (
             flushFromHand.sort().toString() ===
             betterFullHouseHand.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
-      return allFullHouseInfoArray;
+      return allFullHouseInfoArray
     }
 
     //===========================================fourOfaKind
-    if (bestHands[0].pokerHand == "fourOfaKind") {
-      console.log("fourOfaKind");
-      let allFourOfaKindArray = [];
-      let biggestSymbolOutOf4oak = [];
+    if (bestHands[0].pokerHand == 'fourOfaKind') {
+      console.log('fourOfaKind')
+      let allFourOfaKindArray = []
+      let biggestSymbolOutOf4oak = []
 
       bestHands.forEach((bestHand) => {
-        allFourOfaKindArray.push(bestHand.show);
-      });
+        allFourOfaKindArray.push(bestHand.show)
+      })
 
-      const betterFourofAKindHand = betteraFourOfaKind(allFourOfaKindArray);
+      const betterFourofAKindHand = betteraFourOfaKind(allFourOfaKindArray)
 
       const allFourofAkindInfoArray =
         bestHands.filter((hand) => {
-          const fourOfaKindFromHand = cardsToNoSymbolValsArray(
-            hand.show.flat()
-          );
+          const fourOfaKindFromHand = cardsToNoSymbolValsArray(hand.show.flat())
 
           return (
             fourOfaKindFromHand.sort().toString() ===
             betterFourofAKindHand.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
       if (allFourofAkindInfoArray.length == 1) {
-        return allFourofAkindInfoArray;
+        return allFourofAkindInfoArray
       }
 
       biggestSymbolOutOf4oak = highestCardNumberFromArray(
         singleSymbolsToNumsArray(
           allFourofAkindInfoArray
             .map((x) =>
-              notRepeatedSymbolnArray(cardsToNoSymbolValsArray(x.cards))
+              notRepeatedSymbolnArray(cardsToNoSymbolValsArray(x.cards)),
             )
-            .flat()
-        )
-      );
+            .flat(),
+        ),
+      )
 
-      const unTie4ofAK = [...betterFourofAKindHand, biggestSymbolOutOf4oak];
+      const unTie4ofAK = [...betterFourofAKindHand, biggestSymbolOutOf4oak]
 
       const allFourofAkindInfoArrayUnTie =
         bestHands.filter((hand) => {
           const fourOfaKindFromHand = cardsToNoSymbolValsArray(
-            hand.cards.flat()
-          );
+            hand.cards.flat(),
+          )
 
           return (
             fourOfaKindFromHand.sort().toString() ===
             unTie4ofAK.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
-      return allFourofAkindInfoArrayUnTie;
+      return allFourofAkindInfoArrayUnTie
     }
 
     //===========================================straightFlush
-    if (bestHands[0].pokerHand == "straightFlush") {
-      console.log("straightFlush");
-      let allstraightFlushArray = [];
+    if (bestHands[0].pokerHand == 'straightFlush') {
+      console.log('straightFlush')
+      let allstraightFlushArray = []
 
       bestHands.forEach((bestHand) => {
-        allstraightFlushArray.push(bestHand.show);
-      });
+        allstraightFlushArray.push(bestHand.show)
+      })
 
-      let betterStraightFlushCards = betterStraight(allstraightFlushArray);
+      let betterStraightFlushCards = betterStraight(allstraightFlushArray)
 
       const allStraightFlushArrayInfoArray =
         bestHands.filter((hand) => {
           const straightFlushFromHand = cardsToNoSymbolValsArray(
-            hand.show.flat()
-          );
+            hand.show.flat(),
+          )
 
           return (
             straightFlushFromHand.sort().toString() ===
             betterStraightFlushCards.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
-      return allStraightFlushArrayInfoArray;
+      return allStraightFlushArrayInfoArray
     }
 
     //===========================================royalFlush
-    if (bestHands[0].pokerHand == "royalFlush") {
-      console.log("royalFlush");
-      let allRoyalFlushArray = [];
+    if (bestHands[0].pokerHand == 'royalFlush') {
+      console.log('royalFlush')
+      let allRoyalFlushArray = []
 
       bestHands.forEach((bestHand) => {
-        allRoyalFlushArray.push(bestHand.show);
-      });
+        allRoyalFlushArray.push(bestHand.show)
+      })
 
-      let betterRoyaltFlushCards = betterStraight(allRoyalFlushArray);
+      let betterRoyaltFlushCards = betterStraight(allRoyalFlushArray)
 
       const allRoyalFlushArrayInfoArray =
         bestHands.filter((hand) => {
           const straightFlushFromHand = cardsToNoSymbolValsArray(
-            hand.show.flat()
-          );
+            hand.show.flat(),
+          )
 
           return (
             straightFlushFromHand.sort().toString() ===
             betterRoyaltFlushCards.sort().toString()
-          );
-        }) || [];
+          )
+        }) || []
 
-      return allRoyalFlushArrayInfoArray;
+      return allRoyalFlushArrayInfoArray
     }
   }
 }
 
-module.exports = WinnerCore;
+module.exports = WinnerCore

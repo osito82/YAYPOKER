@@ -1,4 +1,4 @@
-const { shuffle } = require("./utils");
+const { shuffle } = require('./utils')
 class Deck {
   // prettier-ignore
   static cards = [
@@ -9,19 +9,19 @@ class Deck {
 ];
 
   static shuffleDeck = (deck, times = 1) => {
-    let shuffledDeck = [...deck];
+    let shuffledDeck = [...deck]
 
-    shuffledDeck = shuffle(shuffledDeck);
+    shuffledDeck = shuffle(shuffledDeck)
     if (times > 1) {
       for (let i = 0; i < times; i++) {
-        shuffledDeck = shuffle(shuffledDeck);
+        shuffledDeck = shuffle(shuffledDeck)
       }
     }
 
-    return shuffledDeck;
-  };
+    return shuffledDeck
+  }
 
-  static originalDeck = Deck.shuffleDeck(Deck.cards);
+  static originalDeck = Deck.shuffleDeck(Deck.cards)
 }
 
-module.exports = Deck;
+module.exports = Deck

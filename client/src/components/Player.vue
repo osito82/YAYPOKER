@@ -28,16 +28,14 @@
       </template>
       <template v-else>
         <!-- Show Backs -->
-         <CardBack :size="'small'" />
-         <CardBack :size="'small'" class="-ml-4" />
+        <CardBack :size="'small'" />
+        <CardBack :size="'small'" class="-ml-4" />
       </template>
     </div>
 
     <!-- Chips & Action -->
     <div class="w-full text-center">
-      <div class="text-yellow-400 font-mono text-sm">
-        ${{ playerChips }}
-      </div>
+      <div class="text-yellow-400 font-mono text-sm">${{ playerChips }}</div>
       <div v-if="playerAction" class="text-xs text-gray-300 mt-1 italic">
         {{ playerAction }}
       </div>
@@ -46,12 +44,12 @@
 </template>
 
 <script setup>
-import Card from "../components/Card.vue";
-import CardBack from "../components/CardBack.vue";
-import { defineProps } from "vue";
+import Card from '../components/Card.vue'
+import CardBack from '../components/CardBack.vue'
+import { defineProps } from 'vue'
 
 const props = defineProps({
-  playerName: { type: String, default: "Player" },
+  playerName: { type: String, default: 'Player' },
   playerChips: { type: Number, default: 0 },
   playerAction: String,
   playerCards: {
@@ -60,12 +58,7 @@ const props = defineProps({
   },
   showCards: { type: Boolean, default: false },
   isActive: { type: Boolean, default: false }, // New prop to highlight active player
-});
+})
 </script>
 
-<style scoped>
-</style>
-
-
-
-
+<style scoped></style>

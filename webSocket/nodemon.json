@@ -1,11 +1,6 @@
 {
   "watch": ["."],
   "ext": "js,json",
-  "ignore": [
-    "node_modules",
-    ".git",
-    "*.test.js",
-    "notes.txt"
-  ],
+  "ignore": ["node_modules", ".git", "*.test.js", "notes.txt"],
   "delay": 500
 }
