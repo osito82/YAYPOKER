@@ -1,6 +1,9 @@
 <template>
   <div id="game-root" class="h-screen w-screen bg-neutral-950 overflow-hidden flex flex-col font-sans text-white select-none">
     
+    <!-- WINNER ANNOUNCEMENT OVERLAY -->
+    <WinnerOverlay :winnerInfo="pokerStore.getWinnerInfo" />
+
     <!-- TOP METADATA BAR (Professional Status) -->
     <nav id="top-bar" class="absolute top-0 left-0 w-full p-4 z-40 flex justify-between items-start pointer-events-none">
       
@@ -14,10 +17,16 @@
         </div>
       </div>
 
-      <!-- Connection Badge -->
-      <div id="status-panel" class="pointer-events-auto bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5 flex items-center gap-2">
-        <div id="status-dot" class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" :class="isConnected ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500'"></div>
-        <span id="lbl-connection" class="text-[9px] font-bold uppercase tracking-widest text-gray-400">{{ isConnected ? 'LIVE' : 'RECONNECTING' }}</span>
+      <!-- Connection & Player Info -->
+      <div class="flex flex-col items-end gap-2">
+        <div id="player-badge" class="pointer-events-auto bg-yellow-500/10 backdrop-blur-md px-4 py-1 rounded-full border border-yellow-500/20">
+          <span class="text-[10px] font-black text-yellow-500 uppercase tracking-widest">{{ playerName }}</span>
+        </div>
+        
+        <div id="status-panel" class="pointer-events-auto bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5 flex items-center gap-2">
+          <div id="status-dot" class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]" :class="isConnected ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500'"></div>
+          <span id="lbl-connection" class="text-[9px] font-bold uppercase tracking-widest text-gray-400">{{ isConnected ? 'LIVE' : 'RECONNECTING' }}</span>
+        </div>
       </div>
     </nav>
 
@@ -82,6 +91,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import PokerTable from "../components/PokerTable.vue";
 import ActionBar from "../components/ActionBar.vue";
+import WinnerOverlay from "../components/WinnerOverlay.vue";
 
 const route = useRoute();
 const pokerStore = usePokerStore();

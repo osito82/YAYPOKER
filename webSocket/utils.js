@@ -18,8 +18,7 @@ function shuffle(array) {
 
 function generateUniqueId(long=4) {
   const fullUUID = uuidv4();
-  const shortUUID = fullUUID.substr(0, long).replace(/-/g, "");
-  return shortUUID;
+  return fullUUID;
 }
 
 ///[ 'Ks', '8c', 'Js', 'Td', 'Qc' ] =>  [ 'K', '8', 'J', 'T', 'Q' ]

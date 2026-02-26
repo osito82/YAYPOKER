@@ -22,7 +22,8 @@ export const usePokerStore = defineStore({
     myInfo: {
       id: null,
       cards: []
-    }
+    },
+    winnerInfo: null // New state for descriptive announcement
   }),
   getters: {
     getSocketMessage: (state) => state.socketMessage,
@@ -33,7 +34,8 @@ export const usePokerStore = defineStore({
     getDisplayMsg: (state) => state.displayMsg,
     getDealerLog: (state) => state.dealerLog,
     getActivePlayerId: (state) => state.activePlayerId,
-    getBettingOptions: (state) => state.bettingOptions
+    getBettingOptions: (state) => state.bettingOptions,
+    getWinnerInfo: (state) => state.winnerInfo
   },
   actions: {
     setSocketMessage(message) {
@@ -46,11 +48,15 @@ export const usePokerStore = defineStore({
 
         console.log("POKER_STORE - Received:", gameData.action, gameData);
 
+        // Reset winner info if a new hand/action starts
+        if (gameData.action === "askForBlindBets" || gameData.action === "signUp") {
+           this.winnerInfo = null;
+        }
+
         // Update ID and private info immediately if available
         if (gameData.myPlayerInfo) {
           if (gameData.myPlayerInfo.playerId) {
             this.myInfo.id = gameData.myPlayerInfo.playerId;
-            console.log("POKER_STORE - My ID confirmed:", this.myInfo.id);
           }
           if (gameData.myPlayerInfo.privateCards) {
             this.myInfo.cards = gameData.myPlayerInfo.privateCards;
@@ -94,6 +100,15 @@ export const usePokerStore = defineStore({
           this.bettingOptions = gameData.data?.action || [];
         } else if (gameData.action === "signUp" && gameData.type === "private") {
           this.myInfo.id = gameData.data?.id;
+        } else if (gameData.action === "winner") {
+          this.winnerInfo = gameData.data;
+          this.activePlayerId = null;
+          this.bettingOptions = [];
+          // Keep winner info for 7 seconds (or until store reset)
+          setTimeout(() => {
+             // Optional: only clear if it hasn't changed
+             if (this.winnerInfo === gameData.data) this.winnerInfo = null;
+          }, 7000);
         }
 
       } catch (e) {

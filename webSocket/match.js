@@ -231,14 +231,25 @@ class Match {
       isFold: isFold
     });
 
+    const finalHands = this.dealer.getFinalHands();
+    const winningHand = finalHands.find(h => h.playerId === winnerPlayer.id);
+
     this.communicator.msgBuilder("winner", "public", null, { 
       method: "winner", 
-      displayMsg: `${winnerPlayer.name} wins ${pot}${isFold ? ' (Fold)' : ''}!`,
-      winner: [{ name: winnerPlayer.name, playerId: winnerPlayer.id }]
+      displayMsg: `${winnerPlayer.name} wins $${pot}${isFold ? ' (Fold)' : ''}!`,
+      winner: {
+        name: winnerPlayer.name,
+        playerId: winnerPlayer.id,
+        amount: pot,
+        handName: isFold ? "Fold" : winningHand?.pokerHand || "High Card",
+        winningCards: isFold ? [] : winningHand?.show || []
+      },
+      allHands: finalHands, // Para que el front pueda mostrar qué tenían los demás
+      isFold: isFold
     });
     this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
 
-    setTimeout(() => { this.restartMatch(); }, 4000);
+    setTimeout(() => { this.restartMatch(); }, 15000); // 15 segundos para el anuncio
   };
 
   restartMatch() {

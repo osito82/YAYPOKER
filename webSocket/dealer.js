@@ -20,10 +20,11 @@ class Dealer {
     this.log.Template({ name: "brakets", title: "DEALER - Final Hands", date: true }).R({ gameId: this.gameId });
     this.finalHands = []; 
     this.players.forEach((player) => {
-      currentPrize = player.getCurrentPrize();
+      currentPrize = player.getCurrentPrize() || {};
       currentPrize.name = player.name;
       currentPrize.playerId = player.id;
       currentPrize.gameId = player.gameId;
+      currentPrize.chips = player.chips; // Importante: incluir chips actualizados
 
       this.finalHands.push({
         ...currentPrize,
