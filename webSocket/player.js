@@ -90,6 +90,16 @@ class Player {
     }
     return betSet;
   }
+
+  setTotalBet(totalAmount) {
+    const diff = totalAmount - this.currentBet;
+    if (diff < 0) return false;
+    if (diff > this.chips) return false;
+
+    this.chips -= diff;
+    this.currentBet = totalAmount;
+    return true;
+  }
 }
 
 module.exports = Player;
