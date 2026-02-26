@@ -68,9 +68,10 @@
           <button v-if="options.includes('check')" id="btn-action-check" @click="$emit('action', 'check')" class="btn-compact border-white/10 text-gray-300 hover:bg-white/10">Check</button>
           <button v-if="options.includes('call')" id="btn-action-call" @click="$emit('action', 'call')" class="btn-compact border-blue-500/30 text-blue-400 hover:bg-blue-600/20">Call</button>
           
-          <button id="btn-action-primary" 
+          <button id="raise-button" 
+                  :disabled="betAmount <= minBet"
                   @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')" 
-                  class="btn-compact bg-yellow-500 text-black border-yellow-600 font-black px-4 md:px-6 hover:bg-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                  class="btn-compact bg-yellow-500 text-black border-yellow-600 font-black px-4 md:px-6 hover:bg-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale transition-all">
             {{ options.includes('bet') ? 'BET' : 'RAISE' }}
           </button>
         </template>
