@@ -106,25 +106,36 @@ class Match {
   setBet(thisSocket, chipsToBet, type = "setBet") {
     const foundPlayer = this.players.find(p => p.id == thisSocket.id);
     if (foundPlayer) {
-      if (foundPlayer.setBet(chipsToBet)) {
+      // If it's a 'Rise', chipsToBet is the total new amount
+      // If it's a blind from askForBlindBets, we might need to handle it differently 
+      // but for now let's assume UI/Blinds logic sends the absolute amount intended for this turn.
+      
+      const currentBetBefore = foundPlayer.getCurrentBet();
+      const success = foundPlayer.setTotalBet(chipsToBet);
+
+      if (success) {
+        const addedChips = chipsToBet - currentBetBefore;
         foundPlayer.setLastAction(type === "setBet" ? "Bet" : "Raise");
-        this.dealer.setPot(chipsToBet);
+        this.dealer.setPot(addedChips);
         
-        if (this.stepChecker.checkStep("blindsBetting")) {
-           this.dealer.removeChecks();
+        if (chipsToBet > this.dealer.getCurrentHighestBet()) {
+          this.dealer.setCurrentHighestBet(chipsToBet);
+          this.dealer.setLastRaiser(foundPlayer.id);
+          // When someone raises, we MUST allow others to act again
+          this.dealer.removeChecks();
         }
 
         this.dealer.setChecked(foundPlayer.id);
         
         this.log.Template({ name: "brakets", title: `MATCH - ${type.toUpperCase()}`, date: true }).R({
           player: foundPlayer.name,
-          amount: chipsToBet,
+          added: addedChips,
           totalBet: foundPlayer.getCurrentBet(),
           newPot: this.dealer.getPot()
         });
 
         this.communicator.msgBuilder("setBet", "public", foundPlayer, {
-          displayMsg: `${foundPlayer.name} bets ${chipsToBet}`,
+          displayMsg: `${foundPlayer.name} ${type === "setBet" ? "bets" : "raises to"} ${chipsToBet}`,
           name: foundPlayer.name,
           bet: foundPlayer.getCurrentBet(),
         });
@@ -135,13 +146,14 @@ class Match {
   }
 
   setCall(thisSocket) {
-    const activePlayers = this.players.filter(p => p.connected && !p.folded);
-    const maxBet = Math.max(...activePlayers.map(p => p.getCurrentBet()));
+    const maxBet = this.dealer.getCurrentHighestBet();
     const foundPlayer = this.players.find(p => p.id == thisSocket.id);
     if (foundPlayer) {
-      const diff = maxBet - foundPlayer.getCurrentBet();
-      if (diff > 0) {
-        if (foundPlayer.setBet(diff)) {
+      const currentBetBefore = foundPlayer.getCurrentBet();
+      const diff = maxBet - currentBetBefore;
+      
+      if (diff >= 0) {
+        if (foundPlayer.setTotalBet(maxBet)) {
           foundPlayer.setLastAction("Call");
           this.dealer.setPot(diff);
           this.dealer.setChecked(foundPlayer.id);
@@ -155,22 +167,22 @@ class Match {
           this.communicator.msgBuilder("setCall", "public", foundPlayer, { displayMsg: `${foundPlayer.name} calls` });
           this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
         }
-      } else { 
-        this.dealer.setChecked(foundPlayer.id); 
-        this.log.Template({ name: "brakets", title: "MATCH - CALL (Zero diff)", date: true }).R({ player: foundPlayer.name });
       }
     }
     this.continue(thisSocket);
   }
 
   setCheck = (thisSocket) => {
-    this.dealer.setChecked(thisSocket.id);
     const foundPlayer = this.players.find(p => p.id == thisSocket.id);
     if (foundPlayer) {
-      foundPlayer.setLastAction("Check");
-      this.log.Template({ name: "brakets", title: "MATCH - CHECK", date: true }).R({ player: foundPlayer.name });
-      this.communicator.msgBuilder("setCheck", "public", foundPlayer, { displayMsg: `${foundPlayer.name} checks` });
-      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+      // Can only check if current bet matches highest bet
+      if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
+        this.dealer.setChecked(thisSocket.id);
+        foundPlayer.setLastAction("Check");
+        this.log.Template({ name: "brakets", title: "MATCH - CHECK", date: true }).R({ player: foundPlayer.name });
+        this.communicator.msgBuilder("setCheck", "public", foundPlayer, { displayMsg: `${foundPlayer.name} checks` });
+        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg());
+      }
     }
     this.continue(thisSocket);
   };
@@ -270,6 +282,8 @@ class Match {
     this.dealer.cardsDealer = [];
     this.dealer.pot = 0;
     this.dealer.removeChecks();
+    this.dealer.setCurrentHighestBet(0);
+    this.dealer.setLastRaiser(null);
     
     if (this.players.length > 1) { this.players.push(this.players.shift()); }
 
@@ -289,7 +303,7 @@ class Match {
     return;
   }
 
-  const maxBet = Math.max(...activePlayers.map(p => p.getCurrentBet()));
+  const maxBet = this.dealer.getCurrentHighestBet();
   
   let sorted = [...activePlayers];
   
@@ -314,9 +328,12 @@ class Match {
     (p.getCurrentBet() < maxBet) || !this.dealer.getPlayersChecked().includes(p.id)
   );
 
-  if (playersToAct.length === 0 && this.dealer.allPlayersCheck()) {
+  if (playersToAct.length === 0) {
     this.log.Template({ name: "brakets", title: `MATCH - Betting Round ${bettingFor} Finished`, date: true }).R({ pot: this.dealer.getPot() });
     this.dealer.removeChecks();
+    this.dealer.setCurrentHighestBet(0);
+    this.dealer.setLastRaiser(null);
+
     const steps = { 
       firstBetting: "firstBetting", 
       flopBetting: "flop_Bet_Step", 
@@ -329,6 +346,13 @@ class Match {
     const p = playersToAct[0];
     const opts = maxBet === 0 ? ["bet", "fold", "check"] : ["call", "rise", "fold"];
     
+    // Si ya igualó la apuesta máxima pero aún no ha "chequeado" formalmente en esta ronda
+    // (por ejemplo BB en primera ronda de apuestas si nadie subió), 
+    // podrías permitirle "check" en vez de forzar call.
+    if (maxBet > 0 && p.getCurrentBet() === maxBet && !this.dealer.getPlayersChecked().includes(p.id)) {
+        if (!opts.includes("check")) opts.push("check");
+    }
+
     this.log.Template({ name: "brakets", title: "MATCH - Waiting Player Act", date: true }).R({ player: p.name, options: opts });
 
     this.communicator.msgBuilder(`bettingCore-${bettingFor}`, "private", p, { 

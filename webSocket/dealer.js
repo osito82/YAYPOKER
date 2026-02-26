@@ -13,7 +13,25 @@ class Dealer {
     this.cardsDealer = cardsDealer || [];
     this.playersChecked = [];
     this.finalHands = [];
+    this.currentHighestBet = 0;
+    this.lastRaiser = null;
   }
+
+  getCurrentHighestBet = () => {
+    return this.currentHighestBet;
+  };
+
+  setCurrentHighestBet = (amount) => {
+    this.currentHighestBet = amount;
+  };
+
+  getLastRaiser = () => {
+    return this.lastRaiser;
+  };
+
+  setLastRaiser = (playerId) => {
+    this.lastRaiser = playerId;
+  };
 
   setFinalHands = () => {
     let currentPrize = {};
