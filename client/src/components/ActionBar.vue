@@ -10,6 +10,25 @@
         </div>
       </div>
 
+      <!-- CARDS SECTOR -->
+      <div id="hud-cards-display" class="flex gap-1 items-center px-4 border-r border-white/10">
+        <template v-if="playerCards && playerCards.length > 0">
+          <Card 
+            v-for="(card, i) in playerCards" 
+            :key="i" 
+            size="small" 
+            :numSymbol="card"
+            class="shadow-lg transform hover:scale-110 transition-transform cursor-default" 
+          />
+        </template>
+        <template v-else>
+          <div class="flex -space-x-2 opacity-20">
+            <div class="w-8 h-12 bg-gray-800 border border-white/10 rounded-md"></div>
+            <div class="w-8 h-12 bg-gray-800 border border-white/10 rounded-md"></div>
+          </div>
+        </template>
+      </div>
+
       <!-- RAISE SECTOR (Functionality Restored) -->
       <div v-if="isMyTurn && (options.includes('bet') || options.includes('rise'))" 
            id="hud-raise-controls" class="flex items-center gap-4 px-2 flex-grow justify-center">
@@ -65,6 +84,8 @@
 </template>
 
 <script setup>
+import Card from "./Card.vue";
+
 defineProps({
   isMyTurn: Boolean,
   canBlind: Boolean,
@@ -72,11 +93,19 @@ defineProps({
   balance: { type: Number, default: 0 },
   betAmount: { type: Number, default: 0 }, // Linked to v-model:betAmount
   minBet: { type: Number, default: 0 },
-  maxBet: { type: Number, default: 0 }
+  maxBet: { type: Number, default: 0 },
+  playerCards: { type: Array, default: () => [] }
 });
 
 defineEmits(['action', 'update:betAmount', 'setQuickBet']);
 </script>
+
+<style scoped>
+.btn-compact { @apply px-5 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center; }
+.chip-btn-tiny { @apply px-2 py-1 bg-white/5 border border-white/10 rounded-md text-[8px] font-bold text-gray-500 hover:text-white hover:bg-white/10 transition-all uppercase tracking-tight; }
+#input-bet-range::-webkit-slider-thumb { -webkit-appearance: none; @apply w-3.5 h-3.5 bg-yellow-500 rounded-full border-2 border-black shadow-md cursor-pointer transition-transform hover:scale-110; }
+#input-bet-range::-moz-range-thumb { @apply w-3.5 h-3.5 bg-yellow-500 rounded-full border-2 border-black shadow-md cursor-pointer transition-transform hover:scale-110; }
+</style>
 
 <style scoped>
 .btn-compact { @apply px-5 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center; }

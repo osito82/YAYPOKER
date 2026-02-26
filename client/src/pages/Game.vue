@@ -64,6 +64,7 @@
         v-model:betAmount="betAmount"
         :minBet="minBet"
         :maxBet="maxBet"
+        :playerCards="myPlayer?.cards || []"
         @action="sendAction"
         @setQuickBet="setQuickBet"
       />

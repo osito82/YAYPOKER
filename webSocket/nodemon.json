@@ -1,5 +1,5 @@
 {
-  "watch": ["app.js"],
+  "watch": ["."],
   "ext": "js,json",
   "ignore": [
     "node_modules",

@@ -1,3 +1,4 @@
+
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // 🔥 Mocks de dependencias
@@ -148,8 +149,8 @@ beforeAll(() => {
 
  
  it("should remove player on fold", () => {
-    console.log("Métodos de match:", Object.keys(match));
-  console.log("fold existe?", typeof match.fold);
+    
+  
   match.signUp(
     { name: "John", secretCode: "123", totalChips: 1000 },
     socketMock
@@ -157,7 +158,7 @@ beforeAll(() => {
 
   match.players[0].setCard("A"); 
   match.players[0].setCard("K");
-console.log(match.players)
+
   vi.spyOn(match, "continue").mockImplementation(() => {});
 
   match.fold(socketMock);
@@ -215,3 +216,4 @@ it("should call checkPrize when dealer has 3 cards", () => {
   expect(spy).toHaveBeenCalled();
 });
 });
+

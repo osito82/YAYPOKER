@@ -27,11 +27,11 @@ class Torneo {
     }
   }
 
-  static getMatch(idTorneo, id) {
+  static getMatch(idTorneo) {
     const torneoMatches = this.torneos.get(idTorneo);
 
-    if (torneoMatches) {
-      return torneoMatches.find((match) => match.gameId === id);
+    if (torneoMatches && torneoMatches.length > 0) {
+      return torneoMatches[0];
     }
     return null;
   }
