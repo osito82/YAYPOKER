@@ -157,7 +157,7 @@ app.get("/status", (req, res) => {
   });
 });
 
-app.get("*", (req, res) => {
+app.get("/*splat", (req, res) => {
   res.redirect("/");
 });
 
