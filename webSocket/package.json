@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Poker API",
   "main": "app.js",
-    "scripts": {
+  "scripts": {
     "start": "nodemon app.js",
     "start_cli": "nodemon index_cli.js",
     "test": "vitest",

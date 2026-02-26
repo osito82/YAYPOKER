@@ -1,19 +1,20 @@
 const { v4: uuidv4 } = require('uuid')
 
-function shuffle(array) {
-  let currentIndex = array.length,
-    randomIndex
+const shuffle = (array) => {
+  const arr = [...array]
 
-  while (currentIndex > 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex)
-    currentIndex--
-
-    ;[array[currentIndex], array[randomIndex]] = [
-      array[randomIndex],
-      array[currentIndex],
-    ]
+  const swap = (i, j) => {
+    const temp = arr[i]
+    arr[i] = arr[j]
+    arr[j] = temp
   }
-  return array
+
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    swap(i, j)
+  }
+
+  return arr
 }
 
 function generateUniqueId(long = 4) {
@@ -122,7 +123,6 @@ function notRepeatedSymbolnArray(array) {
   return uniqueArray
 }
 
-//borrar despues communicator
 function msgBuilder(action, msgType, player, data) {
   const { id: playerId, name: playerName } = player
   return { action, msgType, playerId: playerId, name: playerName, data }
