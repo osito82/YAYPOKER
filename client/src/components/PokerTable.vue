@@ -1,16 +1,16 @@
 <template>
   <div
     id="poker-viewport"
-    class="w-full h-full flex flex-col md:flex-row overflow-hidden bg-neutral-950"
+    class="w-full h-full flex flex-col md:flex-row md:overflow-hidden bg-neutral-950 overflow-y-auto"
   >
     <!-- LEFT: 65% Table Surface -->
     <div
       id="table-container"
-      class="w-full md:w-[65%] h-[45%] md:h-full relative flex items-center justify-center p-2 md:p-6"
+      class="w-full md:w-[65%] shrink-0 h-auto min-h-[50vh] md:h-full relative flex items-center justify-center p-3 sm:p-4 md:p-6"
     >
       <div
         id="main-table-surface"
-        class="w-full h-full bg-gradient-to-br from-green-900 to-emerald-950 shadow-2xl relative overflow-hidden flex items-center justify-center rounded-xl md:rounded-2xl border-0"
+        class="w-full h-full min-h-[280px] sm:min-h-[320px] bg-gradient-to-br from-green-900 to-emerald-950 shadow-2xl relative overflow-hidden flex items-center justify-center rounded-xl md:rounded-2xl border-0"
       >
         <!-- Modern Grid Pattern -->
         <div
@@ -24,30 +24,37 @@
         <!-- CENTER ZONE: Pot & Community Cards -->
         <div
           id="table-center-zone"
-          class="relative z-10 flex flex-col items-center justify-center scale-95 sm:scale-100 md:scale-110"
+          class="relative z-10 w-full flex flex-col items-center justify-center px-4 transition-all duration-300"
         >
           <!-- Pot -->
           <div
             id="pot-display"
-            class="mb-4 md:mb-8 bg-black/40 backdrop-blur-md px-6 md:px-8 py-1.5 md:py-2.5 rounded-lg border border-white/5 shadow-2xl"
+            class="mb-6 md:mb-10 bg-black/40 backdrop-blur-md px-6 md:px-10 py-2 md:py-3 rounded-lg border border-white/5 shadow-2xl"
           >
             <span
               id="pot-amount"
-              class="text-xs md:text-base text-emerald-400 font-black tracking-[0.3em] md:tracking-[0.5em] uppercase"
+              class="text-xs sm:text-sm md:text-lg text-emerald-400 font-black tracking-[0.4em] md:tracking-[0.6em] uppercase"
               >Total Pot: ${{ pot }}</span
             >
           </div>
 
-          <!-- Community Cards -->
-          <div id="community-cards-row" class="flex gap-2 md:gap-4">
+          <!-- Community Cards Container -->
+          <div 
+            id="community-cards-row" 
+            class="flex items-center justify-center gap-1 sm:gap-2 md:gap-4 w-full max-w-full overflow-hidden"
+          >
             <template v-if="communityCards?.length > 0">
               <Card
                 v-for="(c, i) in communityCards"
                 :id="'community-card-' + i"
                 :key="i"
-                :size="windowWidth < 768 ? 'small' : 'medium'"
+                :size="windowWidth < 480 ? 'small' : 'medium'"
                 :numSymbol="c"
-                class="hover:scale-105 transition-transform"
+                class="hover:scale-105 transition-transform flex-shrink origin-center"
+                :class="[
+                  windowWidth < 400 ? 'scale-90' : 'scale-100',
+                  'transition-all duration-300'
+                ]"
               />
             </template>
             <template v-else>
@@ -55,7 +62,7 @@
                 v-for="i in 5"
                 :id="'empty-card-slot-' + i"
                 :key="i"
-                class="w-10 h-14 md:w-20 md:h-28 rounded-xl bg-black/20 border border-white/5 flex items-center justify-center"
+                class="w-10 h-14 sm:w-16 sm:h-24 md:w-24 md:h-32 rounded-lg md:rounded-xl bg-black/20 border border-white/5 flex items-center justify-center flex-shrink"
               >
                 <div class="w-1.5 h-1.5 rounded-full bg-white/5"></div>
               </div>
@@ -68,7 +75,7 @@
     <!-- RIGHT: 35% Players Column -->
     <div
       id="players-sidepanel"
-      class="w-full md:w-[35%] h-[55%] md:h-full bg-neutral-900/50 backdrop-blur-3xl border-t md:border-t-0 md:border-l border-white/5 p-4 md:p-6 flex flex-col gap-4 overflow-y-auto pb-32 md:pb-6"
+      class="w-full md:w-[35%] h-auto md:h-full bg-neutral-900/50 backdrop-blur-3xl border-t md:border-t-0 md:border-l border-white/5 p-4 md:p-6 flex flex-col gap-4 md:overflow-y-auto pb-40 md:pb-6"
     >
       <div class="mb-4 flex items-center justify-between px-2">
         <h2 class="text-xs font-black text-gray-500 uppercase tracking-[0.4em]">Players</h2>
