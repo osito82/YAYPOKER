@@ -343,8 +343,18 @@ setCall(thisSocket) {
   }
 
   askForBlindBets(thisSocket) {
-    const p1 = this.players[0]
-    const p2 = this.players[1]
+    // Filter active players (connected and with chips)
+    const activePlayers = this.players.filter(p => p.connected && p.chips > 0)
+
+    if (activePlayers.length < 2) {
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH - Not Enough Active Players', date: true })
+        .R({ activeCount: activePlayers.length })
+      return
+    }
+
+    const p1 = activePlayers[0]
+    const p2 = activePlayers[1]
 
     if (p1 && p2 && p1.getCurrentBet() > 0 && p2.getCurrentBet() > 0) {
       this.log
