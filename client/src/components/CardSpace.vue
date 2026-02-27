@@ -9,37 +9,36 @@
 </template>
 
 <script setup>
-import { computed, defineProps } from "vue";
+import { computed, defineProps } from 'vue'
 
 const props = defineProps({
   size: String,
-});
+})
 
 const sizeOption = computed(() => {
   switch (props.size) {
-    case "extraLarge":
+    case 'extraLarge':
       return {
-        height: "h-48",
-        width: "w-32",
-      };
-    case "large":
+        height: 'h-48',
+        width: 'w-32',
+      }
+    case 'large':
       return {
-        height: "h-36",
-        width: "w-24",
-      };
-    case "small":
+        height: 'h-36',
+        width: 'w-24',
+      }
+    case 'small':
       return {
-        height: "h-20",
-        width: "w-14",
-      };
+        height: 'h-20',
+        width: 'w-14',
+      }
     default:
       return {
-        height: "h-36",
-        width: "w-24",
-      };
+        height: 'h-36',
+        width: 'w-24',
+      }
   }
-});
+})
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

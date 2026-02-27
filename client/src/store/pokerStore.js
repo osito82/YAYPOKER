@@ -1,132 +1,134 @@
-import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
 
-export const usePokerStore = defineStore("pokerStore", () => {
+export const usePokerStore = defineStore('pokerStore', () => {
   // State
-  const socketMessage = ref(null);
-  const connected = ref(false);
+  const socketMessage = ref(null)
+  const connected = ref(false)
   const gameCredentials = ref({
-    secretCode: "",
-    gameCode: "",
-    playerName: "",
-  });
-  const players = ref([]);
-  const communityCards = ref([]);
-  const pot = ref(0);
-  const displayMsg = ref(null);
-  const dealerLog = ref([]);
-  const activePlayerId = ref(null);
-  const bettingOptions = ref([]);
-  const currentHighestBet = ref(0);
+    secretCode: '',
+    gameCode: '',
+    playerName: '',
+  })
+  const players = ref([])
+  const communityCards = ref([])
+  const pot = ref(0)
+  const displayMsg = ref(null)
+  const dealerLog = ref([])
+  const activePlayerId = ref(null)
+  const bettingOptions = ref([])
+  const currentHighestBet = ref(0)
   const myInfo = ref({
     id: null,
-    cards: []
-  });
-  const winnerInfo = ref(null);
+    cards: [],
+  })
+  const winnerInfo = ref(null)
 
   // Getters
-  const getSocketMessage = computed(() => socketMessage.value);
-  const getConnected = computed(() => connected.value);
-  const getPlayers = computed(() => players.value || []);
-  const getPLayers = getPlayers; // Alias for backward compatibility
-  const getCommunityCards = computed(() => communityCards.value || []);
-  const getPot = computed(() => pot.value || 0);
-  const getDisplayMsg = computed(() => displayMsg.value);
-  const getDealerLog = computed(() => dealerLog.value);
-  const getActivePlayerId = computed(() => activePlayerId.value);
-  const getBettingOptions = computed(() => bettingOptions.value);
-  const getWinnerInfo = computed(() => winnerInfo.value);
-  const getCurrentHighestBet = computed(() => currentHighestBet.value);
+  const getSocketMessage = computed(() => socketMessage.value)
+  const getConnected = computed(() => connected.value)
+  const getPlayers = computed(() => players.value || [])
+  const getPLayers = getPlayers // Alias for backward compatibility
+  const getCommunityCards = computed(() => communityCards.value || [])
+  const getPot = computed(() => pot.value || 0)
+  const getDisplayMsg = computed(() => displayMsg.value)
+  const getDealerLog = computed(() => dealerLog.value)
+  const getActivePlayerId = computed(() => activePlayerId.value)
+  const getBettingOptions = computed(() => bettingOptions.value)
+  const getWinnerInfo = computed(() => winnerInfo.value)
+  const getCurrentHighestBet = computed(() => currentHighestBet.value)
 
   // Actions
   function setSocketMessage(message) {
-    if (!message) return;
-    
-    try {
-      const msgObj = JSON.parse(message);
-      const gameData = msgObj.message;
-      if (!gameData) return;
+    if (!message) return
 
-      console.log("POKER_STORE - Received:", gameData.action, gameData);
+    try {
+      const msgObj = JSON.parse(message)
+      const gameData = msgObj.message
+      if (!gameData) return
+
+      console.log('POKER_STORE - Received:', gameData.action, gameData)
 
       // Reset winner info if a new hand/action starts
-      if (gameData.action === "askForBlindBets" || gameData.action === "signUp") {
-         winnerInfo.value = null;
+      if (
+        gameData.action === 'askForBlindBets' ||
+        gameData.action === 'signUp'
+      ) {
+        winnerInfo.value = null
       }
 
       // Update ID and private info immediately if available
       if (gameData.myPlayerInfo) {
         if (gameData.myPlayerInfo.playerId) {
-          myInfo.value.id = gameData.myPlayerInfo.playerId;
+          myInfo.value.id = gameData.myPlayerInfo.playerId
         }
         if (gameData.myPlayerInfo.privateCards) {
-          myInfo.value.cards = gameData.myPlayerInfo.privateCards;
+          myInfo.value.cards = gameData.myPlayerInfo.privateCards
         }
       }
 
       // Update display message
-      const newMsg = gameData.data?.displayMsg ?? gameData.data?.msg ?? null;
+      const newMsg = gameData.data?.displayMsg ?? gameData.data?.msg ?? null
       if (newMsg !== null) {
-        displayMsg.value = newMsg;
+        displayMsg.value = newMsg
         if (newMsg) {
           dealerLog.value.unshift({
             id: Date.now(),
             text: newMsg,
-            type: gameData.type || 'public'
-          });
-          if (dealerLog.value.length > 10) dealerLog.value.pop();
+            type: gameData.type || 'public',
+          })
+          if (dealerLog.value.length > 10) dealerLog.value.pop()
         }
       }
 
       // Update Players
       if (gameData.players) {
-        players.value = gameData.players.map(p => {
+        players.value = gameData.players.map((p) => {
           if (p.id === myInfo.value.id) {
-             return { ...p, cards: myInfo.value.cards };
+            return { ...p, cards: myInfo.value.cards }
           }
-          return p;
-        });
+          return p
+        })
       }
 
       // Update Table State
-      if (gameData.pot !== undefined) pot.value = gameData.pot;
-      if (gameData.dealerCards) communityCards.value = gameData.dealerCards;
+      if (gameData.pot !== undefined) pot.value = gameData.pot
+      if (gameData.dealerCards) communityCards.value = gameData.dealerCards
       if (gameData.currentHighestBet !== undefined) {
-          currentHighestBet.value = gameData.currentHighestBet;
+        currentHighestBet.value = gameData.currentHighestBet
       }
 
       // Handle Actions and Turns
-      if (gameData.action === "askForBlindBets") {
-        activePlayerId.value = gameData.data.id;
-        bettingOptions.value = ["blind"];
-      } else if (gameData.action?.startsWith("bettingCore")) {
-        activePlayerId.value = gameData.data?.messageForId;
-        bettingOptions.value = gameData.data?.action || [];
-      } else if (gameData.action === "signUp" && gameData.type === "private") {
-        myInfo.value.id = gameData.data?.id;
-      } else if (gameData.action === "winner") {
-        winnerInfo.value = gameData.data;
-        activePlayerId.value = null;
-        bettingOptions.value = [];
+      if (gameData.action === 'askForBlindBets') {
+        activePlayerId.value = gameData.data.id
+        bettingOptions.value = ['blind']
+      } else if (gameData.action?.startsWith('bettingCore')) {
+        activePlayerId.value = gameData.data?.messageForId
+        bettingOptions.value = gameData.data?.action || []
+      } else if (gameData.action === 'signUp' && gameData.type === 'private') {
+        myInfo.value.id = gameData.data?.id
+      } else if (gameData.action === 'winner') {
+        winnerInfo.value = gameData.data
+        activePlayerId.value = null
+        bettingOptions.value = []
         // Keep winner info for 7 seconds
         setTimeout(() => {
-           if (winnerInfo.value === gameData.data) winnerInfo.value = null;
-        }, 7000);
+          if (winnerInfo.value === gameData.data) winnerInfo.value = null
+        }, 7000)
       }
-
     } catch (e) {
-      console.error("POKER_STORE - Error parsing message", e);
+      console.error('POKER_STORE - Error parsing message', e)
     }
   }
 
   function setConnected(status) {
-    connected.value = status;
+    connected.value = status
   }
 
   function setGameCredentials(gameCode, secretCode, playerName) {
-    gameCredentials.value.playerName = playerName;
-    gameCredentials.value.gameCode = gameCode;
-    gameCredentials.value.secretCode = secretCode;
+    gameCredentials.value.playerName = playerName
+    gameCredentials.value.gameCode = gameCode
+    gameCredentials.value.secretCode = secretCode
   }
 
   return {
@@ -162,6 +164,6 @@ export const usePokerStore = defineStore("pokerStore", () => {
     // Actions
     setSocketMessage,
     setConnected,
-    setGameCredentials
-  };
-});
+    setGameCredentials,
+  }
+})

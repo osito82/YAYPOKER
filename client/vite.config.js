@@ -11,8 +11,8 @@ export default defineConfig({
         '**/node_modules/**',
         '**/dist/**',
         '**/.git/**',
-        '**/.vscode/**'
-      ]
-    }
-  }
+        '**/.vscode/**',
+      ],
+    },
+  },
 })

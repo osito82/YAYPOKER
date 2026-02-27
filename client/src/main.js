@@ -1,14 +1,12 @@
-import router from './router';
+import router from './router'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import './styles.css'
 import './index.css'
 
-
 const app = createApp(App)
 const pinia = createPinia()
-
 
 app.use(pinia)
 app.use(router)

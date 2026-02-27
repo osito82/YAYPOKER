@@ -6,7 +6,9 @@
   "scripts": {
     "start": "nodemon app.js",
     "start_cli": "nodemon index_cli.js",
-    "test": "vitest"
+    "test": "vitest",
+    "lint": "eslint . --fix",
+    "format": "prettier --write ."
   },
   "keywords": [
     "poker",
@@ -25,8 +27,13 @@
     "ws": "^8.19.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "chai": "^6.2.2",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.3.0",
     "mocha": "^11.7.5",
+    "prettier": "^3.8.1",
     "vitest": "^4.0.18"
   }
 }
