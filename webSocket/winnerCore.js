@@ -39,10 +39,19 @@ function selectBestRankHands(arrayHands) {
 }
 
 function betterPair(...pairs) {
-  const allPairs = [...pairs]
-  const flatAllPairs = R.flat(allPairs)
+  const flatAllPairs = pairs.flat(2)
   const numericArray = cardsToSingleNumValsArray(flatAllPairs)
-  return highestCardNumberFromArray(numericArray)
+
+  const counts = {}
+  numericArray.forEach((n) => (counts[n] = (counts[n] || 0) + 1))
+
+  const pairValues = Object.keys(counts)
+    .filter((k) => counts[k] >= 2)
+    .map(Number)
+
+  return pairValues.length > 0
+    ? Math.max(...pairValues)
+    : Math.max(...numericArray)
 }
 
 //must work for flush
@@ -126,42 +135,27 @@ function betterFullHouse(cards) {
   return flatToGetSymbolsArray(bestFullHouseTwoParts[0])
 }
 
-function betterTwoPairs(...pairs) {
-  const fourWSymbol = pairs[0].map((pair) => pair.join().split(','))
+function betterTwoPairs(...hands) {
+  const handsFlat = hands.flat(2)
 
-  const fourSingleNumbers = fourWSymbol.map((x) => cardsToSingleNumValsArray(x))
+  const numericValues = cardsToSingleNumValsArray(handsFlat)
 
-  const singles = fourSingleNumbers.map((x) =>
-    uniqueElementsArray(x).sort((a, b) => b - a),
-  )
+  const counts = {}
+  numericValues.forEach((n) => (counts[n] = (counts[n] || 0) + 1))
 
-  let izq = 0
-  let der = 0
+  const pairs = Object.keys(counts)
+    .filter((k) => counts[k] >= 2)
+    .map(Number)
+    .sort((a, b) => b - a) 
 
-  for (let i = 0; i < singles.length; i++) {
-    const currentPair = singles[i]
-
-    if (currentPair[0] > izq) {
-      izq = currentPair[0]
-    }
+  if (pairs.length >= 2) {
+    return [
+      ...singleValsToSymbolsArray([pairs[0], pairs[0]]),
+      ...singleValsToSymbolsArray([pairs[1], pairs[1]]),
+    ]
   }
 
-  for (let i = 0; i < singles.length; i++) {
-    const currentPair = singles[i]
-
-    if (currentPair[0] == izq && currentPair[1] > der) {
-      der = currentPair[1]
-    }
-  }
-
-  let maxPair = [izq, der]
-
-  const fourSimbols = [
-    ...singleValsToSymbolsArray(maxPair),
-    ...singleValsToSymbolsArray(maxPair),
-  ].sort()
-
-  return fourSimbols
+  return []
 }
 
 ///Gets the Best Pair after moving out repeated
@@ -201,10 +195,13 @@ class WinnerCore {
       })
 
       let betterPairCard = betterPair(allPairsArray)
+      let betterPairCardSymbol = numberToCard(betterPairCard)
 
       const allPairsInfoArray =
         bestHands.filter((hand) => {
-          return hand.show.some((item) => item.includes(betterPairCard))
+          return hand.show.some((item) =>
+            cardsToNoSymbolValsArray(item).includes(betterPairCardSymbol),
+          )
         }) || []
 
       allPairsInfoArray.forEach((bestHand) => {
@@ -523,4 +520,14 @@ class WinnerCore {
   }
 }
 
-module.exports = WinnerCore
+//module.exports = WinnerCore
+module.exports = {
+  WinnerCore,
+  selectBestRankHands,
+  betterPair,
+  betterStraight,
+  betterThreeOfAKind,
+  betteraFourOfaKind,
+  betterFullHouse,
+  betterTwoPairs,
+}

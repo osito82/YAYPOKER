@@ -218,38 +218,105 @@ class Match {
   }
 
   setCall(thisSocket) {
+    // 🔒 Validar turno
     if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
 
     const maxBet = this.dealer.getCurrentHighestBet()
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
-    if (foundPlayer) {
-      const currentBetBefore = foundPlayer.getCurrentBet()
-      const diff = maxBet - currentBetBefore
+    if (!foundPlayer) return
 
-      if (diff >= 0) {
-        if (foundPlayer.setTotalBet(maxBet)) {
-          this.activePlayerId = null
-          foundPlayer.setLastAction('Call')
-          this.dealer.setPot(diff)
-          this.dealer.setChecked(foundPlayer.id)
+    const currentBetBefore = foundPlayer.getCurrentBet()
+    const diff = maxBet - currentBetBefore
 
-          this.log
-            .Template({ name: 'brakets', title: 'MATCH - CALL', date: true })
-            .R({
-              player: foundPlayer.name,
-              amount: diff,
-              newPot: this.dealer.getPot(),
-            })
+    // Nada que igualar
+    if (diff <= 0) return
 
-          this.communicator.msgBuilder('setCall', 'public', foundPlayer, {
-            displayMsg: `${foundPlayer.name} calls`,
-          })
-          this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
-        }
-      }
+    this.activePlayerId = null
+
+    let amountAdded = 0
+    let actionType = 'Call'
+
+    // 🔥 CASO ALL-IN (no puede cubrir la apuesta completa)
+    if (foundPlayer.chips <= diff) {
+      amountAdded = foundPlayer.chips
+
+      foundPlayer.setTotalBet(currentBetBefore + amountAdded)
+      foundPlayer.chips = 0
+      foundPlayer.isAllIn = true
+      actionType = 'All-In'
+    } else {
+      // ✅ Call normal
+      amountAdded = diff
+      foundPlayer.setTotalBet(maxBet)
     }
+
+    // Actualizar pot
+    this.dealer.setPot(amountAdded)
+
+    // Marcar como que ya actuó
+    this.dealer.setChecked(foundPlayer.id)
+    foundPlayer.setLastAction(actionType)
+
+    // Log
+    this.log
+      .Template({
+        name: 'brakets',
+        title: `MATCH - ${actionType.toUpperCase()}`,
+        date: true,
+      })
+      .R({
+        player: foundPlayer.name,
+        added: amountAdded,
+        totalBet: foundPlayer.getCurrentBet(),
+        remainingChips: foundPlayer.chips,
+        newPot: this.dealer.getPot(),
+      })
+
+    // Mensaje público
+    this.communicator.msgBuilder('setCall', 'public', foundPlayer, {
+      displayMsg: `${foundPlayer.name} ${actionType === 'All-In' ? 'goes all-in' : 'calls'}`,
+      name: foundPlayer.name,
+      bet: foundPlayer.getCurrentBet(),
+    })
+
+    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+
     this.continue(thisSocket)
   }
+
+  // setCall(thisSocket) {
+  //   if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
+
+  //   const maxBet = this.dealer.getCurrentHighestBet()
+  //   const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
+  //   if (foundPlayer) {
+  //     const currentBetBefore = foundPlayer.getCurrentBet()
+  //     const diff = maxBet - currentBetBefore
+
+  //     if (diff >= 0) {
+  //       if (foundPlayer.setTotalBet(maxBet)) {
+  //         this.activePlayerId = null
+  //         foundPlayer.setLastAction('Call')
+  //         this.dealer.setPot(diff)
+  //         this.dealer.setChecked(foundPlayer.id)
+
+  //         this.log
+  //           .Template({ name: 'brakets', title: 'MATCH - CALL', date: true })
+  //           .R({
+  //             player: foundPlayer.name,
+  //             amount: diff,
+  //             newPot: this.dealer.getPot(),
+  //           })
+
+  //         this.communicator.msgBuilder('setCall', 'public', foundPlayer, {
+  //           displayMsg: `${foundPlayer.name} calls`,
+  //         })
+  //         this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+  //       }
+  //     }
+  //   }
+  //   this.continue(thisSocket)
+  // }
 
   setCheck = (thisSocket) => {
     if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
@@ -277,8 +344,22 @@ class Match {
   }
 
   askForBlindBets(thisSocket) {
-    const p1 = this.players[0]
-    const p2 = this.players[1]
+    // Filter active players (connected and with chips)
+    const activePlayers = this.players.filter((p) => p.connected && p.chips > 0)
+
+    if (activePlayers.length < 2) {
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Not Enough Active Players',
+          date: true,
+        })
+        .R({ activeCount: activePlayers.length })
+      return
+    }
+
+    const p1 = activePlayers[0]
+    const p2 = activePlayers[1]
 
     if (p1 && p2 && p1.getCurrentBet() > 0 && p2.getCurrentBet() > 0) {
       this.log
@@ -446,8 +527,15 @@ class Match {
       sorted = [...activePlayers.slice(1), ...activePlayers.slice(0, 1)]
     }
 
+    // const playersToAct = sorted.filter(
+    //   (p) => p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id),
+    // )
+
     const playersToAct = sorted.filter(
-      (p) => p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id),
+      (p) =>
+        !p.folded &&
+        !p.isAllIn &&
+        (p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id)),
     )
 
     this.log
