@@ -18,7 +18,9 @@ describe('PokerCore Hand Detection', () => {
   // ----------------------
   it('detects a royal flush', () => {
     const cards = ['10H', 'JH', 'QH', 'KH', 'AH']
-    vi.mocked(utils.cardsToSingleNumValsArray).mockReturnValue([10, 11, 12, 13, 14])
+    vi.mocked(utils.cardsToSingleNumValsArray).mockReturnValue([
+      10, 11, 12, 13, 14,
+    ])
     vi.mocked(utils.numberToCard).mockImplementation((n) => {
       const map = { 10: '10', 11: 'J', 12: 'Q', 13: 'K', 14: 'A' }
       return map[n]
@@ -129,7 +131,9 @@ describe('PokerCore Hand Detection', () => {
   it('chooses the best hand among all combinations', () => {
     const dealerCards = ['10H', 'JH']
     const playerCards = ['QH', 'KH', 'AH']
-    vi.mocked(utils.cardsToSingleNumValsArray).mockReturnValue([10, 11, 12, 13, 14])
+    vi.mocked(utils.cardsToSingleNumValsArray).mockReturnValue([
+      10, 11, 12, 13, 14,
+    ])
     vi.mocked(utils.numberToCard).mockReturnValue('A')
 
     const result = PokerCore.betterHand(dealerCards, playerCards)
