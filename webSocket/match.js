@@ -20,6 +20,7 @@ class Match {
     this.gameId = gameId
 
     this.players = []
+    this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
     this.autofoldTimer = null
     this.autofoldDuration = 16000 // 16 seconds
@@ -88,6 +89,13 @@ class Match {
   }
 
   signUp(data, thisSocket) {
+    if (!this.acceptingPlayers) {
+  this.communicator.msgBuilder('signUp', 'private', null, {
+    displayMsg: 'Game in progress. Please wait for next round.',
+  })
+  this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+  return
+}
     const { id: thisSocketId } = thisSocket
     const existingPlayerIndex = this.players.findIndex(
       (s) => s.name === data.name,
@@ -174,6 +182,24 @@ class Match {
       this.askForBlindBets(thisSocket)
     }
   }
+
+  noMorePlayers() {
+  this.acceptingPlayers = false
+
+  this.log
+    .Template({
+      name: 'brakets',
+      title: 'MATCH - Registration Closed',
+      date: true,
+    })
+    .R({ gameId: this.gameId })
+
+  this.communicator.msgBuilder('noMorePlayers', 'public', null, {
+    displayMsg: 'Registration closed. Game in progress.',
+  })
+
+  this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+}
 
   dealtPrivateCards(thisSocket) {
     try {
@@ -334,40 +360,6 @@ class Match {
     this.continue(thisSocket)
   }
 
-  // setCall(thisSocket) {
-  //   if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
-
-  //   const maxBet = this.dealer.getCurrentHighestBet()
-  //   const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
-  //   if (foundPlayer) {
-  //     const currentBetBefore = foundPlayer.getCurrentBet()
-  //     const diff = maxBet - currentBetBefore
-
-  //     if (diff >= 0) {
-  //       if (foundPlayer.setTotalBet(maxBet)) {
-  //         this.activePlayerId = null
-  //         foundPlayer.setLastAction('Call')
-  //         this.dealer.setPot(diff)
-  //         this.dealer.setChecked(foundPlayer.id)
-
-  //         this.log
-  //           .Template({ name: 'brakets', title: 'MATCH - CALL', date: true })
-  //           .R({
-  //             player: foundPlayer.name,
-  //             amount: diff,
-  //             newPot: this.dealer.getPot(),
-  //           })
-
-  //         this.communicator.msgBuilder('setCall', 'public', foundPlayer, {
-  //           displayMsg: `${foundPlayer.name} calls`,
-  //         })
-  //         this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
-  //       }
-  //     }
-  //   }
-  //   this.continue(thisSocket)
-  // }
-
   setCheck = (thisSocket) => {
     if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
 
@@ -395,6 +387,8 @@ class Match {
   }
 
   askForBlindBets(thisSocket) {
+      // Cerrar registro de jugadores
+  if (this.acceptingPlayers) this.noMorePlayers()
     // Filter active players (connected and with chips)
     const activePlayers = this.players.filter((p) => p.connected && p.chips > 0)
 
@@ -524,6 +518,7 @@ class Match {
   }
 
   restartMatch() {
+    this.acceptingPlayers = true
     this.log
       .Template({ name: 'brakets', title: 'MATCH - Restarting', date: true })
       .R({ oldGameId: this.gameId })
