@@ -78,8 +78,8 @@ function betterFullHouse(hands) {
   // Convertimos cada mano a números sumando trio + par
   const handsWithValue = hands.map((hand) => {
     const [trioCards, pairCards] = hand
-    const trioNumVals = cardsToSingleNumValsArray(trioCards)
-    const pairNumVals = cardsToSingleNumValsArray(pairCards)
+    const trioNumVals = cardsToSingleNumValsArray(trioCards.flat())
+    const pairNumVals = cardsToSingleNumValsArray(pairCards.flat())
 
     const trioNum = Math.max(...trioNumVals)
     const pairNum = Math.max(...pairNumVals)
@@ -122,9 +122,7 @@ class WinnerCore {
         allCardsArray = bestHands.flatMap((h) => h.show)
         const bestPairCard = betterPair(allCardsArray)
         bestCards = bestHands.filter((h) =>
-          h.show.some((s) =>
-            cardsToSingleNumValsArray(s).includes(bestPairCard),
-          ),
+          cardsToSingleNumValsArray(h.show.flat()).includes(bestPairCard),
         )
         if (bestCards.length === 1) return bestCards[0]
         const outOfPair = ArrayOutOfPairSingles(

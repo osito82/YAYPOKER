@@ -190,6 +190,8 @@ const props = defineProps({
   winnerInfo: Object,
 })
 
+const emit = defineEmits(['close'])
+
 const pokerStore = usePokerStore()
 const countdown = ref(15)
 const isVisible = ref(true)
@@ -202,29 +204,39 @@ const startTimer = () => {
   stopTimer()
   countdown.value = 15
   isVisible.value = true
-  startTime = Date.now()
+  const startTime = Date.now()
 
-  timer = setInterval(() => {
+  const tick = () => {
     const elapsed = Date.now() - startTime
-    countdown.value = Math.max(0, Math.ceil((duration - elapsed) / 1000))
+    const remaining = Math.max(0, Math.ceil((15000 - elapsed) / 1000))
+    countdown.value = remaining
 
-    if (elapsed >= duration) {
-      stopTimer()
+    if (elapsed < 15000) {
+      // llama al siguiente tick exactamente cuando cambie el segundo
+      const nextTick = 1000 - (elapsed % 1000)
+      timer = setTimeout(tick, nextTick)
+    } else {
       closeOverlay()
+      timer = null
     }
-  }, 50)
+  }
+
+  tick()
 }
 
 const stopTimer = () => {
   if (timer) {
-    clearInterval(timer)
+    clearTimeout(timer)
     timer = null
   }
 }
 
+
+
 const closeOverlay = () => {
   isVisible.value = false
   pokerStore.clearWinnerInfo()
+  emit('close')
 }
 
 const flattenedWinningCards = computed(() => {

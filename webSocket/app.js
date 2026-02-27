@@ -143,6 +143,10 @@ wss.on('connection', (ws, req) => {
       match.stats(thisSocket.id)
     }
 
+    if (jsonData && jsonData.action === 'nextRound') {
+      match.nextRound()
+    }
+
     if (jsonData && jsonData.action === 'startGame') {
       match.startGame(thisSocket)
     }

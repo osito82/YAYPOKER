@@ -29,6 +29,7 @@ class Match {
     this.cardsDealer = []
 
     this.activePlayerId = null // Track who is expected to act
+    this.waitingForNextRound = false
 
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.shuffledDeck = initialDeck
@@ -253,6 +254,8 @@ class Match {
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (!foundPlayer) return
 
+    this.clearAutofold()
+
     const currentBetBefore = foundPlayer.getCurrentBet()
     const diff = maxBet - currentBetBefore
 
@@ -352,6 +355,7 @@ class Match {
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
       if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
+        this.clearAutofold()
         this.activePlayerId = null
         this.dealer.setChecked(thisSocket.id)
         foundPlayer.setLastAction('Check')
@@ -430,6 +434,7 @@ class Match {
 
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer && !foundPlayer.folded) {
+      this.clearAutofold()
       this.activePlayerId = null
       foundPlayer.setLastAction('Fold')
       foundPlayer.setFolded(true)
@@ -458,6 +463,7 @@ class Match {
     if (this.stepChecker.checkStep('winner')) return
     this.stepChecker.grantStep('winner')
     this.activePlayerId = null
+    this.clearAutofold()
 
     const pot = this.dealer.getPot()
     winnerPlayer.chips += pot
@@ -488,9 +494,14 @@ class Match {
     })
     this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
 
-    setTimeout(() => {
+    this.waitingForNextRound = true
+  }
+
+  nextRound() {
+    if (this.waitingForNextRound) {
+      this.waitingForNextRound = false
       this.restartMatch()
-    }, 1000)
+    }
   }
 
   restartMatch() {
