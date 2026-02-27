@@ -213,7 +213,7 @@ function ArrayOutOfPairSingles(...arrays) {
 }
 
 module.exports = {
-  WinnerCore,
+  WinnerCore,           // ✅ ahora puedes usar WinnerCore.Winner()
   selectBestRankHands,
   betterPair,
   betterTwoPairs,

@@ -10,7 +10,7 @@ const { msgBuilder } = require('./utils')
 
 const osolog = require('osolog')
 const R = require('radash')
-const WinnerCore = require('./winnerCore')
+const {WinnerCore} = require('./winnerCore')
 
 class Match {
   log = new osolog()

@@ -81,7 +81,7 @@
 
       <!-- Footer -->
       <div class="bg-gray-900 p-4 text-center text-gray-500 text-xs">
-        &copy; 2024 OsoPoker. All chips are virtual.
+        &copy; 2026 OsoPoker. All chips are virtual.
       </div>
     </div>
   </div>
