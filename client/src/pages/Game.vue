@@ -3,68 +3,71 @@
     id="game-root"
     class="h-screen w-screen bg-neutral-950 overflow-hidden flex flex-col font-sans text-white select-none"
   >
+    <!-- GLOBAL HEADER -->
+    <header
+      id="id-header"
+      class="w-full bg-black/60 backdrop-blur-xl border-b border-white/5 py-2 px-6 flex items-center justify-between z-50 shrink-0"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+          <span class="text-black font-black text-xl">O</span>
+        </div>
+        <span class="text-xl font-black tracking-tighter text-white uppercase italic">
+          oso<span class="text-yellow-500">POker</span>
+        </span>
+      </div>
+      
+      <div class="hidden md:flex items-center gap-4">
+        <div class="flex flex-col items-end">
+          <span class="text-[8px] font-black text-gray-500 uppercase tracking-widest">Server Time</span>
+          <span class="text-[10px] font-mono font-bold text-gray-300">21:44:02</span>
+        </div>
+      </div>
+    </header>
+
     <!-- WINNER ANNOUNCEMENT OVERLAY -->
     <WinnerOverlay :winnerInfo="pokerStore.getWinnerInfo" />
 
-    <!-- TOP METADATA BAR (Professional Status) -->
+    <!-- TOP METADATA BAR (Game Context) -->
     <nav
       id="top-bar"
-      class="absolute top-0 left-0 w-full p-4 z-40 flex justify-between items-start pointer-events-none"
+      class="w-full bg-neutral-900/40 backdrop-blur-md border-b border-white/5 p-3 px-6 z-40 flex justify-between items-center shrink-0"
     >
       <!-- Table Info -->
-      <div
-        id="info-panel"
-        class="pointer-events-auto flex flex-col items-start bg-black/40 backdrop-blur-md border-l-4 border-yellow-500 px-5 py-2 rounded-r-2xl shadow-xl"
-      >
-        <h1
-          id="lbl-table-type"
-          class="text-[10px] font-black text-yellow-500 uppercase tracking-[0.25em] mb-1"
-        >
-          No Limit Hold'em
-        </h1>
-        <div class="flex items-center gap-3">
-          <span
-            id="lbl-blinds"
-            class="text-sm font-mono font-bold text-gray-200"
-            >Blinds $10/$20</span
-          >
-          <div class="h-3 w-px bg-white/20"></div>
-          <span id="lbl-table-code" class="text-[10px] font-mono text-gray-500"
-            >REF: {{ gameCode }}</span
-          >
+      <div id="info-panel" class="flex items-center gap-4">
+        <div class="flex flex-col">
+          <h1 class="text-[9px] font-black text-yellow-500 uppercase tracking-[0.2em] leading-none mb-1">
+            No Limit Hold'em
+          </h1>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-gray-200">Blinds $10/$20</span>
+            <span class="text-[9px] font-mono text-gray-600">ID: {{ gameCode }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Connection & Player Info -->
-      <div class="flex flex-col items-end gap-2">
+      <!-- Connection & Player Badge -->
+      <div class="flex items-center gap-3">
         <div
-          id="player-badge"
-          class="pointer-events-auto bg-yellow-500/10 backdrop-blur-md px-4 py-1 rounded-full border border-yellow-500/20"
+          id="status-panel"
+          class="bg-black/40 px-3 py-1 rounded-full border border-white/5 flex items-center gap-2"
         >
-          <span
-            class="text-[10px] font-black text-yellow-500 uppercase tracking-widest"
-            >{{ playerName }}</span
-          >
+          <div
+            class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]"
+            :class="isConnected ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500'"
+          ></div>
+          <span class="text-[8px] font-bold uppercase tracking-widest text-gray-400">
+            {{ isConnected ? 'LIVE' : 'RECONNECTING' }}
+          </span>
         </div>
 
         <div
-          id="status-panel"
-          class="pointer-events-auto bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/5 flex items-center gap-2"
+          id="player-badge"
+          class="bg-yellow-500/10 px-4 py-1 rounded-full border border-yellow-500/20"
         >
-          <div
-            id="status-dot"
-            class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]"
-            :class="
-              isConnected
-                ? 'bg-green-500 text-green-500'
-                : 'bg-red-500 text-red-500'
-            "
-          ></div>
-          <span
-            id="lbl-connection"
-            class="text-[9px] font-bold uppercase tracking-widest text-gray-400"
-            >{{ isConnected ? 'LIVE' : 'RECONNECTING' }}</span
-          >
+          <span class="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
+            {{ playerName }}
+          </span>
         </div>
       </div>
     </nav>
@@ -84,7 +87,7 @@
         id="component-poker-table"
         :pot="pokerStore.getPot"
         :communityCards="pokerStore.getCommunityCards"
-        :opponents="opponents"
+        :players="allPlayers"
         :activePlayerId="pokerStore.getActivePlayerId"
       />
 
