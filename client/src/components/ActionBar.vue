@@ -3,6 +3,17 @@
     id="poker-action-hud"
     class="fixed bottom-0 left-0 right-0 z-50 pointer-events-none"
   >
+    <!-- Turn Timer Bar -->
+    <div
+      v-if="isMyTurn && progress > 0"
+      class="w-full h-1 bg-gray-800/50 backdrop-blur-sm pointer-events-auto"
+    >
+      <div
+        class="h-full bg-yellow-500 transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(234,179,8,0.5)]"
+        :style="{ width: `${progress}%` }"
+      ></div>
+    </div>
+
     <div
       id="hud-main-container"
       class="w-full flex flex-wrap md:flex-nowrap items-center justify-center md:justify-between gap-3 md:gap-6 pointer-events-auto bg-gray-900/95 backdrop-blur-3xl border-t p-3 md:p-4 transition-all duration-500"
@@ -186,9 +197,11 @@
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import Card from './Card.vue'
+import { usePokerStore } from '../store/pokerStore'
 
-defineProps({
+const props = defineProps({
   isMyTurn: Boolean,
   canBlind: Boolean,
   options: { type: Array, default: () => [] },
@@ -200,7 +213,63 @@ defineProps({
 })
 
 defineEmits(['action', 'update:betAmount', 'setQuickBet'])
+
+const pokerStore = usePokerStore()
+const progress = ref(100)
+let timerInterval = null
+
+const updateProgress = () => {
+  if (!pokerStore.getAutofoldStartTime || !props.isMyTurn) {
+    progress.value = 0
+    return
+  }
+
+  const elapsed = (Date.now() - pokerStore.getAutofoldStartTime) / 1000
+  const remaining = Math.max(0, pokerStore.getAutofoldDuration - elapsed)
+  progress.value = (remaining / pokerStore.getAutofoldDuration) * 100
+
+  if (remaining <= 0) {
+    clearInterval(timerInterval)
+  }
+}
+
+watch(() => props.isMyTurn, (newVal) => {
+  if (newVal) {
+    if (timerInterval) clearInterval(timerInterval)
+    timerInterval = setInterval(updateProgress, 100)
+  } else {
+    clearInterval(timerInterval)
+    progress.value = 0
+  }
+})
+
+onUnmounted(() => {
+  if (timerInterval) clearInterval(timerInterval)
+})
 </script>
+
+<style scoped>
+#input-bet-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 24px;
+  background: #eab308;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#input-bet-range::-webkit-slider-thumb:hover {
+  background: #facc15;
+}
+#input-bet-range::-moz-range-thumb {
+  width: 16px;
+  height: 24px;
+  background: #eab308;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+}
+</style>
 
 <style scoped>
 #input-bet-range::-webkit-slider-thumb {

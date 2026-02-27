@@ -23,6 +23,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     cards: [],
   })
   const winnerInfo = ref(null)
+  const autofoldStartTime = ref(null)
+  const autofoldDuration = ref(16)
 
   // Getters
   const getSocketMessage = computed(() => socketMessage.value)
@@ -37,6 +39,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getBettingOptions = computed(() => bettingOptions.value)
   const getWinnerInfo = computed(() => winnerInfo.value)
   const getCurrentHighestBet = computed(() => currentHighestBet.value)
+  const getAutofoldStartTime = computed(() => autofoldStartTime.value)
+  const getAutofoldDuration = computed(() => autofoldDuration.value)
 
   // Actions
   function setSocketMessage(message) {
@@ -102,15 +106,20 @@ export const usePokerStore = defineStore('pokerStore', () => {
       if (gameData.action === 'askForBlindBets') {
         activePlayerId.value = gameData.data.id
         bettingOptions.value = ['blind']
+        autofoldStartTime.value = Date.now()
+        autofoldDuration.value = gameData.autofoldDuration || 16
       } else if (gameData.action?.startsWith('bettingCore')) {
         activePlayerId.value = gameData.data?.messageForId
         bettingOptions.value = gameData.data?.action || []
+        autofoldStartTime.value = Date.now()
+        autofoldDuration.value = gameData.autofoldDuration || 16
       } else if (gameData.action === 'signUp' && gameData.type === 'private') {
         myInfo.value.id = gameData.data?.id
       } else if (gameData.action === 'winner' || gameData.method === 'winner') {
         winnerInfo.value = gameData.data || gameData
         activePlayerId.value = null
         bettingOptions.value = []
+        autofoldStartTime.value = null
         // Keep winner info for 15 seconds
         const currentWinnerData = gameData.data || gameData
         setTimeout(() => {
@@ -119,6 +128,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
       } else if (['setBet', 'setRise', 'setCall', 'setCheck', 'fold'].includes(gameData.action)) {
         activePlayerId.value = null
         bettingOptions.value = []
+        autofoldStartTime.value = null
       }
     } catch (e) {
       console.error('POKER_STORE - Error parsing message', e)
@@ -154,6 +164,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     currentHighestBet,
     myInfo,
     winnerInfo,
+    autofoldStartTime,
+    autofoldDuration,
 
     // Getters (computeds)
     getSocketMessage,
@@ -168,6 +180,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getBettingOptions,
     getWinnerInfo,
     getCurrentHighestBet,
+    getAutofoldStartTime,
+    getAutofoldDuration,
 
     // Actions
     setSocketMessage,

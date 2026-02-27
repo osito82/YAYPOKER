@@ -21,6 +21,8 @@ class Match {
 
     this.players = []
     this.pauseTimeouts = new Map()
+    this.autofoldTimer = null
+    this.autofoldDuration = 16000 // 16 seconds
 
     this.playersFold = []
     this.pot = 0
@@ -58,6 +60,30 @@ class Match {
         date: true,
       })
       .R({ torneoId, gameId })
+  }
+
+  autofold() {
+    const foundPlayer = this.players.find((p) => p.id == this.activePlayerId)
+    if (foundPlayer) {
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH - AUTOFOLD', date: true })
+        .R({ player: foundPlayer.name })
+      this.fold({ id: foundPlayer.id })
+    }
+  }
+
+  startAutofold() {
+    this.clearAutofold()
+    this.autofoldTimer = setTimeout(() => {
+      this.autofold()
+    }, this.autofoldDuration)
+  }
+
+  clearAutofold() {
+    if (this.autofoldTimer) {
+      clearTimeout(this.autofoldTimer)
+      this.autofoldTimer = null
+    }
   }
 
   signUp(data, thisSocket) {
@@ -172,6 +198,8 @@ class Match {
         })
       return
     }
+
+    this.clearAutofold()
 
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
@@ -392,6 +420,7 @@ class Match {
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
         })
         this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
+        this.startAutofold()
       }
     }
   }
@@ -618,6 +647,7 @@ class Match {
         displayMsg: `Waiting for ${p.name}`,
       })
       this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg())
+      this.startAutofold()
     }
   }
 
@@ -726,6 +756,8 @@ class Match {
     }
     if (!this.stepChecker.checkStep('winner')) {
       const winnerData = WinnerCore.Winner(this.dealer.getFinalHands())
+      if (!winnerData) return this.continue(thisSocket)
+
       const winner = Array.isArray(winnerData) ? winnerData[0] : winnerData
       const wp = this.players.find((p) => p.id === winner.playerId)
       if (wp) this.winner(wp)

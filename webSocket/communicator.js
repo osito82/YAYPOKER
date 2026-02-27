@@ -38,6 +38,7 @@ class Communicator {
       currentHighestBet: this.dealer.getCurrentHighestBet(),
       myPlayerInfo,
       data,
+      autofoldDuration: 16, // seconds to autofold
       stepChecker: this.stepChecker.getChecker(),
       players: this.censoredPlayersInfo(players),
       dealerCards: this.dealer.getDealerCards(),

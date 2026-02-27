@@ -161,12 +161,12 @@
             </div>
             
             <!-- Visual Timer Bar -->
-            <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-              <div 
-                class="h-full bg-yellow-500 transition-all duration-1000 ease-linear"
-                :style="{ width: `${(countdown / 15) * 100}%` }"
-              ></div>
-            </div>
+<div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+  <div
+    class="h-full bg-yellow-500 transition-all duration-50 ease-linear"
+    :style="{ width: `${(countdown / 15) * 100}%` }"
+  ></div>
+</div>
 
             <button
               @click="closeOverlay"
@@ -195,17 +195,24 @@ const countdown = ref(15)
 const isVisible = ref(true)
 let timer = null
 
+let startTime = null
+const duration = 15000 // 15 segundos en ms
+
 const startTimer = () => {
   stopTimer()
   countdown.value = 15
   isVisible.value = true
+  startTime = Date.now()
+
   timer = setInterval(() => {
-    if (countdown.value > 0) {
-      countdown.value--
-    } else {
+    const elapsed = Date.now() - startTime
+    countdown.value = Math.max(0, Math.ceil((duration - elapsed) / 1000))
+
+    if (elapsed >= duration) {
       stopTimer()
+      closeOverlay()
     }
-  }, 1000)
+  }, 50)
 }
 
 const stopTimer = () => {

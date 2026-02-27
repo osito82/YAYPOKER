@@ -13,8 +13,13 @@ const {
 function selectBestRankHands(arrayHands) {
   if (!arrayHands || arrayHands.length === 0) return []
 
-  const minRank = Math.min(...arrayHands.map((h) => h.prizeRank))
-  return arrayHands.filter((h) => h.prizeRank === minRank)
+  const validHands = arrayHands.filter(
+    (h) => h.prizeRank !== undefined && h.prizeRank !== null,
+  )
+  if (validHands.length === 0) return []
+
+  const minRank = Math.min(...validHands.map((h) => h.prizeRank))
+  return validHands.filter((h) => h.prizeRank === minRank)
 }
 
 function betterPair(...pairs) {
@@ -106,6 +111,7 @@ function betterStraight(cards) {
 class WinnerCore {
   static Winner(hands) {
     const bestHands = selectBestRankHands(hands)
+    if (!bestHands || bestHands.length === 0) return null
     if (bestHands.length === 1) return bestHands
 
     const type = bestHands[0].pokerHand
