@@ -96,9 +96,28 @@ class Match {
     let player
     if (existingPlayerIndex !== -1) {
       player = this.players[existingPlayerIndex]
+      const oldId = player.id
       player.id = thisSocketId
       player.setConnected(true)
-      this.stepChecker.revokeStep('pause')
+
+      // Actualizar referencias al ID antiguo si es necesario
+      if (this.activePlayerId === oldId) {
+        this.activePlayerId = thisSocketId
+      }
+      this.dealer.updatePlayerId(oldId, thisSocketId)
+
+      const timeout = this.pauseTimeouts.get(player.name)
+      if (timeout) {
+        clearTimeout(timeout)
+        this.pauseTimeouts.delete(player.name)
+      }
+
+      const stillPaused = this.players.some((p) => !p.connected)
+      if (!stillPaused) {
+        this.stepChecker.revokeStep('pause')
+        this.continue(thisSocket)
+      }
+
       this.log
         .Template({
           name: 'brakets',
@@ -777,24 +796,27 @@ class Match {
   }
 
   pause(thisSocket) {
+    const time = 60000;
     const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
     const foundPlayer = this.players.find((p) => p.id === socketId)
     if (foundPlayer) {
       foundPlayer.setConnected(false)
+      this.clearAutofold()
       this.stepChecker.grantStep('pause')
       this.log
         .Template({ name: 'brakets', title: 'MATCH - PAUSE', date: true })
         .R({ player: foundPlayer.name, reason: 'Disconnected' })
 
       this.communicator.msgBuilder('pause', 'public', foundPlayer, {
-        displayMsg: `${foundPlayer.name} disconnected. Game paused.`,
+        displayMsg: `${foundPlayer.name} disconnected. Waiting ${time/1000} seconds for reconnection...`,
+        timeout: 60,
       })
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
 
       const timeout = setTimeout(() => {
         this.playerLeave(thisSocket)
         this.pauseTimeouts.delete(foundPlayer.name)
-      }, 60000) // 1 minute
+      }, time) // 1 minute
       this.pauseTimeouts.set(foundPlayer.name, timeout)
     }
   }
@@ -804,17 +826,38 @@ class Match {
   }
 
   playerLeave(thisSocket) {
-    const index = this.players.findIndex((p) => p.id === thisSocket.id)
+    const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
+    const index = this.players.findIndex((p) => p.id === socketId)
+
     if (index !== -1) {
+      const playerLeaving = this.players[index]
+
+      this.communicator.msgBuilder('playerLeave', 'public', playerLeaving, {
+        displayMsg: `${playerLeaving.name} has left the game.`,
+      })
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+
       this.log
         .Template({
           name: 'brakets',
           title: 'MATCH - Player Leaving',
           date: true,
         })
-        .R({ player: this.players[index].name })
+        .R({ player: playerLeaving.name })
+
+      if (this.activePlayerId === playerLeaving.id) {
+        this.activePlayerId = null
+        this.clearAutofold()
+      }
+
       this.players.splice(index, 1)
     }
+
+    const stillPaused = this.players.some((p) => !p.connected)
+    if (!stillPaused) {
+      this.stepChecker.revokeStep('pause')
+    }
+
     this.continue(thisSocket)
   }
 
