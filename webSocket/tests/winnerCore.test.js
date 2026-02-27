@@ -115,7 +115,7 @@ describe('WinnerCore - Funciones auxiliares', () => {
     ]
     const result = betterTwoPairs(...pairs)
 
-    expect(result).toEqual(['A', 'A', 'K', 'K'])
+    expect(result).toEqual(['A', 'A', '3', '3'])
   })
 })
 
