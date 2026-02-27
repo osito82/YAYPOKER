@@ -18,11 +18,11 @@ function combinar(arr, k) {
   return result
 }
 
-sameValueCards = (cartas, valorBuscado) => {
+const sameValueCards = (cartas, valorBuscado) => {
   return cartas.filter((carta) => carta.startsWith(valorBuscado))
 }
 
-detectPairs = (cartas) => {
+const detectPairs = (cartas) => {
   const conteoCartas = {}
   let arrayOnlyValues = []
   const parejas = []
@@ -51,7 +51,7 @@ detectPairs = (cartas) => {
   }
 }
 
-detectTwoPairs = (cartas) => {
+const detectTwoPairs = (cartas) => {
   const conteoCartas = {}
   const parejas = []
 
@@ -149,6 +149,7 @@ function isArrayOrderedAndConsecutive(arr) {
 function detectStraight(cartas) {
   const realValues = cardsToSingleNumValsArray(cartas)
   const numerosOrdenados = realValues.slice().sort((a, b) => a - b)
+  let result
 
   if (isArrayOrderedAndConsecutive(numerosOrdenados)) {
     result = {
@@ -164,7 +165,7 @@ function detectStraight(cartas) {
   return result
 }
 
-detectHighCard = (cartas) => {
+const detectHighCard = (cartas) => {
   const realValues = cardsToSingleNumValsArray(cartas)
   const bigestNumber = Math.max(...realValues)
 
@@ -200,7 +201,7 @@ function detectFullHouse(cartas) {
   }
 }
 
-detectThreeOfAKind = (cartas) => {
+const detectThreeOfAKind = (cartas) => {
   const conteoCartas = {}
   let trio = []
 
@@ -225,7 +226,7 @@ detectThreeOfAKind = (cartas) => {
   }
 }
 
-detectFourOfaKind = (cartas) => {
+const detectFourOfaKind = (cartas) => {
   const conteoCartas = {}
   let fouroak = []
 
