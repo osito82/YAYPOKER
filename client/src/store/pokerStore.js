@@ -107,18 +107,26 @@ export const usePokerStore = defineStore('pokerStore', () => {
         bettingOptions.value = gameData.data?.action || []
       } else if (gameData.action === 'signUp' && gameData.type === 'private') {
         myInfo.value.id = gameData.data?.id
-      } else if (gameData.action === 'winner') {
-        winnerInfo.value = gameData.data
+      } else if (gameData.action === 'winner' || gameData.method === 'winner') {
+        winnerInfo.value = gameData.data || gameData
         activePlayerId.value = null
         bettingOptions.value = []
-        // Keep winner info for 7 seconds
+        // Keep winner info for 15 seconds
+        const currentWinnerData = gameData.data || gameData
         setTimeout(() => {
-          if (winnerInfo.value === gameData.data) winnerInfo.value = null
-        }, 7000)
+          if (winnerInfo.value === currentWinnerData) winnerInfo.value = null
+        }, 15000)
+      } else if (['setBet', 'setRise', 'setCall', 'setCheck', 'fold'].includes(gameData.action)) {
+        activePlayerId.value = null
+        bettingOptions.value = []
       }
     } catch (e) {
       console.error('POKER_STORE - Error parsing message', e)
     }
+  }
+
+  function clearWinnerInfo() {
+    winnerInfo.value = null
   }
 
   function setConnected(status) {
@@ -165,5 +173,6 @@ export const usePokerStore = defineStore('pokerStore', () => {
     setSocketMessage,
     setConnected,
     setGameCredentials,
+    clearWinnerInfo,
   }
 })

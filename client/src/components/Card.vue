@@ -65,6 +65,14 @@ const sizeOption = computed(() => {
         height: 'h-44', // Increased from h-36
         width: 'w-32', // Increased from w-24
       }
+    case 'medium':
+      return {
+        cornerText: 'text-lg',
+        cornerSymbol: 'text-md',
+        centerSymbol: 'text-5xl',
+        height: 'h-36',
+        width: 'w-24',
+      }
     case 'small':
       return {
         cornerText: 'text-sm',

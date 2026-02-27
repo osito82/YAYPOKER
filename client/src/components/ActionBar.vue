@@ -164,7 +164,7 @@
 
           <button
             id="raise-button"
-            :disabled="betAmount <= minBet"
+            :disabled="betAmount < minBet"
             @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
             class="px-8 py-3 bg-yellow-500 text-black text-xs font-black uppercase tracking-widest transition-all active:scale-95 hover:bg-yellow-400 shadow-xl shadow-yellow-900/20 disabled:opacity-50 disabled:grayscale"
           >
