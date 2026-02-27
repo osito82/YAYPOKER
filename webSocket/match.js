@@ -422,7 +422,7 @@ class Match {
   continue(thisSocket) {
     setTimeout(() => {
       this.startGame(thisSocket)
-    }, 1000)
+    }, 500)
   }
 
   winner = (winnerPlayer, isFold = false) => {
@@ -461,7 +461,7 @@ class Match {
 
     setTimeout(() => {
       this.restartMatch()
-    }, 15000)
+    }, 1000)
   }
 
   restartMatch() {
