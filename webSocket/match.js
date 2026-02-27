@@ -501,7 +501,8 @@ class Match {
   bettingCore = (thisSocket, bettingFor) => {
     if (this.stepChecker.checkStep('winner')) return
 
-    const activePlayers = this.players.filter((p) => p.connected && !p.folded)
+    const allPlayers = this.players
+    const activePlayers = allPlayers.filter((p) => p.connected && !p.folded)
 
     if (activePlayers.length === 1) {
       this.winner(activePlayers[0], true)
@@ -511,28 +512,31 @@ class Match {
     const maxBet = this.dealer.getCurrentHighestBet()
     const checkedPlayers = this.dealer.getPlayersChecked()
 
-    let sorted = [...activePlayers]
+    let sorted = []
 
     if (bettingFor === 'firstBetting') {
-      const bbPosition = activePlayers.length === 2 ? 1 : 2
-      if (activePlayers.length > bbPosition + 1) {
-        sorted = [
-          ...activePlayers.slice(bbPosition + 1),
-          ...activePlayers.slice(0, bbPosition + 1),
-        ]
+      if (allPlayers.length === 2) {
+        // Heads-up pre-flop: Dealer(0) acts first
+        sorted = [...allPlayers]
       } else {
-        sorted = [...activePlayers]
+        // 3+ players pre-flop: UTG acts first (P3)
+        sorted = [...allPlayers.slice(3), ...allPlayers.slice(0, 3)]
       }
     } else {
-      sorted = [...activePlayers.slice(1), ...activePlayers.slice(0, 1)]
+      // Post-flop (Flop, Turn, River):
+      if (allPlayers.length === 2) {
+        // Heads-up post-flop: BB(1) acts first
+        sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]
+      } else {
+        // 3+ players post-flop: SB(1) acts first
+        sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]
+      }
     }
 
-    // const playersToAct = sorted.filter(
-    //   (p) => p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id),
-    // )
-
+    // Now filter only those who are still in the hand but KEEP the sorted order
     const playersToAct = sorted.filter(
       (p) =>
+        p.connected &&
         !p.folded &&
         !p.isAllIn &&
         (p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id)),
