@@ -530,36 +530,52 @@ class Match {
     }, 500)
   }
 
-  winner = (winnerPlayer, isFold = false) => {
+  winner = (winnerData, isFold = false) => {
     if (this.stepChecker.checkStep('winner')) return
     this.stepChecker.grantStep('winner')
     this.activePlayerId = null
     this.clearAutofold()
 
+    const winnerPlayers = Array.isArray(winnerData) ? winnerData : [winnerData]
     const pot = this.dealer.getPot()
-    winnerPlayer.chips += pot
-
-    this.log
-      .Template({ name: 'brakets', title: 'MATCH - WINNER', date: true })
-      .R({
-        winner: winnerPlayer.name,
-        amount: pot,
-        isFold: isFold,
-      })
-
+    const splitPot = Math.floor(pot / winnerPlayers.length)
     const finalHands = this.dealer.getFinalHands()
-    const winningHand = finalHands.find((h) => h.playerId === winnerPlayer.id)
+
+    winnerPlayers.forEach((wp) => {
+      const player = this.players.find((p) => p.id === wp.playerId || p.id === wp.id)
+      if (player) {
+        player.chips += splitPot
+        
+        this.log
+          .Template({ name: 'brakets', title: 'MATCH - WINNER', date: true })
+          .R({
+            winner: player.name,
+            amount: splitPot,
+            isFold: isFold,
+          })
+      }
+    })
+
+    const winnersInfo = winnerPlayers.map(wp => {
+      const player = this.players.find((p) => p.id === wp.playerId || p.id === wp.id)
+      const winningHand = finalHands.find((h) => h.playerId === player.id)
+      return {
+        name: player.name,
+        playerId: player.id,
+        amount: splitPot,
+        handName: isFold ? 'Fold' : winningHand?.pokerHand || 'High Card',
+        winningCards: isFold ? [] : winningHand?.show || [],
+      }
+    })
+
+    const displayMsg = winnersInfo.length > 1 
+      ? `Tie! ${winnersInfo.map(w => w.name).join(' and ')} split $${pot}!`
+      : `${winnersInfo[0].name} wins $${pot}${isFold ? ' (Fold)' : ''}!`
 
     this.communicator.msgBuilder('winner', 'public', null, {
       method: 'winner',
-      displayMsg: `${winnerPlayer.name} wins $${pot}${isFold ? ' (Fold)' : ''}!`,
-      winner: {
-        name: winnerPlayer.name,
-        playerId: winnerPlayer.id,
-        amount: pot,
-        handName: isFold ? 'Fold' : winningHand?.pokerHand || 'High Card',
-        winningCards: isFold ? [] : winningHand?.show || [],
-      },
+      displayMsg,
+      winners: winnersInfo,
       allHands: finalHands,
       isFold: isFold,
     })
@@ -841,11 +857,11 @@ class Match {
     }
     if (!this.stepChecker.checkStep('winner')) {
       const winnerData = WinnerCore.Winner(this.dealer.getFinalHands())
-      if (!winnerData) return this.continue(thisSocket)
+      if (!winnerData || (Array.isArray(winnerData) && winnerData.length === 0)) {
+        return this.continue(thisSocket)
+      }
 
-      const winner = Array.isArray(winnerData) ? winnerData[0] : winnerData
-      const wp = this.players.find((p) => p.id === winner.playerId)
-      if (wp) this.winner(wp)
+      this.winner(winnerData)
       return
     }
   }
