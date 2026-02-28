@@ -45,11 +45,12 @@
         </div>
       </div>
 
-      <!-- MIDDLE-LEFT: Personal Cards -->
+      <!-- MIDDLE-LEFT: Personal Cards & Odds -->
       <div
         id="hud-cards-display"
         class="flex gap-4 items-center px-4 md:border-r border-white/10 h-full"
       >
+        <!-- Odds Display -->
         <div 
           v-if="pokerStore.getOdds && (pokerStore.getOdds.win > 0 || pokerStore.getOdds.tie > 0)" 
           class="flex flex-col items-center justify-center pr-4 border-r border-white/10 min-w-[70px]"
@@ -69,25 +70,51 @@
              <span class="text-[9px] font-mono font-bold text-blue-300">{{ pokerStore.getOdds.tie }}%</span>
           </div>
         </div>
-        <template v-if="playerCards && playerCards.length > 0">
-          <Card
-            v-for="(card, i) in playerCards"
-            :key="i"
-            size="small"
-            :numSymbol="card"
-            class="shadow-xl transform hover:-translate-y-2 transition-transform cursor-default scale-110"
-          />
-        </template>
-        <template v-else>
-          <div class="flex -space-x-3 opacity-10">
-            <div
-              class="w-10 h-14 bg-gray-700 border border-white/20 rounded"
-            ></div>
-            <div
-              class="w-10 h-14 bg-gray-700 border border-white/20 rounded"
+
+        <!-- Current Hand Evaluation -->
+        <div 
+          v-if="pokerStore.getCurrentHand"
+          class="flex flex-col items-start justify-center px-2 min-w-[100px]"
+        >
+          <span class="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-1">
+            Current Hand
+          </span>
+          <span class="text-sm font-black text-white uppercase tracking-tight">
+            {{ pokerStore.getCurrentHand.pokerHand }}
+          </span>
+          <div class="flex gap-0.5 mt-1">
+            <div 
+              v-for="i in 10" 
+              :key="i"
+              class="w-1.5 h-2 rounded-full"
+              :class="i <= (11 - pokerStore.getCurrentHand.prizeRank) ? 'bg-yellow-500' : 'bg-gray-800'"
             ></div>
           </div>
-        </template>
+        </div>
+
+        <!-- Board & Player Cards -->
+        <div class="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-white/5">
+
+
+          <!-- Player Cards -->
+          <div class="flex gap-2">
+            <template v-if="playerCards && playerCards.length > 0">
+              <Card
+                v-for="(card, i) in playerCards"
+                :key="'player-' + i"
+                size="small"
+                :numSymbol="card"
+                class="shadow-xl transform hover:-translate-y-2 transition-transform cursor-default scale-110"
+              />
+            </template>
+            <template v-else>
+              <div class="flex -space-x-3 opacity-10">
+                <div class="w-10 h-14 bg-gray-700 border border-white/20 rounded"></div>
+                <div class="w-10 h-14 bg-gray-700 border border-white/20 rounded"></div>
+              </div>
+            </template>
+          </div>
+        </div>
       </div>
 
       <!-- MIDDLE-RIGHT: Bet Controls -->

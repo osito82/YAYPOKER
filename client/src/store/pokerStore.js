@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { PokerCore, PokerOddsCalculator } from '../pokerLogic'
 
 export const usePokerStore = defineStore('pokerStore', () => {
   // State
@@ -43,6 +44,11 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getCurrentHighestBet = computed(() => currentHighestBet.value)
   const getAutofoldStartTime = computed(() => autofoldStartTime.value)
   const getAutofoldDuration = computed(() => autofoldDuration.value)
+
+  const getCurrentHand = computed(() => {
+    if (!myInfo.value.cards || myInfo.value.cards.length === 0) return null
+    return PokerCore.betterHand(communityCards.value, myInfo.value.cards)
+  })
 
   // Actions
   function setSocketMessage(message) {
@@ -189,6 +195,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getCurrentHighestBet,
     getAutofoldStartTime,
     getAutofoldDuration,
+    getCurrentHand,
 
     // Actions
     setSocketMessage,
