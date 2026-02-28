@@ -108,7 +108,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import Card from './Card.vue'
 import PlayerSeat from './PlayerSeat.vue'
 
-const props = defineProps({
+defineProps({
   pot: { type: [Number, String], default: 0 },
   communityCards: { type: Array, default: () => [] },
   players: { type: Array, default: () => [] },

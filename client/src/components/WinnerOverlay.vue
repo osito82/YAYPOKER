@@ -182,7 +182,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { computed, ref, onUnmounted, watch } from 'vue'
 import Card from './Card.vue'
 import { usePokerStore } from '../store/pokerStore'
 
@@ -196,9 +196,6 @@ const pokerStore = usePokerStore()
 const countdown = ref(15)
 const isVisible = ref(true)
 let timer = null
-
-let startTime = null
-const duration = 15000 // 15 segundos en ms
 
 const startTimer = () => {
   stopTimer()

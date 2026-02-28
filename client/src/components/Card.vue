@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { computed, defineProps } from 'vue'
+import { computed } from 'vue'
 import { simbolConverter, whatColor } from '../vutils.js'
 
 const props = defineProps({

@@ -91,7 +91,6 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Logo from '../components/Logo.vue'
-import { v4 as uuidv4 } from 'uuid'
 
 const router = useRouter()
 const playerName = ref('')

@@ -32,10 +32,6 @@
 import QRCodeVue3 from 'qrcode-vue3'
 import {
   computed,
-  defineProps,
-  onMounted,
-  onUpdated,
-  watch,
   ref,
   nextTick,
 } from 'vue'
