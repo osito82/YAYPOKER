@@ -602,7 +602,7 @@ class Match {
 
     if (bettingFor === 'firstBetting') {
       if (allPlayers.length === 2) {
-        // Heads-up pre-flop: Dealer(0) acts first
+        // Heads-up pre-flop: Dealer(0) acts first (SB), BB(1) acts last
         sorted = [...allPlayers]
       } else {
         // 3+ players pre-flop: UTG acts first (P3)
@@ -611,8 +611,9 @@ class Match {
     } else {
       // Post-flop (Flop, Turn, River):
       if (allPlayers.length === 2) {
-        // Heads-up post-flop: BB(1) acts first
-        sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]
+        // Heads-up post-flop: SB(0) acts first, BB(1) acts last
+        // This matches the user's requirement to avoid consecutive checks for the same player
+        sorted = [...allPlayers]
       } else {
         // 3+ players post-flop: SB(1) acts first
         sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]
