@@ -24,7 +24,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   })
   const winnerInfo = ref(null)
   const autofoldStartTime = ref(null)
-  const autofoldDuration = ref(16)
+  const autofoldDuration = ref(600)
 
   // Getters
   const getSocketMessage = computed(() => socketMessage.value)
@@ -107,12 +107,12 @@ export const usePokerStore = defineStore('pokerStore', () => {
         activePlayerId.value = gameData.data.id
         bettingOptions.value = ['blind']
         autofoldStartTime.value = Date.now()
-        autofoldDuration.value = gameData.autofoldDuration || 16
+        autofoldDuration.value = gameData.autofoldDuration || 600 //10 minutes autoFold
       } else if (gameData.action?.startsWith('bettingCore')) {
         activePlayerId.value = gameData.data?.messageForId
         bettingOptions.value = gameData.data?.action || []
         autofoldStartTime.value = Date.now()
-        autofoldDuration.value = gameData.autofoldDuration || 16
+        autofoldDuration.value = gameData.autofoldDuration || 600 //10 minutes autoFold
       } else if (gameData.action === 'signUp' && gameData.type === 'private') {
         myInfo.value.id = gameData.data?.id
       } else if (gameData.action === 'winner' || gameData.method === 'winner') {

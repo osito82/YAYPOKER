@@ -23,7 +23,7 @@ class Match {
     this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
     this.autofoldTimer = null
-    this.autofoldDuration = 16000 // 16 seconds
+    this.autofoldDuration = 600000 // 10 minutos
 
     this.playersFold = []
     this.pot = 0
@@ -89,13 +89,6 @@ class Match {
   }
 
   signUp(data, thisSocket) {
-    if (!this.acceptingPlayers) {
-  this.communicator.msgBuilder('signUp', 'private', null, {
-    displayMsg: 'Game in progress. Please wait for next round.',
-  })
-  this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
-  return
-}
     const { id: thisSocketId } = thisSocket
     const existingPlayerIndex = this.players.findIndex(
       (s) => s.name === data.name,
@@ -134,7 +127,24 @@ class Match {
         })
         .R({ name: player.name, id: player.id })
     } else {
-      if (this.players.length >= 10) return
+      // Máximo 10 jugadores
+      if (this.players.length >= 10) {
+        this.communicator.msgBuilder('signUp', 'private', null, {
+          displayMsg: 'Table is full (max 10 players).',
+        })
+        this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+        return
+      }
+
+      // No permitir nuevos jugadores si el juego ya empezó
+      if (!this.acceptingPlayers) {
+        this.communicator.msgBuilder('signUp', 'private', null, {
+          displayMsg: 'Game in progress. Please wait for next round.',
+        })
+        this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+        return
+      }
+
       const playerNumber = this.players.length + 1
       player = new Player(
         this.gameId,
@@ -147,6 +157,12 @@ class Match {
       )
       player.setConnected(true)
       this.players.push(player)
+
+      // Si llegamos a 10, cerramos registro inmediatamente
+      if (this.players.length >= 10) {
+        this.noMorePlayers()
+      }
+
       this.log
         .Template({
           name: 'brakets',
@@ -184,22 +200,23 @@ class Match {
   }
 
   noMorePlayers() {
-  this.acceptingPlayers = false
+    if (!this.acceptingPlayers) return
+    this.acceptingPlayers = false
 
-  this.log
-    .Template({
-      name: 'brakets',
-      title: 'MATCH - Registration Closed',
-      date: true,
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'MATCH - Registration Closed',
+        date: true,
+      })
+      .R({ gameId: this.gameId })
+
+    this.communicator.msgBuilder('noMorePlayers', 'public', null, {
+      displayMsg: 'Registration closed. Game in progress.',
     })
-    .R({ gameId: this.gameId })
 
-  this.communicator.msgBuilder('noMorePlayers', 'public', null, {
-    displayMsg: 'Registration closed. Game in progress.',
-  })
-
-  this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
-}
+    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+  }
 
   dealtPrivateCards(thisSocket) {
     try {
@@ -387,8 +404,6 @@ class Match {
   }
 
   askForBlindBets(thisSocket) {
-      // Cerrar registro de jugadores
-  if (this.acceptingPlayers) this.noMorePlayers()
     // Filter active players (connected and with chips)
     const activePlayers = this.players.filter((p) => p.connected && p.chips > 0)
 
