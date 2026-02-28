@@ -11,6 +11,7 @@ const { msgBuilder } = require('./utils')
 const osolog = require('osolog')
 const R = require('radash')
 const {WinnerCore} = require('./winnerCore')
+const PokerOddsCalculator = require('./pokerOdds')
 
 class Match {
   log = new osolog()
@@ -27,7 +28,6 @@ class Match {
 
     this.playersFold = []
     this.pot = 0
-    this.cardsDealer = []
 
     this.activePlayerId = null // Track who is expected to act
     this.waitingForNextRound = false
@@ -41,8 +41,9 @@ class Match {
       initialDeck,
       torneoId,
       this.pot,
-      this.cardsDealer,
+      [], // Start with empty array for dealer cards
     )
+    this.cardsDealer = this.dealer.getDealerCards() // Reference the dealer's array
 
     this.stepChecker = new StepChecker(this.gameId)
 
@@ -55,6 +56,8 @@ class Match {
       this.dealer,
     )
 
+    this.oddsCalculator = new PokerOddsCalculator()
+
     this.log
       .Template({
         name: 'brakets',
@@ -62,6 +65,27 @@ class Match {
         date: true,
       })
       .R({ torneoId, gameId })
+  }
+
+  sendOdds() {
+    const activePlayers = this.players.filter((p) => !p.folded && p.connected)
+    if (activePlayers.length < 2) return
+
+    const playerHands = activePlayers.map((p) => p.getCards())
+    const boardCards = this.dealer.getDealerCards()
+
+    const results = this.oddsCalculator.calculateOdds(playerHands, boardCards)
+
+    activePlayers.forEach((p, idx) => {
+      const playerOdds = {
+        win: results.winProbabilities[idx],
+        tie: results.tieProbability,
+      }
+      this.communicator.msgBuilder('oddsUpdate', 'private', p, {
+        odds: playerOdds,
+      })
+      this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
+    })
   }
 
   autofold() {
@@ -245,6 +269,7 @@ class Match {
         displayMsg: 'Cards dealt!',
       })
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      this.sendOdds()
       this.continue(thisSocket)
     } catch (error) {
       console.error('Error in dealtPrivateCards:', error)
@@ -494,6 +519,7 @@ class Match {
         displayMsg: `${foundPlayer.name} folded.`,
       })
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      this.sendOdds()
       this.continue(thisSocket)
     }
   }
@@ -557,7 +583,6 @@ class Match {
 
     const oldGameId = this.gameId
     this.pot = 0
-    this.cardsDealer = []
     this.playersFold = []
     this.activePlayerId = null
     this.players.forEach((p) => {
@@ -569,6 +594,7 @@ class Match {
     this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.dealer.deck = this.shuffledDeck
     this.dealer.cardsDealer = []
+    this.cardsDealer = this.dealer.getDealerCards()
     this.dealer.pot = 0
     this.dealer.removeChecks()
     this.dealer.setCurrentHighestBet(0)
@@ -728,6 +754,7 @@ class Match {
       displayMsg: `Dealer deals the ${whatHand}`,
     })
     this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+    this.sendOdds()
     this.continue(thisSocket)
   }
 

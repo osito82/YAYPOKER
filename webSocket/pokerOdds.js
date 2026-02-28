@@ -1,3 +1,7 @@
+const PokerCore = require('./pokerCore');
+const { WinnerCore } = require('./winnerCore');
+const { shuffle } = require('./utils');
+
 class PokerOddsCalculator {
   constructor(deckSize = 52) {
     this.suits = ['h', 'd', 'c', 's'];
@@ -18,50 +22,53 @@ class PokerOddsCalculator {
 
   // Elimina cartas usadas del mazo
   removeUsedCards(deck, usedCards) {
-    return deck.filter(c => !usedCards.includes(c));
-  }
-
-  // Evalúa la categoría de la mano (simplificado, puedes integrar tu evaluator completo)
-  evaluateHand(hand) {
-    // Aquí debes usar tu lógica de evaluación completa o librería
-    // Por simplicidad, devolveremos un número al azar para ejemplo
-    // 0 = High Card, 1 = Pair, ..., 9 = Royal Flush
-    return Math.floor(Math.random() * 10);
+    const usedSet = new Set(usedCards);
+    return deck.filter(c => !usedSet.has(c));
   }
 
   // Calcula probabilidades usando Monte Carlo
-  calculateOdds(playerHands, boardCards = [], simulations = 10000) {
-    let deck = this.generateDeck();
-    const usedCards = [...boardCards, ...playerHands.flat()];
-    deck = this.removeUsedCards(deck, usedCards);
+  calculateOdds(playerHands, boardCards = [], simulations = 500) {
+    let originalDeck = this.generateDeck();
+    const currentBoard = [...boardCards];
+    const usedCards = [...currentBoard, ...playerHands.flat()];
+    originalDeck = this.removeUsedCards(originalDeck, usedCards);
 
     const wins = Array(playerHands.length).fill(0);
     let ties = 0;
 
     for (let i = 0; i < simulations; i++) {
-      const shuffled = deck.sort(() => Math.random() - 0.5);
+      const remainingDeck = shuffle([...originalDeck]);
 
       // Completa el board hasta 5 cartas
-      const simBoard = [...boardCards];
-      while (simBoard.length < 5) simBoard.push(shuffled.pop());
+      const simBoard = [...currentBoard];
+      while (simBoard.length < 5) {
+        simBoard.push(remainingDeck.pop());
+      }
 
       // Evalúa manos
-      const handValues = playerHands.map(hand =>
-        this.evaluateHand([...hand, ...simBoard])
-      );
+      const evaluatedHands = playerHands.map((hand, idx) => {
+        const best = PokerCore.betterHand(simBoard, hand);
+        return { ...best, playerId: idx }; 
+      });
 
-      const maxValue = Math.max(...handValues);
-      const winners = handValues
-        .map((v, idx) => (v === maxValue ? idx : -1))
-        .filter(idx => idx !== -1);
-
-      if (winners.length === 1) wins[winners[0]]++;
-      else ties++;
+      const winnerData = WinnerCore.Winner(evaluatedHands);
+      
+      if (!winnerData) {
+        ties++;
+      } else if (Array.isArray(winnerData)) {
+        if (winnerData.length === 1) {
+          wins[winnerData[0].playerId]++;
+        } else {
+          ties++;
+        }
+      } else {
+        wins[winnerData.playerId]++;
+      }
     }
 
     return {
-      winProbabilities: wins.map(w => w / simulations),
-      tieProbability: ties / simulations
+      winProbabilities: wins.map(w => (w / simulations * 100).toFixed(1)),
+      tieProbability: (ties / simulations * 100).toFixed(1)
     };
   }
 }
