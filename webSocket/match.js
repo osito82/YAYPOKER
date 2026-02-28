@@ -538,16 +538,21 @@ class Match {
     this.activePlayerId = null
     this.clearAutofold()
 
+    // Preparar manos finales incluso en fold para que el overlay tenga datos de los oponentes
+    this.dealer.setFinalHands()
+
     const winnerPlayers = Array.isArray(winnerData) ? winnerData : [winnerData]
     const pot = this.dealer.getPot()
     const splitPot = Math.floor(pot / winnerPlayers.length)
     const finalHands = this.dealer.getFinalHands()
 
     winnerPlayers.forEach((wp) => {
-      const player = this.players.find((p) => p.id === wp.playerId || p.id === wp.id)
+      const player = this.players.find(
+        (p) => p.id === (wp.playerId || wp.id),
+      )
       if (player) {
         player.chips += splitPot
-        
+
         this.log
           .Template({ name: 'brakets', title: 'MATCH - WINNER', date: true })
           .R({
@@ -558,21 +563,24 @@ class Match {
       }
     })
 
-    const winnersInfo = winnerPlayers.map(wp => {
-      const player = this.players.find((p) => p.id === wp.playerId || p.id === wp.id)
-      const winningHand = finalHands.find((h) => h.playerId === player.id)
+    const winnersInfo = winnerPlayers.map((wp) => {
+      const player = this.players.find(
+        (p) => p.id === (wp.playerId || wp.id),
+      )
+      const winningHand = finalHands.find((h) => h.playerId === player?.id)
       return {
-        name: player.name,
-        playerId: player.id,
+        name: player?.name || 'Unknown',
+        playerId: player?.id,
         amount: splitPot,
-        handName: isFold ? 'Fold' : winningHand?.pokerHand || 'High Card',
+        handName: isFold ? 'Fold Victory' : winningHand?.pokerHand || 'High Card',
         winningCards: isFold ? [] : winningHand?.show || [],
       }
     })
 
-    const displayMsg = winnersInfo.length > 1 
-      ? `Tie! ${winnersInfo.map(w => w.name).join(' and ')} split $${pot}!`
-      : `${winnersInfo[0].name} wins $${pot}${isFold ? ' (Fold)' : ''}!`
+    const displayMsg =
+      winnersInfo.length > 1
+        ? `Tie! ${winnersInfo.map((w) => w.name).join(' and ')} split $${pot}!`
+        : `${winnersInfo[0].name} wins $${pot}${isFold ? ' (Fold)' : ''}!`
 
     this.communicator.msgBuilder('winner', 'public', null, {
       method: 'winner',

@@ -90,13 +90,16 @@
               {{ winner.handName }}
             </div>
 
-            <div class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100">
+            <div v-if="flattenCards(winner.winningCards).length > 0" class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100">
               <Card
                 v-for="(card, i) in flattenCards(winner.winningCards)"
                 :key="'card-' + i"
                 size="medium"
                 :numSymbol="card"
               />
+            </div>
+            <div v-else class="text-[10px] text-gray-500 italic relative z-10">
+              (No cards shown)
             </div>
           </div>
 
@@ -119,7 +122,7 @@
                   <div
                     class="text-[8px] text-gray-500 italic uppercase tracking-tighter truncate"
                   >
-                    {{ player.pokerHand || 'Folded' }}
+                    {{ player.pokerHand || (player.folded ? 'Folded' : 'Active') }}
                   </div>
                 </div>
                 <div class="flex -space-x-4 sm:-space-x-5 opacity-80 scale-75 sm:scale-90 origin-right">
@@ -133,14 +136,14 @@
                       :numSymbol="c"
                     />
                   </template>
-                  <template v-else-if="!player.folded">
+                  <template v-else>
                      <div
-                      class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center"
+                      class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
                       <div class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
                     </div>
                      <div
-                      class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center"
+                      class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
                       <div class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
                     </div>
@@ -211,7 +214,6 @@ const startTimer = () => {
     countdown.value = remaining
 
     if (elapsed < 15000) {
-      // llama al siguiente tick exactamente cuando cambie el segundo
       const nextTick = 1000 - (elapsed % 1000)
       timer = setTimeout(tick, nextTick)
     } else {
