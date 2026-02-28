@@ -188,6 +188,30 @@ describe('Dealer Class', () => {
     expect(sendMock).toHaveBeenCalledWith(JSON.stringify({ message: 'hello' }))
   })
 
+  it('talkToPLayerById should NOT send message if player not in match', () => {
+    const sendMock = vi.fn()
+    vi.spyOn(Socket, 'getSocket').mockReturnValue({
+      id: 'p3',
+      socket: { send: sendMock },
+    })
+
+    // Player 'p3' is NOT in the dealer.players list
+    dealer.talkToPLayerById('p3', 'hello')
+
+    expect(sendMock).not.toHaveBeenCalled()
+  })
+
+  it('talkToSocketById should send message even if player not in match', () => {
+    const sendMock = vi.fn()
+    vi.spyOn(Socket, 'getSocketsByTorneo').mockReturnValue([
+      { id: 'p3', socket: { send: sendMock } },
+    ])
+
+    dealer.talkToSocketById('p3', 'hello')
+
+    expect(sendMock).toHaveBeenCalledWith(JSON.stringify({ message: 'hello' }))
+  })
+
   // ================================
   // 🟢 jugadores folded / disconnected
   // ================================

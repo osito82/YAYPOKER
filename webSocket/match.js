@@ -156,17 +156,19 @@ class Match {
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Table is full (max 10 players).',
         })
-        this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
       }
 
       // No permitir nuevos jugadores si el juego ya empezó
       if (!this.acceptingPlayers) {
-        console.log(`[DEBUG] Blocking new player ${data.name} join because acceptingPlayers=false`)
+        console.log(
+          `[DEBUG] Blocking new player ${data.name} join because acceptingPlayers=false`,
+        )
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Game in progress. Please wait for next round.',
         })
-        this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
       }
 
