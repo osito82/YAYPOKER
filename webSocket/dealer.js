@@ -34,20 +34,20 @@ class Dealer {
   }
 
   setFinalHands = () => {
-    let currentPrize = {}
     this.log
       .Template({ name: 'brakets', title: 'DEALER - Final Hands', date: true })
       .R({ gameId: this.gameId })
     this.finalHands = []
     this.players.forEach((player) => {
-      currentPrize = player.getCurrentPrize() || {}
-      currentPrize.name = player.name
-      currentPrize.playerId = player.id
-      currentPrize.gameId = player.gameId
-      currentPrize.chips = player.chips // Importante: incluir chips actualizados
-
+      const prize = player.getCurrentPrize() || {}
       this.finalHands.push({
-        ...currentPrize,
+        ...prize,
+        name: player.name,
+        playerId: player.id,
+        gameId: player.gameId,
+        chips: player.chips,
+        folded: player.folded,
+        connected: player.connected,
       })
     })
   }

@@ -11,6 +11,7 @@ const { msgBuilder } = require('./utils')
 const osolog = require('osolog')
 const R = require('radash')
 const {WinnerCore} = require('./winnerCore')
+const PokerOddsCalculator = require('./pokerOdds')
 
 class Match {
   log = new osolog()
@@ -27,7 +28,6 @@ class Match {
 
     this.playersFold = []
     this.pot = 0
-    this.cardsDealer = []
 
     this.activePlayerId = null // Track who is expected to act
     this.waitingForNextRound = false
@@ -41,8 +41,9 @@ class Match {
       initialDeck,
       torneoId,
       this.pot,
-      this.cardsDealer,
+      [], // Start with empty array for dealer cards
     )
+    this.cardsDealer = this.dealer.getDealerCards() // Reference the dealer's array
 
     this.stepChecker = new StepChecker(this.gameId)
 
@@ -55,6 +56,8 @@ class Match {
       this.dealer,
     )
 
+    this.oddsCalculator = new PokerOddsCalculator()
+
     this.log
       .Template({
         name: 'brakets',
@@ -62,6 +65,27 @@ class Match {
         date: true,
       })
       .R({ torneoId, gameId })
+  }
+
+  sendOdds() {
+    const activePlayers = this.players.filter((p) => !p.folded && p.connected)
+    if (activePlayers.length < 2) return
+
+    const playerHands = activePlayers.map((p) => p.getCards())
+    const boardCards = this.dealer.getDealerCards()
+
+    const results = this.oddsCalculator.calculateOdds(playerHands, boardCards)
+
+    activePlayers.forEach((p, idx) => {
+      const playerOdds = {
+        win: results.winProbabilities[idx],
+        tie: results.tieProbability,
+      }
+      this.communicator.msgBuilder('oddsUpdate', 'private', p, {
+        odds: playerOdds,
+      })
+      this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
+    })
   }
 
   autofold() {
@@ -132,17 +156,19 @@ class Match {
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Table is full (max 10 players).',
         })
-        this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
       }
 
       // No permitir nuevos jugadores si el juego ya empezó
       if (!this.acceptingPlayers) {
-        console.log(`[DEBUG] Blocking new player ${data.name} join because acceptingPlayers=false`)
+        console.log(
+          `[DEBUG] Blocking new player ${data.name} join because acceptingPlayers=false`,
+        )
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Game in progress. Please wait for next round.',
         })
-        this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
       }
 
@@ -245,6 +271,7 @@ class Match {
         displayMsg: 'Cards dealt!',
       })
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      this.sendOdds()
       this.continue(thisSocket)
     } catch (error) {
       console.error('Error in dealtPrivateCards:', error)
@@ -494,6 +521,7 @@ class Match {
         displayMsg: `${foundPlayer.name} folded.`,
       })
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      this.sendOdds()
       this.continue(thisSocket)
     }
   }
@@ -504,36 +532,60 @@ class Match {
     }, 500)
   }
 
-  winner = (winnerPlayer, isFold = false) => {
+  winner = (winnerData, isFold = false) => {
     if (this.stepChecker.checkStep('winner')) return
     this.stepChecker.grantStep('winner')
     this.activePlayerId = null
     this.clearAutofold()
 
+    // Preparar manos finales incluso en fold para que el overlay tenga datos de los oponentes
+    this.dealer.setFinalHands()
+
+    const winnerPlayers = Array.isArray(winnerData) ? winnerData : [winnerData]
     const pot = this.dealer.getPot()
-    winnerPlayer.chips += pot
-
-    this.log
-      .Template({ name: 'brakets', title: 'MATCH - WINNER', date: true })
-      .R({
-        winner: winnerPlayer.name,
-        amount: pot,
-        isFold: isFold,
-      })
-
+    const splitPot = Math.floor(pot / winnerPlayers.length)
     const finalHands = this.dealer.getFinalHands()
-    const winningHand = finalHands.find((h) => h.playerId === winnerPlayer.id)
+
+    winnerPlayers.forEach((wp) => {
+      const player = this.players.find(
+        (p) => p.id === (wp.playerId || wp.id),
+      )
+      if (player) {
+        player.chips += splitPot
+
+        this.log
+          .Template({ name: 'brakets', title: 'MATCH - WINNER', date: true })
+          .R({
+            winner: player.name,
+            amount: splitPot,
+            isFold: isFold,
+          })
+      }
+    })
+
+    const winnersInfo = winnerPlayers.map((wp) => {
+      const player = this.players.find(
+        (p) => p.id === (wp.playerId || wp.id),
+      )
+      const winningHand = finalHands.find((h) => h.playerId === player?.id)
+      return {
+        name: player?.name || 'Unknown',
+        playerId: player?.id,
+        amount: splitPot,
+        handName: isFold ? 'Fold Victory' : winningHand?.pokerHand || 'High Card',
+        winningCards: isFold ? [] : winningHand?.show || [],
+      }
+    })
+
+    const displayMsg =
+      winnersInfo.length > 1
+        ? `Tie! ${winnersInfo.map((w) => w.name).join(' and ')} split $${pot}!`
+        : `${winnersInfo[0].name} wins $${pot}${isFold ? ' (Fold)' : ''}!`
 
     this.communicator.msgBuilder('winner', 'public', null, {
       method: 'winner',
-      displayMsg: `${winnerPlayer.name} wins $${pot}${isFold ? ' (Fold)' : ''}!`,
-      winner: {
-        name: winnerPlayer.name,
-        playerId: winnerPlayer.id,
-        amount: pot,
-        handName: isFold ? 'Fold' : winningHand?.pokerHand || 'High Card',
-        winningCards: isFold ? [] : winningHand?.show || [],
-      },
+      displayMsg,
+      winners: winnersInfo,
       allHands: finalHands,
       isFold: isFold,
     })
@@ -557,7 +609,6 @@ class Match {
 
     const oldGameId = this.gameId
     this.pot = 0
-    this.cardsDealer = []
     this.playersFold = []
     this.activePlayerId = null
     this.players.forEach((p) => {
@@ -569,6 +620,7 @@ class Match {
     this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.dealer.deck = this.shuffledDeck
     this.dealer.cardsDealer = []
+    this.cardsDealer = this.dealer.getDealerCards()
     this.dealer.pot = 0
     this.dealer.removeChecks()
     this.dealer.setCurrentHighestBet(0)
@@ -728,6 +780,7 @@ class Match {
       displayMsg: `Dealer deals the ${whatHand}`,
     })
     this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+    this.sendOdds()
     this.continue(thisSocket)
   }
 
@@ -814,11 +867,11 @@ class Match {
     }
     if (!this.stepChecker.checkStep('winner')) {
       const winnerData = WinnerCore.Winner(this.dealer.getFinalHands())
-      if (!winnerData) return this.continue(thisSocket)
+      if (!winnerData || (Array.isArray(winnerData) && winnerData.length === 0)) {
+        return this.continue(thisSocket)
+      }
 
-      const winner = Array.isArray(winnerData) ? winnerData[0] : winnerData
-      const wp = this.players.find((p) => p.id === winner.playerId)
-      if (wp) this.winner(wp)
+      this.winner(winnerData)
       return
     }
   }

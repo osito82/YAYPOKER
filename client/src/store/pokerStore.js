@@ -23,6 +23,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     cards: [],
   })
   const winnerInfo = ref(null)
+  const odds = ref({ win: 0, tie: 0 })
   const autofoldStartTime = ref(null)
   const autofoldDuration = ref(600)
 
@@ -38,9 +39,16 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getActivePlayerId = computed(() => activePlayerId.value)
   const getBettingOptions = computed(() => bettingOptions.value)
   const getWinnerInfo = computed(() => winnerInfo.value)
+  const getOdds = computed(() => odds.value)
   const getCurrentHighestBet = computed(() => currentHighestBet.value)
   const getAutofoldStartTime = computed(() => autofoldStartTime.value)
   const getAutofoldDuration = computed(() => autofoldDuration.value)
+
+  const getCurrentHand = computed(() => {
+    const me = players.value.find((p) => p.id === myInfo.value.id)
+    if (!me || !me.currentPrize || !me.currentPrize.pokerHand) return null
+    return me.currentPrize
+  })
 
   // Actions
   function setSocketMessage(message) {
@@ -59,6 +67,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
         gameData.action === 'signUp'
       ) {
         winnerInfo.value = null
+        odds.value = { win: 0, tie: 0 }
       }
 
       // Update ID and private info immediately if available
@@ -115,6 +124,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
         autofoldDuration.value = gameData.autofoldDuration || 600 //10 minutes autoFold
       } else if (gameData.action === 'signUp' && gameData.type === 'private') {
         myInfo.value.id = gameData.data?.id
+      } else if (gameData.action === 'oddsUpdate') {
+        odds.value = gameData.data.odds
       } else if (gameData.action === 'winner' || gameData.method === 'winner') {
         winnerInfo.value = gameData.data || gameData
         activePlayerId.value = null
@@ -164,10 +175,12 @@ export const usePokerStore = defineStore('pokerStore', () => {
     currentHighestBet,
     myInfo,
     winnerInfo,
+    odds,
     autofoldStartTime,
     autofoldDuration,
 
     // Getters (computeds)
+    getOdds,
     getSocketMessage,
     getConnected,
     getPlayers,
@@ -182,6 +195,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getCurrentHighestBet,
     getAutofoldStartTime,
     getAutofoldDuration,
+    getCurrentHand,
 
     // Actions
     setSocketMessage,

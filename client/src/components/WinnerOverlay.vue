@@ -63,38 +63,43 @@
           <h2
             class="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter mb-1 sm:mb-2"
           >
-            {{ winnerInfo.winner.name }}
-            <span class="text-yellow-500">Wins!</span>
+            {{ winnerNames }}
+            <span class="text-yellow-500">{{ winners.length > 1 ? ' Split the Pot!' : ' Wins!' }}</span>
           </h2>
 
           <div
             class="text-4xl sm:text-5xl font-mono font-black text-yellow-400 mb-4 sm:mb-6 drop-shadow-lg"
           >
-            +${{ winnerInfo.winner.amount }}
+            +${{ totalAmount }}
           </div>
 
-          <!-- Winning Hand -->
+          <!-- Winning Hands -->
           <div
-            class="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 w-full mb-4 sm:mb-6 relative overflow-hidden"
+            v-for="(winner, idx) in winners"
+            :key="'winner-' + idx"
+            class="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 w-full mb-4 last:mb-6 relative overflow-hidden"
           >
             <div
               class="absolute inset-0 bg-yellow-500/5 pointer-events-none"
             ></div>
             <span
               class="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2 sm:mb-3 relative z-10"
-              >Winning Hand</span
+              >{{ winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand' }}</span
             >
             <div class="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 relative z-10">
-              {{ winnerInfo.winner.handName }}
+              {{ winner.handName }}
             </div>
 
-            <div class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100">
+            <div v-if="flattenCards(winner.winningCards).length > 0" class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100">
               <Card
-                v-for="(card, i) in flattenedWinningCards"
-                :key="i"
+                v-for="(card, i) in flattenCards(winner.winningCards)"
+                :key="'card-' + i"
                 size="medium"
                 :numSymbol="card"
               />
+            </div>
+            <div v-else class="text-[10px] text-gray-500 italic relative z-10">
+              (No cards shown)
             </div>
           </div>
 
@@ -117,7 +122,7 @@
                   <div
                     class="text-[8px] text-gray-500 italic uppercase tracking-tighter truncate"
                   >
-                    {{ player.pokerHand || 'Folded' }}
+                    {{ player.pokerHand || (player.folded ? 'Folded' : 'Active') }}
                   </div>
                 </div>
                 <div class="flex -space-x-4 sm:-space-x-5 opacity-80 scale-75 sm:scale-90 origin-right">
@@ -131,14 +136,14 @@
                       :numSymbol="c"
                     />
                   </template>
-                  <template v-else-if="!player.folded">
+                  <template v-else>
                      <div
-                      class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center"
+                      class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
                       <div class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
                     </div>
                      <div
-                      class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center"
+                      class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
                       <div class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
                     </div>
@@ -209,7 +214,6 @@ const startTimer = () => {
     countdown.value = remaining
 
     if (elapsed < 15000) {
-      // llama al siguiente tick exactamente cuando cambie el segundo
       const nextTick = 1000 - (elapsed % 1000)
       timer = setTimeout(tick, nextTick)
     } else {
@@ -228,20 +232,32 @@ const stopTimer = () => {
   }
 }
 
-
-
 const closeOverlay = () => {
   isVisible.value = false
   pokerStore.clearWinnerInfo()
   emit('close')
 }
 
-const flattenedWinningCards = computed(() => {
-  const cards = props.winnerInfo?.winner?.winningCards
+const winners = computed(() => {
+  if (!props.winnerInfo) return []
+  if (props.winnerInfo.winners) return props.winnerInfo.winners
+  if (props.winnerInfo.winner) return [props.winnerInfo.winner]
+  return []
+})
+
+const winnerNames = computed(() => {
+  return winners.value.map(w => w.name).join(' & ')
+})
+
+const totalAmount = computed(() => {
+  return winners.value.reduce((sum, w) => sum + (w.amount || 0), 0)
+})
+
+const flattenCards = (cards) => {
   if (!cards) return []
   if (typeof cards === 'string') return [cards]
   return cards.flat()
-})
+}
 
 watch(() => props.winnerInfo, (newVal) => {
   if (newVal) {
@@ -258,8 +274,9 @@ onUnmounted(() => {
 
 const opponentsHands = computed(() => {
   if (!props.winnerInfo?.allHands) return []
+  const winnerIds = winners.value.map(w => w.playerId)
   return props.winnerInfo.allHands.filter(
-    (h) => h.playerId !== props.winnerInfo.winner.playerId,
+    (h) => !winnerIds.includes(h.playerId),
   )
 })
 </script>
