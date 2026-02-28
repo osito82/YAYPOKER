@@ -197,7 +197,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onUnmounted, watch } from 'vue'
 import Card from './Card.vue'
 import { usePokerStore } from '../store/pokerStore'
 

@@ -46,9 +46,8 @@
 <script setup>
 import Card from '../components/Card.vue'
 import CardBack from '../components/CardBack.vue'
-import { defineProps } from 'vue'
 
-const props = defineProps({
+defineProps({
   playerName: { type: String, default: 'Player' },
   playerChips: { type: Number, default: 0 },
   playerAction: String,
