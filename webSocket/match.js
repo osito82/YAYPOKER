@@ -10,7 +10,7 @@ const { msgBuilder } = require('./utils')
 
 const osolog = require('osolog')
 const R = require('radash')
-const WinnerCore = require('./winnerCore')
+const {WinnerCore} = require('./winnerCore')
 
 class Match {
   log = new osolog()
@@ -20,13 +20,17 @@ class Match {
     this.gameId = gameId
 
     this.players = []
+    this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
+    this.autofoldTimer = null
+    this.autofoldDuration = 600000 // 10 minutos
 
     this.playersFold = []
     this.pot = 0
     this.cardsDealer = []
 
     this.activePlayerId = null // Track who is expected to act
+    this.waitingForNextRound = false
 
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.shuffledDeck = initialDeck
@@ -60,6 +64,30 @@ class Match {
       .R({ torneoId, gameId })
   }
 
+  autofold() {
+    const foundPlayer = this.players.find((p) => p.id == this.activePlayerId)
+    if (foundPlayer) {
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH - AUTOFOLD', date: true })
+        .R({ player: foundPlayer.name })
+      this.fold({ id: foundPlayer.id })
+    }
+  }
+
+  startAutofold() {
+    this.clearAutofold()
+    this.autofoldTimer = setTimeout(() => {
+      this.autofold()
+    }, this.autofoldDuration)
+  }
+
+  clearAutofold() {
+    if (this.autofoldTimer) {
+      clearTimeout(this.autofoldTimer)
+      this.autofoldTimer = null
+    }
+  }
+
   signUp(data, thisSocket) {
     const { id: thisSocketId } = thisSocket
     const existingPlayerIndex = this.players.findIndex(
@@ -69,9 +97,28 @@ class Match {
     let player
     if (existingPlayerIndex !== -1) {
       player = this.players[existingPlayerIndex]
+      const oldId = player.id
       player.id = thisSocketId
       player.setConnected(true)
-      this.stepChecker.revokeStep('pause')
+
+      // Actualizar referencias al ID antiguo si es necesario
+      if (this.activePlayerId === oldId) {
+        this.activePlayerId = thisSocketId
+      }
+      this.dealer.updatePlayerId(oldId, thisSocketId)
+
+      const timeout = this.pauseTimeouts.get(player.name)
+      if (timeout) {
+        clearTimeout(timeout)
+        this.pauseTimeouts.delete(player.name)
+      }
+
+      const stillPaused = this.players.some((p) => !p.connected)
+      if (!stillPaused) {
+        this.stepChecker.revokeStep('pause')
+        this.continue(thisSocket)
+      }
+
       this.log
         .Template({
           name: 'brakets',
@@ -80,7 +127,24 @@ class Match {
         })
         .R({ name: player.name, id: player.id })
     } else {
-      if (this.players.length >= 10) return
+      // Máximo 10 jugadores
+      if (this.players.length >= 10) {
+        this.communicator.msgBuilder('signUp', 'private', null, {
+          displayMsg: 'Table is full (max 10 players).',
+        })
+        this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+        return
+      }
+
+      // No permitir nuevos jugadores si el juego ya empezó
+      if (!this.acceptingPlayers) {
+        this.communicator.msgBuilder('signUp', 'private', null, {
+          displayMsg: 'Game in progress. Please wait for next round.',
+        })
+        this.dealer.talkToPLayerById(thisSocket.id, this.communicator.getMsg())
+        return
+      }
+
       const playerNumber = this.players.length + 1
       player = new Player(
         this.gameId,
@@ -93,6 +157,12 @@ class Match {
       )
       player.setConnected(true)
       this.players.push(player)
+
+      // Si llegamos a 10, cerramos registro inmediatamente
+      if (this.players.length >= 10) {
+        this.noMorePlayers()
+      }
+
       this.log
         .Template({
           name: 'brakets',
@@ -127,6 +197,25 @@ class Match {
       this.stepChecker.grantStep('signUp')
       this.askForBlindBets(thisSocket)
     }
+  }
+
+  noMorePlayers() {
+    if (!this.acceptingPlayers) return
+    this.acceptingPlayers = false
+
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'MATCH - Registration Closed',
+        date: true,
+      })
+      .R({ gameId: this.gameId })
+
+    this.communicator.msgBuilder('noMorePlayers', 'public', null, {
+      displayMsg: 'Registration closed. Game in progress.',
+    })
+
+    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
   }
 
   dealtPrivateCards(thisSocket) {
@@ -172,6 +261,8 @@ class Match {
         })
       return
     }
+
+    this.clearAutofold()
 
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
@@ -224,6 +315,8 @@ class Match {
     const maxBet = this.dealer.getCurrentHighestBet()
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (!foundPlayer) return
+
+    this.clearAutofold()
 
     const currentBetBefore = foundPlayer.getCurrentBet()
     const diff = maxBet - currentBetBefore
@@ -284,46 +377,13 @@ class Match {
     this.continue(thisSocket)
   }
 
-  // setCall(thisSocket) {
-  //   if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
-
-  //   const maxBet = this.dealer.getCurrentHighestBet()
-  //   const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
-  //   if (foundPlayer) {
-  //     const currentBetBefore = foundPlayer.getCurrentBet()
-  //     const diff = maxBet - currentBetBefore
-
-  //     if (diff >= 0) {
-  //       if (foundPlayer.setTotalBet(maxBet)) {
-  //         this.activePlayerId = null
-  //         foundPlayer.setLastAction('Call')
-  //         this.dealer.setPot(diff)
-  //         this.dealer.setChecked(foundPlayer.id)
-
-  //         this.log
-  //           .Template({ name: 'brakets', title: 'MATCH - CALL', date: true })
-  //           .R({
-  //             player: foundPlayer.name,
-  //             amount: diff,
-  //             newPot: this.dealer.getPot(),
-  //           })
-
-  //         this.communicator.msgBuilder('setCall', 'public', foundPlayer, {
-  //           displayMsg: `${foundPlayer.name} calls`,
-  //         })
-  //         this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
-  //       }
-  //     }
-  //   }
-  //   this.continue(thisSocket)
-  // }
-
   setCheck = (thisSocket) => {
     if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
 
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
       if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
+        this.clearAutofold()
         this.activePlayerId = null
         this.dealer.setChecked(thisSocket.id)
         foundPlayer.setLastAction('Check')
@@ -392,6 +452,7 @@ class Match {
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
         })
         this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
+        this.startAutofold()
       }
     }
   }
@@ -401,6 +462,7 @@ class Match {
 
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer && !foundPlayer.folded) {
+      this.clearAutofold()
       this.activePlayerId = null
       foundPlayer.setLastAction('Fold')
       foundPlayer.setFolded(true)
@@ -422,13 +484,14 @@ class Match {
   continue(thisSocket) {
     setTimeout(() => {
       this.startGame(thisSocket)
-    }, 1000)
+    }, 500)
   }
 
   winner = (winnerPlayer, isFold = false) => {
     if (this.stepChecker.checkStep('winner')) return
     this.stepChecker.grantStep('winner')
     this.activePlayerId = null
+    this.clearAutofold()
 
     const pot = this.dealer.getPot()
     winnerPlayer.chips += pot
@@ -459,12 +522,18 @@ class Match {
     })
     this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
 
-    setTimeout(() => {
+    this.waitingForNextRound = true
+  }
+
+  nextRound() {
+    if (this.waitingForNextRound) {
+      this.waitingForNextRound = false
       this.restartMatch()
-    }, 15000)
+    }
   }
 
   restartMatch() {
+    this.acceptingPlayers = true
     this.log
       .Template({ name: 'brakets', title: 'MATCH - Restarting', date: true })
       .R({ oldGameId: this.gameId })
@@ -501,7 +570,8 @@ class Match {
   bettingCore = (thisSocket, bettingFor) => {
     if (this.stepChecker.checkStep('winner')) return
 
-    const activePlayers = this.players.filter((p) => p.connected && !p.folded)
+    const allPlayers = this.players
+    const activePlayers = allPlayers.filter((p) => p.connected && !p.folded)
 
     if (activePlayers.length === 1) {
       this.winner(activePlayers[0], true)
@@ -511,28 +581,31 @@ class Match {
     const maxBet = this.dealer.getCurrentHighestBet()
     const checkedPlayers = this.dealer.getPlayersChecked()
 
-    let sorted = [...activePlayers]
+    let sorted = []
 
     if (bettingFor === 'firstBetting') {
-      const bbPosition = activePlayers.length === 2 ? 1 : 2
-      if (activePlayers.length > bbPosition + 1) {
-        sorted = [
-          ...activePlayers.slice(bbPosition + 1),
-          ...activePlayers.slice(0, bbPosition + 1),
-        ]
+      if (allPlayers.length === 2) {
+        // Heads-up pre-flop: Dealer(0) acts first
+        sorted = [...allPlayers]
       } else {
-        sorted = [...activePlayers]
+        // 3+ players pre-flop: UTG acts first (P3)
+        sorted = [...allPlayers.slice(3), ...allPlayers.slice(0, 3)]
       }
     } else {
-      sorted = [...activePlayers.slice(1), ...activePlayers.slice(0, 1)]
+      // Post-flop (Flop, Turn, River):
+      if (allPlayers.length === 2) {
+        // Heads-up post-flop: BB(1) acts first
+        sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]
+      } else {
+        // 3+ players post-flop: SB(1) acts first
+        sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]
+      }
     }
 
-    // const playersToAct = sorted.filter(
-    //   (p) => p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id),
-    // )
-
+    // Now filter only those who are still in the hand but KEEP the sorted order
     const playersToAct = sorted.filter(
       (p) =>
+        p.connected &&
         !p.folded &&
         !p.isAllIn &&
         (p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id)),
@@ -614,6 +687,7 @@ class Match {
         displayMsg: `Waiting for ${p.name}`,
       })
       this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg())
+      this.startAutofold()
     }
   }
 
@@ -722,6 +796,8 @@ class Match {
     }
     if (!this.stepChecker.checkStep('winner')) {
       const winnerData = WinnerCore.Winner(this.dealer.getFinalHands())
+      if (!winnerData) return this.continue(thisSocket)
+
       const winner = Array.isArray(winnerData) ? winnerData[0] : winnerData
       const wp = this.players.find((p) => p.id === winner.playerId)
       if (wp) this.winner(wp)
@@ -730,24 +806,27 @@ class Match {
   }
 
   pause(thisSocket) {
+    const time = 60000;
     const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
     const foundPlayer = this.players.find((p) => p.id === socketId)
     if (foundPlayer) {
       foundPlayer.setConnected(false)
+      this.clearAutofold()
       this.stepChecker.grantStep('pause')
       this.log
         .Template({ name: 'brakets', title: 'MATCH - PAUSE', date: true })
         .R({ player: foundPlayer.name, reason: 'Disconnected' })
 
       this.communicator.msgBuilder('pause', 'public', foundPlayer, {
-        displayMsg: `${foundPlayer.name} disconnected. Game paused.`,
+        displayMsg: `${foundPlayer.name} disconnected. Waiting ${time/1000} seconds for reconnection...`,
+        timeout: 60,
       })
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
 
       const timeout = setTimeout(() => {
         this.playerLeave(thisSocket)
         this.pauseTimeouts.delete(foundPlayer.name)
-      }, 60000) // 1 minute
+      }, time) // 1 minute
       this.pauseTimeouts.set(foundPlayer.name, timeout)
     }
   }
@@ -757,17 +836,38 @@ class Match {
   }
 
   playerLeave(thisSocket) {
-    const index = this.players.findIndex((p) => p.id === thisSocket.id)
+    const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
+    const index = this.players.findIndex((p) => p.id === socketId)
+
     if (index !== -1) {
+      const playerLeaving = this.players[index]
+
+      this.communicator.msgBuilder('playerLeave', 'public', playerLeaving, {
+        displayMsg: `${playerLeaving.name} has left the game.`,
+      })
+      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+
       this.log
         .Template({
           name: 'brakets',
           title: 'MATCH - Player Leaving',
           date: true,
         })
-        .R({ player: this.players[index].name })
+        .R({ player: playerLeaving.name })
+
+      if (this.activePlayerId === playerLeaving.id) {
+        this.activePlayerId = null
+        this.clearAutofold()
+      }
+
       this.players.splice(index, 1)
     }
+
+    const stillPaused = this.players.some((p) => !p.connected)
+    if (!stillPaused) {
+      this.stepChecker.revokeStep('pause')
+    }
+
     this.continue(thisSocket)
   }
 

@@ -72,6 +72,16 @@ class Dealer {
     this.playersChecked = []
   }
 
+  updatePlayerId = (oldId, newId) => {
+    const checkIndex = this.playersChecked.indexOf(oldId)
+    if (checkIndex !== -1) {
+      this.playersChecked[checkIndex] = newId
+    }
+    if (this.lastRaiser === oldId) {
+      this.lastRaiser = newId
+    }
+  }
+
   setChecked = (thisSocketId) => {
     if (!this.playersChecked.includes(thisSocketId)) {
       this.playersChecked.push(thisSocketId)

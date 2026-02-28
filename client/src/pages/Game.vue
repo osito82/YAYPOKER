@@ -26,7 +26,7 @@
     </header>
 
     <!-- WINNER ANNOUNCEMENT OVERLAY -->
-    <WinnerOverlay :winnerInfo="pokerStore.getWinnerInfo" />
+    <WinnerOverlay :winnerInfo="pokerStore.getWinnerInfo" @close="sendMessage({ action: 'nextRound' })" />
 
     <!-- TOP METADATA BAR (Game Context) -->
     <nav
