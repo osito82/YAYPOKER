@@ -197,7 +197,8 @@ const canBlind = computed(
 
 // 3. DYNAMIC BETTING LIMITS
 const minBet = computed(() => {
-  return currentMaxBetOnTable.value > 0 ? currentMaxBetOnTable.value + 20 : 20
+  const baseMin = currentMaxBetOnTable.value > 0 ? currentMaxBetOnTable.value + 20 : 20
+  return Math.min(baseMin, maxBet.value)
 })
 
 const maxBet = computed(() => {
@@ -227,13 +228,14 @@ const setQuickBet = (m) => {
 
 watch(isMyTurn, (newVal) => {
   if (newVal) {
-    betAmount.value = Math.min(minBet.value, maxBet.value)
+    betAmount.value = minBet.value
   }
 })
 
-watch(currentMaxBetOnTable, (newMax) => {
-  if (isMyTurn.value && betAmount.value < minBet.value) {
-    betAmount.value = Math.min(minBet.value, maxBet.value)
+watch([minBet, maxBet], ([newMin, newMax]) => {
+  if (isMyTurn.value) {
+    if (betAmount.value < newMin) betAmount.value = newMin
+    if (betAmount.value > newMax) betAmount.value = newMax
   }
 })
 
