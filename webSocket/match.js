@@ -138,6 +138,7 @@ class Match {
 
       // No permitir nuevos jugadores si el juego ya empezó
       if (!this.acceptingPlayers) {
+        console.log(`[DEBUG] Blocking new player ${data.name} join because acceptingPlayers=false`)
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Game in progress. Please wait for next round.',
         })
@@ -200,7 +201,11 @@ class Match {
   }
 
   noMorePlayers() {
-    if (!this.acceptingPlayers) return
+    if (!this.acceptingPlayers) {
+      console.log(`[DEBUG] noMorePlayers called but acceptingPlayers already false for game ${this.gameId}`)
+      return
+    }
+    console.log(`[DEBUG] Closing registration for game ${this.gameId}`)
     this.acceptingPlayers = false
 
     this.log
@@ -263,6 +268,10 @@ class Match {
     }
 
     this.clearAutofold()
+    if (this.acceptingPlayers) {
+      console.log(`[DEBUG] Action ${type} from ${thisSocket.name} closing registration`)
+      this.noMorePlayers()
+    }
 
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
@@ -317,6 +326,10 @@ class Match {
     if (!foundPlayer) return
 
     this.clearAutofold()
+    if (this.acceptingPlayers) {
+      console.log(`[DEBUG] Action setCall from ${foundPlayer.name} closing registration`)
+      this.noMorePlayers()
+    }
 
     const currentBetBefore = foundPlayer.getCurrentBet()
     const diff = maxBet - currentBetBefore
@@ -463,6 +476,10 @@ class Match {
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer && !foundPlayer.folded) {
       this.clearAutofold()
+      if (this.acceptingPlayers) {
+        console.log(`[DEBUG] Action fold from ${foundPlayer.name} closing registration`)
+        this.noMorePlayers()
+      }
       this.activePlayerId = null
       foundPlayer.setLastAction('Fold')
       foundPlayer.setFolded(true)
