@@ -51,28 +51,33 @@
         class="flex gap-4 items-center px-4 md:border-r border-white/10 h-full"
       >
         <!-- Odds Display -->
-        <div 
-          v-if="pokerStore.getOdds && (pokerStore.getOdds.win > 0 || pokerStore.getOdds.tie > 0)" 
+        <div
+          v-if="pokerStore.getOdds && (pokerStore.getOdds.win > 0 || pokerStore.getOdds.tie > 0)"
           class="flex flex-col items-center justify-center pr-4 border-r border-white/10 min-w-[70px]"
         >
           <span class="text-[8px] font-black text-gray-500 uppercase tracking-widest mb-1.5">
             {{ pokerStore.getCommunityCards.length === 5 ? 'Final Result' : 'Win Prob' }}
           </span>
           <div class="flex items-baseline gap-0.5">
-            <span :class="['text-2xl font-mono font-black transition-colors duration-700', getOddsColor(pokerStore.getOdds.win)]">
+            <span
+              :class="['text-2xl font-mono font-black transition-colors duration-700', getOddsColor(pokerStore.getOdds.win)]"
+            >
               {{ Math.round(pokerStore.getOdds.win) }}
             </span>
             <span class="text-[10px] font-bold text-gray-600">%</span>
           </div>
-          
-          <div v-if="parseFloat(pokerStore.getOdds.tie) > 0" class="flex items-center gap-1.5 mt-1 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20">
-             <span class="text-[7px] font-black text-blue-400/80 uppercase tracking-tighter">Tie</span>
-             <span class="text-[9px] font-mono font-bold text-blue-300">{{ pokerStore.getOdds.tie }}%</span>
+
+          <div
+            v-if="parseFloat(pokerStore.getOdds.tie) > 0"
+            class="flex items-center gap-1.5 mt-1 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20"
+          >
+            <span class="text-[7px] font-black text-blue-400/80 uppercase tracking-tighter">Tie</span>
+            <span class="text-[9px] font-mono font-bold text-blue-300">{{ pokerStore.getOdds.tie }}%</span>
           </div>
         </div>
 
         <!-- Current Hand Evaluation -->
-        <div 
+        <div
           v-if="pokerStore.getCurrentHand"
           class="flex flex-col items-start justify-center px-2 min-w-[100px]"
         >
@@ -83,8 +88,8 @@
             {{ pokerStore.getCurrentHand.pokerHand }}
           </span>
           <div class="flex gap-0.5 mt-1">
-            <div 
-              v-for="i in 10" 
+            <div
+              v-for="i in 10"
               :key="i"
               class="w-1.5 h-2 rounded-full"
               :class="i <= (11 - pokerStore.getCurrentHand.prizeRank) ? 'bg-yellow-500' : 'bg-gray-800'"
@@ -94,8 +99,6 @@
 
         <!-- Board & Player Cards -->
         <div class="flex items-center gap-3 bg-black/20 p-2 rounded-lg border border-white/5">
-
-
           <!-- Player Cards -->
           <div class="flex gap-2">
             <template v-if="playerCards && playerCards.length > 0">
@@ -119,65 +122,55 @@
 
       <!-- MIDDLE-RIGHT: Bet Controls -->
       <div
-        v-if="
-          isMyTurn && (options.includes('bet') || options.includes('raise'))
-        "
+        v-if="isMyTurn && (options.includes('bet') || options.includes('raise'))"
         id="hud-raise-controls"
-        class="flex items-center gap-4 md:gap-6 px-4 flex-grow justify-center min-w-full md:min-w-0 order-first md:order-none mb-3 md:mb-0"
+        class="flex items-center gap-4 md:gap-6 px-4 flex-grow justify-center min-w-full md:min-w-0 order-first md:order-none mb-3 md:mb-0 transition-all duration-300"
+        :class="{ 'opacity-40 grayscale pointer-events-none': minBet > maxBet }"
       >
         <div class="flex flex-col items-center min-w-[80px]">
           <span
             id="label-raise-to"
             class="text-[8px] font-black text-yellow-500 uppercase mb-1"
-            >Raise Amount</span
-          >
+          >Raise Amount</span>
           <span
             id="display-raise-amount"
             class="text-lg md:text-xl font-mono font-bold text-white leading-none"
-            >${{ betAmount }}</span
-          >
+          >${{ betAmount }}</span>
         </div>
 
         <div class="flex flex-col items-center gap-2 flex-grow max-w-xs">
           <input
             id="input-bet-range"
             type="range"
-            :value="betAmount"
-            @input="
-              $emit(
-                'update:betAmount',
-                Math.max(minBet, Number($event.target.value)),
-              )
-            "
+            v-model.number="betProxy"
             :min="minBet"
             :max="maxBet"
+            :disabled="minBet > maxBet"
             class="w-full h-2 bg-gray-800 rounded-none appearance-none cursor-pointer accent-yellow-500 border border-white/5"
           />
           <div class="flex justify-between w-full px-1">
-            <span class="text-[7px] text-gray-500 font-bold font-mono"
-              >MIN: ${{ minBet }}</span
-            >
-            <span class="text-[7px] text-gray-500 font-bold font-mono"
-              >MAX: ${{ maxBet }}</span
-            >
+            <span class="text-[7px] text-gray-500 font-bold font-mono">MIN: ${{ minBet }}</span>
+            <span class="text-[7px] text-gray-500 font-bold font-mono">MAX: ${{ maxBet }}</span>
           </div>
         </div>
 
         <div id="quick-bet-group" class="flex gap-1.5">
           <button
-            @click="$emit('setQuickBet', 0.5)"
-            class="px-3 py-1.5 bg-white/5 border border-white/10 text-[9px] font-black text-gray-400 hover:text-white hover:bg-white/10 transition-all uppercase"
+            @click="setQuick(0.5)"
+            :disabled="minBet > maxBet"
+            class="px-3 py-1.5 bg-white/5 border border-white/10 text-[9px] font-black text-gray-400 hover:text-white hover:bg-white/10 transition-all uppercase disabled:opacity-30"
           >
             1/2
           </button>
           <button
-            @click="$emit('setQuickBet', 1)"
-            class="px-3 py-1.5 bg-white/5 border border-white/10 text-[9px] font-black text-gray-400 hover:text-white hover:bg-white/10 transition-all uppercase"
+            @click="setQuick(1)"
+            :disabled="minBet > maxBet"
+            class="px-3 py-1.5 bg-white/5 border border-white/10 text-[9px] font-black text-gray-400 hover:text-white hover:bg-white/10 transition-all uppercase disabled:opacity-30"
           >
             POT
           </button>
           <button
-            @click="$emit('setQuickBet', 'all')"
+            @click="setQuick('all')"
             class="px-3 py-1.5 bg-red-900/20 border border-red-500/30 text-[9px] font-black text-red-400 hover:bg-red-500/30 transition-all uppercase"
           >
             ALL IN
@@ -221,7 +214,7 @@
 
           <button
             id="raise-button"
-            :disabled="betAmount < minBet"
+      :disabled="!canRaise"
             @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
             class="px-8 py-3 bg-yellow-500 text-black text-xs font-black uppercase tracking-widest transition-all active:scale-95 hover:bg-yellow-400 shadow-xl shadow-yellow-900/20 disabled:opacity-50 disabled:grayscale"
           >
@@ -232,9 +225,7 @@
         <div v-else class="flex flex-col items-end px-4">
           <div class="flex items-center gap-2">
             <div class="w-1.5 h-1.5 bg-yellow-500/50 rounded-full animate-pulse"></div>
-            <span class="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]"
-              >Waiting...</span
-            >
+            <span class="text-[10px] text-gray-500 font-black uppercase tracking-[0.2em]">Waiting...</span>
           </div>
         </div>
       </div>
@@ -243,7 +234,7 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted, watch } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import Card from './Card.vue'
 import { usePokerStore } from '../store/pokerStore'
 
@@ -258,20 +249,46 @@ const props = defineProps({
   playerCards: { type: Array, default: () => [] },
 })
 
-defineEmits(['action', 'update:betAmount', 'setQuickBet'])
+
+const canRaise = computed(() => {
+  
+  return betProxy.value > props.minBet
+})
+
+const emit = defineEmits(['action', 'update:betAmount', 'setQuickBet'])
 
 const pokerStore = usePokerStore()
 const progress = ref(100)
+const hasMoved = ref(false)
 let timerInterval = null
 
 const getOddsColor = (win) => {
-  const w = parseFloat(win);
-  if (w >= 70) return 'text-green-500';
-  if (w >= 40) return 'text-yellow-500';
-  if (w >= 20) return 'text-orange-500';
-  return 'text-red-500';
-};
+  const w = parseFloat(win)
+  if (w >= 70) return 'text-green-500'
+  if (w >= 40) return 'text-yellow-500'
+  if (w >= 20) return 'text-orange-500'
+  return 'text-red-500'
+}
 
+// --- Slider Proxy ---
+const betProxy = computed({
+  get() {
+    return props.betAmount
+  },
+  set(val) {
+    hasMoved.value = true
+    const safeValue = Math.min(props.maxBet, Math.max(props.minBet, val))
+    emit('update:betAmount', safeValue)
+  }
+})
+
+// --- Quick Bet ---
+const setQuick = (ratio) => {
+  hasMoved.value = true
+  emit('setQuickBet', ratio)
+}
+
+// --- Progress Timer ---
 const updateProgress = () => {
   if (!pokerStore.getAutofoldStartTime || !props.isMyTurn) {
     progress.value = 0
@@ -282,48 +299,35 @@ const updateProgress = () => {
   const remaining = Math.max(0, pokerStore.getAutofoldDuration - elapsed)
   progress.value = (remaining / pokerStore.getAutofoldDuration) * 100
 
-  if (remaining <= 0) {
-    clearInterval(timerInterval)
-  }
+  if (remaining <= 0) clearInterval(timerInterval)
 }
 
-watch(() => props.isMyTurn, (newVal) => {
-  if (newVal) {
-    if (timerInterval) clearInterval(timerInterval)
-    timerInterval = setInterval(updateProgress, 100)
-  } else {
-    clearInterval(timerInterval)
-    progress.value = 0
+watch(
+  () => props.isMyTurn,
+  (newVal) => {
+    if (newVal) {
+      hasMoved.value = false
+      if (timerInterval) clearInterval(timerInterval)
+      timerInterval = setInterval(updateProgress, 100)
+    } else {
+      clearInterval(timerInterval)
+      progress.value = 0
+    }
   }
-})
+)
+
+watch(
+  () => [props.minBet, props.maxBet],
+  () => {
+    if (props.betAmount < props.minBet) emit('update:betAmount', props.minBet)
+    if (props.betAmount > props.maxBet) emit('update:betAmount', props.maxBet)
+  }
+)
 
 onUnmounted(() => {
   if (timerInterval) clearInterval(timerInterval)
 })
 </script>
-
-<style scoped>
-#input-bet-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 24px;
-  background: #eab308;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-#input-bet-range::-webkit-slider-thumb:hover {
-  background: #facc15;
-}
-#input-bet-range::-moz-range-thumb {
-  width: 16px;
-  height: 24px;
-  background: #eab308;
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-}
-</style>
 
 <style scoped>
 #input-bet-range::-webkit-slider-thumb {

@@ -6,11 +6,11 @@ const StepChecker = require('./stepChecker')
 const Socket = require('./sockets')
 const Communicator = require('./communicator')
 
-const { msgBuilder } = require('./utils')
+const { msgBuilder, generateUniqueId } = require('./utils')
 
 const osolog = require('osolog')
 const R = require('radash')
-const {WinnerCore} = require('./winnerCore')
+const { WinnerCore } = require('./winnerCore')
 const PokerOddsCalculator = require('./pokerOdds')
 
 class Match {
@@ -228,7 +228,9 @@ class Match {
 
   noMorePlayers() {
     if (!this.acceptingPlayers) {
-      console.log(`[DEBUG] noMorePlayers called but acceptingPlayers already false for game ${this.gameId}`)
+      console.log(
+        `[DEBUG] noMorePlayers called but acceptingPlayers already false for game ${this.gameId}`,
+      )
       return
     }
     console.log(`[DEBUG] Closing registration for game ${this.gameId}`)
@@ -296,7 +298,9 @@ class Match {
 
     this.clearAutofold()
     if (this.acceptingPlayers) {
-      console.log(`[DEBUG] Action ${type} from ${thisSocket.name} closing registration`)
+      console.log(
+        `[DEBUG] Action ${type} from ${thisSocket.name} closing registration`,
+      )
       this.noMorePlayers()
     }
 
@@ -354,7 +358,9 @@ class Match {
 
     this.clearAutofold()
     if (this.acceptingPlayers) {
-      console.log(`[DEBUG] Action setCall from ${foundPlayer.name} closing registration`)
+      console.log(
+        `[DEBUG] Action setCall from ${foundPlayer.name} closing registration`,
+      )
       this.noMorePlayers()
     }
 
@@ -504,7 +510,9 @@ class Match {
     if (foundPlayer && !foundPlayer.folded) {
       this.clearAutofold()
       if (this.acceptingPlayers) {
-        console.log(`[DEBUG] Action fold from ${foundPlayer.name} closing registration`)
+        console.log(
+          `[DEBUG] Action fold from ${foundPlayer.name} closing registration`,
+        )
         this.noMorePlayers()
       }
       this.activePlayerId = null
@@ -547,9 +555,7 @@ class Match {
     const finalHands = this.dealer.getFinalHands()
 
     winnerPlayers.forEach((wp) => {
-      const player = this.players.find(
-        (p) => p.id === (wp.playerId || wp.id),
-      )
+      const player = this.players.find((p) => p.id === (wp.playerId || wp.id))
       if (player) {
         player.chips += splitPot
 
@@ -564,15 +570,15 @@ class Match {
     })
 
     const winnersInfo = winnerPlayers.map((wp) => {
-      const player = this.players.find(
-        (p) => p.id === (wp.playerId || wp.id),
-      )
+      const player = this.players.find((p) => p.id === (wp.playerId || wp.id))
       const winningHand = finalHands.find((h) => h.playerId === player?.id)
       return {
         name: player?.name || 'Unknown',
         playerId: player?.id,
         amount: splitPot,
-        handName: isFold ? 'Fold Victory' : winningHand?.pokerHand || 'High Card',
+        handName: isFold
+          ? 'Fold Victory'
+          : winningHand?.pokerHand || 'High Card',
         winningCards: isFold ? [] : winningHand?.show || [],
       }
     })
@@ -603,21 +609,31 @@ class Match {
 
   restartMatch() {
     this.acceptingPlayers = true
+    const oldGameId = this.gameId
+    this.gameId = generateUniqueId() // Generar nuevo ID para la nueva mano
+
     this.log
       .Template({ name: 'brakets', title: 'MATCH - Restarting', date: true })
-      .R({ oldGameId: this.gameId })
+      .R({ oldGameId, newGameId: this.gameId })
 
-    const oldGameId = this.gameId
     this.pot = 0
     this.playersFold = []
     this.activePlayerId = null
+
+    // Resetear jugadores pero mantener sus fichas y conexión
     this.players.forEach((p) => {
+      p.gameId = this.gameId
       p.cards = []
       p.currentBet = 0
       p.folded = false
       p.lastAction = ''
+      p.isAllIn = false
+      p.setCurrentPrize({})
     })
+
+    // Resetear el Dealer con el nuevo ID y mazo
     this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)
+    this.dealer.gameId = this.gameId
     this.dealer.deck = this.shuffledDeck
     this.dealer.cardsDealer = []
     this.cardsDealer = this.dealer.getDealerCards()
@@ -626,12 +642,23 @@ class Match {
     this.dealer.setCurrentHighestBet(0)
     this.dealer.setLastRaiser(null)
 
+    // Actualizar el gameId en los componentes de apoyo
+    this.communicator.gameId = this.gameId
+    this.stepChecker.reset()
+    this.stepChecker.gameFlow.gameId = this.gameId
+
+    // Rotar el botón (Dealer) para la siguiente mano
     if (this.players.length > 1) {
       this.players.push(this.players.shift())
     }
 
-    this.stepChecker.reset()
-    this.stepChecker.gameFlow.gameId = oldGameId
+    // Notificar a todos del cambio de ID y reinicio
+    this.communicator.msgBuilder('gameRestarted', 'public', null, {
+      displayMsg: 'New hand starting...',
+      newGameId: this.gameId,
+    })
+    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+
     this.stepChecker.grantStep('signUp')
     this.startGame()
   }
@@ -867,7 +894,10 @@ class Match {
     }
     if (!this.stepChecker.checkStep('winner')) {
       const winnerData = WinnerCore.Winner(this.dealer.getFinalHands())
-      if (!winnerData || (Array.isArray(winnerData) && winnerData.length === 0)) {
+      if (
+        !winnerData ||
+        (Array.isArray(winnerData) && winnerData.length === 0)
+      ) {
         return this.continue(thisSocket)
       }
 
@@ -877,7 +907,7 @@ class Match {
   }
 
   pause(thisSocket) {
-    const time = 60000;
+    const time = 60000
     const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
     const foundPlayer = this.players.find((p) => p.id === socketId)
     if (foundPlayer) {
@@ -889,7 +919,7 @@ class Match {
         .R({ player: foundPlayer.name, reason: 'Disconnected' })
 
       this.communicator.msgBuilder('pause', 'public', foundPlayer, {
-        displayMsg: `${foundPlayer.name} disconnected. Waiting ${time/1000} seconds for reconnection...`,
+        displayMsg: `${foundPlayer.name} disconnected. Waiting ${time / 1000} seconds for reconnection...`,
         timeout: 60,
       })
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())

@@ -119,75 +119,102 @@ class WinnerCore {
 
     switch (type) {
       case 'pairs': {
-        const handsWithValues = bestHands.map(h => ({
+        const handsWithValues = bestHands.map((h) => ({
           ...h,
-          pairVal: betterPair(h.show)
+          pairVal: betterPair(h.show),
         }))
-        const maxPairVal = Math.max(...handsWithValues.map(h => h.pairVal))
-        const candidates = handsWithValues.filter(h => h.pairVal === maxPairVal)
-        
+        const maxPairVal = Math.max(...handsWithValues.map((h) => h.pairVal))
+        const candidates = handsWithValues.filter(
+          (h) => h.pairVal === maxPairVal,
+        )
+
         if (candidates.length === 1) return [candidates[0]]
-        
+
         // Tie breaker: compare other cards
-        const highestSum = Math.max(...candidates.map(h => sumArrayNumbers(cardsToSingleNumValsArray(h.cards))))
-        return candidates.filter(h => sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) === highestSum)
+        const highestSum = Math.max(
+          ...candidates.map((h) =>
+            sumArrayNumbers(cardsToSingleNumValsArray(h.cards)),
+          ),
+        )
+        return candidates.filter(
+          (h) =>
+            sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) === highestSum,
+        )
       }
 
       case 'twoPairs': {
-        const handsWithValues = bestHands.map(h => {
-          const nums = cardsToSingleNumValsArray(h.show.flat()).sort((a, b) => b - a)
+        const handsWithValues = bestHands.map((h) => {
+          const nums = cardsToSingleNumValsArray(h.show.flat()).sort(
+            (a, b) => b - a,
+          )
           return { ...h, highPair: nums[0], lowPair: nums[2] }
         })
-        const maxHigh = Math.max(...handsWithValues.map(h => h.highPair))
-        let candidates = handsWithValues.filter(h => h.highPair === maxHigh)
+        const maxHigh = Math.max(...handsWithValues.map((h) => h.highPair))
+        let candidates = handsWithValues.filter((h) => h.highPair === maxHigh)
         if (candidates.length > 1) {
-          const maxLow = Math.max(...candidates.map(h => h.lowPair))
-          candidates = candidates.filter(h => h.lowPair === maxLow)
+          const maxLow = Math.max(...candidates.map((h) => h.lowPair))
+          candidates = candidates.filter((h) => h.lowPair === maxLow)
         }
         if (candidates.length > 1) {
-          const highestSum = Math.max(...candidates.map(h => sumArrayNumbers(cardsToSingleNumValsArray(h.cards))))
-          candidates = candidates.filter(h => sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) === highestSum)
+          const highestSum = Math.max(
+            ...candidates.map((h) =>
+              sumArrayNumbers(cardsToSingleNumValsArray(h.cards)),
+            ),
+          )
+          candidates = candidates.filter(
+            (h) =>
+              sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) ===
+              highestSum,
+          )
         }
         return candidates
       }
 
       case 'threeOfAKind': {
-        const handsWithValues = bestHands.map(h => ({
+        const handsWithValues = bestHands.map((h) => ({
           ...h,
-          trioVal: Math.max(...cardsToSingleNumValsArray(h.show.flat()))
+          trioVal: Math.max(...cardsToSingleNumValsArray(h.show.flat())),
         }))
-        const maxTrio = Math.max(...handsWithValues.map(h => h.trioVal))
-        let candidates = handsWithValues.filter(h => h.trioVal === maxTrio)
+        const maxTrio = Math.max(...handsWithValues.map((h) => h.trioVal))
+        let candidates = handsWithValues.filter((h) => h.trioVal === maxTrio)
         if (candidates.length > 1) {
-          const highestSum = Math.max(...candidates.map(h => sumArrayNumbers(cardsToSingleNumValsArray(h.cards))))
-          candidates = candidates.filter(h => sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) === highestSum)
+          const highestSum = Math.max(
+            ...candidates.map((h) =>
+              sumArrayNumbers(cardsToSingleNumValsArray(h.cards)),
+            ),
+          )
+          candidates = candidates.filter(
+            (h) =>
+              sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) ===
+              highestSum,
+          )
         }
         return candidates
       }
 
       case 'fourOfaKind': {
-        const handsWithValues = bestHands.map(h => ({
+        const handsWithValues = bestHands.map((h) => ({
           ...h,
-          quadVal: Math.max(...cardsToSingleNumValsArray(h.show.flat()))
+          quadVal: Math.max(...cardsToSingleNumValsArray(h.show.flat())),
         }))
-        const maxQuad = Math.max(...handsWithValues.map(h => h.quadVal))
-        return handsWithValues.filter(h => h.quadVal === maxQuad)
+        const maxQuad = Math.max(...handsWithValues.map((h) => h.quadVal))
+        return handsWithValues.filter((h) => h.quadVal === maxQuad)
       }
 
       case 'fullHouse': {
-        const handsWithValues = bestHands.map(h => {
+        const handsWithValues = bestHands.map((h) => {
           const nums = cardsToSingleNumValsArray(h.show.flat())
           const counts = {}
-          nums.forEach(n => counts[n] = (counts[n] || 0) + 1)
-          const trio = Number(Object.keys(counts).find(k => counts[k] === 3))
-          const pair = Number(Object.keys(counts).find(k => counts[k] === 2))
+          nums.forEach((n) => (counts[n] = (counts[n] || 0) + 1))
+          const trio = Number(Object.keys(counts).find((k) => counts[k] === 3))
+          const pair = Number(Object.keys(counts).find((k) => counts[k] === 2))
           return { ...h, trio, pair }
         })
-        const maxTrio = Math.max(...handsWithValues.map(h => h.trio))
-        let candidates = handsWithValues.filter(h => h.trio === maxTrio)
+        const maxTrio = Math.max(...handsWithValues.map((h) => h.trio))
+        let candidates = handsWithValues.filter((h) => h.trio === maxTrio)
         if (candidates.length > 1) {
-          const maxPair = Math.max(...candidates.map(h => h.pair))
-          candidates = candidates.filter(h => h.pair === maxPair)
+          const maxPair = Math.max(...candidates.map((h) => h.pair))
+          candidates = candidates.filter((h) => h.pair === maxPair)
         }
         return candidates
       }
@@ -195,37 +222,37 @@ class WinnerCore {
       case 'straight':
       case 'straightFlush':
       case 'royalFlush': {
-        const handsWithValues = bestHands.map(h => ({
+        const handsWithValues = bestHands.map((h) => ({
           ...h,
-          sum: sumArrayNumbers(cardsToSingleNumValsArray(h.show.flat()))
+          sum: sumArrayNumbers(cardsToSingleNumValsArray(h.show.flat())),
         }))
-        const maxSum = Math.max(...handsWithValues.map(h => h.sum))
-        return handsWithValues.filter(h => h.sum === maxSum)
+        const maxSum = Math.max(...handsWithValues.map((h) => h.sum))
+        return handsWithValues.filter((h) => h.sum === maxSum)
       }
 
       case 'flush': {
-        const handsWithValues = bestHands.map(h => ({
+        const handsWithValues = bestHands.map((h) => ({
           ...h,
-          nums: cardsToSingleNumValsArray(h.show.flat()).sort((a, b) => b - a)
+          nums: cardsToSingleNumValsArray(h.show.flat()).sort((a, b) => b - a),
         }))
         let candidates = handsWithValues
         for (let i = 0; i < 5; i++) {
-          const maxVal = Math.max(...candidates.map(h => h.nums[i]))
-          candidates = candidates.filter(h => h.nums[i] === maxVal)
+          const maxVal = Math.max(...candidates.map((h) => h.nums[i]))
+          candidates = candidates.filter((h) => h.nums[i] === maxVal)
           if (candidates.length === 1) break
         }
         return candidates
       }
 
       case 'highCard': {
-        const handsWithValues = bestHands.map(h => ({
+        const handsWithValues = bestHands.map((h) => ({
           ...h,
-          nums: cardsToSingleNumValsArray(h.cards.flat()).sort((a, b) => b - a)
+          nums: cardsToSingleNumValsArray(h.cards.flat()).sort((a, b) => b - a),
         }))
         let candidates = handsWithValues
         for (let i = 0; i < 5; i++) {
-          const maxVal = Math.max(...candidates.map(h => h.nums[i]))
-          candidates = candidates.filter(h => h.nums[i] === maxVal)
+          const maxVal = Math.max(...candidates.map((h) => h.nums[i]))
+          candidates = candidates.filter((h) => h.nums[i] === maxVal)
           if (candidates.length === 1) break
         }
         return candidates
@@ -247,7 +274,7 @@ function ArrayOutOfPairSingles(...arrays) {
 }
 
 module.exports = {
-  WinnerCore,           // ✅ ahora puedes usar WinnerCore.Winner()
+  WinnerCore, // ✅ ahora puedes usar WinnerCore.Winner()
   selectBestRankHands,
   betterPair,
   betterTwoPairs,
