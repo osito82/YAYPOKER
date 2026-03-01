@@ -49,7 +49,9 @@ class Socket {
   static getSocket(idTorneo, id) {
     const torneoSockets = this.torneoSockets.get(idTorneo)
     if (torneoSockets) {
-      return Array.from(torneoSockets.values()).find((socket) => socket.id === id)
+      return Array.from(torneoSockets.values()).find(
+        (socket) => socket.id === id,
+      )
     }
     return null
   }
@@ -57,7 +59,9 @@ class Socket {
   static socketExists(idTorneo, id) {
     const torneoSockets = this.torneoSockets.get(idTorneo)
     if (torneoSockets) {
-      return Array.from(torneoSockets.values()).some((socket) => socket.id === id)
+      return Array.from(torneoSockets.values()).some(
+        (socket) => socket.id === id,
+      )
     }
     return false
   }

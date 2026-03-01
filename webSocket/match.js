@@ -601,14 +601,40 @@ class Match {
   }
 
   nextRound() {
-    if (this.waitingForNextRound) {
-      this.waitingForNextRound = false
-      this.restartMatch()
+    if (!this.waitingForNextRound) return
+
+    this.waitingForNextRound = false
+
+    const playersWithChips = this.players.filter(
+      (p) => p.connected && p.chips > 0,
+    )
+
+    if (playersWithChips.length < 2) {
+      this.resetStacks() // 👈 NUEVO
     }
+
+    this.restartMatch()
   }
 
+  resetStacks() {
+    const INITIAL_STACK = 1000
+
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'MATCH - Resetting Stacks',
+        date: true,
+      })
+      .R({ reason: 'Not enough chips to continue' })
+
+    this.players.forEach((p) => {
+      if (p.connected) {
+        p.chips = INITIAL_STACK
+      }
+    })
+  }
   restartMatch() {
-    this.acceptingPlayers = true
+    this.acceptingPlayers = false
     const oldGameId = this.gameId
     this.gameId = generateUniqueId() // Generar nuevo ID para la nueva mano
 
@@ -844,6 +870,7 @@ class Match {
       this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
       return
     }
+
     if (!this.stepChecker.checkStep('blindsBetting'))
       return this.askForBlindBets(thisSocket)
     if (!this.stepChecker.checkStep('dealtPrivateCards'))
