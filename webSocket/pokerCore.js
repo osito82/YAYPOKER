@@ -262,35 +262,45 @@ class PokerCore {
 
     for (const array of combinationsArray) {
       let tempHand = detectRoyalFlush(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
       if (bestHand.prizeRank === 1) break
 
       tempHand = detectStraightFlush(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
 
       tempHand = detectFourOfaKind(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
 
       tempHand = detectFullHouse(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
 
       tempHand = detectFlush(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
 
       tempHand = detectStraight(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
 
       tempHand = detectThreeOfAKind(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
 
       tempHand = detectTwoPairs(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
 
       tempHand = detectPairs(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
 
       tempHand = detectHighCard(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank) bestHand = tempHand
+      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
+        bestHand = tempHand
     }
 
     return bestHand

@@ -16,7 +16,7 @@
       >
         <!-- Close Button -->
         <button
-          @click="closeOverlay"
+          @click="handleClose"
           class="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 transition-all z-[120] p-2 rounded-full border border-white/10 flex items-center justify-center shadow-lg hover:scale-110 active:scale-90"
           aria-label="Close"
         >
@@ -166,18 +166,20 @@
             </div>
             
             <!-- Visual Timer Bar -->
-<div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-  <div
-    class="h-full bg-yellow-500 transition-all duration-50 ease-linear"
-    :style="{ width: `${(countdown / 15) * 100}%` }"
-  ></div>
-</div>
+            <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-yellow-500 transition-all duration-50 ease-linear"
+                :style="{ width: `${(countdown / 15) * 100}%` }"
+              ></div>
+            </div>
 
             <button
-              @click="closeOverlay"
-              class="mt-2 px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95"
+              @click="handleClose"
+              :disabled="isWaiting"
+              class="mt-2 px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 disabled:hover:bg-white/10 border border-white/10 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
             >
-              Continue Playing
+              <div v-if="isWaiting" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              {{ isWaiting ? 'Waiting for others...' : 'Play New Game' }}
             </button>
           </div>
         </div>
@@ -200,12 +202,14 @@ const emit = defineEmits(['close'])
 const pokerStore = usePokerStore()
 const countdown = ref(15)
 const isVisible = ref(true)
+const isWaiting = ref(false)
 let timer = null
 
 const startTimer = () => {
   stopTimer()
   countdown.value = 15
   isVisible.value = true
+  isWaiting.value = false
   const startTime = Date.now()
 
   const tick = () => {
@@ -217,7 +221,7 @@ const startTimer = () => {
       const nextTick = 1000 - (elapsed % 1000)
       timer = setTimeout(tick, nextTick)
     } else {
-      closeOverlay()
+      handleClose()
       timer = null
     }
   }
@@ -232,10 +236,15 @@ const stopTimer = () => {
   }
 }
 
+const handleClose = () => {
+  if (isWaiting.value) return
+  isWaiting.value = true
+  emit('close')
+}
+
 const closeOverlay = () => {
   isVisible.value = false
   pokerStore.clearWinnerInfo()
-  emit('close')
 }
 
 const winners = computed(() => {
@@ -265,6 +274,7 @@ watch(() => props.winnerInfo, (newVal) => {
   } else {
     stopTimer()
     isVisible.value = false
+    isWaiting.value = false
   }
 }, { immediate: true })
 

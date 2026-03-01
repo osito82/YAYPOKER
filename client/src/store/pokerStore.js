@@ -63,8 +63,12 @@ export const usePokerStore = defineStore('pokerStore', () => {
 
       // Reset winner info if a new hand/action starts
       if (
-        gameData.action === 'askForBlindBets' ||
-        gameData.action === 'signUp'
+        [
+          'askForBlindBets',
+          'signUp',
+          'gameRestarted',
+          'dealtPrivateCards',
+        ].includes(gameData.action)
       ) {
         winnerInfo.value = null
         odds.value = { win: 0, tie: 0 }
@@ -136,10 +140,20 @@ export const usePokerStore = defineStore('pokerStore', () => {
         setTimeout(() => {
           if (winnerInfo.value === currentWinnerData) winnerInfo.value = null
         }, 15000)
-      } else if (['setBet', 'setRise', 'setCall', 'setCheck', 'fold'].includes(gameData.action)) {
+      } else if (
+        ['setBet', 'setRise', 'setCall', 'setCheck', 'fold'].includes(
+          gameData.action,
+        )
+      ) {
         activePlayerId.value = null
         bettingOptions.value = []
         autofoldStartTime.value = null
+      } else if (gameData.action === 'gameRestarted') {
+        // Clear board and pot for new hand
+        communityCards.value = []
+        pot.value = 0
+        currentHighestBet.value = 0
+        winnerInfo.value = null
       }
     } catch (e) {
       console.error('POKER_STORE - Error parsing message', e)
