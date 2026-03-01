@@ -129,18 +129,19 @@ describe('WinnerCore - Método Winner', () => {
     const pair1 = {
       pokerHand: 'pairs',
       prizeRank: 2,
-      cards: [['5H'], ['5D'], ['7S'], ['9C'], ['KH']],
-      show: [['5H', '5D']],
+      cards: ['5H', '5D', '7S', '9C', 'KH'],
+
+      show: ['5H', '5D'],
     }
 
     const pair2 = {
       pokerHand: 'pairs',
       prizeRank: 2,
-      cards: [['6H'], ['6D'], ['7S'], ['9C'], ['KH']],
-      show: [['6H', '6D']],
+      cards: ['6H', '6D', '7S', '9C', 'KH'],
+      show: ['6H', '6D'],
     }
 
-    const result = WinnerCore.Winner([pair1, pair2])
-    expect(result.show).toEqual([['6H', '6D']])
+    const result = WinnerCore.Winner([pair1, pair2])[0]
+    expect(result.show).toEqual(['6H', '6D'])
   })
 })
