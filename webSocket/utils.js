@@ -1,20 +1,20 @@
 const { v4: uuidv4 } = require('uuid')
 
 const shuffle = (array) => {
-  const arr = [...array]
+  const arr = [...array];
 
   const swap = (i, j) => {
-    const temp = arr[i]
-    arr[i] = arr[j]
-    arr[j] = temp
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 
   for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    swap(i, j)
+    const randArray = new Uint32Array(1);
+    crypto.getRandomValues(randArray);
+    const j = randArray[0] % (i + 1);
+    swap(i, j);
   }
 
-  return arr
+  return arr;
 }
 
 function generateUniqueId(long = 4) {
