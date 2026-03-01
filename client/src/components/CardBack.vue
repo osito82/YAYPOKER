@@ -17,27 +17,48 @@ const props = defineProps({
   size: String,
 })
 
+
 const sizeOption = computed(() => {
   switch (props.size) {
     case 'extraLarge':
       return {
-        height: 'h-48',
-        width: 'w-32',
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
+        centerSymbol: 'text-7xl',
+        height: 'h-56', // Increased from h-48
+        width: 'w-40', // Increased from w-32
       }
     case 'large':
       return {
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
+        centerSymbol: 'text-6xl',
+        height: 'h-44', // Increased from h-36
+        width: 'w-32', // Increased from w-24
+      }
+    case 'medium':
+      return {
+        cornerText: 'text-lg',
+        cornerSymbol: 'text-md',
+        centerSymbol: 'text-5xl',
         height: 'h-36',
         width: 'w-24',
       }
     case 'small':
       return {
-        height: 'h-20',
-        width: 'w-14',
+        cornerText: 'text-sm',
+        cornerSymbol: 'text-xs',
+        centerSymbol: 'text-3xl',
+        height: 'h-24', // Increased from h-20
+        width: 'w-16', // Increased from w-14
       }
     default:
       return {
-        height: 'h-36',
-        width: 'w-24',
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
+        centerSymbol: 'text-6xl',
+        height: 'h-44',
+        width: 'w-32',
       }
   }
 })

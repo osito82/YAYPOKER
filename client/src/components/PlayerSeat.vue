@@ -9,36 +9,33 @@
     "
   >
     <!-- Active Turn Pulse -->
-    <div
+    <div id="playerSeat"
       v-if="isActive"
       class="absolute inset-0 bg-yellow-500/5 animate-pulse pointer-events-none"
     ></div>
 
     <!-- Cards Section (Left) -->
-    <div class="flex -space-x-6 mr-4 shrink-0">
-      <template v-if="showCards && playerCards?.length > 0">
-        <Card
-          v-for="(c, i) in playerCards"
-          :key="i"
-          size="small"
-          :numSymbol="c"
-          class="scale-90 origin-left"
-        />
-      </template>
-      <template v-else>
-        <!-- Card Backs -->
-        <div
-          v-for="i in 2"
-          :key="i"
-          class="w-10 h-14 bg-neutral-800 border border-white/20 rounded shadow-sm flex items-center justify-center overflow-hidden"
-          :class="i > 1 ? '-ml-6' : ''"
-        >
-          <div
-            class="w-full h-full bg-[repeating-linear-gradient(45deg,#222,#222_2px,#333_2px,#333_4px)] opacity-50"
-          ></div>
-        </div>
-      </template>
-    </div>
+  <div class="flex mr-4 shrink-0">
+  <template v-if="showCards && playerCards?.length > 0">
+    <Card
+      v-for="(c, i) in playerCards"
+      :key="i"
+      size="small"
+      :numSymbol="c"
+      class="scale-90 origin-left"
+      :class="i > 0 ? '-ml-6' : ''"
+    />
+  </template>
+  <template v-else>
+    <CardBack
+      v-for="i in 2"
+      :key="i"
+      size="small"
+      class="scale-90 origin-left"
+      :class="i > 1 ? '-ml-6' : ''"
+    />
+  </template>
+</div>
 
     <!-- Info Section (Right) -->
     <div class="flex-grow flex flex-col justify-center min-w-0">
@@ -83,6 +80,7 @@
 
 <script setup>
 import Card from './Card.vue'
+import CardBack from './CardBack.vue';
 
 defineProps({
   playerName: { type: String, default: 'Guest' },
