@@ -215,45 +215,6 @@ class Dealer {
     }
   }
 
-  talkToPLayerById(idNumber, targetMessage) {
-    try {
-      const foundPlayer = this.getPlayerById(idNumber)
-
-      if (foundPlayer) {
-        const targetSocket = Socket.getSocket(this.torneoId, idNumber)
-        if (targetSocket && targetSocket.socket) {
-          targetSocket.socket.send(JSON.stringify({ message: targetMessage }))
-        }
-      }
-    } catch (error) {
-      console.log('Error in talkToPLayerById:', error)
-    }
-  }
-
-  talkToPlayerBUTid(idToOmitNumber, targetMessage) {
-    try {
-      this.players.forEach((player) => {
-        const { id } = player
-
-        if (id && id !== idToOmitNumber) {
-          this.talkToPLayerById(id, targetMessage)
-        }
-      })
-    } catch (error) {
-      console.log('Error in talkToPlayerBUTid:', error)
-    }
-  }
-
-  talkToAllPlayersOnTable(targetMessage) {
-    try {
-      this.players.forEach((player) => {
-        const { id } = player
-        this.talkToPLayerById(id, targetMessage)
-      })
-    } catch (error) {
-      console.log('Error in talkToAllPlayersOnTable:', error)
-    }
-  }
 
   talkToAllSockets(targetMessage) {
     try {
