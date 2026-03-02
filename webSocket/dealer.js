@@ -203,25 +203,33 @@ class Dealer {
 
   talkToSocketById(socketId, targetMessage) {
     try {
-      const allSockets = Socket.getSocketsByTorneo(this.torneoId)
-      if (allSockets) {
-        const targetSocket = allSockets.find((s) => s.id === socketId)
-        if (targetSocket && targetSocket.socket) {
-          targetSocket.socket.send(JSON.stringify({ message: targetMessage }))
-        }
+      const targetSocket = Socket.getSocket(this.torneoId, socketId)
+      if (
+        targetSocket &&
+        targetSocket.socket &&
+        targetSocket.socket.readyState === 1
+      ) {
+        targetSocket.socket.send(JSON.stringify({ message: targetMessage }))
       }
     } catch (error) {
       console.log('Error in talkToSocketById:', error)
     }
   }
 
-
   talkToAllSockets(targetMessage) {
     try {
       const allSockets = Socket.getSocketsByTorneo(this.torneoId)
       if (allSockets) {
-        allSockets.forEach((thisSocket) => {
-          thisSocket.socket.send(JSON.stringify({ message: targetMessage }))
+        allSockets.forEach((socketWrapper) => {
+          if (
+            socketWrapper &&
+            socketWrapper.socket &&
+            socketWrapper.socket.readyState === 1
+          ) {
+            socketWrapper.socket.send(
+              JSON.stringify({ message: targetMessage }),
+            )
+          }
         })
       }
     } catch (error) {
