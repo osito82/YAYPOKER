@@ -1,11 +1,11 @@
 <template>
-  <div
-    :class="[
-      sizeOption.height,
-      sizeOption.width,
-      'bg-white rounded-lg shadow-md border border-gray-300 relative select-none overflow-hidden transition-transform hover:-translate-y-1',
-    ]"
-  >
+<div
+  :class="[
+    sizeOption.height,
+    sizeOption.width,
+    'bg-white rounded-lg shadow-md border border-gray-300 relative select-none transition-transform hover:-translate-y-1 hover:scale-105',
+  ]"
+>
     <!-- Top Left -->
     <div
       class="absolute top-1 left-1 flex flex-col items-center leading-none"

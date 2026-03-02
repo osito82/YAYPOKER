@@ -9,69 +9,72 @@
     "
   >
     <!-- Active Turn Pulse -->
-    <div
+    <div id="playerSeat"
       v-if="isActive"
       class="absolute inset-0 bg-yellow-500/5 animate-pulse pointer-events-none"
     ></div>
 
     <!-- Cards Section (Left) -->
-    <div class="flex -space-x-6 mr-4 shrink-0">
-      <template v-if="showCards && playerCards?.length > 0">
-        <Card
-          v-for="(c, i) in playerCards"
-          :key="i"
-          size="small"
-          :numSymbol="c"
-          class="scale-90 origin-left"
-        />
-      </template>
-      <template v-else>
-        <!-- Card Backs -->
-        <div
-          v-for="i in 2"
-          :key="i"
-          class="w-10 h-14 bg-neutral-800 border border-white/20 rounded shadow-sm flex items-center justify-center overflow-hidden"
-          :class="i > 1 ? '-ml-6' : ''"
-        >
-          <div
-            class="w-full h-full bg-[repeating-linear-gradient(45deg,#222,#222_2px,#333_2px,#333_4px)] opacity-50"
-          ></div>
-        </div>
-      </template>
-    </div>
+  <div class="flex mr-4 shrink-0">
+  <template v-if="showCards && playerCards?.length > 0">
+    <Card
+      v-for="(c, i) in playerCards"
+      :key="i"
+      size="small"
+      :numSymbol="c"
+      class="scale-90 origin-left"
+      :class="i > 0 ? '-ml-6' : ''"
+    />
+  </template>
+  <template v-else>
+    <CardBack
+      v-for="i in 2"
+      :key="i"
+      size="small"
+      class="scale-90 origin-left"
+      :class="i > 1 ? '-ml-6' : ''"
+    />
+  </template>
+</div>
 
     <!-- Info Section (Right) -->
     <div class="flex-grow flex flex-col justify-center min-w-0">
-      <div class="flex justify-between items-center gap-2">
-        <span class="text-sm font-bold text-gray-100 truncate">{{
+      <div class="flex justify-between items-start mb-1">
+        <span class="text-base font-black text-gray-100 truncate leading-tight">{{
           playerName
         }}</span>
-        <div class="flex flex-col items-end">
-          <span class="text-[10px] font-black text-gray-500 uppercase tracking-tighter">Stack</span>
+        <div class="flex flex-col items-end shrink-0 ml-2">
+          <span class="text-[9px] font-black text-gray-500 uppercase tracking-tighter leading-none mb-0.5">Stack</span>
           <span class="text-xs font-mono font-black text-yellow-500 leading-none"
             >${{ playerChips }}</span
           >
         </div>
       </div>
 
-      <div class="mt-2 flex justify-between items-center h-6">
-        <div class="flex items-center gap-2">
+      <div class="mt-1 flex justify-between items-end h-7">
+        <div class="flex flex-col">
+          <span class="text-[8px] font-black text-blue-500/70 uppercase tracking-wider leading-none mb-1">Last Action</span>
           <Transition
             enter-active-class="transition duration-200 ease-out"
             enter-from-class="transform -translate-y-1 opacity-0"
             enter-to-class="transform translate-y-0 opacity-100"
+            mode="out-in"
           >
             <div
               v-if="playerAction"
-              class="bg-blue-600 px-2 py-0.5 rounded text-[8px] font-black text-white uppercase tracking-wider"
+              :key="playerAction"
+              class="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none"
             >
               {{ playerAction }}
+            </div>
+            <div v-else class="text-[10px] font-black text-gray-600 uppercase tracking-widest leading-none italic">
+              ...
             </div>
           </Transition>
         </div>
         
-        <div v-if="playerBet > 0" class="flex flex-col items-end">
-          <span class="text-[8px] font-black text-emerald-500/70 uppercase leading-none mb-0.5">Bet</span>
+        <div v-if="playerBet > 0" class="flex flex-col items-end shrink-0 ml-2">
+          <span class="text-[8px] font-black text-emerald-500/70 uppercase leading-none mb-1">Bet</span>
           <span class="text-xs font-mono font-black text-emerald-400 leading-none">
             ${{ playerBet }}
           </span>
@@ -83,6 +86,7 @@
 
 <script setup>
 import Card from './Card.vue'
+import CardBack from './CardBack.vue';
 
 defineProps({
   playerName: { type: String, default: 'Guest' },
