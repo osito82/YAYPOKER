@@ -76,6 +76,7 @@ const sizeOption = computed(() => {
     #183b5a 5px,
     #183b5a 10px
   );
+    opacity: 0.5;
 }
 
 .centered {

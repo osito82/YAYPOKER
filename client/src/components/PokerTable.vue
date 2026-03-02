@@ -27,10 +27,7 @@
           class="relative z-10 w-full flex flex-col items-center justify-center px-4 transition-all duration-300"
         >
           <!-- Pot -->
-          <div
-            id="pot-display"
-            class="mb-6 md:mb-10 bg-black/40 backdrop-blur-md px-6 md:px-10 py-2 md:py-3 rounded-lg border border-white/5 shadow-2xl"
-          >
+      <div id="pot-display" class="mb-3 md:mb-5 bg-black/40 backdrop-blur-md px-6 md:px-10 py-2 md:py-3 rounded-lg border border-white/5 shadow-2xl">
             <span
               id="pot-amount"
               class="text-xs sm:text-sm md:text-lg text-emerald-400 font-black tracking-[0.4em] md:tracking-[0.6em] uppercase"
@@ -39,35 +36,30 @@
           </div>
 
           <!-- Community Cards Container -->
-          <div 
-            id="community-cards-row" 
-            class="flex items-center justify-center gap-1 sm:gap-2 md:gap-4 w-full max-w-full overflow-hidden"
-          >
-            <template v-if="communityCards?.length > 0">
-              <Card
-                v-for="(c, i) in communityCards"
-                :id="'community-card-' + i"
-                :key="i"
-                :size="windowWidth < 480 ? 'small' : 'medium'"
-                :numSymbol="c"
-                class="hover:scale-105 transition-transform flex-shrink origin-center"
-                :class="[
-                  windowWidth < 400 ? 'scale-90' : 'scale-100',
-                  'transition-all duration-300'
-                ]"
-              />
-            </template>
-            <template v-else>
-              <div
-                v-for="i in 5"
-                :id="'empty-card-slot-' + i"
-                :key="i"
-                class="w-10 h-14 sm:w-16 sm:h-24 md:w-24 md:h-32 rounded-lg md:rounded-xl bg-black/20 border border-white/5 flex items-center justify-center flex-shrink"
-              >
-                <div class="w-1.5 h-1.5 rounded-full bg-white/5"></div>
-              </div>
-            </template>
-          </div>
+<div 
+  id="community-cards-row" 
+  class="flex items-center justify-center gap-0.5 sm:gap-1 md:gap-2 w-full max-w-full "
+>
+  <template v-for="i in 5" :key="i">
+    <template v-if="communityCards[i - 1]">
+      <Card
+        :id="'community-card-' + (i-1)"
+        :numSymbol="communityCards[i - 1]"
+        :size="windowWidth < 480 ? 'small' : 'large'"
+        class="hover:scale-105 transition-transform flex-shrink origin-center"
+        :class="windowWidth < 400 ? 'scale-90' : 'scale-100'"
+      />
+    </template>
+    <template v-else>
+      <CardSpace
+        :size="windowWidth < 480 ? 'small' : 'large'"
+        class="flex-shrink"
+      />
+    </template>
+  </template>
+</div>
+  
+
         </div>
       </div>
     </div>
@@ -93,7 +85,7 @@
           :playerName="p.name"
           :playerChips="p.chips"
           :playerBet="p.currentBet || 0"
-          :playerAction="p.action"
+          :playerAction="p.lastAction"
           :showCards="p.showCards || false"
           :playerCards="p.cards || []"
           :isActive="activePlayerId === p.id"
@@ -107,6 +99,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import Card from './Card.vue'
 import PlayerSeat from './PlayerSeat.vue'
+import CardSpace from './CardSpace.vue'
 
 defineProps({
   pot: { type: [Number, String], default: 0 },
