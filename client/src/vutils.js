@@ -1,10 +1,8 @@
-//const { v4: uuidv4 } = require("uuid");
 import { v4 } from 'uuid'
 
-function generateUniqueId(long = 4) {
-  const fullUUID = v4()
-  const shortUUID = fullUUID.substr(0, long).replace(/-/g, '')
-  return shortUUID
+function generateUniqueId() {
+  const randomStr = () => Math.random().toString(36).substring(2, 7).toUpperCase()
+  return `${randomStr()}-${randomStr()}`
 }
 
 const simbolConverter = (simbol) => {
@@ -21,27 +19,6 @@ const simbolConverter = (simbol) => {
 
   return number
 }
-
-// function getKeyData(objeto, key) {
-//   if (!objeto) return;
-
-//   let obj;
-//   try {
-//     obj = JSON.parse(objeto);
-//   } catch (error) {
-//     obj = objeto;
-//   }
-
-//   if (key == "displayMsg") {
-//     const displayMsg = obj?.message?.data?.displayMsg;
-
-//     if (displayMsg !== undefined) {
-//       return String(displayMsg);
-//     } else {
-//       return `The key "${key}" was not found.`;
-//     }
-//   }
-// }
 
 const whatColor = (symbol) => {
   const symbolC = symbol.charAt(symbol.length - 1)
@@ -83,5 +60,4 @@ export {
   letterToSymbol,
   letterToNumber,
   whatColor,
-  //getKeyData,
 }

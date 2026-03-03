@@ -17,9 +17,9 @@ const shuffle = (array) => {
   return arr
 }
 
-function generateUniqueId(long = 4) {
-  const fullUUID = uuidv4()
-  return fullUUID
+function generateUniqueId() {
+  const randomStr = () => Math.random().toString(36).substring(2, 7).toUpperCase()
+  return `${randomStr()}-${randomStr()}`
 }
 
 ///[ 'Ks', '8c', 'Js', 'Td', 'Qc' ] =>  [ 'K', '8', 'J', 'T', 'Q' ]

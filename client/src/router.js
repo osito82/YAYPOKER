@@ -11,9 +11,23 @@ const routes = [
     component: Home,
   },
   {
+    name: 'newgame',
+    path: '/newgame',
+    component: Home,
+    props: { isNewGame: true }
+  },
+  {
     name: 'game',
     path: '/game/:gameCode',
     component: Game,
+    beforeEnter: (to, from, next) => {
+      if (!to.query.playerName) {
+        // Redirigir a Home si no hay nombre, pasando el código para pre-poblar
+        next({ path: '/', query: { joinCode: to.params.gameCode } })
+      } else {
+        next()
+      }
+    }
   },
   { name: 'about', path: '/about', component: About },
 ]

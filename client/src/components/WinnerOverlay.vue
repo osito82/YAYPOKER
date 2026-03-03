@@ -9,13 +9,16 @@
   >
     <div
       v-if="winnerInfo && isVisible"
+      id="winner-overlay-root"
       class="fixed inset-0 z-[100] flex items-start justify-center p-4 sm:items-center bg-black/80 backdrop-blur-md overflow-y-auto"
     >
       <div
+        id="winner-modal-container"
         class="relative w-full max-w-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black border-2 border-yellow-500/50 rounded-[2rem] shadow-[0_0_100px_rgba(234,179,8,0.3)] my-auto overflow-hidden"
       >
         <!-- Close Button -->
         <button
+          id="winner-close-button"
           @click="handleClose"
           class="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 transition-all z-[120] p-2 rounded-full border border-white/10 flex items-center justify-center shadow-lg hover:scale-110 active:scale-90"
           aria-label="Close"
@@ -38,12 +41,14 @@
 
         <!-- Decoration -->
         <div
+          id="winner-top-decoration"
           class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"
         ></div>
 
-        <div class="p-6 sm:p-8 flex flex-col items-center text-center">
+        <div id="winner-modal-content" class="p-6 sm:p-8 flex flex-col items-center text-center">
           <!-- Trophy Icon -->
           <div
+            id="winner-trophy-container"
             class="w-16 h-16 sm:w-20 sm:h-20 bg-yellow-500 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-[0_0_30px_rgba(234,179,8,0.4)] animate-bounce"
           >
             <svg
@@ -61,76 +66,91 @@
           </div>
 
           <h2
-            class="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter mb-1 sm:mb-2"
+            id="winner-title"
+            class="text-4xl sm:text-5xl font-black text-white uppercase tracking-tighter mb-1 sm:mb-2"
           >
             {{ winnerNames }}
-            <span class="text-yellow-500">{{ winners.length > 1 ? ' Split the Pot!' : ' Wins!' }}</span>
+            <span id="winner-title-suffix" class="text-yellow-500">{{ winners.length > 1 ? ' Split the Pot!' : ' Wins!' }}</span>
           </h2>
 
           <div
-            class="text-4xl sm:text-5xl font-mono font-black text-yellow-400 mb-4 sm:mb-6 drop-shadow-lg"
+            id="winner-amount-display"
+            class="text-5xl sm:text-6xl font-mono font-black text-yellow-400 mb-4 sm:mb-6 drop-shadow-lg"
           >
             +${{ totalAmount }}
           </div>
 
           <!-- Winning Hands -->
           <div
-            v-for="(winner, idx) in winners"
-            :key="'winner-' + idx"
-            class="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 w-full mb-4 last:mb-6 relative overflow-hidden"
+            id="winners-list-container"
+            class="w-full flex flex-col items-center"
           >
             <div
-              class="absolute inset-0 bg-yellow-500/5 pointer-events-none"
-            ></div>
-            <span
-              class="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-2 sm:mb-3 relative z-10"
-              >{{ winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand' }}</span
+              v-for="(winner, idx) in winners"
+              :id="'winner-hand-box-' + idx"
+              :key="'winner-' + idx"
+              class="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 w-full mb-4 last:mb-6 relative overflow-hidden"
             >
-            <div class="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 relative z-10">
-              {{ winner.handName }}
-            </div>
+              <div
+                :id="'winner-bg-glow-' + idx"
+                class="absolute inset-0 bg-yellow-500/5 pointer-events-none"
+              ></div>
+              <span
+                :id="'winner-label-' + idx"
+                class="text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-2 sm:mb-3 relative z-10"
+                >{{ winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand' }}</span
+              >
+              <div :id="'winner-hand-name-' + idx" class="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4 relative z-10">
+                {{ winner.handName }}
+              </div>
 
-            <div v-if="flattenCards(winner.winningCards).length > 0" class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100">
-              <Card
-                v-for="(card, i) in flattenCards(winner.winningCards)"
-                :key="'card-' + i"
-                size="medium"
-                :numSymbol="card"
-              />
-            </div>
-            <div v-else class="text-[10px] text-gray-500 italic relative z-10">
-              (No cards shown)
+              <div v-if="flattenCards(winner.winningCards).length > 0" :id="'winner-cards-flex-' + idx" class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100">
+                <Card
+                  v-for="(card, i) in flattenCards(winner.winningCards)"
+                  :id="'winner-card-' + idx + '-' + i"
+                  :key="'card-' + i"
+                  size="medium"
+                  :numSymbol="card"
+                />
+              </div>
+              <div v-else :id="'winner-no-cards-' + idx" class="text-[12px] text-gray-400 italic relative z-10">
+                (No cards shown)
+              </div>
             </div>
           </div>
 
           <!-- Other Players -->
-          <div class="w-full text-left">
+          <div id="opponents-section" class="w-full text-left">
             <span
-              class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2 sm:mb-3 border-b border-white/5 pb-2"
+              id="opponents-label"
+              class="text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-2 sm:mb-3 border-b border-white/5 pb-2"
               >Showdown / Opponents</span
             >
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-h-40 sm:max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+            <div id="opponents-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-h-40 sm:max-h-48 overflow-y-auto pr-2 custom-scrollbar">
               <div
                 v-for="player in opponentsHands"
+                :id="'opponent-box-' + player.playerId"
                 :key="player.playerId"
                 class="flex items-center justify-between bg-black/20 p-2 sm:p-3 rounded-xl border border-white/5"
               >
-                <div class="flex-1 min-w-0">
-                  <div class="text-xs font-bold text-gray-300 truncate">
+                <div :id="'opponent-info-' + player.playerId" class="flex-1 min-w-0">
+                  <div :id="'opponent-name-' + player.playerId" class="text-sm font-bold text-white truncate">
                     {{ player.name }}
                   </div>
                   <div
-                    class="text-[8px] text-gray-500 italic uppercase tracking-tighter truncate"
+                    :id="'opponent-hand-type-' + player.playerId"
+                    class="text-[10px] text-gray-400 italic uppercase tracking-tighter truncate"
                   >
                     {{ player.pokerHand || (player.folded ? 'Folded' : 'Active') }}
                   </div>
                 </div>
-                <div class="flex -space-x-4 sm:-space-x-5 opacity-80 scale-75 sm:scale-90 origin-right">
+                <div :id="'opponent-cards-visual-' + player.playerId" class="flex -space-x-4 sm:-space-x-5 opacity-80 scale-75 sm:scale-90 origin-right">
                   <template
                     v-if="player.show && player.show.length > 0"
                   >
                     <Card
                       v-for="(c, idx) in player.show.slice(0, 2)"
+                      :id="'opponent-card-' + player.playerId + '-' + idx"
                       :key="idx"
                       size="small"
                       :numSymbol="c"
@@ -138,14 +158,16 @@
                   </template>
                   <template v-else>
                      <div
+                      :id="'opponent-placeholder-1-' + player.playerId"
                       class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
-                      <div class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
+                      <div :id="'opponent-card-pattern-1-' + player.playerId" class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
                     </div>
                      <div
+                      :id="'opponent-placeholder-2-' + player.playerId"
                       class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
-                      <div class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
+                      <div :id="'opponent-card-pattern-2-' + player.playerId" class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
                     </div>
                   </template>
                 </div>
@@ -155,30 +177,33 @@
 
           <!-- Footer Info & Timer -->
           <div
+            id="winner-footer-section"
             class="mt-6 sm:mt-8 w-full flex flex-col items-center gap-3 sm:gap-4"
           >
-            <div class="flex gap-4 sm:gap-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">
-              <div class="flex items-center gap-2">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div id="timer-info-flex" class="flex gap-4 sm:gap-6 text-[12px] font-black text-gray-300 uppercase tracking-widest">
+              <div id="next-round-timer-wrapper" class="flex items-center gap-2">
+                <div id="timer-indicator-dot" class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
                 Next Round in {{ countdown }}s
               </div>
-              <div>Pot Cleared</div>
+              <div id="pot-status-label">Pot Cleared</div>
             </div>
             
             <!-- Visual Timer Bar -->
-            <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+            <div id="visual-timer-bar-container" class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
               <div
+                id="visual-timer-bar-progress"
                 class="h-full bg-yellow-500 transition-all duration-50 ease-linear"
                 :style="{ width: `${(countdown / 15) * 100}%` }"
               ></div>
             </div>
 
             <button
+              id="winner-continue-button"
               @click="handleClose"
               :disabled="isWaiting"
-              class="mt-2 px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 disabled:hover:bg-white/10 border border-white/10 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+              class="mt-2 px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 disabled:hover:bg-white/10 border border-white/10 rounded-full text-[12px] sm:text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
             >
-              <div v-if="isWaiting" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div v-if="isWaiting" id="waiting-spinner" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               {{ isWaiting ? 'Waiting for others...' : 'Play New Game' }}
             </button>
           </div>

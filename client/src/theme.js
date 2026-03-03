@@ -6,11 +6,11 @@ export const theme = {
     panel: '#111827', // gray-900
     surface: '#1f2937', // gray-800
     border: 'rgba(255, 255, 255, 0.1)',
-    text: '#f9fafb', // gray-50
-    textMuted: '#9ca3af', // gray-400
-    fold: '#991b1b', // red-800
-    call: '#1e40af', // blue-800
-    raise: '#a16207', // yellow-700
+    text: '#ffffff', // max contrast
+    textMuted: '#d1d5db', // gray-300 (lighter than gray-400)
+    fold: '#ef4444', // red-500 (lighter than red-800)
+    call: '#60a5fa', // blue-400 (lighter than blue-800)
+    raise: '#facc15', // yellow-400 (lighter than yellow-700)
     success: '#22c55e', // green-500
     error: '#ef4444', // red-500
   },

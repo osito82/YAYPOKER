@@ -9,51 +9,54 @@
     "
   >
     <!-- Active Turn Pulse -->
-    <div id="playerSeat"
+    <div 
+      :id="'active-pulse-' + playerName"
       v-if="isActive"
       class="absolute inset-0 bg-yellow-500/5 animate-pulse pointer-events-none"
     ></div>
 
     <!-- Cards Section (Left) -->
-  <div class="flex mr-4 shrink-0">
-  <template v-if="showCards && playerCards?.length > 0">
-    <Card
-      v-for="(c, i) in playerCards"
-      :key="i"
-      size="small"
-      :numSymbol="c"
-      class="scale-90 origin-left"
-      :class="i > 0 ? '-ml-6' : ''"
-    />
-  </template>
-  <template v-else>
-    <CardBack
-      v-for="i in 2"
-      :key="i"
-      size="small"
-      class="scale-90 origin-left"
-      :class="i > 1 ? '-ml-6' : ''"
-    />
-  </template>
-</div>
+    <div :id="'seat-cards-section-' + playerName" class="flex mr-4 shrink-0">
+      <template v-if="showCards && playerCards?.length > 0">
+        <Card
+          v-for="(c, i) in playerCards"
+          :id="'seat-card-' + playerName + '-' + i"
+          :key="i"
+          size="small"
+          :numSymbol="c"
+          class="scale-90 origin-left"
+          :class="i > 0 ? '-ml-6' : ''"
+        />
+      </template>
+      <template v-else>
+        <CardBack
+          v-for="i in 2"
+          :id="'seat-card-back-' + playerName + '-' + i"
+          :key="i"
+          size="small"
+          class="scale-90 origin-left"
+          :class="i > 1 ? '-ml-6' : ''"
+        />
+      </template>
+    </div>
 
     <!-- Info Section (Right) -->
-    <div class="flex-grow flex flex-col justify-center min-w-0">
-      <div class="flex justify-between items-start mb-1">
-        <span class="text-base font-black text-gray-100 truncate leading-tight">{{
+    <div :id="'seat-info-section-' + playerName" class="flex-grow flex flex-col justify-center min-w-0">
+      <div :id="'seat-header-' + playerName" class="flex justify-between items-start mb-1">
+        <span :id="'seat-name-' + playerName" class="text-lg font-black text-white truncate leading-tight">{{
           playerName
         }}</span>
-        <div class="flex flex-col items-end shrink-0 ml-2">
-          <span class="text-[9px] font-black text-gray-500 uppercase tracking-tighter leading-none mb-0.5">Stack</span>
-          <span class="text-xs font-mono font-black text-yellow-500 leading-none"
+        <div :id="'seat-stack-container-' + playerName" class="flex flex-col items-end shrink-0 ml-2">
+          <span :id="'label-stack-' + playerName" class="text-[11px] font-black text-gray-300 uppercase tracking-tighter leading-none mb-0.5">Stack</span>
+          <span :id="'display-stack-' + playerName" class="text-sm font-mono font-black text-yellow-500 leading-none"
             >${{ playerChips }}</span
           >
         </div>
       </div>
 
-      <div class="mt-1 flex justify-between items-end h-7">
-        <div class="flex flex-col">
-          <span class="text-[8px] font-black text-blue-500/70 uppercase tracking-wider leading-none mb-1">Last Action</span>
+      <div :id="'seat-footer-' + playerName" class="mt-1 flex justify-between items-end h-7">
+        <div :id="'seat-action-container-' + playerName" class="flex flex-col">
+          <span :id="'label-action-' + playerName" class="text-[10px] font-black text-blue-400 uppercase tracking-wider leading-none mb-1">Last Action</span>
           <Transition
             enter-active-class="transition duration-200 ease-out"
             enter-from-class="transform -translate-y-1 opacity-0"
@@ -62,20 +65,21 @@
           >
             <div
               v-if="playerAction"
+              :id="'display-action-' + playerName"
               :key="playerAction"
-              class="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none"
+              class="text-[12px] font-black text-blue-300 uppercase tracking-widest leading-none"
             >
               {{ playerAction }}
             </div>
-            <div v-else class="text-[10px] font-black text-gray-600 uppercase tracking-widest leading-none italic">
+            <div v-else :id="'display-action-none-' + playerName" class="text-[12px] font-black text-gray-400 uppercase tracking-widest leading-none italic">
               ...
             </div>
           </Transition>
         </div>
         
-        <div v-if="playerBet > 0" class="flex flex-col items-end shrink-0 ml-2">
-          <span class="text-[8px] font-black text-emerald-500/70 uppercase leading-none mb-1">Bet</span>
-          <span class="text-xs font-mono font-black text-emerald-400 leading-none">
+        <div v-if="playerBet > 0" :id="'seat-bet-container-' + playerName" class="flex flex-col items-end shrink-0 ml-2">
+          <span :id="'label-bet-' + playerName" class="text-[10px] font-black text-emerald-400 uppercase leading-none mb-1">Bet</span>
+          <span :id="'display-bet-' + playerName" class="text-sm font-mono font-black text-emerald-400 leading-none">
             ${{ playerBet }}
           </span>
         </div>

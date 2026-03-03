@@ -47,8 +47,10 @@ const forceRender = async () => {
   renderComponent.value = true
 }
 
+
 const computedGameCode = computed(() => {
   forceRender()
-  return 'http://localhost:5173/game/' + pokerStore.getGameCredentials.gameCode
+  const base = window.location.origin
+  return `${base}/?joinCode=${pokerStore.getGameCredentials.gameCode}`
 })
 </script>
