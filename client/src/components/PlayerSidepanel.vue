@@ -49,26 +49,29 @@
 
         <!-- Player Info -->
         <div :id="'sidepanel-player-info-' + player.id" class="flex-1 flex flex-col min-w-0">
-          <div :id="'sidepanel-player-header-' + player.id" class="flex items-center justify-between gap-2">
-            <span :id="'sidepanel-player-name-' + player.id" class="font-bold text-sm text-gray-100 truncate uppercase tracking-wide">{{ player.name }}</span>
-            <!-- Last Action Badge -->
-            <span 
-              v-if="player.lastAction" 
-              :id="'sidepanel-player-action-' + player.id"
-              class="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-white/10 border border-white/5"
-              :class="getActionColor(player.lastAction)"
-            >{{ player.lastAction }}</span>
+          <div :id="'sidepanel-player-header-' + player.id" class="flex items-center justify-between gap-2 mb-1">
+            <span :id="'sidepanel-player-name-' + player.id" class="font-black text-lg text-gray-100 truncate uppercase tracking-wide">{{ player.name }}</span>
           </div>
           
-          <div :id="'sidepanel-player-stats-' + player.id" class="flex items-center gap-3 mt-0.5">
+          <div :id="'sidepanel-player-stats-' + player.id" class="flex items-center justify-between">
             <div class="flex items-center gap-1">
-              <span class="text-[10px] text-yellow-500/80 font-mono font-bold">$</span>
-              <span :id="'sidepanel-player-chips-' + player.id" class="text-sm font-mono font-black text-white/90">{{ player.chips }}</span>
+              <span class="text-[14px] text-yellow-500 font-mono font-bold">$</span>
+              <span :id="'sidepanel-player-chips-' + player.id" class="text-lg font-mono font-black text-white">{{ player.chips }}</span>
             </div>
-            <!-- Individual Bet -->
-            <div v-if="player.currentBet > 0" class="flex items-center gap-1 opacity-60">
-              <span class="text-[9px] text-emerald-500 font-mono">→</span>
-              <span :id="'sidepanel-player-bet-' + player.id" class="text-[11px] font-mono font-bold text-emerald-400">{{ player.currentBet }}</span>
+
+            <div class="flex items-center gap-3">
+              <!-- Last Action Badge -->
+              <span 
+                v-if="player.lastAction" 
+                :id="'sidepanel-player-action-' + player.id"
+                class="text-xs font-black uppercase px-2 py-1 rounded bg-white/10 border border-white/5"
+                :class="getActionColor(player.lastAction)"
+              >{{ player.lastAction }}</span>
+
+              <!-- Individual Bet -->
+              <div v-if="player.currentBet > 0" class="flex items-center gap-1">
+                <span :id="'sidepanel-player-bet-' + player.id" class="text-xl font-mono font-black text-emerald-400 tracking-tighter">${{ player.currentBet }}</span>
+              </div>
             </div>
           </div>
         </div>
