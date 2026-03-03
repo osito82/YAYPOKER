@@ -176,10 +176,10 @@ describe('Dealer Class', () => {
     const sendMock = vi.fn()
 
     // Definimos el comportamiento del mock específicamente para este test
-    vi.spyOn(Socket, 'getSocketsByTorneo').mockReturnValue([
-      { socket: { send: sendMock } },
-      { socket: { send: sendMock } },
-    ])
+    vi.spyOn(Socket, 'getSocketsByTorneo').mockReturnValue(new Map([
+      ['p1', { socket: { send: sendMock, readyState: 1 } }],
+      ['p2', { socket: { send: sendMock, readyState: 1 } }],
+    ]))
 
     dealer.talkToAllSockets('hello')
 
@@ -188,29 +188,21 @@ describe('Dealer Class', () => {
     expect(sendMock).toHaveBeenCalledWith(JSON.stringify({ message: 'hello' }))
   })
 
-  it('talkToPLayerById should NOT send message if player not in match', () => {
+  it('should send message to a specific socket by id', () => {
     const sendMock = vi.fn()
     vi.spyOn(Socket, 'getSocket').mockReturnValue({
-      id: 'p3',
-      socket: { send: sendMock },
+      socket: { send: sendMock, readyState: 1 },
     })
 
-    // Player 'p3' is NOT in the dealer.players list
-    dealer.talkToPLayerById('p3', 'hello')
+    dealer.talkToSocketById('p1', 'direct message')
 
-    expect(sendMock).not.toHaveBeenCalled()
+    expect(Socket.getSocket).toHaveBeenCalledWith('torneo1', 'p1')
+    expect(sendMock).toHaveBeenCalledWith(JSON.stringify({ message: 'direct message' }))
   })
 
-  it('talkToSocketById should send message even if player not in match', () => {
-    const sendMock = vi.fn()
-    vi.spyOn(Socket, 'getSocketsByTorneo').mockReturnValue([
-      { id: 'p3', socket: { send: sendMock } },
-    ])
 
-    dealer.talkToSocketById('p3', 'hello')
 
-    expect(sendMock).toHaveBeenCalledWith(JSON.stringify({ message: 'hello' }))
-  })
+
 
   // ================================
   // 🟢 jugadores folded / disconnected

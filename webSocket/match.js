@@ -277,7 +277,6 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
       for (const player of this.players) {
         this.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
         Socket.sendToPlayer(this.torneoId, player.name, this.communicator.getMsg())
-        //this.dealer.talkToPLayerById(player.id, this.communicator.getMsg())
       }
       this.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
         displayMsg: 'Cards dealt!',
