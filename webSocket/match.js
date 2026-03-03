@@ -352,7 +352,22 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
 
   setCall(thisSocket) {
     // 🔒 Validar turno
-    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
+    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) {
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Action Rejected',
+          date: true,
+        })
+        .R({
+          player: thisSocket.name,
+          reason: 'Not your turn',
+          action: 'Call',
+          expected: this.activePlayerId,
+          received: thisSocket.id,
+        })
+      return
+    }
 
     const maxBet = this.dealer.getCurrentHighestBet()
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
@@ -369,8 +384,13 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
     const currentBetBefore = foundPlayer.getCurrentBet()
     const diff = maxBet - currentBetBefore
 
-    // Nada que igualar
-    if (diff <= 0) return
+    // Si no hay nada que igualar, se trata como un Check
+    if (diff <= 0) {
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH - CALL AS CHECK', date: true })
+        .R({ player: foundPlayer.name, diff })
+      return this.setCheck(thisSocket)
+    }
 
     this.activePlayerId = null
 
