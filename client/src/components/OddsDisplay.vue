@@ -1,49 +1,55 @@
 <template>
   <div
-    id="odds-display-badge"
-    class="flex flex-col items-center bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 transition-all hover:bg-white/10"
+    id="odds-display-container"
+    class="flex flex-col items-center bg-white/5 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 transition-all hover:bg-white/10 shadow-lg"
   >
-    <div id="odds-values-flex" class="flex items-center gap-3">
-      <!-- Win Odds & Hand Evaluation -->
-      <div id="win-group" class="flex flex-col items-center">
-        <div id="win-value-wrapper" class="flex items-baseline gap-0.5 leading-none">
+    <div id="odds-values-wrapper" class="flex items-center gap-6">
+      <!-- WIN GROUP -->
+      <div id="odds-win-group" class="flex flex-col items-center px-3 py-1 rounded-md bg-black/20 border border-white/5">
+        <span id="odds-win-label" class="text-[9px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Win</span>
+        <div id="odds-win-value-display" class="flex items-baseline gap-0.5 leading-none">
           <span
-            id="display-win-percent"
-            :class="['text-xl font-mono font-black tracking-tighter', winColor]"
+            id="odds-win-percent-text"
+            :class="['text-3xl font-mono font-black tracking-tighter', winColor]"
           >{{ Math.round(winProb) }}</span>
-          <span id="win-symbol" class="text-[8px] font-bold text-gray-500">%</span>
-        </div>
-        
-        <!-- Integrated Hand Evaluation -->
-        <div
-          v-if="handName"
-          id="hand-evaluation-mini"
-          class="flex flex-col items-center mt-0.5"
-        >
-          <span id="display-hand-name" class="text-[9px] font-bold text-yellow-500 uppercase italic leading-none truncate max-w-[65px]">{{ handName }}</span>
-          <div id="hand-rank-dots" class="flex gap-0.5 mt-0.5">
-            <div
-              v-for="i in 10"
-              :key="i"
-              class="w-1 h-0.5 rounded-full"
-              :class="i <= (11 - handRank) ? 'bg-yellow-500' : 'bg-white/10'"
-            ></div>
-          </div>
+          <span id="odds-win-symbol" class="text-xs font-bold text-gray-500/60">%</span>
         </div>
       </div>
 
-      <!-- Tie (Optional) -->
+      <!-- Main Divider -->
+      <div v-if="handName || tieProb > 0" id="odds-vertical-divider-main" class="w-px h-10 bg-white/10"></div>
+
+      <!-- HAND EVALUATION -->
+      <div
+        v-if="handName"
+        id="odds-hand-eval-section"
+        class="flex flex-col items-center min-w-[80px]"
+      >
+        <span id="odds-hand-label" class="text-[9px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Hand</span>
+        <span id="odds-hand-name-text" class="text-xs lg:text-sm font-black text-yellow-500 uppercase italic leading-none truncate max-w-[100px]">{{ handName }}</span>
+        <div id="odds-hand-rank-indicator" class="flex gap-1 mt-2">
+          <div
+            v-for="i in 10"
+            :id="'odds-rank-dot-' + i"
+            :key="i"
+            class="w-2 h-0.5 rounded-full"
+            :class="i <= (11 - handRank) ? 'bg-yellow-500' : 'bg-white/10'"
+          ></div>
+        </div>
+      </div>
+
+      <!-- TIE GROUP (Optional) -->
       <template v-if="tieProb > 0">
-        <div id="odds-divider" class="w-px h-6 bg-white/10"></div>
-        <div id="tie-odds-container" class="flex flex-col items-center">
-          <div id="tie-value-wrapper" class="flex items-baseline gap-0.5 leading-none">
+        <div id="odds-vertical-divider-tie" class="w-px h-8 bg-white/10"></div>
+        <div id="odds-tie-group" class="flex flex-col items-center">
+          <span id="odds-tie-label" class="text-[9px] font-black text-gray-500 uppercase tracking-widest leading-none mb-1">Tie</span>
+          <div id="odds-tie-value-display" class="flex items-baseline gap-0.5 leading-none">
             <span
-              id="display-tie-percent"
-              class="text-lg font-mono font-black text-blue-400 tracking-tighter"
+              id="odds-tie-percent-text"
+              class="text-xl font-mono font-black text-blue-400 tracking-tighter"
             >{{ Math.round(tieProb) }}</span>
-            <span id="tie-symbol" class="text-[8px] font-bold text-gray-500">%</span>
+            <span id="odds-tie-symbol" class="text-[10px] font-bold text-gray-500/60">%</span>
           </div>
-          <span id="tie-text" class="text-[7px] font-black text-gray-400 uppercase">Tie</span>
         </div>
       </template>
     </div>
