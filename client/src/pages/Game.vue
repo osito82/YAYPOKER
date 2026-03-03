@@ -129,6 +129,7 @@
         :canBlind="canBlind"
         :options="options"
         :balance="myPlayer?.chips || 0"
+        :currentBet="myPlayer?.currentBet || 0"
         v-model:betAmount="betAmount"
         :minBet="minBet"
         :maxBet="maxBet"
