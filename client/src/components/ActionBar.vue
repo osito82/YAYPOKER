@@ -155,7 +155,7 @@
 
             <template v-else>
               <button
-                v-if="options.includes('fold')"
+                v-if="options.includes('fold') || !isMyTurn"
                 id="hud-action-fold"
                 @click="$emit('action', 'fold')"
                 :disabled="!isMyTurn"
@@ -163,7 +163,7 @@
               >Fold</button>
               
               <button
-                v-if="options.includes('check')"
+                v-if="options.includes('check') || !isMyTurn"
                 id="hud-action-check"
                 @click="$emit('action', 'check')"
                 :disabled="!isMyTurn"
@@ -171,7 +171,7 @@
               >Check</button>
               
               <button
-                v-if="options.includes('call')"
+                v-if="options.includes('call') || !isMyTurn"
                 id="hud-action-call"
                 @click="$emit('action', 'call')"
                 :disabled="!isMyTurn"
@@ -179,7 +179,7 @@
               >Call</button>
 
               <button
-                v-if="options.includes('bet') || options.includes('raise')"
+                v-if="options.includes('bet') || options.includes('raise') || !isMyTurn"
                 id="hud-action-raise"
                 :disabled="!isMyTurn || !canRaise"
                 @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
@@ -236,7 +236,8 @@ const activePlayerName = computed(() => {
 })
 
 const canRaise = computed(() => {
-  return props.betAmount > props.minBet || (props.options.includes('bet') || props.options.includes('raise'))
+  const hasIncreased = props.betAmount > props.minBet
+  return hasMoved.value && hasIncreased && (props.options.includes('bet') || props.options.includes('raise'))
 })
 
 const betProxy = computed({
