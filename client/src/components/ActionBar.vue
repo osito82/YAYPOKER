@@ -26,7 +26,7 @@
 
       <div id="hud-content-wrapper" class="max-w-[1920px] mx-auto flex flex-row items-center gap-2 lg:gap-6 p-1.5 lg:p-3 lg:px-10 relative overflow-hidden">
         
-        <!-- SECTION 1: CARDS (Left) -->
+        <!-- SECTION 1: CARDS -->
         <div id="hud-cards-area" class="shrink-0">
           <div id="hud-cards-container" class="flex items-center p-1 bg-white/5 rounded-lg border border-white/5 shadow-inner">
             <div id="hud-cards-flex" class="flex gap-0.5 lg:gap-1 items-end">
@@ -58,9 +58,8 @@
           </div>
         </div>
 
-        <!-- SECTION 2: INFO COLUMN (Odds & Finance - Center) -->
+        <!-- SECTION 2: INFO COLUMN -->
         <div id="hud-info-column" class="flex flex-col gap-1 flex-1 min-w-0">
-          <!-- Top: Odds Module -->
           <div v-if="playerCards?.length" id="hud-odds-wrapper" class="w-full scale-90 lg:scale-100 origin-left">
             <OddsDisplay 
               :winProb="pokerStore.getOdds.win" 
@@ -70,7 +69,6 @@
             />
           </div>
 
-          <!-- Bottom: Finance Module -->
           <div id="hud-finance-wrapper" class="flex items-center justify-around gap-2 lg:gap-4 px-2 lg:px-6 py-1 lg:py-2 rounded-lg lg:rounded-xl bg-white/5 border border-white/5">
             <div id="hud-stack-display" class="flex flex-col items-center">
               <span id="hud-stack-label" class="hidden lg:block text-[9px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Stack</span>
@@ -92,21 +90,23 @@
           </div>
         </div>
 
-        <!-- SECTION 3: ACTIONS AREA (Right) -->
+        <!-- SECTION 3: ACTIONS AREA -->
         <div id="hud-actions-area" class="flex flex-col gap-1 lg:gap-2 lg:min-w-[450px]">
-          <!-- Raise Control Module -->
-          <Transition name="slide-up">
-            <div
-              v-if="isMyTurn && (options.includes('bet') || options.includes('raise'))"
-              id="hud-raise-slider-container"
-              class="flex items-center gap-2 lg:gap-4 bg-white/5 p-1 rounded-lg lg:rounded-xl border border-white/5"
-            >
-              <div id="hud-raise-amount-box" class="bg-black/40 px-2 lg:px-4 py-1 lg:py-2 rounded-md lg:rounded-lg min-w-[60px] lg:min-w-[90px] border border-white/5 flex flex-col items-center">
-                <span id="hud-raise-label" class="text-[7px] lg:text-[9px] font-black text-yellow-500 uppercase leading-none">Bet To</span>
+          
+          <!-- PERSISTENT TOP MODULE: Raise Slider OR Full-width Waiting State -->
+          <div
+            id="hud-raise-slider-container"
+            class="flex items-center bg-white/5 p-1 rounded-lg lg:rounded-xl border transition-all duration-500 h-10 lg:h-14 overflow-hidden"
+            :class="isMyTurn ? 'border-yellow-500/40 shadow-[inset_0_0_20px_rgba(234,179,8,0.05)]' : 'border-white/5'"
+          >
+            <!-- Turn Layout -->
+            <template v-if="isMyTurn">
+              <div id="hud-raise-amount-box" class="bg-black/40 px-2 lg:px-4 py-1 lg:py-2 rounded-md lg:rounded-lg min-w-[80px] lg:min-w-[110px] border border-white/5 flex flex-col items-center shrink-0">
+                <span id="hud-raise-label" class="text-[7px] lg:text-[9px] font-black text-yellow-500 uppercase leading-none mb-1">Bet To</span>
                 <span id="hud-raise-value" class="text-sm lg:text-xl font-mono font-black text-white leading-none">${{ betAmount }}</span>
               </div>
               
-              <div id="hud-slider-wrapper" class="flex-1 flex flex-col gap-0.5 lg:gap-1 px-1">
+              <div id="hud-slider-wrapper" class="flex-1 flex flex-col gap-0.5 lg:gap-1 px-3">
                 <input
                   id="hud-bet-range-input"
                   type="range"
@@ -124,55 +124,64 @@
               <button
                 id="hud-quick-allin-button"
                 @click="setQuick('all')"
-                class="px-2 py-1.5 lg:px-4 lg:py-2.5 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white text-[8px] lg:text-[10px] font-black uppercase transition-all rounded-md border border-red-500/20"
+                class="px-2 py-1.5 lg:px-4 lg:py-2.5 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white text-[8px] lg:text-[10px] font-black uppercase transition-all rounded-md border border-red-500/20 shrink-0"
               >All-In</button>
-            </div>
-          </Transition>
+            </template>
 
-          <!-- Buttons & State Module -->
+            <!-- Waiting Layout (Inherits the "Raise" theme colors) -->
+            <template v-else>
+              <div id="hud-waiting-state" class="w-full h-full flex items-center justify-center gap-4 bg-yellow-500/5">
+                <div id="hud-waiting-ping" class="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-yellow-500 rounded-full animate-ping"></div>
+                <div class="flex items-baseline gap-2">
+                  <span id="hud-waiting-label" class="text-[8px] lg:text-[10px] font-black text-yellow-500/60 uppercase tracking-widest italic">Waiting for</span>
+                  <span id="hud-waiting-name" class="text-xs lg:text-base font-black text-yellow-500 uppercase tracking-tight">{{ activePlayerName }}</span>
+                </div>
+                <div class="flex gap-1">
+                  <div v-for="i in 3" :key="i" class="w-1 h-1 bg-yellow-500/30 rounded-full animate-bounce" :style="{ animationDelay: (i * 0.2) + 's' }"></div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- BOTTOM MODULE: Buttons (Always visible, disabled if not my turn) -->
           <div id="hud-buttons-container" class="flex gap-1 lg:gap-2 items-stretch h-9 lg:h-14">
             <template v-if="canBlind">
               <button
                 id="hud-action-blind"
                 @click="$emit('action', 'blind')"
-                class="flex-1 bg-gradient-to-b from-purple-500 to-purple-700 text-white text-[9px] lg:text-sm font-black uppercase tracking-wider rounded-lg transition-all active:scale-95"
+                class="flex-1 bg-gradient-to-b from-purple-500 to-purple-700 text-white text-[9px] lg:text-sm font-black uppercase tracking-wider rounded-lg transition-all active:scale-95 shadow-xl"
               >Post Blind</button>
             </template>
 
-            <template v-else-if="isMyTurn">
+            <template v-else>
               <button
-                v-if="options.includes('fold')"
                 id="hud-action-fold"
                 @click="$emit('action', 'fold')"
-                class="flex-1 bg-white/5 border border-white/10 text-gray-400 text-[9px] lg:text-sm font-black uppercase transition-all rounded-lg"
+                :disabled="!isMyTurn"
+                class="flex-1 bg-white/5 border border-white/10 text-gray-400 text-[9px] lg:text-sm font-black uppercase transition-all rounded-lg hover:bg-red-600/20 hover:text-red-400 disabled:opacity-10 disabled:grayscale disabled:cursor-not-allowed"
               >Fold</button>
               
               <button
-                v-if="options.includes('check')"
                 id="hud-action-check"
                 @click="$emit('action', 'check')"
-                class="flex-1 bg-white/5 border border-white/10 text-gray-300 text-[9px] lg:text-sm font-black uppercase transition-all rounded-lg"
+                :disabled="!isMyTurn"
+                class="flex-1 bg-white/5 border border-white/10 text-gray-300 text-[9px] lg:text-sm font-black uppercase transition-all rounded-lg hover:bg-white/10 hover:text-white disabled:opacity-10 disabled:grayscale disabled:cursor-not-allowed"
               >Check</button>
               
               <button
-                v-if="options.includes('call')"
                 id="hud-action-call"
                 @click="$emit('action', 'call')"
-                class="flex-1 bg-blue-600/10 border border-blue-500/20 text-blue-400 text-[9px] lg:text-sm font-black uppercase transition-all rounded-lg"
+                :disabled="!isMyTurn"
+                class="flex-1 bg-blue-600/10 border border-blue-500/20 text-blue-400 text-[9px] lg:text-sm font-black uppercase transition-all rounded-lg hover:bg-blue-600 hover:text-white disabled:opacity-10 disabled:grayscale disabled:cursor-not-allowed"
               >Call</button>
 
               <button
                 id="hud-action-raise"
-                :disabled="!canRaise"
+                :disabled="!isMyTurn || !canRaise"
                 @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
-                class="px-4 lg:px-14 bg-gradient-to-b from-yellow-400 to-yellow-600 text-black text-[9px] lg:text-sm font-black uppercase tracking-wider shadow-xl disabled:opacity-20 rounded-lg transition-all active:scale-95"
+                class="px-4 lg:px-14 bg-gradient-to-b from-yellow-400 to-yellow-600 text-black text-[9px] lg:text-sm font-black uppercase tracking-wider shadow-xl disabled:opacity-10 disabled:grayscale disabled:cursor-not-allowed rounded-lg transition-all active:scale-95"
               >{{ options.includes('bet') ? 'BET' : 'RAISE' }}</button>
             </template>
-
-            <div v-else id="hud-waiting-state" class="flex-1 flex items-center justify-between gap-2 lg:gap-4 px-3 lg:px-8 bg-white/5 rounded-lg border border-white/5">
-              <span id="hud-waiting-label" class="text-[9px] lg:text-sm text-gray-400 font-black uppercase tracking-widest italic truncate">Waiting for {{ activePlayerName }}</span>
-              <div id="hud-waiting-ping" class="shrink-0 w-1.5 h-1.5 lg:w-2 lg:h-2 bg-yellow-500 rounded-full animate-ping"></div>
-            </div>
           </div>
         </div>
       </div>
@@ -222,7 +231,9 @@ const activePlayerName = computed(() => {
   return player ? player.name : 'others'
 })
 
-const canRaise = computed(() => betProxy.value > props.minBet)
+const canRaise = computed(() => {
+  return props.betAmount > props.minBet || (props.options.includes('bet') || props.options.includes('raise'))
+})
 
 const betProxy = computed({
   get: () => props.betAmount,
