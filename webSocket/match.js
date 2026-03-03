@@ -572,7 +572,24 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
 
   winner = (winnerData, isFold = false) => {
     if (this.stepChecker.checkStep('winner')) return
+    
+    // Grant all steps up to winner to prevent startGame loop from running intermediate steps
+    this.stepChecker.grantStep('blindsBetting')
+    this.stepChecker.grantStep('dealtPrivateCards')
+    this.stepChecker.grantStep('firstBetting')
+    this.stepChecker.grantStep('flop_Dealer_Hand')
+    this.stepChecker.grantStep('flop_Check_Prize_Step')
+    this.stepChecker.grantStep('flop_Bet_Step')
+    this.stepChecker.grantStep('turn_Dealer_Hand')
+    this.stepChecker.grantStep('turn_Check_Prize_Step')
+    this.stepChecker.grantStep('turn_Bet_Step')
+    this.stepChecker.grantStep('river_Dealer_Hand')
+    this.stepChecker.grantStep('river_Check_Prize_Step')
+    this.stepChecker.grantStep('river_Bet_Step')
+    this.stepChecker.grantStep('finalHands')
+    this.stepChecker.grantStep('showDown')
     this.stepChecker.grantStep('winner')
+
     this.activePlayerId = null
     this.clearAutofold()
 

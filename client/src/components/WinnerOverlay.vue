@@ -265,6 +265,13 @@ const handleClose = () => {
   if (isWaiting.value) return
   isWaiting.value = true
   emit('close')
+  // We don't clear it immediately here to allow for the transition
+  // and because Game.vue will handle the nextRound message.
+  // But we want to ensure it eventually gets cleared.
+  setTimeout(() => {
+    isVisible.value = false
+    pokerStore.clearWinnerInfo()
+  }, 500)
 }
 
 const closeOverlay = () => {
