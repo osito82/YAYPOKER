@@ -8,19 +8,19 @@
       id="id-header"
       class="w-full bg-black/60 backdrop-blur-xl border-b border-white/5 py-2 px-6 flex items-center justify-between z-50 shrink-0"
     >
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)]">
-          <span class="text-black font-black text-xl">O</span>
+      <div id="header-logo-section" class="flex items-center gap-3">
+        <div id="logo-icon-container" class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+          <span id="logo-letter" class="text-black font-black text-2xl">O</span>
         </div>
-        <span class="text-xl font-black tracking-tighter text-white uppercase italic">
+        <span id="logo-text" class="text-2xl font-black tracking-tighter text-white uppercase italic">
           oso<span class="text-yellow-500">POker</span>
         </span>
       </div>
       
-      <div class="hidden md:flex items-center gap-4">
-        <div class="flex flex-col items-end">
-          <span class="text-[8px] font-black text-gray-500 uppercase tracking-widest">Server Time</span>
-          <span class="text-[10px] font-mono font-bold text-gray-300">21:44:02</span>
+      <div id="header-metadata-section" class="hidden md:flex items-center gap-4">
+        <div id="server-time-container" class="flex flex-col items-end">
+          <span id="label-server-time" class="text-[10px] font-black text-gray-300 uppercase tracking-widest">Server Time</span>
+          <span id="display-server-time" class="text-[12px] font-mono font-bold text-gray-100">21:44:02</span>
         </div>
       </div>
     </header>
@@ -35,28 +35,29 @@
     >
       <!-- Table Info -->
       <div id="info-panel" class="flex items-center gap-4">
-        <div class="flex flex-col">
-          <h1 class="text-[9px] font-black text-yellow-500 uppercase tracking-[0.2em] leading-none mb-1">
+        <div id="table-metadata" class="flex flex-col">
+          <h1 id="game-type-label" class="text-[11px] font-black text-yellow-500 uppercase tracking-[0.2em] leading-none mb-1">
             No Limit Hold'em
           </h1>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-mono font-bold text-gray-200">Blinds $10/$20</span>
-            <span class="text-[9px] font-mono text-gray-600">ID: {{ gameCode }}</span>
+          <div id="table-details" class="flex items-center gap-2">
+            <span id="blinds-display" class="text-sm font-mono font-bold text-white">Blinds $10/$20</span>
+            <span id="game-id-display" class="text-[11px] font-mono text-gray-400">ID: {{ gameCode }}</span>
           </div>
         </div>
       </div>
 
       <!-- Connection & Player Badge -->
-      <div class="flex items-center gap-3">
+      <div id="header-status-section" class="flex items-center gap-3">
         <div
           id="status-panel"
           class="bg-black/40 px-3 py-1 rounded-full border border-white/5 flex items-center gap-2"
         >
           <div
-            class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]"
+            id="connection-indicator"
+            class="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]"
             :class="isConnected ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500'"
           ></div>
-          <span class="text-[8px] font-bold uppercase tracking-widest text-gray-400">
+          <span id="connection-text" class="text-[10px] font-bold uppercase tracking-widest text-gray-200">
             {{ isConnected ? 'LIVE' : 'RECONNECTING' }}
           </span>
         </div>
@@ -65,7 +66,7 @@
           id="player-badge"
           class="bg-yellow-500/10 px-4 py-1 rounded-full border border-yellow-500/20"
         >
-          <span class="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
+          <span id="player-name-display" class="text-[12px] font-black text-yellow-500 uppercase tracking-widest">
             {{ playerName }}
           </span>
         </div>
@@ -79,6 +80,7 @@
     >
       <!-- Ambient Lights -->
       <div
+        id="ambient-light-effect"
         class="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-1/2 bg-yellow-500/5 blur-[120px] pointer-events-none"
       ></div>
 
@@ -106,10 +108,12 @@
           class="absolute bottom-32 left-1/2 -translate-x-1/2 z-30"
         >
           <div
+            id="toast-content"
             class="bg-black/80 backdrop-blur-xl px-6 py-2 rounded-full border border-white/10 shadow-2xl"
           >
             <span
-              class="text-xs font-bold text-gray-300 uppercase tracking-widest"
+              id="toast-text"
+              class="text-sm font-bold text-gray-100 uppercase tracking-widest"
               >{{ pokerStore.getDisplayMsg }}</span
             >
           </div>

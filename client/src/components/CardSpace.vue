@@ -1,5 +1,6 @@
 <template>
   <div
+    id="card-space-outer"
     :class="[
       sizeOption.width,
       sizeOption.height,
@@ -18,11 +19,11 @@ const props = defineProps({
 
 const sizeOption = computed(() => {
   switch (props.size) {
-    case 'extraLarge': return { height: 'h-56', width: 'w-40' }
-    case 'large':      return { height: 'h-44', width: 'w-32' }
-    case 'medium':     return { height: 'h-36', width: 'w-24' }
-    case 'small':      return { height: 'h-24', width: 'w-16' }
-    default:           return { height: 'h-44', width: 'w-32' }
+    case 'extraLarge': return { height: 'h-64', width: 'w-48' }
+    case 'large':      return { height: 'h-48', width: 'w-36' }
+    case 'medium':     return { height: 'h-40', width: 'w-28' }
+    case 'small':      return { height: 'h-28', width: 'w-20' }
+    default:           return { height: 'h-48', width: 'w-36' }
   }
 })
 
