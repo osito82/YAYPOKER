@@ -169,8 +169,6 @@ const wsUrl = import.meta.env.VITE_WS_URL || 'localhost'
 const wsProtocol = import.meta.env.VITE_WS_PROTOCOL ||`ws`
 const wsUrlwPort = `${wsProtocol}://${wsUrl}:${wsPort}`
 
-console.log(wsUrlwPort)
-
 const connectionOptions = { gameCode, playerName, secretCode }
 
 const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(

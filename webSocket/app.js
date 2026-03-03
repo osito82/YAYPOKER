@@ -20,7 +20,6 @@ const log = new osolog()
 
 // Constantes para mejorar mantenibilidad
 const MAX_ID_LENGTH = 25
-const DEFAULT_PORT = 8888
 
 // Mapeo de acciones a manejadores para mejor organización
 const actionHandlers = {
@@ -182,7 +181,7 @@ app.get('/*splat', (req, res) => {
 })
 
 // Inicialización del servidor
-const PORT = process.env.PORT || DEFAULT_PORT
+const PORT = process.env.PORT || '8888'
 
 if (require.main === module) {
   server.listen(PORT, () => {

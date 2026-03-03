@@ -23,10 +23,14 @@
           <div class="space-y-4">
             <button
               @click="goToCreate"
-              class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-gray-900 font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline transition-all transform hover:-translate-y-0.5 shadow-lg uppercase tracking-wider"
+              :disabled="joinCode.length > 0"
+              class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-gray-900 font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline transition-all transform hover:-translate-y-0.5 shadow-lg uppercase tracking-wider disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             >
               Create new Poker Game
             </button>
+            <p v-if="joinCode.length > 0" class="text-gray-500 text-[10px] text-center uppercase tracking-widest italic">
+              Clear join code to create new table
+            </p>
           </div>
 
           <!-- Join Game Section -->
@@ -44,21 +48,35 @@
                 type="text"
                 placeholder="Your Name"
               />
-              
-              <div class="flex space-x-2">
-                <input
-                  v-model="joinCode"
-                  class="shadow appearance-none border border-gray-600 rounded w-full py-3 px-4 text-gray-200 bg-gray-900 leading-tight focus:outline-none focus:border-blue-500 transition-colors font-mono uppercase"
-                  type="text"
-                  placeholder="Ex: ABC12-DEF34"
-                />
-                <button
-                  @click="joinGame"
-                  :disabled="!isValidJoin"
-                  class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+
+              <div class="space-y-1 relative group">
+                <!-- Tooltip -->
+                <div v-if="joinCode && !isGameCodeValid" 
+                  class="absolute bottom-full left-0 mb-3 px-3 py-2 bg-red-600 text-white text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-wider z-20 whitespace-nowrap shadow-2xl border border-red-500"
                 >
-                  Join
-                </button>
+                  Format must be XXXXX-XXXXX
+                  <div class="absolute top-full left-4 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-red-600"></div>
+                </div>
+
+                <div class="flex space-x-2">
+                  <input
+                    v-model="joinCode"
+                    class="shadow appearance-none border border-gray-600 rounded w-full py-3 px-4 text-gray-200 bg-gray-900 leading-tight focus:outline-none transition-colors font-mono uppercase"
+                    :class="joinCode && !isGameCodeValid ? 'border-red-500 focus:border-red-500' : 'border-gray-600 focus:border-blue-500'"
+                    type="text"
+                    placeholder="Ex: ABC12-DEF34"
+                  />
+                  <button
+                    @click="joinGame"
+                    :disabled="!isValidJoin"
+                    class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded focus:outline-none focus:shadow-outline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Join
+                  </button>
+                </div>
+                <p v-if="joinCode && !isGameCodeValid" class="text-red-500 text-[10px] uppercase tracking-wide font-bold ml-1">
+                  Format must be XXXXX-XXXXX
+                </p>
               </div>
             </div>
           </div>
@@ -153,7 +171,7 @@ const copyStatus = ref('Copy Code')
 const gameUrl = computed(() => {
   if (!generatedCode.value) return ''
   const base = window.location.origin
-  return `${base}/game/${generatedCode.value}`
+  return `${base}/?joinCode=${generatedCode.value}`
 })
 
 const checkRouteState = () => {
@@ -169,16 +187,23 @@ const checkRouteState = () => {
   }
 }
 
-onMounted(checkRouteState)
+onMounted(() => {
+  checkRouteState()
+  if (route.query.joinCode) {
+    joinCode.value = route.query.joinCode.toUpperCase()
+  }
+})
+
 watch(() => route.name, checkRouteState)
 
 // Join Logic
-const isValidJoin = computed(() => {
+const isGameCodeValid = computed(() => {
   const gameCodeRegex = /^[A-Z0-9]{5}-[A-Z0-9]{5}$/
-  return (
-    playerName.value.trim().length > 0 &&
-    gameCodeRegex.test(joinCode.value.toUpperCase())
-  )
+  return gameCodeRegex.test(joinCode.value.toUpperCase())
+})
+
+const isValidJoin = computed(() => {
+  return playerName.value.trim().length > 0 && isGameCodeValid.value
 })
 
 const joinGame = () => {
