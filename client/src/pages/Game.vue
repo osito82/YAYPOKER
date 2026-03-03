@@ -163,11 +163,18 @@ const getSavedName = () => {
 
 const playerName = getSavedName()
 const secretCode = uuidv4()
-const wsUrl = 'ws://localhost:8888'
+
+const wsPort = import.meta.env.VITE_WS_PORT || '8888'
+const wsUrl = import.meta.env.VITE_WS_URL || 'localhost'
+const wsProtocol = import.meta.env.VITE_WS_PROTOCOL ||`ws`
+const wsUrlwPort = `${wsProtocol}://${wsUrl}:${wsPort}`
+
+console.log(wsUrlwPort)
+
 const connectionOptions = { gameCode, playerName, secretCode }
 
-const { socket, connectSocket, disconnectSocket, sendMessage } = useWebSocket(
-  wsUrl,
+const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
+  wsUrlwPort,
   connectionOptions,
 )
 

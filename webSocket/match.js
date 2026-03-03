@@ -84,7 +84,8 @@ class Match {
       this.communicator.msgBuilder('oddsUpdate', 'private', p, {
         odds: playerOdds,
       })
-      this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
+     // 0021 this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
+      Socket.sendToPlayer(this.torneoId, p.name, this.communicator.getMsg())
     })
   }
 
@@ -113,7 +114,7 @@ class Match {
   }
 
   signUp(data, thisSocket) {
-    const { id: thisSocketId } = thisSocket
+    const { id: thisSocketId, name: thisSocketName } = thisSocket
     const existingPlayerIndex = this.players.findIndex(
       (s) => s.name === data.name,
     )
@@ -202,13 +203,13 @@ class Match {
     this.communicator.msgBuilder('signUp', 'public', player, {
       msg: `Welcome ${player.name}!`,
     })
-    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
     this.communicator.msgBuilder('signUp', 'private', player, {
       method: 'signUp',
       id: thisSocketId,
     })
-    this.dealer.talkToPLayerById(thisSocketId, this.communicator.getMsg())
-
+   
+Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
     const connectedPlayers = this.players.filter((p) => p.connected)
     if (
       connectedPlayers.length >= 2 &&
@@ -248,7 +249,7 @@ class Match {
       displayMsg: 'Registration closed. Game in progress.',
     })
 
-    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
   }
 
   dealtPrivateCards(thisSocket) {
@@ -267,12 +268,13 @@ class Match {
 
       for (const player of this.players) {
         this.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
-        this.dealer.talkToPLayerById(player.id, this.communicator.getMsg())
+        Socket.sendToPlayer(this.torneoId, player.name, this.communicator.getMsg())
+        //this.dealer.talkToPLayerById(player.id, this.communicator.getMsg())
       }
       this.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
         displayMsg: 'Cards dealt!',
       })
-      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       this.sendOdds()
       this.continue(thisSocket)
     } catch (error) {
@@ -342,7 +344,7 @@ class Match {
           name: foundPlayer.name,
           bet: foundPlayer.getCurrentBet(),
         })
-        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       }
     }
     this.continue(thisSocket)
@@ -418,7 +420,7 @@ class Match {
       bet: foundPlayer.getCurrentBet(),
     })
 
-    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
     this.continue(thisSocket)
   }
@@ -439,7 +441,7 @@ class Match {
         this.communicator.msgBuilder('setCheck', 'public', foundPlayer, {
           displayMsg: `${foundPlayer.name} checks`,
         })
-        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       }
     }
     this.continue(thisSocket)
@@ -492,12 +494,13 @@ class Match {
         this.communicator.msgBuilder(`askForBlindBets`, 'public', p, {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
         })
-        this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
         this.communicator.msgBuilder(`askForBlindBets`, 'private', p, {
           id: p.id,
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
         })
-        this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
+        Socket.sendToPlayer(this.torneoId, p.name, this.communicator.getMsg())
+        // this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
         this.startAutofold()
       }
     }
@@ -528,7 +531,7 @@ class Match {
       this.communicator.msgBuilder('fold', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} folded.`,
       })
-      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       this.sendOdds()
       this.continue(thisSocket)
     }
@@ -595,7 +598,7 @@ class Match {
       allHands: finalHands,
       isFold: isFold,
     })
-    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
     this.waitingForNextRound = true
   }
@@ -683,7 +686,7 @@ class Match {
       displayMsg: 'New hand starting...',
       newGameId: this.gameId,
     })
-    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
     this.stepChecker.grantStep('signUp')
     this.startGame()
@@ -802,14 +805,16 @@ class Match {
         action: opts,
         displayMsg: 'Your turn',
       })
-      this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
-
+      // this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
+Socket.sendToPlayer(this.torneoId, p.name, this.communicator.getMsg())
       this.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'public', p, {
         messageForId: p.id,
         action: opts,
         displayMsg: `Waiting for ${p.name}`,
       })
-      this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg())
+
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+     // 0021 this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg())
       this.startAutofold()
     }
   }
@@ -832,7 +837,7 @@ class Match {
     this.communicator.msgBuilder(`dealerHand-${whatHand}`, 'public', null, {
       displayMsg: `Dealer deals the ${whatHand}`,
     })
-    this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
     this.sendOdds()
     this.continue(thisSocket)
   }
@@ -867,7 +872,7 @@ class Match {
       this.communicator.msgBuilder('startGame', 'public', null, {
         displayMsg: 'Waiting for players...',
       })
-      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       return
     }
 
@@ -915,7 +920,7 @@ class Match {
         method: 'showDown',
         showDown: this.dealer.getFinalHands(),
       })
-      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       this.stepChecker.grantStep('showDown')
       return this.continue(thisSocket)
     }
@@ -949,7 +954,7 @@ class Match {
         displayMsg: `${foundPlayer.name} disconnected. Waiting ${time / 1000} seconds for reconnection...`,
         timeout: 60,
       })
-      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
       const timeout = setTimeout(() => {
         this.playerLeave(thisSocket)
@@ -973,7 +978,7 @@ class Match {
       this.communicator.msgBuilder('playerLeave', 'public', playerLeaving, {
         displayMsg: `${playerLeaving.name} has left the game.`,
       })
-      this.dealer.talkToAllPlayersOnTable(this.communicator.getMsg())
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
       this.log
         .Template({

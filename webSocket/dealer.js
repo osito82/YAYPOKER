@@ -203,55 +203,16 @@ class Dealer {
 
   talkToSocketById(socketId, targetMessage) {
     try {
-      const allSockets = Socket.getSocketsByTorneo(this.torneoId)
-      if (allSockets) {
-        const targetSocket = allSockets.find((s) => s.id === socketId)
-        if (targetSocket && targetSocket.socket) {
-          targetSocket.socket.send(JSON.stringify({ message: targetMessage }))
-        }
+      const targetSocket = Socket.getSocket(this.torneoId, socketId)
+      if (
+        targetSocket &&
+        targetSocket.socket &&
+        targetSocket.socket.readyState === 1
+      ) {
+        targetSocket.socket.send(JSON.stringify({ message: targetMessage }))
       }
     } catch (error) {
       console.log('Error in talkToSocketById:', error)
-    }
-  }
-
-  talkToPLayerById(idNumber, targetMessage) {
-    try {
-      const foundPlayer = this.getPlayerById(idNumber)
-
-      if (foundPlayer) {
-        const targetSocket = Socket.getSocket(this.torneoId, idNumber)
-        if (targetSocket && targetSocket.socket) {
-          targetSocket.socket.send(JSON.stringify({ message: targetMessage }))
-        }
-      }
-    } catch (error) {
-      console.log('Error in talkToPLayerById:', error)
-    }
-  }
-
-  talkToPlayerBUTid(idToOmitNumber, targetMessage) {
-    try {
-      this.players.forEach((player) => {
-        const { id } = player
-
-        if (id && id !== idToOmitNumber) {
-          this.talkToPLayerById(id, targetMessage)
-        }
-      })
-    } catch (error) {
-      console.log('Error in talkToPlayerBUTid:', error)
-    }
-  }
-
-  talkToAllPlayersOnTable(targetMessage) {
-    try {
-      this.players.forEach((player) => {
-        const { id } = player
-        this.talkToPLayerById(id, targetMessage)
-      })
-    } catch (error) {
-      console.log('Error in talkToAllPlayersOnTable:', error)
     }
   }
 
@@ -259,8 +220,16 @@ class Dealer {
     try {
       const allSockets = Socket.getSocketsByTorneo(this.torneoId)
       if (allSockets) {
-        allSockets.forEach((thisSocket) => {
-          thisSocket.socket.send(JSON.stringify({ message: targetMessage }))
+        allSockets.forEach((socketWrapper) => {
+          if (
+            socketWrapper &&
+            socketWrapper.socket &&
+            socketWrapper.socket.readyState === 1
+          ) {
+            socketWrapper.socket.send(
+              JSON.stringify({ message: targetMessage }),
+            )
+          }
         })
       }
     } catch (error) {

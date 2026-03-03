@@ -41,30 +41,62 @@ class Socket {
     return this.torneoSockets
   }
 
-  static getSocketsByTorneo(idTorneo) {
-    const torneoSockets = this.torneoSockets.get(idTorneo)
-    return torneoSockets ? Array.from(torneoSockets.values()) : null
+static getSocketsByTorneo(idTorneo) {
+  return this.torneoSockets.get(idTorneo) || null
+}static getSocket(idTorneo, id) {
+  const torneoSockets = this.torneoSockets.get(idTorneo)
+  if (!torneoSockets) return null
+
+  for (const socket of torneoSockets.values()) {
+    if (socket.id === id) return socket
+  }
+  return null
+}
+
+static socketExists(idTorneo, id) {
+  const torneoSockets = this.torneoSockets.get(idTorneo)
+  if (!torneoSockets) return false
+
+  for (const socket of torneoSockets.values()) {
+    if (socket.id === id) return true
+  }
+  return false
+}
+
+  static sendToPlayer(idTorneo, playerName, data) {
+    const torneoSockets = this.getSocketsByTorneo(idTorneo)
+    if (!torneoSockets) return
+
+    const playerSocketWrapper = torneoSockets.get(playerName)
+
+    if (
+      playerSocketWrapper &&
+      playerSocketWrapper.socket &&
+      playerSocketWrapper.socket.readyState === 1
+    ) {
+      playerSocketWrapper.socket.send(JSON.stringify({ message: data }))
+    } else {
+      console.log(`Socket not found or invalid for ${playerName}`)
+    }
   }
 
-  static getSocket(idTorneo, id) {
-    const torneoSockets = this.torneoSockets.get(idTorneo)
-    if (torneoSockets) {
-      return Array.from(torneoSockets.values()).find(
-        (socket) => socket.id === id,
-      )
+  static broadcastToTorneo(idTorneo, data) {
+    const torneoSockets = this.getSocketsByTorneo(idTorneo)
+    if (!torneoSockets) return
+
+    for (const socketWrapper of torneoSockets.values()) {
+      if (
+        socketWrapper &&
+        socketWrapper.socket &&
+        socketWrapper.socket.readyState === 1
+      ) {
+        socketWrapper.socket.send(JSON.stringify({ message: data }))
+      }
     }
-    return null
   }
 
-  static socketExists(idTorneo, id) {
-    const torneoSockets = this.torneoSockets.get(idTorneo)
-    if (torneoSockets) {
-      return Array.from(torneoSockets.values()).some(
-        (socket) => socket.id === id,
-      )
-    }
-    return false
-  }
+  
+
 }
 
 module.exports = Socket

@@ -1,33 +1,33 @@
 // socket.test.js
-import { describe, it, expect, beforeEach } from 'vitest'
-//import Socket from '../Socket.js' // asegúrate de la ruta correcta
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 const Socket = require('../sockets')
 
 describe('Socket Manager', () => {
   const torneoId = 'torneo-test'
-  const socket1 = { id: '1', name: 'Alice' }
-  const socket2 = { id: '2', name: 'Bob' }
+  const socket1 = { id: '1', name: 'Alice', socket: { send: vi.fn(), readyState: 1 } }
+  const socket2 = { id: '2', name: 'Bob', socket: { send: vi.fn(), readyState: 1 } }
 
   beforeEach(() => {
     // limpiar todos los torneos antes de cada test
     Socket.torneoSockets.clear()
+    vi.clearAllMocks()
   })
 
   it('should add a new socket', () => {
     Socket.addSocket(socket1, torneoId)
     const sockets = Socket.getSocketsByTorneo(torneoId)
-    expect(sockets).toHaveLength(1)
-    expect(sockets[0]).toEqual(socket1)
+    expect(sockets.size).toBe(1)
+    expect(sockets.get('Alice')).toEqual(socket1)
   })
 
   it('should replace socket on reconnection', () => {
     Socket.addSocket(socket1, torneoId)
-    const socket1New = { id: '3', name: 'Alice' }
+    const socket1New = { id: '3', name: 'Alice', socket: { send: vi.fn(), readyState: 1 } }
     Socket.addSocket(socket1New, torneoId)
 
     const sockets = Socket.getSocketsByTorneo(torneoId)
-    expect(sockets).toHaveLength(1)
-    expect(sockets[0]).toEqual(socket1New)
+    expect(sockets.size).toBe(1)
+    expect(sockets.get('Alice')).toEqual(socket1New)
   })
 
   it('should remove a socket', () => {
@@ -36,8 +36,9 @@ describe('Socket Manager', () => {
     Socket.removeSocket(socket1, torneoId)
 
     const sockets = Socket.getSocketsByTorneo(torneoId)
-    expect(sockets).toHaveLength(1)
-    expect(sockets[0]).toEqual(socket2)
+    expect(sockets.size).toBe(1)
+    expect(sockets.get('Bob')).toEqual(socket2)
+    expect(sockets.has('Alice')).toBe(false)
   })
 
   it('should check if a socket exists', () => {
@@ -50,5 +51,35 @@ describe('Socket Manager', () => {
     Socket.addSocket(socket2, torneoId)
     const found = Socket.getSocket(torneoId, '2')
     expect(found).toEqual(socket2)
+  })
+
+  describe('sendToPlayer', () => {
+    it('should send data to a specific player', () => {
+      Socket.addSocket(socket1, torneoId)
+      const data = { action: 'test' }
+      Socket.sendToPlayer(torneoId, 'Alice', data)
+      
+      expect(socket1.socket.send).toHaveBeenCalledWith(JSON.stringify({ message: data }))
+    })
+
+    it('should not send data if socket is not open', () => {
+      const closedSocket = { id: '4', name: 'Dave', socket: { send: vi.fn(), readyState: 3 } } // 3 is CLOSED
+      Socket.addSocket(closedSocket, torneoId)
+      Socket.sendToPlayer(torneoId, 'Dave', { action: 'test' })
+      
+      expect(closedSocket.socket.send).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('broadcastToTorneo', () => {
+    it('should send data to all players in a torneo', () => {
+      Socket.addSocket(socket1, torneoId)
+      Socket.addSocket(socket2, torneoId)
+      const data = { action: 'broadcast' }
+      Socket.broadcastToTorneo(torneoId, data)
+      
+      expect(socket1.socket.send).toHaveBeenCalledWith(JSON.stringify({ message: data }))
+      expect(socket2.socket.send).toHaveBeenCalledWith(JSON.stringify({ message: data }))
+    })
   })
 })
