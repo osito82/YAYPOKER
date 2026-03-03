@@ -4,7 +4,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    silent: false, // <--- asegura que console.log no se silencie
+    silent: false,
     reporters: 'verbose',
+    exclude: ['node_modules/**', 'dist/**', 'logs/**'],
   },
 })

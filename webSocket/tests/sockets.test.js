@@ -8,7 +8,6 @@ describe('Socket Manager', () => {
   const socket2 = { id: '2', name: 'Bob', socket: { send: vi.fn(), readyState: 1 } }
 
   beforeEach(() => {
-    // limpiar todos los torneos antes de cada test
     Socket.torneoSockets.clear()
     vi.clearAllMocks()
   })
