@@ -67,7 +67,7 @@ class Match {
       .R({ torneoId, gameId })
   }
 
-  sendOdds() {
+  sendOdds(targetPlayer = null) {
     const activePlayers = this.players.filter((p) => !p.folded && p.connected)
     if (activePlayers.length < 2) return
 
@@ -77,6 +77,9 @@ class Match {
     const results = this.oddsCalculator.calculateOdds(playerHands, boardCards)
 
     activePlayers.forEach((p, idx) => {
+      // Si se especificó un targetPlayer, solo enviar a él
+      if (targetPlayer && p.id !== targetPlayer.id) return
+
       const playerOdds = {
         win: results.winProbabilities[idx],
         tie: results.tieProbability,
@@ -84,7 +87,6 @@ class Match {
       this.communicator.msgBuilder('oddsUpdate', 'private', p, {
         odds: playerOdds,
       })
-     // 0021 this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
       Socket.sendToPlayer(this.torneoId, p.name, this.communicator.getMsg())
     })
   }
@@ -210,6 +212,12 @@ class Match {
     })
    
 Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
+
+    // 🔥 REENVIAR ODDS AL RECONECTAR (Después de la confirmación privada)
+    if (existingPlayerIndex !== -1) {
+      this.sendOdds(player)
+    }
+
     const connectedPlayers = this.players.filter((p) => p.connected)
     if (
       connectedPlayers.length >= 2 &&

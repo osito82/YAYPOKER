@@ -65,7 +65,6 @@ export const usePokerStore = defineStore('pokerStore', () => {
       if (
         [
           'askForBlindBets',
-          'signUp',
           'gameRestarted',
           'dealtPrivateCards',
         ].includes(gameData.action)
