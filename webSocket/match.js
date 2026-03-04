@@ -701,8 +701,9 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
       p.gameId = this.gameId
       p.cards = []
       p.currentBet = 0
-      p.folded = false
-      p.lastAction = ''
+      // Si no tiene fichas, entra a la mano ya foldeado (solo observa)
+      p.folded = p.chips <= 0
+      p.lastAction = p.chips <= 0 ? 'Out' : ''
       p.isAllIn = false
       p.setCurrentPrize({})
     })
