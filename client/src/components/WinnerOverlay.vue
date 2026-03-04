@@ -146,10 +146,10 @@
                 </div>
                 <div :id="'opponent-cards-visual-' + player.playerId" class="flex -space-x-4 sm:-space-x-5 opacity-80 scale-75 sm:scale-90 origin-right">
                   <template
-                    v-if="player.show && player.show.length > 0"
+                    v-if="player.show && flattenCards(player.show).length > 0"
                   >
                     <Card
-                      v-for="(c, idx) in player.show.slice(0, 2)"
+                      v-for="(c, idx) in flattenCards(player.show).slice(0, 2)"
                       :id="'opponent-card-' + player.playerId + '-' + idx"
                       :key="idx"
                       size="small"
@@ -318,7 +318,7 @@ const opponentsHands = computed(() => {
   if (!props.winnerInfo?.allHands) return []
   const winnerIds = winners.value.map(w => w.playerId)
   return props.winnerInfo.allHands.filter(
-    (h) => !winnerIds.includes(h.playerId),
+    (h) => !winnerIds.includes(h.playerId) && h.lastAction !== 'Out',
   )
 })
 </script>

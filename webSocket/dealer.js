@@ -48,6 +48,7 @@ class Dealer {
         chips: player.chips,
         folded: player.folded,
         connected: player.connected,
+        lastAction: player.lastAction,
       })
     })
   }

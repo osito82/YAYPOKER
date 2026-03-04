@@ -31,6 +31,7 @@ class Match {
 
     this.activePlayerId = null // Track who is expected to act
     this.waitingForNextRound = false
+    this.isRunout = false
 
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.shuffledDeck = initialDeck
@@ -565,9 +566,10 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
   }
 
   continue(thisSocket) {
+    const delay = this.isRunout ? 2000 : 500
     setTimeout(() => {
       this.startGame(thisSocket)
-    }, 500)
+    }, delay)
   }
 
   winner = (winnerData, isFold = false) => {
@@ -692,14 +694,16 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
     this.pot = 0
     this.playersFold = []
     this.activePlayerId = null
+    this.isRunout = false
 
     // Resetear jugadores pero mantener sus fichas y conexión
     this.players.forEach((p) => {
       p.gameId = this.gameId
       p.cards = []
       p.currentBet = 0
-      p.folded = false
-      p.lastAction = ''
+      // Si no tiene fichas, entra a la mano ya foldeado (solo observa)
+      p.folded = p.chips <= 0
+      p.lastAction = p.chips <= 0 ? 'Out' : ''
       p.isAllIn = false
       p.setCurrentPrize({})
     })
@@ -749,6 +753,41 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
 
     const maxBet = this.dealer.getCurrentHighestBet()
     const checkedPlayers = this.dealer.getPlayersChecked()
+
+    const canActPlayers = activePlayers.filter((p) => !p.isAllIn)
+
+    const steps = {
+      firstBetting: 'firstBetting',
+      flopBetting: 'flop_Bet_Step',
+      turnBetting: 'turn_Bet_Step',
+      riverBetting: 'river_Bet_Step',
+    }
+
+    // 🔥 RUNOUT DETECTION
+    if (
+      !this.isRunout &&
+      canActPlayers.length <= 1 &&
+      activePlayers.length > 1
+    ) {
+      // If only one player can act, check if they already matched the maxBet
+      const p = canActPlayers[0]
+      if (!p || p.getCurrentBet() >= maxBet) {
+        this.isRunout = true
+        this.log
+          .Template({ name: 'brakets', title: 'MATCH - RUNOUT', date: true })
+          .R({ gameId: this.gameId })
+
+        this.communicator.msgBuilder('runout', 'public', null, {
+          displayMsg: 'All-in runout! Dealing remaining cards...',
+        })
+        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+      }
+    }
+
+    if (this.isRunout) {
+      this.stepChecker.grantStep(steps[bettingFor])
+      return this.continue(thisSocket)
+    }
 
     let sorted = []
 
@@ -809,12 +848,6 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
       this.dealer.setCurrentHighestBet(0)
       this.dealer.setLastRaiser(null)
 
-      const steps = {
-        firstBetting: 'firstBetting',
-        flopBetting: 'flop_Bet_Step',
-        turnBetting: 'turn_Bet_Step',
-        riverBetting: 'river_Bet_Step',
-      }
       this.stepChecker.grantStep(steps[bettingFor])
       this.continue(thisSocket)
     } else if (playersToAct.length > 0) {

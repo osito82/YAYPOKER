@@ -75,7 +75,7 @@
 
               <!-- Individual Bet -->
               <div v-if="player.currentBet > 0" class="flex items-center gap-1">
-                <span :id="'sidepanel-player-bet-' + player.id" class="text-xl font-mono font-black text-emerald-400 tracking-tighter transition-all duration-500">${{ player.currentBet }}</span>
+                <span :id="'sidepanel-player-card-bet-' + player.id" class="text-xl font-mono font-black text-emerald-400 tracking-tighter transition-all duration-500">${{ player.currentBet }}</span>
               </div>
             </div>
           </div>

@@ -84,7 +84,7 @@
               <span id="hud-bet-label" class="hidden lg:block text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">In Play</span>
               <div id="hud-bet-value-wrapper" class="flex items-baseline gap-0.5 lg:gap-1">
                 <span id="hud-bet-currency" class="text-[8px] lg:text-[10px] font-bold text-emerald-500/80">$</span>
-                <span id="hud-bet-value" class="text-base lg:text-2xl font-mono font-black text-white tracking-tight leading-none">{{ currentBet }}</span>
+                <span id="hud-bet-value" class="text-base lg:text-2xl font-mono font-black text-white tracking-tight leading-none">{{ isMyTurn ? betAmount : currentBet }}</span>
               </div>
             </div>
           </div>
