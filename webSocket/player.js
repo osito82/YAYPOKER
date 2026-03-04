@@ -11,6 +11,7 @@ class Player {
     this.lastAction = ''
     this.connected = true
     this.folded = false
+    this.isAllIn = false
     this.playerNumber = playerNumber
     this.currentBet = 0
   }
@@ -86,6 +87,7 @@ class Player {
     } else {
       this.chips -= chipsToBet
       this.currentBet += chipsToBet
+      if (this.chips === 0) this.isAllIn = true
       betSet = true
     }
     return betSet
@@ -98,6 +100,7 @@ class Player {
 
     this.chips -= diff
     this.currentBet = totalAmount
+    if (this.chips === 0) this.isAllIn = true
     return true
   }
 
@@ -108,6 +111,7 @@ class Player {
       chips: this.chips,
       currentBet: this.currentBet,
       folded: this.folded,
+      isAllIn: this.isAllIn,
       connected: this.connected,
       lastAction: this.lastAction,
       playerNumber: this.playerNumber,
