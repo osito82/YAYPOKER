@@ -10,7 +10,10 @@
     >
       <div
         id="main-table-surface"
-        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-start rounded-xl lg:rounded-2xl border-[6px] border-neutral-900/60"
+        class="w-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-start rounded-xl lg:rounded-2xl border-[6px] border-neutral-900/60"
+        :class="[
+          responsive.screenSize === 'large' ? 'h-[85%]' : 'h-[80%]',
+        ]"
       >
         <!-- Modern Grid Pattern -->
         <div
@@ -37,7 +40,10 @@
         <!-- TOP-CENTERED CONTENT ZONE -->
         <div
           id="table-elements-stack"
-          class="relative z-10 flex flex-col items-center gap-6 md:gap-10 w-full pt-8 lg:pt-12"
+          class="relative z-10 flex flex-col items-center w-full h-full"
+          :class="[
+            responsive.screenSize === 'large' ? 'justify-start pt-8 lg:pt-12 gap-10' : 'justify-between pt-4 pb-0'
+          ]"
         >
           <!-- Pot -->
           <div
@@ -54,27 +60,28 @@
           <!-- Community Cards -->
           <div
             id="community-cards-row"
-            class="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 px-4 w-full"
+            class="flex items-end justify-center gap-2 sm:gap-3 md:gap-4 px-4 w-full overflow-hidden"
+            :class="{ 'mb-0': responsive.screenSize !== 'large' }"
           >
             <template v-for="i in 5" :key="i">
               <div
                 :id="'card-wrapper-' + i"
-                class="shrink-0 flex items-center justify-center"
+                class="shrink-0 flex items-end justify-center"
               >
                 <template v-if="communityCards[i - 1]">
                   <Card
                     :id="'community-card-item-' + (i - 1)"
                     :numSymbol="communityCards[i - 1]"
-                    :percentage="responsiveCardPercentage"
-                    :size="responsiveCardSize"
-                    class="shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 origin-center"
+                    :percentage="responsive.cardPercentage"
+                    :size="responsive.cardSize"
+                    class="shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 origin-bottom"
                   />
                 </template>
                 <template v-else>
                   <CardSpace
                     :id="'community-card-space-empty-' + (i - 1)"
-                    :size="responsiveCardSize"
-                    :percentage="responsiveCardPercentage"
+                    :size="responsive.cardSize"
+                    :percentage="responsive.cardPercentage"
                     class="opacity-30 border-white/10"
                   />
                 </template>
@@ -93,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import Card from './Card.vue'
 import CardSpace from './CardSpace.vue'
 import PotDisplay from './PotDisplay.vue'
@@ -107,24 +114,5 @@ const props = defineProps({
   players: { type: Array, default: () => [] },
   activePlayerId: String,
 })
-
-const windowWidth = ref(window.innerWidth)
-const updateWidth = () => {
-  windowWidth.value = window.innerWidth
-}
-
-const responsiveCardSize = computed(() => {
-  if (windowWidth.value < 640) return 'small'
-  if (windowWidth.value < 1024) return 'medium'
-  return 'large'
-})
-
-const responsiveCardPercentage = computed(() => {
-  if (windowWidth.value < 640) return 55 // mobile
-  if (windowWidth.value < 1024) return 75 // tablet
-  return 100 // desktop
-})
-
-onMounted(() => window.addEventListener('resize', updateWidth))
-onUnmounted(() => window.removeEventListener('resize', updateWidth))
 </script>
+
