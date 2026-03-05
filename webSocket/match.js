@@ -462,6 +462,7 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
         this.clearAutofold()
         this.activePlayerId = null
         this.dealer.setChecked(thisSocket.id)
+
         foundPlayer.setLastAction('Check')
         this.log
           .Template({ name: 'brakets', title: 'MATCH - CHECK', date: true })
@@ -512,6 +513,10 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
       if (p) {
         const isSB = p === p1
         this.activePlayerId = p.id
+
+        // Clear player action when it becomes their turn
+        if (p.lastAction !== 'Out') p.setLastAction('')
+
         this.log
           .Template({
             name: 'brakets',
@@ -547,6 +552,7 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
         this.noMorePlayers()
       }
       this.activePlayerId = null
+
       foundPlayer.setLastAction('Fold')
       foundPlayer.setFolded(true)
       this.playersFold.push(foundPlayer.name)
@@ -853,6 +859,9 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
     } else if (playersToAct.length > 0) {
       const p = playersToAct[0]
       this.activePlayerId = p.id
+
+      // Clear action when it's their turn
+      if (p.lastAction !== 'Out') p.setLastAction('')
 
       let opts = []
       if (maxBet === 0) {

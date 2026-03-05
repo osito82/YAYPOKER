@@ -184,7 +184,10 @@ const copyStatus = ref('Copy Code')
 
 const gameUrl = computed(() => {
   if (!generatedCode.value) return ''
-  const base = window.location.origin
+  const protocol = import.meta.env.VITE_CLIENT_PROTOCOL || 'http'
+  const host = import.meta.env.VITE_CLIENT_URL || 'localhost'
+  const port = import.meta.env.VITE_CLIENT_PORT || '5173'
+  const base = `${protocol}://${host}:${port}`
   return `${base}/?joinCode=${generatedCode.value}`
 })
 
@@ -239,9 +242,33 @@ const cancelCreate = () => {
   router.push({ name: 'home' })
 }
 
+// const copyToClipboard = async () => {
+//   try {
+//     await navigator.clipboard.writeText(gameUrl.value)
+//     copyStatus.value = 'Copied!'
+//     setTimeout(() => {
+//       copyStatus.value = 'Copy Code'
+//     }, 2000)
+//   } catch (err) {
+//     copyStatus.value = 'Error'
+//   }
+// }
+
 const copyToClipboard = async () => {
   try {
-    await navigator.clipboard.writeText(generatedCode.value)
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(gameUrl.value)
+    } else {
+      const textarea = document.createElement('textarea')
+      textarea.value = gameUrl.value
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
+
     copyStatus.value = 'Copied!'
     setTimeout(() => {
       copyStatus.value = 'Copy Code'

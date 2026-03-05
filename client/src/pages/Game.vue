@@ -113,6 +113,7 @@
         class="flex-grow lg:flex-none min-h-0"
         :players="allPlayers"
         :activePlayerId="pokerStore.getActivePlayerId"
+        :myPlayerId="pokerStore.myInfo.id"
         :pot="pokerStore.getPot"
       />
     </div>
