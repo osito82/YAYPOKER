@@ -24,7 +24,7 @@
       <!-- Background Glow Effect -->
       <div v-if="isMyTurn" id="hud-turn-glow-effect" class="absolute inset-0 bg-yellow-500/[0.03] pointer-events-none animate-pulse"></div>
 
-      <div id="hud-content-wrapper" class="max-w-[1920px] mx-auto flex flex-row items-center gap-2 lg:gap-6 p-1.5 lg:p-3 lg:px-10 relative overflow-hidden">
+      <div id="hud-content-wrapper" class="max-w-[1920px] mx-auto flex flex-col lg:flex-row items-center gap-2 lg:gap-6 p-1.5 lg:p-3 lg:px-10 relative overflow-hidden">
         
         <!-- SECTION 1: CARDS -->
         <div id="hud-cards-area" class="shrink-0">
@@ -59,8 +59,8 @@
         </div>
 
         <!-- SECTION 2: INFO COLUMN -->
-        <div id="hud-info-column" class="flex flex-col gap-1 flex-1 min-w-0">
-          <div v-if="playerCards?.length" id="hud-odds-wrapper" class="w-full scale-90 lg:scale-100 origin-left">
+        <div id="hud-info-column" class="flex flex-col gap-1 flex-1 lg:min-w-[450px]">
+          <div id="hud-odds-wrapper" class="w-full scale-90 lg:scale-100 origin-left transition-all duration-500" :class="{ 'opacity-20 grayscale pointer-events-none': !playerCards?.length }">
             <OddsDisplay 
               :winProb="pokerStore.getOdds.win" 
               :tieProb="pokerStore.getOdds.tie" 
@@ -91,7 +91,7 @@
         </div>
 
         <!-- SECTION 3: ACTIONS AREA -->
-        <div id="hud-actions-area" class="flex flex-col gap-1 lg:gap-2 lg:min-w-[450px]">
+        <div id="hud-actions-area" class="flex flex-col gap-1 lg:gap-2 flex-1 lg:min-w-[450px]">
           
           <!-- PERSISTENT TOP MODULE: Raise Slider OR Full-width Waiting State -->
           <div
