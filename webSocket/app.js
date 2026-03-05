@@ -18,8 +18,61 @@ const Torneo = require('./torneo')
 const startTime = new Date()
 const log = new osolog()
 
+// Global error handlers to prevent server crashes
+process.on('uncaughtException', (error) => {
+  log.Template({ name: 'brakets', title: 'SERVER - Uncaught Exception', date: true })
+    .R({ error: error.message, stack: error.stack })
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+  log.Template({ name: 'brakets', title: 'SERVER - Unhandled Rejection', date: true })
+    .R({ reason: reason?.message || reason, stack: reason?.stack })
+})
+
+// Periodic garbage collector for inactive/abandoned matches
+// Runs every 10 minutes
+setInterval(() => {
+  const removedCount = Torneo.removeInactiveMatches(3600000) // 1 hour idle
+  if (removedCount > 0) {
+    log.Template({ name: 'brakets', title: 'SERVER - GC', date: true })
+      .R({ msg: 'Cleaned up inactive matches', count: removedCount })
+  }
+}, 600000)
+
 // Constantes para mejorar mantenibilidad
 const MAX_ID_LENGTH = 25
+
+// Validación de datos de entrada
+const validateAction = (action, data) => {
+  if (!action) return 'Action is required'
+  
+  const rules = {
+    signUp: () => {
+      const chips = Number(data.totalChips)
+      if (isNaN(chips) || chips < 0) return 'Invalid chips amount'
+      data.totalChips = chips // Sanitizar
+      return null
+    },
+    setBet: () => {
+      const bet = Number(data.chipsToBet)
+      if (isNaN(bet) || bet < 0) return 'Invalid bet amount'
+      data.chipsToBet = bet // Sanitizar
+      return null
+    },
+    setRise: () => {
+      const rise = Number(data.chipsToRiseBet)
+      if (isNaN(rise) || rise < 0) return 'Invalid rise amount'
+      data.chipsToRiseBet = rise // Sanitizar
+      return null
+    },
+    sendMessage: () => {
+      if (!data.targetPlayerId || typeof data.targetMessage !== 'string') return 'Invalid message data'
+      return null
+    }
+  }
+
+  return rules[action] ? rules[action]() : null
+}
 
 // Mapeo de acciones a manejadores para mejor organización
 const actionHandlers = {
@@ -110,6 +163,15 @@ wss.on('connection', (ws, req) => {
     }
 
     if (jsonData?.action) {
+      // Robustez: Validar datos antes de procesar
+      const validationError = validateAction(jsonData.action, jsonData)
+      if (validationError) {
+        log.Template({ name: 'brakets', title: 'SERVER - Validation Error', date: true })
+          .R({ action: jsonData.action, error: validationError, from: playerName })
+        ws.send(JSON.stringify({ error: validationError }))
+        return
+      }
+
       const handler = actionHandlers[jsonData.action]
       if (handler) {
         try {
@@ -129,7 +191,14 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     log.Template({ name: 'brakets', title: 'SERVER - Disconnection', date: true })
       .R({ playerName })
-    match.pause(thisSocket)
+    try {
+      if (match) {
+        match.pause(thisSocket)
+      }
+    } catch (error) {
+      log.Template({ name: 'brakets', title: 'SERVER - Disconnection Error', date: true })
+        .R({ error: error.message, playerName })
+    }
   })
 
   // Manejo de errores del WebSocket
@@ -190,4 +259,4 @@ if (require.main === module) {
   })
 }
 
-module.exports = { app, server, wss }
+module.exports = { app, server, wss, validateAction }
