@@ -54,8 +54,13 @@ const letterToNumber = (letter) => {
   }
 }
 
+function generateSecretCode() {
+  return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
+}
+
 export {
   generateUniqueId,
+  generateSecretCode,
   simbolConverter,
   letterToSymbol,
   letterToNumber,
