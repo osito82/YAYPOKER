@@ -110,9 +110,10 @@
       <!-- SIDEPANEL: PLAYERS (Con min-h-0 para activar scroll) -->
       <PlayerSidepanel
         id="sidepanel-container"
-        class="flex-grow lg:flex-none min-h-0"
+        class="flex-1 min-h-0"
         :players="allPlayers"
         :activePlayerId="pokerStore.getActivePlayerId"
+        :myPlayerId="pokerStore.myInfo.id"
         :pot="pokerStore.getPot"
       />
     </div>
