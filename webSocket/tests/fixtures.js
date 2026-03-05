@@ -7,17 +7,17 @@
 export const MOCK_PLAYERS = {
   ALICE: {
     name: 'Alice',
-    secretCode: 'sec-alice-123',
+    secretCode: '4844',
     totalChips: 1000,
   },
   BOB: {
     name: 'Bob',
-    secretCode: 'sec-bob-456',
+    secretCode: '8874',
     totalChips: 1500,
   },
   CHARLIE: {
     name: 'Charlie',
-    secretCode: 'sec-charlie-789',
+    secretCode: '8894',
     totalChips: 500,
   },
 }
