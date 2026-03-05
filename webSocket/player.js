@@ -6,8 +6,8 @@ class Player {
     this.id = id
     this.gameId = gameId
     this.secretCode = secretCode
-    this.chips = chips
-    this.cards = cards
+    this.chips = Number(chips) || 0
+    this.cards = Array.isArray(cards) ? cards : []
     this.lastAction = ''
     this.connected = true
     this.folded = false
@@ -63,12 +63,12 @@ class Player {
   }
 
   setConnected = (status) => {
-    this.connected = status
+    this.connected = !!status
   }
 
   setFolded = (status) => {
-    this.folded = status
-    if (status) this.cards = []
+    this.folded = !!status
+    if (this.folded) this.cards = []
   }
 
   giveChipsToDealer = () => {
@@ -82,24 +82,29 @@ class Player {
   }
 
   setBet(chipsToBet) {
-    let betSet = false
-    if (Number(chipsToBet) > Number(this.chips)) {
+    const amount = Number(chipsToBet)
+    if (isNaN(amount) || amount <= 0) return false
+    
+    if (amount > this.chips) {
+      return false
     } else {
-      this.chips -= chipsToBet
-      this.currentBet += chipsToBet
+      this.chips -= amount
+      this.currentBet += amount
       if (this.chips === 0) this.isAllIn = true
-      betSet = true
+      return true
     }
-    return betSet
   }
 
   setTotalBet(totalAmount) {
-    const diff = totalAmount - this.currentBet
+    const amount = Number(totalAmount)
+    if (isNaN(amount)) return false
+
+    const diff = amount - this.currentBet
     if (diff < 0) return false
     if (diff > this.chips) return false
 
     this.chips -= diff
-    this.currentBet = totalAmount
+    this.currentBet = amount
     if (this.chips === 0) this.isAllIn = true
     return true
   }

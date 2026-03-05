@@ -42,6 +42,38 @@ setInterval(() => {
 // Constantes para mejorar mantenibilidad
 const MAX_ID_LENGTH = 25
 
+// Validación de datos de entrada
+const validateAction = (action, data) => {
+  if (!action) return 'Action is required'
+  
+  const rules = {
+    signUp: () => {
+      const chips = Number(data.totalChips)
+      if (isNaN(chips) || chips < 0) return 'Invalid chips amount'
+      data.totalChips = chips // Sanitizar
+      return null
+    },
+    setBet: () => {
+      const bet = Number(data.chipsToBet)
+      if (isNaN(bet) || bet < 0) return 'Invalid bet amount'
+      data.chipsToBet = bet // Sanitizar
+      return null
+    },
+    setRise: () => {
+      const rise = Number(data.chipsToRiseBet)
+      if (isNaN(rise) || rise < 0) return 'Invalid rise amount'
+      data.chipsToRiseBet = rise // Sanitizar
+      return null
+    },
+    sendMessage: () => {
+      if (!data.targetPlayerId || typeof data.targetMessage !== 'string') return 'Invalid message data'
+      return null
+    }
+  }
+
+  return rules[action] ? rules[action]() : null
+}
+
 // Mapeo de acciones a manejadores para mejor organización
 const actionHandlers = {
   signUp: (match, socket, data, playerName, secretCode, torneoId) => {
@@ -131,6 +163,15 @@ wss.on('connection', (ws, req) => {
     }
 
     if (jsonData?.action) {
+      // Robustez: Validar datos antes de procesar
+      const validationError = validateAction(jsonData.action, jsonData)
+      if (validationError) {
+        log.Template({ name: 'brakets', title: 'SERVER - Validation Error', date: true })
+          .R({ action: jsonData.action, error: validationError, from: playerName })
+        ws.send(JSON.stringify({ error: validationError }))
+        return
+      }
+
       const handler = actionHandlers[jsonData.action]
       if (handler) {
         try {

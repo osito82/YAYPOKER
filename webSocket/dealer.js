@@ -9,7 +9,7 @@ class Dealer {
     this.torneoId = torneoId
     this.deck = deck
     this.players = players
-    this.pot = pot || 0
+    this.pot = Number(pot) || 0
     this.cardsDealer = cardsDealer || []
     this.playersChecked = []
     this.finalHands = []
@@ -22,7 +22,7 @@ class Dealer {
   }
 
   setCurrentHighestBet = (amount) => {
-    this.currentHighestBet = amount
+    this.currentHighestBet = Number(amount) || 0
   }
 
   getLastRaiser = () => {
@@ -59,6 +59,8 @@ class Dealer {
 
   allPlayersCheck = () => {
     const activePlayers = this.players.filter((p) => p.connected && !p.folded)
+    if (activePlayers.length === 0) return true
+    
     const maxBet = Math.max(...activePlayers.map((p) => p.getCurrentBet()))
     return activePlayers.every(
       (p) => p.getCurrentBet() === maxBet && this.playersChecked.includes(p.id),
@@ -84,13 +86,16 @@ class Dealer {
   }
 
   setChecked = (thisSocketId) => {
-    if (!this.playersChecked.includes(thisSocketId)) {
+    if (thisSocketId && !this.playersChecked.includes(thisSocketId)) {
       this.playersChecked.push(thisSocketId)
     }
   }
 
   setPot(chipsToBet) {
-    this.pot = Number(this.pot) + Number(chipsToBet)
+    const amount = Number(chipsToBet)
+    if (!isNaN(amount)) {
+      this.pot = Number(this.pot) + amount
+    }
   }
 
   getPot() {
@@ -151,7 +156,9 @@ class Dealer {
   }
 
   setCard(card) {
-    this.cardsDealer.push(card)
+    if (card) {
+      this.cardsDealer.push(card)
+    }
   }
 
   hasMinimumPlayers() {
@@ -197,6 +204,7 @@ class Dealer {
 
   hasAllPlayersBet = () => {
     const activePlayers = this.players.filter((p) => p.connected && !p.folded)
+    if (activePlayers.length === 0) return true
     return activePlayers.every((player) => {
       return Number(player.getCurrentBet()) !== 0
     })
