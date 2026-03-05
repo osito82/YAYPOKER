@@ -1,7 +1,7 @@
 <template>
   <aside
     id="sidepanel-root"
-    class="w-full lg:w-[350px] h-full bg-black/40 backdrop-blur-3xl border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col shrink-0 min-h-0 z-40"
+    class="w-full lg:w-[350px] flex-1 lg:h-full bg-black/40 backdrop-blur-3xl border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col shrink-0 min-h-0 z-40"
   >
     <!-- Sidepanel Header -->
     <div id="sidepanel-header-container" class="p-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between shrink-0">
@@ -20,7 +20,7 @@
       name="player-list"
       tag="div"
       id="sidepanel-players-list"
-      class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar pb-32 lg:pb-4"
+      class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar min-h-0 pb-10"
     >
       <div
         v-for="player in sortedPlayers"
