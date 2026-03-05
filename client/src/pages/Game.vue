@@ -150,7 +150,7 @@ const getSavedName = () => {
 }
 
 const playerName = getSavedName()
-const secretCode = uuidv4()
+const secretCode = route.query.secretCode || generateSecretCode()
 
 const wsPort = import.meta.env.VITE_WS_PORT || '8888'
 const wsUrl = import.meta.env.VITE_WS_URL || 'localhost'
@@ -228,6 +228,10 @@ watch([minBet, maxBet], ([newMin, newMax]) => {
     if (betAmount.value > newMax) betAmount.value = newMax
   }
 })
+
+const generateSecretCode = ()=> {
+  return String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+}
 
 const sendAction = (action) => {
   if (!isConnected.value) return

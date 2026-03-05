@@ -5,7 +5,7 @@ const osolog = require('osolog')
 const http = require('http')
 const WebSocket = require('ws')
 
-const { generateUniqueId, randomName } = require('./utils')
+const { generateUniqueId, randomName, generateSecretCode } = require('./utils')
 
 const app = express()
 const server = http.createServer(app)
@@ -70,7 +70,7 @@ wss.on('connection', (ws, req) => {
 
   const torneoId = (urlParams.get('gameCode') ?? generateUniqueId(MAX_ID_LENGTH)).slice(0, MAX_ID_LENGTH)
   const playerName = (urlParams.get('playerName') ?? randomName()).slice(0, MAX_ID_LENGTH)
-  const secretCode = generateUniqueId(MAX_ID_LENGTH)
+  const secretCode = (urlParams.get('secretCode') ?? generateUniqueId(MAX_ID_LENGTH)).slice(0, MAX_ID_LENGTH)
 
   const thisSocket = {
     id: generateUniqueId(MAX_ID_LENGTH),
@@ -80,7 +80,7 @@ wss.on('connection', (ws, req) => {
   }
 
   log.Template({ name: 'brakets', title: 'SERVER - New Connection', date: true })
-    .R({ playerName, id: thisSocket.id, torneo: torneoId })
+    .R({ playerName, id: thisSocket.id, torneo: torneoId, secretCode })
     
   Socket.addSocket(thisSocket, torneoId)
 

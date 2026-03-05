@@ -22,6 +22,10 @@ function generateUniqueId() {
   return `${randomStr()}-${randomStr()}`
 }
 
+import function generateSecretCode() {
+  return String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+}
+
 ///[ 'Ks', '8c', 'Js', 'Td', 'Qc' ] =>  [ 'K', '8', 'J', 'T', 'Q' ]
 const cardsToNoSymbolValsArray = (cartas) => {
   return cartas.map((carta) => carta.slice(0, -1))

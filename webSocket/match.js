@@ -88,7 +88,7 @@ class Match {
       this.communicator.msgBuilder('oddsUpdate', 'private', p, {
         odds: playerOdds,
       })
-      Socket.sendToPlayer(this.torneoId, p.name, this.communicator.getMsg())
+      Socket.sendToPlayer(this.torneoId, p.secretCode, this.communicator.getMsg())
     })
   }
 
@@ -117,9 +117,11 @@ class Match {
   }
 
   signUp(data, thisSocket) {
-    const { id: thisSocketId, name: thisSocketName } = thisSocket
+    const { id: thisSocketId, name: thisSocketName, secretCode: thisSecretCode } = thisSocket
+    
+    // Buscar jugador existente por secretCode para re-conexión
     const existingPlayerIndex = this.players.findIndex(
-      (s) => s.name === data.name,
+      (s) => s.secretCode === thisSecretCode,
     )
 
     let player
@@ -153,7 +155,7 @@ class Match {
           title: 'MATCH - Player Reconnected',
           date: true,
         })
-        .R({ name: player.name, id: player.id })
+        .R({ name: player.name, id: player.id, secretCode: player.secretCode })
     } else {
       // Máximo 10 jugadores
       if (this.players.length >= 10) {
@@ -176,10 +178,21 @@ class Match {
         return
       }
 
+      // Manejar nombres duplicados
+      let finalName = data.name
+      let counter = 1
+      while (this.players.some(p => p.name === finalName)) {
+        finalName = `${data.name}-${counter}`
+        counter++
+      }
+      
+      // Actualizar el nombre en el socket también para consistencia
+      thisSocket.name = finalName
+
       const playerNumber = this.players.length + 1
       player = new Player(
         this.gameId,
-        data.name,
+        finalName,
         data.secretCode,
         data.totalChips,
         [],
@@ -200,7 +213,7 @@ class Match {
           title: 'MATCH - New Player Joined',
           date: true,
         })
-        .R({ name: player.name, chips: player.chips, num: playerNumber })
+        .R({ name: player.name, chips: player.chips, num: playerNumber, secretCode: player.secretCode })
     }
 
     this.communicator.msgBuilder('signUp', 'public', player, {
@@ -212,7 +225,7 @@ class Match {
       id: thisSocketId,
     })
    
-Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
+    Socket.sendToPlayer(this.torneoId, player.secretCode, this.communicator.getMsg())
 
     // 🔥 REENVIAR ODDS AL RECONECTAR (Después de la confirmación privada)
     if (existingPlayerIndex !== -1) {
@@ -277,7 +290,7 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
 
       for (const player of this.players) {
         this.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
-        Socket.sendToPlayer(this.torneoId, player.name, this.communicator.getMsg())
+        Socket.sendToPlayer(this.torneoId, player.secretCode, this.communicator.getMsg())
       }
       this.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
         displayMsg: 'Cards dealt!',
@@ -532,7 +545,7 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
           id: p.id,
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
         })
-        Socket.sendToPlayer(this.torneoId, p.name, this.communicator.getMsg())
+        Socket.sendToPlayer(this.torneoId, p.secretCode, this.communicator.getMsg())
         // this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
         this.startAutofold()
       }
@@ -892,7 +905,7 @@ Socket.sendToPlayer(this.torneoId, thisSocketName, this.communicator.getMsg())
         displayMsg: 'Your turn',
       })
       // this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
-Socket.sendToPlayer(this.torneoId, p.name, this.communicator.getMsg())
+      Socket.sendToPlayer(this.torneoId, p.secretCode, this.communicator.getMsg())
       this.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'public', p, {
         messageForId: p.id,
         action: opts,

@@ -55,6 +55,16 @@
                 placeholder="Enter Your Name"
               />
 
+              <input
+                id="input-secret-code"
+                v-model="secretCode"
+                class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-yellow-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
+                type="password"
+                maxlength="4"
+                placeholder="Enter 4-Digit Pin (Secret)"
+                @input="secretCode = secretCode.replace(/\D/g, '')"
+              />
+
               <div id="join-code-input-wrapper" class="space-y-2 relative group">
                 <!-- Tooltip -->
                 <div v-if="joinCode && !isGameCodeValid" 
@@ -118,15 +128,26 @@
           <!-- Name Input for Creator -->
           <div id="creator-name-section" class="space-y-3">
             <label id="label-creator-name" class="block text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2">
-              Set Your Display Name
+              Set Your Display Name & Pin
             </label>
-            <input
-              id="input-creator-name"
-              v-model="playerName"
-              class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
-              type="text"
-              placeholder="Ex: Doyle Brunson"
-            />
+            <div class="space-y-4">
+              <input
+                id="input-creator-name"
+                v-model="playerName"
+                class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
+                type="text"
+                placeholder="Ex: Doyle Brunson"
+              />
+              <input
+                id="input-creator-secret"
+                v-model="secretCode"
+                class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
+                type="password"
+                maxlength="4"
+                placeholder="4-Digit Pin (Secret)"
+                @input="secretCode = secretCode.replace(/\D/g, '')"
+              />
+            </div>
           </div>
           
           <div id="creator-actions-grid" class="grid grid-cols-2 gap-4">
@@ -177,6 +198,7 @@ const route = useRoute()
 
 // State
 const playerName = ref('')
+const secretCode = ref('')
 const joinCode = ref('')
 const generatedCode = ref('')
 const isCreating = ref(false)
@@ -220,7 +242,7 @@ const isGameCodeValid = computed(() => {
 })
 
 const isValidJoin = computed(() => {
-  return playerName.value.trim().length > 0 && isGameCodeValid.value
+  return playerName.value.trim().length > 0 && isGameCodeValid.value && secretCode.value.length === 4
 })
 
 const joinGame = () => {
@@ -228,7 +250,7 @@ const joinGame = () => {
     router.push({
       name: 'game',
       params: { gameCode: joinCode.value.toUpperCase() },
-      query: { playerName: playerName.value }
+      query: { playerName: playerName.value, secretCode: secretCode.value }
     })
   }
 }
@@ -279,11 +301,11 @@ const copyToClipboard = async () => {
 }
 
 const startGame = () => {
-  if (playerName.value.trim()) {
+  if (playerName.value.trim() && secretCode.value.length === 4) {
     router.push({
       name: 'game',
       params: { gameCode: generatedCode.value },
-      query: { playerName: playerName.value }
+      query: { playerName: playerName.value, secretCode: secretCode.value }
     })
   }
 }
