@@ -16,12 +16,23 @@
         <div
           id="table-grid-pattern"
           class="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 50px 50px;"
+          style="
+            background-image:
+              linear-gradient(#fff 1px, transparent 1px),
+              linear-gradient(90deg, #fff 1px, transparent 1px);
+            background-size: 50px 50px;
+          "
         ></div>
 
         <!-- Enhanced Inner Glow & Felt Texture -->
-        <div id="table-inner-glow" class="absolute inset-0 shadow-[inset_0_0_180px_rgba(0,0,0,0.8)] pointer-events-none"></div>
-        <div id="table-felt-texture" class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-20 pointer-events-none"></div>
+        <div
+          id="table-inner-glow"
+          class="absolute inset-0 shadow-[inset_0_0_180px_rgba(0,0,0,0.8)] pointer-events-none"
+        ></div>
+        <div
+          id="table-felt-texture"
+          class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-20 pointer-events-none"
+        ></div>
 
         <!-- TOP-CENTERED CONTENT ZONE -->
         <div
@@ -29,20 +40,30 @@
           class="relative z-10 flex flex-col items-center gap-6 md:gap-10 w-full pt-8 lg:pt-12"
         >
           <!-- Pot -->
-          <div id="table-pot-display-container" class="transform transition-transform duration-300">
-             <PotDisplay :id="'pot-display-main'" :amount="pot" class="scale-90 lg:scale-100" />
+          <div
+            id="table-pot-display-container"
+            class="transform transition-transform duration-300"
+          >
+            <PotDisplay
+              :id="'pot-display-main'"
+              :amount="pot"
+              class="scale-90 lg:scale-100"
+            />
           </div>
 
           <!-- Community Cards -->
-          <div 
-            id="community-cards-row" 
+          <div
+            id="community-cards-row"
             class="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 px-4 w-full"
           >
             <template v-for="i in 5" :key="i">
-              <div :id="'card-wrapper-' + i" class="shrink-0 flex items-center justify-center">
+              <div
+                :id="'card-wrapper-' + i"
+                class="shrink-0 flex items-center justify-center"
+              >
                 <template v-if="communityCards[i - 1]">
                   <Card
-                    :id="'community-card-item-' + (i-1)"
+                    :id="'community-card-item-' + (i - 1)"
                     :numSymbol="communityCards[i - 1]"
                     :percentage="responsiveCardPercentage"
                     :size="responsiveCardSize"
@@ -51,7 +72,7 @@
                 </template>
                 <template v-else>
                   <CardSpace
-                    :id="'community-card-space-empty-' + (i-1)"
+                    :id="'community-card-space-empty-' + (i - 1)"
                     :size="responsiveCardSize"
                     :percentage="responsiveCardPercentage"
                     class="opacity-30 border-white/10"
@@ -63,7 +84,9 @@
         </div>
 
         <!-- Subtle Decorative Inner Line -->
-        <div class="absolute inset-3 rounded-lg lg:rounded-xl border border-white/[0.03] pointer-events-none"></div>
+        <div
+          class="absolute inset-3 rounded-lg lg:rounded-xl border border-white/[0.03] pointer-events-none"
+        ></div>
       </div>
     </div>
   </div>
@@ -74,6 +97,9 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Card from './Card.vue'
 import CardSpace from './CardSpace.vue'
 import PotDisplay from './PotDisplay.vue'
+import { useResponsiveStore } from '../store/responsiveStore'
+
+const responsive = useResponsiveStore()
 
 const props = defineProps({
   pot: { type: [Number, String], default: 0 },
@@ -94,9 +120,9 @@ const responsiveCardSize = computed(() => {
 })
 
 const responsiveCardPercentage = computed(() => {
-  if (windowWidth.value < 640) return 33 // h-1/3
-  if (windowWidth.value < 1024) return 50 // h-1/2
-  return 100                               // full height
+  if (windowWidth.value < 640) return 55 // mobile
+  if (windowWidth.value < 1024) return 75 // tablet
+  return 100 // desktop
 })
 
 onMounted(() => window.addEventListener('resize', updateWidth))

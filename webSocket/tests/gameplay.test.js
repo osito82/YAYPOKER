@@ -1,4 +1,3 @@
-
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import WebSocket from 'ws'
 import { server } from '../app'
@@ -19,7 +18,7 @@ describe('Poker Game Integration Tests', () => {
   })
 
   afterAll(() => {
-    clients.forEach(c => {
+    clients.forEach((c) => {
       if (c.readyState === WebSocket.OPEN) c.close()
     })
     return new Promise((resolve) => server.close(resolve))
@@ -27,9 +26,11 @@ describe('Poker Game Integration Tests', () => {
 
   const createClient = (playerData, gameCode) => {
     const { name, secretCode } = playerData
-    const ws = new WebSocket(`ws://localhost:${port}?gameCode=${gameCode}&playerName=${name}&secretCode=${secretCode}`)
+    const ws = new WebSocket(
+      `ws://localhost:${port}?gameCode=${gameCode}&playerName=${name}&secretCode=${secretCode}`,
+    )
     clients.push(ws)
-    
+
     const responses = []
     ws.on('message', (data) => {
       responses.push(JSON.parse(data.toString()))
@@ -39,7 +40,9 @@ describe('Poker Game Integration Tests', () => {
       return new Promise((resolve, reject) => {
         const start = Date.now()
         const check = setInterval(() => {
-          const found = responses.find(r => r.message && r.message.action === action)
+          const found = responses.find(
+            (r) => r.message && r.message.action === action,
+          )
           if (found) {
             clearInterval(check)
             resolve(found)
@@ -53,7 +56,8 @@ describe('Poker Game Integration Tests', () => {
     }
 
     const send = (actionPayload) => {
-      const data = typeof actionPayload === 'function' ? actionPayload() : actionPayload
+      const data =
+        typeof actionPayload === 'function' ? actionPayload() : actionPayload
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(data))
       } else {
@@ -66,13 +70,13 @@ describe('Poker Game Integration Tests', () => {
 
   it('debería ejecutar el escenario de Alice haciendo Fold usando Mocks', async () => {
     const gameCode = 'test-room-' + Math.random().toString(36).substring(7)
-    
+
     const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
     const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
 
     await Promise.all([
-      new Promise(r => alice.ws.on('open', r)),
-      new Promise(r => bob.ws.on('open', r))
+      new Promise((r) => alice.ws.on('open', r)),
+      new Promise((r) => bob.ws.on('open', r)),
     ])
 
     // Registro usando acciones de MOCK
@@ -92,21 +96,23 @@ describe('Poker Game Integration Tests', () => {
     // Bob recibe la notificación de fold
     const foldMsg = await bob.waitAction('fold')
     expect(foldMsg.message.action).toBe('fold')
-    
-    const aliceState = foldMsg.message.players.find(p => p.name === MOCK_PLAYERS.ALICE.name)
+
+    const aliceState = foldMsg.message.players.find(
+      (p) => p.name === MOCK_PLAYERS.ALICE.name,
+    )
     expect(aliceState.folded).toBe(true)
     expect(aliceState.lastAction).toBe('Fold')
   }, 15000)
 
   it('debería completar una ronda pre-flop con Alice igualando y Bob pasando', async () => {
     const gameCode = 'test-room-' + Math.random().toString(36).substring(7)
-    
+
     const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
     const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
 
     await Promise.all([
-      new Promise(r => alice.ws.on('open', r)),
-      new Promise(r => bob.ws.on('open', r))
+      new Promise((r) => alice.ws.on('open', r)),
+      new Promise((r) => bob.ws.on('open', r)),
     ])
 
     // 1. Registro
@@ -117,11 +123,11 @@ describe('Poker Game Integration Tests', () => {
 
     // 2. Iniciar juego
     alice.send(MOCK_ACTIONS.START_GAME)
-    
+
     // 3. Poner Blinds
     await alice.waitAction('askForBlindBets')
     alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    
+
     await bob.waitAction('askForBlindBets')
     bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 

@@ -1,7 +1,8 @@
 import { v4 } from 'uuid'
 
 function generateUniqueId() {
-  const randomStr = () => Math.random().toString(36).substring(2, 7).toUpperCase()
+  const randomStr = () =>
+    Math.random().toString(36).substring(2, 7).toUpperCase()
   return `${randomStr()}-${randomStr()}`
 }
 

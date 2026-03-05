@@ -9,31 +9,55 @@
       class="w-full bg-black/60 backdrop-blur-xl border-b border-white/5 py-2 px-6 flex items-center justify-between z-50 shrink-0"
     >
       <div id="header-logo-section" class="flex items-center gap-3">
-        <div id="logo-icon-container" class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+        <div
+          id="logo-icon-container"
+          class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)]"
+        >
           <span id="logo-letter" class="text-black font-black text-2xl">O</span>
         </div>
-        <span id="logo-text" class="text-2xl font-black tracking-tighter text-white uppercase italic">
+        <span
+          id="logo-text"
+          class="text-2xl font-black tracking-tighter text-white uppercase italic"
+        >
           oso<span class="text-yellow-500">POker</span>
         </span>
       </div>
-      
-      <div id="header-metadata-section" class="hidden md:flex items-center gap-4">
+
+      <div
+        id="header-metadata-section"
+        class="hidden md:flex items-center gap-4"
+      >
         <div id="server-time-container" class="flex flex-col items-end">
-          <span id="label-server-time" class="text-[10px] font-black text-gray-300 uppercase tracking-widest">Server Time</span>
-          <span id="display-server-time" class="text-[12px] font-mono font-bold text-gray-100">{{ serverTime }}</span>
+          <span
+            id="label-server-time"
+            class="text-[10px] font-black text-gray-300 uppercase tracking-widest"
+            >Server Time</span
+          >
+          <span
+            id="display-server-time"
+            class="text-[12px] font-mono font-bold text-gray-100"
+            >{{ serverTime }}</span
+          >
         </div>
       </div>
     </header>
 
     <!-- WINNER ANNOUNCEMENT OVERLAY -->
-    <WinnerOverlay :winnerInfo="pokerStore.getWinnerInfo" @close="sendMessage({ action: 'nextRound' })" />
+    <WinnerOverlay
+      :winnerInfo="pokerStore.getWinnerInfo"
+      @close="sendMessage({ action: 'nextRound' })"
+    />
 
     <!-- GAME VIEWPORT & SIDEPANEL CONTAINER -->
-    <div id="main-layout-container" class="flex-grow flex flex-col lg:flex-row overflow-hidden relative">
-      
+    <div
+      id="main-layout-container"
+      class="flex-grow flex flex-col lg:flex-row overflow-hidden relative"
+    >
       <!-- TOP AREA: TABLE & HUD -->
-      <div id="game-primary-area" class="flex flex-col min-w-0 relative shrink-0 lg:flex-1 lg:h-full">
-        
+      <div
+        id="game-primary-area"
+        class="flex flex-col min-w-0 relative shrink-0 lg:flex-1 lg:h-full"
+      >
         <!-- TOP METADATA BAR -->
         <nav
           id="top-bar"
@@ -41,25 +65,57 @@
         >
           <div id="info-panel" class="flex items-center gap-4">
             <div id="table-metadata" class="flex flex-col">
-              <h1 id="game-type-label" class="text-[11px] font-black text-yellow-500 uppercase tracking-[0.2em] leading-none mb-1">
+              <h1
+                id="game-type-label"
+                class="text-[11px] font-black text-yellow-500 uppercase tracking-[0.2em] leading-none mb-1"
+              >
                 No Limit Hold'em
               </h1>
               <div id="table-details" class="flex items-center gap-2">
-                <span id="blinds-display" class="text-sm font-mono font-bold text-white">Blinds $10/$20</span>
-                <span id="game-id-display" class="text-[11px] font-mono text-gray-400">ID: {{ gameCode }}</span>
+                <span
+                  id="blinds-display"
+                  class="text-sm font-mono font-bold text-white"
+                  >Blinds $10/$20</span
+                >
+                <span
+                  id="game-id-display"
+                  class="text-[11px] font-mono text-gray-400"
+                  >ID: {{ gameCode }}</span
+                >
               </div>
             </div>
           </div>
 
           <div id="header-status-section" class="flex items-center gap-3">
-            <div id="status-panel" class="bg-black/40 px-3 py-1 rounded-full border border-white/5 flex items-center gap-2">
-              <div id="connection-indicator" class="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]" :class="isConnected ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500'"></div>
-              <span id="connection-text" class="text-[10px] font-bold uppercase tracking-widest text-gray-200">
+            <div
+              id="status-panel"
+              class="bg-black/40 px-3 py-1 rounded-full border border-white/5 flex items-center gap-2"
+            >
+              <div
+                id="connection-indicator"
+                class="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]"
+                :class="
+                  isConnected
+                    ? 'bg-green-500 text-green-500'
+                    : 'bg-red-500 text-red-500'
+                "
+              ></div>
+              <span
+                id="connection-text"
+                class="text-[10px] font-bold uppercase tracking-widest text-gray-200"
+              >
                 {{ isConnected ? 'LIVE' : 'RECONNECTING' }}
               </span>
             </div>
-            <div id="player-badge" class="bg-yellow-500/10 px-4 py-1 rounded-full border border-yellow-500/20">
-              <span id="player-name-display" class="text-[12px] font-black text-yellow-500 uppercase tracking-widest">{{ playerName }}</span>
+            <div
+              id="player-badge"
+              class="bg-yellow-500/10 px-4 py-1 rounded-full border border-yellow-500/20"
+            >
+              <span
+                id="player-name-display"
+                class="text-[12px] font-black text-yellow-500 uppercase tracking-widest"
+                >{{ playerName }}</span
+              >
             </div>
           </div>
         </nav>
@@ -79,10 +135,28 @@
           />
 
           <!-- Notification Toast -->
-          <Transition enter-active-class="transition duration-300 ease-out" enter-from-class="translate-y-4 opacity-0" enter-to-class="translate-y-0 opacity-100" leave-active-class="transition duration-200 ease-in" leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-4 opacity-0">
-            <div v-if="pokerStore.getDisplayMsg && !isMyTurn" id="game-toast" class="absolute bottom-32 left-1/2 -translate-x-1/2 z-30">
-              <div id="toast-content" class="bg-black/80 backdrop-blur-xl px-6 py-2 rounded-full border border-white/10 shadow-2xl">
-                <span id="toast-text" class="text-sm font-bold text-gray-100 uppercase tracking-widest">{{ pokerStore.getDisplayMsg }}</span>
+          <Transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="translate-y-4 opacity-0"
+            enter-to-class="translate-y-0 opacity-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="translate-y-0 opacity-100"
+            leave-to-class="translate-y-4 opacity-0"
+          >
+            <div
+              v-if="pokerStore.getDisplayMsg && !isMyTurn"
+              id="game-toast"
+              class="absolute bottom-32 left-1/2 -translate-x-1/2 z-30"
+            >
+              <div
+                id="toast-content"
+                class="bg-black/80 backdrop-blur-xl px-6 py-2 rounded-full border border-white/10 shadow-2xl"
+              >
+                <span
+                  id="toast-text"
+                  class="text-sm font-bold text-gray-100 uppercase tracking-widest"
+                  >{{ pokerStore.getDisplayMsg }}</span
+                >
               </div>
             </div>
           </Transition>
@@ -154,7 +228,7 @@ const secretCode = route.query.secretCode || generateSecretCode()
 
 const wsPort = import.meta.env.VITE_WS_PORT || '8888'
 const wsUrl = import.meta.env.VITE_WS_URL || 'localhost'
-const wsProtocol = import.meta.env.VITE_WS_PROTOCOL ||`ws`
+const wsProtocol = import.meta.env.VITE_WS_PROTOCOL || `ws`
 const wsUrlwPort = `${wsProtocol}://${wsUrl}:${wsPort}`
 
 const connectionOptions = { gameCode, playerName, secretCode }
@@ -187,7 +261,8 @@ const canBlind = computed(
 
 // 3. DYNAMIC BETTING LIMITS
 const minBet = computed(() => {
-  const baseMin = currentMaxBetOnTable.value > 0 ? currentMaxBetOnTable.value + 20 : 20
+  const baseMin =
+    currentMaxBetOnTable.value > 0 ? currentMaxBetOnTable.value + 20 : 20
   return Math.min(baseMin, maxBet.value)
 })
 
@@ -229,8 +304,8 @@ watch([minBet, maxBet], ([newMin, newMax]) => {
   }
 })
 
-const generateSecretCode = ()=> {
-  return String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+const generateSecretCode = () => {
+  return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 }
 
 const sendAction = (action) => {

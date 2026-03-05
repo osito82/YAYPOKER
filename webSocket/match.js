@@ -90,7 +90,11 @@ class Match {
       this.communicator.msgBuilder('oddsUpdate', 'private', p, {
         odds: playerOdds,
       })
-      Socket.sendToPlayer(this.torneoId, p.secretCode, this.communicator.getMsg())
+      Socket.sendToPlayer(
+        this.torneoId,
+        p.secretCode,
+        this.communicator.getMsg(),
+      )
     })
   }
 
@@ -120,8 +124,12 @@ class Match {
 
   signUp(data, thisSocket) {
     this.lastActivity = Date.now()
-    const { id: thisSocketId, name: thisSocketName, secretCode: thisSecretCode } = thisSocket
-    
+    const {
+      id: thisSocketId,
+      name: thisSocketName,
+      secretCode: thisSecretCode,
+    } = thisSocket
+
     // Buscar jugador existente por secretCode para re-conexión
     const existingPlayerIndex = this.players.findIndex(
       (s) => s.secretCode === thisSecretCode,
@@ -184,11 +192,11 @@ class Match {
       // Manejar nombres duplicados
       let finalName = data.name
       let counter = 1
-      while (this.players.some(p => p.name === finalName)) {
+      while (this.players.some((p) => p.name === finalName)) {
         finalName = `${data.name}-${counter}`
         counter++
       }
-      
+
       // Actualizar el nombre en el socket también para consistencia
       thisSocket.name = finalName
 
@@ -216,7 +224,12 @@ class Match {
           title: 'MATCH - New Player Joined',
           date: true,
         })
-        .R({ name: player.name, chips: player.chips, num: playerNumber, secretCode: player.secretCode })
+        .R({
+          name: player.name,
+          chips: player.chips,
+          num: playerNumber,
+          secretCode: player.secretCode,
+        })
     }
 
     this.communicator.msgBuilder('signUp', 'public', player, {
@@ -227,8 +240,12 @@ class Match {
       method: 'signUp',
       id: thisSocketId,
     })
-   
-    Socket.sendToPlayer(this.torneoId, player.secretCode, this.communicator.getMsg())
+
+    Socket.sendToPlayer(
+      this.torneoId,
+      player.secretCode,
+      this.communicator.getMsg(),
+    )
 
     // 🔥 REENVIAR ODDS AL RECONECTAR (Después de la confirmación privada)
     if (existingPlayerIndex !== -1) {
@@ -293,7 +310,11 @@ class Match {
 
       for (const player of this.players) {
         this.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
-        Socket.sendToPlayer(this.torneoId, player.secretCode, this.communicator.getMsg())
+        Socket.sendToPlayer(
+          this.torneoId,
+          player.secretCode,
+          this.communicator.getMsg(),
+        )
       }
       this.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
         displayMsg: 'Cards dealt!',
@@ -411,7 +432,11 @@ class Match {
     // Si no hay nada que igualar, se trata como un Check
     if (diff <= 0) {
       this.log
-        .Template({ name: 'brakets', title: 'MATCH - CALL AS CHECK', date: true })
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - CALL AS CHECK',
+          date: true,
+        })
         .R({ player: foundPlayer.name, diff })
       return this.setCheck(thisSocket)
     }
@@ -548,7 +573,11 @@ class Match {
           id: p.id,
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
         })
-        Socket.sendToPlayer(this.torneoId, p.secretCode, this.communicator.getMsg())
+        Socket.sendToPlayer(
+          this.torneoId,
+          p.secretCode,
+          this.communicator.getMsg(),
+        )
         // this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
         this.startAutofold()
       }
@@ -597,7 +626,7 @@ class Match {
 
   winner = (winnerData, isFold = false) => {
     if (this.stepChecker.checkStep('winner')) return
-    
+
     // Grant all steps up to winner to prevent startGame loop from running intermediate steps
     this.stepChecker.grantStep('blindsBetting')
     this.stepChecker.grantStep('dealtPrivateCards')
@@ -909,7 +938,11 @@ class Match {
         displayMsg: 'Your turn',
       })
       // this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
-      Socket.sendToPlayer(this.torneoId, p.secretCode, this.communicator.getMsg())
+      Socket.sendToPlayer(
+        this.torneoId,
+        p.secretCode,
+        this.communicator.getMsg(),
+      )
       this.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'public', p, {
         messageForId: p.id,
         action: opts,
@@ -917,7 +950,7 @@ class Match {
       })
 
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-     // 0021 this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg())
+      // 0021 this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg())
       this.startAutofold()
     }
   }

@@ -12,10 +12,14 @@ class Socket {
 
     if (torneoSockets.has(secretCode)) {
       torneoSockets.set(secretCode, socket)
-      console.log(`Socket - addSocket - Reconnected - ${name} (${secretCode}) - ${id}`)
+      console.log(
+        `Socket - addSocket - Reconnected - ${name} (${secretCode}) - ${id}`,
+      )
     } else {
       torneoSockets.set(secretCode, socket)
-      console.log(`Socket - addSocket - Connected - ${name} (${secretCode}) - ${id}.`)
+      console.log(
+        `Socket - addSocket - Connected - ${name} (${secretCode}) - ${id}.`,
+      )
     }
   }
 
@@ -41,27 +45,28 @@ class Socket {
     return this.torneoSockets
   }
 
-static getSocketsByTorneo(idTorneo) {
-  return this.torneoSockets.get(idTorneo) || null
-}static getSocket(idTorneo, id) {
-  const torneoSockets = this.torneoSockets.get(idTorneo)
-  if (!torneoSockets) return null
-
-  for (const socket of torneoSockets.values()) {
-    if (socket.id === id) return socket
+  static getSocketsByTorneo(idTorneo) {
+    return this.torneoSockets.get(idTorneo) || null
   }
-  return null
-}
+  static getSocket(idTorneo, id) {
+    const torneoSockets = this.torneoSockets.get(idTorneo)
+    if (!torneoSockets) return null
 
-static socketExists(idTorneo, id) {
-  const torneoSockets = this.torneoSockets.get(idTorneo)
-  if (!torneoSockets) return false
-
-  for (const socket of torneoSockets.values()) {
-    if (socket.id === id) return true
+    for (const socket of torneoSockets.values()) {
+      if (socket.id === id) return socket
+    }
+    return null
   }
-  return false
-}
+
+  static socketExists(idTorneo, id) {
+    const torneoSockets = this.torneoSockets.get(idTorneo)
+    if (!torneoSockets) return false
+
+    for (const socket of torneoSockets.values()) {
+      if (socket.id === id) return true
+    }
+    return false
+  }
 
   static sendToPlayer(idTorneo, secretCode, data) {
     const torneoSockets = this.getSocketsByTorneo(idTorneo)
@@ -94,9 +99,6 @@ static socketExists(idTorneo, id) {
       }
     }
   }
-
-  
-
 }
 
 module.exports = Socket

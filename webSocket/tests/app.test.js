@@ -8,8 +8,12 @@ describe('App Validation Logic', () => {
     expect(error).toBeNull()
     expect(data.totalChips).toBe(1000)
 
-    expect(validateAction('signUp', { totalChips: 'invalid' })).toBe('Invalid chips amount')
-    expect(validateAction('signUp', { totalChips: -10 })).toBe('Invalid chips amount')
+    expect(validateAction('signUp', { totalChips: 'invalid' })).toBe(
+      'Invalid chips amount',
+    )
+    expect(validateAction('signUp', { totalChips: -10 })).toBe(
+      'Invalid chips amount',
+    )
   })
 
   it('should validate setBet chips', () => {
@@ -18,13 +22,24 @@ describe('App Validation Logic', () => {
     expect(error).toBeNull()
     expect(data.chipsToBet).toBe(500)
 
-    expect(validateAction('setBet', { chipsToBet: 'abc' })).toBe('Invalid bet amount')
+    expect(validateAction('setBet', { chipsToBet: 'abc' })).toBe(
+      'Invalid bet amount',
+    )
   })
 
   it('should validate sendMessage data', () => {
-    expect(validateAction('sendMessage', { targetPlayerId: '1', targetMessage: 'hello' })).toBeNull()
-    expect(validateAction('sendMessage', { targetPlayerId: '1' })).toBe('Invalid message data')
-    expect(validateAction('sendMessage', { targetMessage: 'hello' })).toBe('Invalid message data')
+    expect(
+      validateAction('sendMessage', {
+        targetPlayerId: '1',
+        targetMessage: 'hello',
+      }),
+    ).toBeNull()
+    expect(validateAction('sendMessage', { targetPlayerId: '1' })).toBe(
+      'Invalid message data',
+    )
+    expect(validateAction('sendMessage', { targetMessage: 'hello' })).toBe(
+      'Invalid message data',
+    )
   })
 
   it('should return error if action is missing', () => {

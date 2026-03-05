@@ -1,4 +1,3 @@
-
 /**
  * Fixtures para testing del Backend de Poker
  * Contiene jugadores predefinidos y acciones comunes.
@@ -78,5 +77,5 @@ export const SCENARIOS = {
     { player: 'ALICE', action: 'START_GAME' },
     { player: 'ALICE', action: 'BET', params: [50] },
     { player: 'BOB', action: 'CALL' },
-  ]
+  ],
 }

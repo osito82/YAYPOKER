@@ -2,7 +2,7 @@
   <div
     id="poker-card-crop-container"
     class="relative overflow-hidden transition-all duration-300"
-    :class="cropHeightClass"
+    :style="cropStyle"
   >
     <div
       id="poker-card-outer"
@@ -18,7 +18,9 @@
         class="absolute top-1 left-1 flex flex-col items-center leading-none"
         :class="colorClass"
       >
-        <span :class="[sizeOption.cornerText, 'font-bold']">{{ numSymbol.letter }}</span>
+        <span :class="[sizeOption.cornerText, 'font-bold']">{{
+          numSymbol.letter
+        }}</span>
         <span :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
       </div>
 
@@ -30,14 +32,16 @@
       >
         <span :class="sizeOption.centerSymbol">{{ numSymbol.symbol }}</span>
       </div>
-{{props.percentage}}
+
       <!-- Bottom Right (Rotated) -->
       <div
         id="card-corner-bottom-right"
         class="absolute bottom-1 right-1 flex flex-col items-center leading-none transform rotate-180"
         :class="colorClass"
       >
-        <span :class="[sizeOption.cornerText, 'font-bold']">{{ numSymbol.letter }}</span>
+        <span :class="[sizeOption.cornerText, 'font-bold']">{{
+          numSymbol.letter
+        }}</span>
         <span :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
       </div>
     </div>
@@ -53,35 +57,73 @@ const props = defineProps({
   size: String,
   percentage: {
     type: Number,
-    default: 100  
-  }
+    default: 100,
+  },
 })
 
 const sizeOption = computed(() => {
   switch (props.size) {
-    case 'extraLarge': return { cornerText: 'text-3xl', cornerSymbol: 'text-2xl', centerSymbol: 'text-8xl', heightClass: 'h-64', width: 'w-48', heightPx: 256 }
-    case 'large':      return { cornerText: 'text-3xl', cornerSymbol: 'text-2xl', centerSymbol: 'text-7xl', heightClass: 'h-48', width: 'w-36', heightPx: 192 }
-    case 'medium':     return { cornerText: 'text-xl', cornerSymbol: 'text-lg', centerSymbol: 'text-6xl', heightClass: 'h-40', width: 'w-28', heightPx: 160 }
-    case 'small':      return { cornerText: 'text-base', cornerSymbol: 'text-sm', centerSymbol: 'text-4xl', heightClass: 'h-28', width: 'w-20', heightPx: 112 }
-    default:           return { cornerText: 'text-3xl', cornerSymbol: 'text-2xl', centerSymbol: 'text-7xl', heightClass: 'h-48', width: 'w-36', heightPx: 192 }
+    case 'extraLarge':
+      return {
+        cornerText: 'text-3xl',
+        cornerSymbol: 'text-2xl',
+        centerSymbol: 'text-8xl',
+        heightClass: 'h-64',
+        width: 'w-48',
+        heightPx: 256,
+      }
+    case 'large':
+      return {
+        cornerText: 'text-3xl',
+        cornerSymbol: 'text-2xl',
+        centerSymbol: 'text-7xl',
+        heightClass: 'h-48',
+        width: 'w-36',
+        heightPx: 192,
+      }
+    case 'medium':
+      return {
+        cornerText: 'text-xl',
+        cornerSymbol: 'text-lg',
+        centerSymbol: 'text-6xl',
+        heightClass: 'h-40',
+        width: 'w-28',
+        heightPx: 160,
+      }
+    case 'small':
+      return {
+        cornerText: 'text-base',
+        cornerSymbol: 'text-sm',
+        centerSymbol: 'text-4xl',
+        heightClass: 'h-28',
+        width: 'w-20',
+        heightPx: 112,
+      }
+    default:
+      return {
+        cornerText: 'text-3xl',
+        cornerSymbol: 'text-2xl',
+        centerSymbol: 'text-7xl',
+        heightClass: 'h-48',
+        width: 'w-36',
+        heightPx: 192,
+      }
   }
 })
 
 const numSymbol = computed(() => simbolConverter(props.numSymbol || 'Ah'))
 const color = computed(() => whatColor(props.numSymbol || 'Ah'))
-const colorClass = computed(() => color.value === 'red' ? 'text-red-600' : 'text-black')
+const colorClass = computed(() =>
+  color.value === 'red' ? 'text-red-600' : 'text-black',
+)
 
-// Convertimos percentage a clase Tailwind
-const cropHeightClass = computed(() => {
+// Calculamos el estilo de recorte dinámicamente
+const cropStyle = computed(() => {
   const pct = props.percentage ?? 100
-  console.log(props.percentage, '--------')
-  if (pct >= 100) return ''        // full height
-  if (pct >= 75) return 'h-3/4'
-  if (pct >= 66) return 'h-2/3'
-  if (pct >= 50) return 'h-1/2'
-  if (pct >= 33) return 'h-1/3'
-  if (pct >= 25) return 'h-1/4'
-  return 'h-1/6'                   // mínimo visible
+  if (pct >= 100) return {}
+  return {
+    height: `${(sizeOption.value.heightPx * pct) / 100}px`,
+  }
 })
 </script>
 

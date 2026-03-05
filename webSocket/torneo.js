@@ -46,7 +46,8 @@ class Torneo {
     return this.torneos.has(idTorneo)
   }
 
-  static removeInactiveMatches(maxIdleTimeMs = 3600000) { // 1 hora por defecto
+  static removeInactiveMatches(maxIdleTimeMs = 3600000) {
+    // 1 hora por defecto
     const now = Date.now()
     let removedCount = 0
 
@@ -54,10 +55,10 @@ class Torneo {
       const activeMatches = matches.filter((match) => {
         const idleTime = now - (match.lastActivity || 0)
         const isInactive = idleTime > maxIdleTimeMs
-        
+
         // También limpiar si no hay jugadores y ha pasado un tiempo prudencial (ej. 10 min)
         const hasNoPlayers = !match.players || match.players.length === 0
-        const isAbandoned = hasNoPlayers && idleTime > 600000 
+        const isAbandoned = hasNoPlayers && idleTime > 600000
 
         if (isInactive || isAbandoned) {
           removedCount++
@@ -74,10 +75,14 @@ class Torneo {
     }
 
     if (removedCount > 0) {
-      log.Template({ name: 'brakets', title: 'TORNEO - Cleanup', date: true })
-        .R({ removedMatches: removedCount, remainingTorneos: this.torneos.size })
+      log
+        .Template({ name: 'brakets', title: 'TORNEO - Cleanup', date: true })
+        .R({
+          removedMatches: removedCount,
+          remainingTorneos: this.torneos.size,
+        })
     }
-    
+
     return removedCount
   }
 }

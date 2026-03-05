@@ -30,11 +30,7 @@
 
 <script setup>
 import QRCodeVue3 from 'qrcode-vue3'
-import {
-  computed,
-  ref,
-  nextTick,
-} from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
 
 const pokerStore = usePokerStore()
@@ -46,7 +42,6 @@ const forceRender = async () => {
   await nextTick()
   renderComponent.value = true
 }
-
 
 const computedGameCode = computed(() => {
   forceRender()

@@ -14,7 +14,7 @@ const routes = [
     name: 'newgame',
     path: '/newgame',
     component: Home,
-    props: { isNewGame: true }
+    props: { isNewGame: true },
   },
   {
     name: 'game',
@@ -28,7 +28,7 @@ const routes = [
       } else {
         next()
       }
-    }
+    },
   },
   { name: 'about', path: '/about', component: About },
 ]
