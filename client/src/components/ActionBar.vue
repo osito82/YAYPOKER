@@ -420,14 +420,6 @@ watch(
   },
 )
 
-onMounted(() => {
-  window.addEventListener('resize', updateWidth)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateWidth)
-  if (timerInterval) clearInterval(timerInterval)
-})
 </script>
 
 <style scoped>

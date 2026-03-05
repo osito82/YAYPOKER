@@ -12,37 +12,59 @@
         'bg-white rounded-lg shadow-md border border-gray-300 relative select-none transition-transform hover:-translate-y-1 hover:scale-105',
       ]"
     >
-      <!-- Top Left -->
       <div
+        v-if="props.percentage > 55"
         id="card-corner-top-left"
         class="absolute top-1 left-1 flex flex-col items-center leading-none"
         :class="colorClass"
       >
-        <span :class="[sizeOption.cornerText, 'font-bold']">{{
-          numSymbol.letter
-        }}</span>
-        <span :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
+        <!-- Número más abajo con translate-y y símbolo más gordo con font-black y scale -->
+        <span :class="[sizeOption.cornerText, 'font-extrabold', 'translate-y-1.5']">
+          {{ numSymbol.letter }}
+        </span>
+        <span :class="[sizeOption.cornerSymbol, 'font-black', 'scale-125', 'inline-block']">
+          {{ numSymbol.symbol }}
+        </span>
       </div>
 
-      <!-- Center -->
       <div
         id="card-center-symbol-container"
-        class="absolute inset-0 flex justify-center items-center"
-        :class="colorClass"
+        class="absolute inset-0 flex justify-center"
+        :class="[
+          colorClass,
+          isCropped ? 'items-start pt-0' : 'items-center'
+        ]"
       >
-        <span :class="sizeOption.centerSymbol">{{ numSymbol.symbol }}</span>
+        <div 
+          v-if="isCropped" 
+          class="flex items-center justify-center w-full gap-4 -mt-0"
+        >
+          <span :class="[sizeOption.cropTextSize, 'font-black tracking-tighter']">
+            {{ numSymbol.letter }}
+          </span>
+          <span :class="sizeOption.cropTextSize">
+            {{ numSymbol.symbol }}
+          </span>
+        </div>
+        
+        <span v-else :class="sizeOption.centerSymbol">
+          {{ numSymbol.symbol }}
+        </span>
       </div>
 
-      <!-- Bottom Right (Rotated) -->
       <div
+        v-if="props.percentage > 55"
         id="card-corner-bottom-right"
         class="absolute bottom-1 right-1 flex flex-col items-center leading-none transform rotate-180"
         :class="colorClass"
       >
-        <span :class="[sizeOption.cornerText, 'font-bold']">{{
-          numSymbol.letter
-        }}</span>
-        <span :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
+        <!-- Mismos ajustes para la esquina inferior -->
+        <span :class="[sizeOption.cornerText, 'font-extrabold', 'translate-y-1.5']">
+          {{ numSymbol.letter }}
+        </span>
+        <span :class="[sizeOption.cornerSymbol, 'font-black', 'scale-125', 'inline-block']">
+          {{ numSymbol.symbol }}
+        </span>
       </div>
     </div>
   </div>
@@ -61,6 +83,9 @@ const props = defineProps({
   },
 })
 
+// Variable para detectar si estamos en modo "recortado"
+const isCropped = computed(() => props.percentage <= 55)
+
 const sizeOption = computed(() => {
   switch (props.size) {
     case 'extraLarge':
@@ -68,15 +93,17 @@ const sizeOption = computed(() => {
         cornerText: 'text-3xl',
         cornerSymbol: 'text-2xl',
         centerSymbol: 'text-8xl',
+        cropTextSize: 'text-8xl', // Cropped Size
         heightClass: 'h-64',
         width: 'w-48',
         heightPx: 256,
       }
     case 'large':
       return {
-        cornerText: 'text-3xl',
-        cornerSymbol: 'text-2xl',
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
         centerSymbol: 'text-7xl',
+        cropTextSize: 'text-7xl', 
         heightClass: 'h-48',
         width: 'w-36',
         heightPx: 192,
@@ -86,24 +113,27 @@ const sizeOption = computed(() => {
         cornerText: 'text-xl',
         cornerSymbol: 'text-lg',
         centerSymbol: 'text-6xl',
+        cropTextSize: 'text-6xl',
         heightClass: 'h-40',
         width: 'w-28',
         heightPx: 160,
       }
     case 'small':
       return {
-        cornerText: 'text-base',
-        cornerSymbol: 'text-sm',
+        cornerText: 'text-sm',
+        cornerSymbol: 'text-xs',
         centerSymbol: 'text-4xl',
+        cropTextSize: 'text-4xl',
         heightClass: 'h-28',
         width: 'w-20',
         heightPx: 112,
       }
     default:
       return {
-        cornerText: 'text-3xl',
-        cornerSymbol: 'text-2xl',
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
         centerSymbol: 'text-7xl',
+        cropTextSize: 'text-7xl',
         heightClass: 'h-48',
         width: 'w-36',
         heightPx: 192,
@@ -117,16 +147,16 @@ const colorClass = computed(() =>
   color.value === 'red' ? 'text-red-600' : 'text-black',
 )
 
-// Calculamos el estilo de recorte dinámicamente
 const cropStyle = computed(() => {
   const pct = props.percentage ?? 100
   if (pct >= 100) return {}
-  return {
-    height: `${(sizeOption.value.heightPx * pct) / 100}px`,
-  }
+  let height = (sizeOption.value.heightPx * pct) / 100
+  return { height: `${height}px` }
 })
 </script>
 
 <style scoped>
-/* ya no necesitamos height calc() ni variables CSS */
+#poker-card-crop-container {
+  overflow: hidden;
+}
 </style>

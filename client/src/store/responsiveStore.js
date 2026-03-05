@@ -20,8 +20,8 @@ export const useResponsiveStore = defineStore('responsive', () => {
 
   // Computed card crop percentage
   const cardPercentage = computed(() => {
-    if (windowWidth.value < 640) return 55
-    if (windowWidth.value < 1024) return 75
+    if (windowWidth.value < 640) return 40
+    if (windowWidth.value < 1024) return 55
     return 100
   })
 
