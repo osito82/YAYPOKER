@@ -36,6 +36,7 @@
                   :id="'hud-card-item-' + i"
                   :key="'player-' + i"
                   :size="responsiveCardSize"
+                  :percentage="responsiveCardPercentage"
                   :numSymbol="card"
                   class="shadow-xl transition-all hover:scale-105"
                 />
@@ -45,11 +46,13 @@
                   <CardBack 
                     id="hud-card-back-1"
                     :size="responsiveCardSize" 
+                    :percentage="responsiveCardPercentage"
                     class="opacity-20 shadow-xl"
                   />
                   <CardBack 
                     id="hud-card-back-2"
                     :size="responsiveCardSize" 
+                    :percentage="responsiveCardPercentage"
                     class="opacity-20 shadow-xl"
                   />
                 </div>
@@ -225,7 +228,15 @@ const updateWidth = () => {
   windowWidth.value = window.innerWidth
 }
 const responsiveCardSize = computed(() => {
-  return windowWidth.value >= 1024 ? 'medium' : 'small'
+  if (windowWidth.value < 640) return 'small'
+  if (windowWidth.value < 1024) return 'medium'
+  return 'large'
+})
+
+const responsiveCardPercentage = computed(() => {
+  if (windowWidth.value < 640) return 33 // h-1/3
+  if (windowWidth.value < 1024) return 50 // h-1/2
+  return 100                               // full height
 })
 
 const activePlayerName = computed(() => {

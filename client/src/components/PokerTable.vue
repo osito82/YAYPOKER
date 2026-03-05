@@ -44,14 +44,16 @@
                   <Card
                     :id="'community-card-item-' + (i-1)"
                     :numSymbol="communityCards[i - 1]"
-                    :size="cardSize"
+                    :percentage="responsiveCardPercentage"
+                    :size="responsiveCardSize"
                     class="shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 origin-center"
                   />
                 </template>
                 <template v-else>
                   <CardSpace
                     :id="'community-card-space-empty-' + (i-1)"
-                    :size="cardSize"
+                    :size="responsiveCardSize"
+                    :percentage="responsiveCardPercentage"
                     class="opacity-30 border-white/10"
                   />
                 </template>
@@ -85,10 +87,16 @@ const updateWidth = () => {
   windowWidth.value = window.innerWidth
 }
 
-const cardSize = computed(() => {
+const responsiveCardSize = computed(() => {
   if (windowWidth.value < 640) return 'small'
   if (windowWidth.value < 1024) return 'medium'
   return 'large'
+})
+
+const responsiveCardPercentage = computed(() => {
+  if (windowWidth.value < 640) return 33 // h-1/3
+  if (windowWidth.value < 1024) return 50 // h-1/2
+  return 100                               // full height
 })
 
 onMounted(() => window.addEventListener('resize', updateWidth))

@@ -1,43 +1,45 @@
 <template>
-<div
-  id="poker-card-outer"
-  :class="[
-    sizeOption.height,
-    sizeOption.width,
-    'bg-white rounded-lg shadow-md border border-gray-300 relative select-none transition-transform hover:-translate-y-1 hover:scale-105',
-  ]"
->
-    <!-- Top Left -->
+  <div
+    id="poker-card-crop-container"
+    class="relative overflow-hidden transition-all duration-300"
+    :class="cropHeightClass"
+  >
     <div
-      id="card-corner-top-left"
-      class="absolute top-1 left-1 flex flex-col items-center leading-none"
-      :class="colorClass"
+      id="poker-card-outer"
+      :class="[
+        sizeOption.width,
+        sizeOption.heightClass,
+        'bg-white rounded-lg shadow-md border border-gray-300 relative select-none transition-transform hover:-translate-y-1 hover:scale-105',
+      ]"
     >
-      <span id="card-letter-top" :class="sizeOption.cornerText" class="font-bold">{{
-        numSymbol.letter
-      }}</span>
-      <span id="card-symbol-top" :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
-    </div>
+      <!-- Top Left -->
+      <div
+        id="card-corner-top-left"
+        class="absolute top-1 left-1 flex flex-col items-center leading-none"
+        :class="colorClass"
+      >
+        <span :class="[sizeOption.cornerText, 'font-bold']">{{ numSymbol.letter }}</span>
+        <span :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
+      </div>
 
-    <!-- Center -->
-    <div
-      id="card-center-symbol-container"
-      class="absolute inset-0 flex justify-center items-center"
-      :class="colorClass"
-    >
-      <span id="card-symbol-center" :class="sizeOption.centerSymbol">{{ numSymbol.symbol }}</span>
-    </div>
-
-    <!-- Bottom Right (Rotated) -->
-    <div
-      id="card-corner-bottom-right"
-      class="absolute bottom-1 right-1 flex flex-col items-center leading-none transform rotate-180"
-      :class="colorClass"
-    >
-      <span id="card-letter-bottom" :class="sizeOption.cornerText" class="font-bold">{{
-        numSymbol.letter
-      }}</span>
-      <span id="card-symbol-bottom" :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
+      <!-- Center -->
+      <div
+        id="card-center-symbol-container"
+        class="absolute inset-0 flex justify-center items-center"
+        :class="colorClass"
+      >
+        <span :class="sizeOption.centerSymbol">{{ numSymbol.symbol }}</span>
+      </div>
+{{props.percentage}}
+      <!-- Bottom Right (Rotated) -->
+      <div
+        id="card-corner-bottom-right"
+        class="absolute bottom-1 right-1 flex flex-col items-center leading-none transform rotate-180"
+        :class="colorClass"
+      >
+        <span :class="[sizeOption.cornerText, 'font-bold']">{{ numSymbol.letter }}</span>
+        <span :class="sizeOption.cornerSymbol">{{ numSymbol.symbol }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -49,58 +51,40 @@ import { simbolConverter, whatColor } from '../vutils.js'
 const props = defineProps({
   numSymbol: String,
   size: String,
+  percentage: {
+    type: Number,
+    default: 100  
+  }
 })
 
 const sizeOption = computed(() => {
   switch (props.size) {
-    case 'extraLarge':
-      return {
-        cornerText: 'text-3xl',
-        cornerSymbol: 'text-2xl',
-        centerSymbol: 'text-8xl',
-        height: 'h-64',
-        width: 'w-48',
-      }
-    case 'large':
-      return {
-        cornerText: 'text-3xl',
-        cornerSymbol: 'text-2xl',
-        centerSymbol: 'text-7xl',
-        height: 'h-48',
-        width: 'w-36',
-      }
-    case 'medium':
-      return {
-        cornerText: 'text-xl',
-        cornerSymbol: 'text-lg',
-        centerSymbol: 'text-6xl',
-        height: 'h-40',
-        width: 'w-28',
-      }
-    case 'small':
-      return {
-        cornerText: 'text-base',
-        cornerSymbol: 'text-sm',
-        centerSymbol: 'text-4xl',
-        height: 'h-28',
-        width: 'w-20',
-      }
-    default:
-      return {
-        cornerText: 'text-3xl',
-        cornerSymbol: 'text-2xl',
-        centerSymbol: 'text-7xl',
-        height: 'h-48',
-        width: 'w-36',
-      }
+    case 'extraLarge': return { cornerText: 'text-3xl', cornerSymbol: 'text-2xl', centerSymbol: 'text-8xl', heightClass: 'h-64', width: 'w-48', heightPx: 256 }
+    case 'large':      return { cornerText: 'text-3xl', cornerSymbol: 'text-2xl', centerSymbol: 'text-7xl', heightClass: 'h-48', width: 'w-36', heightPx: 192 }
+    case 'medium':     return { cornerText: 'text-xl', cornerSymbol: 'text-lg', centerSymbol: 'text-6xl', heightClass: 'h-40', width: 'w-28', heightPx: 160 }
+    case 'small':      return { cornerText: 'text-base', cornerSymbol: 'text-sm', centerSymbol: 'text-4xl', heightClass: 'h-28', width: 'w-20', heightPx: 112 }
+    default:           return { cornerText: 'text-3xl', cornerSymbol: 'text-2xl', centerSymbol: 'text-7xl', heightClass: 'h-48', width: 'w-36', heightPx: 192 }
   }
 })
 
 const numSymbol = computed(() => simbolConverter(props.numSymbol || 'Ah'))
 const color = computed(() => whatColor(props.numSymbol || 'Ah'))
-const colorClass = computed(() =>
-  color.value === 'red' ? 'text-red-600' : 'text-black',
-)
+const colorClass = computed(() => color.value === 'red' ? 'text-red-600' : 'text-black')
+
+// Convertimos percentage a clase Tailwind
+const cropHeightClass = computed(() => {
+  const pct = props.percentage ?? 100
+  console.log(props.percentage, '--------')
+  if (pct >= 100) return ''        // full height
+  if (pct >= 75) return 'h-3/4'
+  if (pct >= 66) return 'h-2/3'
+  if (pct >= 50) return 'h-1/2'
+  if (pct >= 33) return 'h-1/3'
+  if (pct >= 25) return 'h-1/4'
+  return 'h-1/6'                   // mínimo visible
+})
 </script>
 
-<style scoped></style>
+<style scoped>
+/* ya no necesitamos height calc() ni variables CSS */
+</style>
