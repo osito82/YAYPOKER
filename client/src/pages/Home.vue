@@ -55,6 +55,16 @@
                 placeholder="Enter Your Name"
               />
 
+              <input
+                id="input-secret-code"
+                v-model="secretCode"
+                class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-yellow-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
+                type="password"
+                maxlength="4"
+                placeholder="Enter 4-Digit Pin (Secret)"
+                @input="secretCode = secretCode.replace(/\D/g, '')"
+              />
+
               <div id="join-code-input-wrapper" class="space-y-2 relative group">
                 <!-- Tooltip -->
                 <div v-if="joinCode && !isGameCodeValid" 
@@ -99,34 +109,49 @@
             <p id="display-generated-code" class="text-3xl font-mono font-black text-yellow-500 tracking-[0.2em] mb-6">{{ generatedCode }}</p>
             
             <!-- QR Code Section -->
-            <div id="qr-code-wrapper" class="mt-4 flex flex-col items-center bg-white p-4 rounded-2xl mx-auto w-fit shadow-2xl">
+            <div 
+              id="qr-code-wrapper" 
+              class="mt-4 flex flex-col items-center bg-white p-4 rounded-2xl mx-auto w-fit shadow-2xl animate-fade-in"
+            >
               <QRCodeVue3
                 id="qr-component"
+                :key="shareUrl"
                 :width="180"
                 :height="180"
-                :value="gameUrl"
+                :value="shareUrl"
                 :qrOptions="{ typeNumber: 0, mode: 'Byte', errorCorrectionLevel: 'H' }"
                 :dotsOptions="{ type: 'rounded', color: '#000000' }"
                 :backgroundOptions="{ color: '#ffffff' }"
                 :cornersSquareOptions="{ type: 'extra-rounded', color: '#000000' }"
                 :download="false"
               />
-              <p id="qr-helper-text" class="text-[11px] font-black text-gray-400 mt-4 uppercase tracking-tighter">Scan to play on mobile</p>
+              <p id="qr-helper-text" class="text-[11px] font-black text-gray-400 mt-4 uppercase tracking-tighter">Share to invite players</p>
             </div>
           </div>
           
           <!-- Name Input for Creator -->
           <div id="creator-name-section" class="space-y-3">
             <label id="label-creator-name" class="block text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2">
-              Set Your Display Name
+              Set Your Display Name & Pin
             </label>
-            <input
-              id="input-creator-name"
-              v-model="playerName"
-              class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
-              type="text"
-              placeholder="Ex: Doyle Brunson"
-            />
+            <div id="creator-inputs-group" class="space-y-4">
+              <input
+                id="input-creator-name"
+                v-model="playerName"
+                class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
+                type="text"
+                placeholder="Ex: Doyle Brunson"
+              />
+              <input
+                id="input-creator-secret"
+                v-model="secretCode"
+                class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
+                type="password"
+                maxlength="4"
+                placeholder="4-Digit Pin (Secret)"
+                @input="secretCode = secretCode.replace(/\D/g, '')"
+              />
+            </div>
           </div>
           
           <div id="creator-actions-grid" class="grid grid-cols-2 gap-4">
@@ -140,7 +165,7 @@
             <button
               id="btn-start-playing"
               @click="startGame"
-              :disabled="!playerName.trim()"
+              :disabled="!playerName.trim() || (secretCode.length > 0 && secretCode.length !== 4)"
               class="bg-green-600 hover:bg-green-500 text-white font-black py-4 px-4 rounded-xl shadow-xl transition-all transform hover:scale-105 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-xs"
             >
               Start Playing
@@ -170,25 +195,26 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import QRCodeVue3 from 'qrcode-vue3'
 import Logo from '../components/Logo.vue'
-import { generateUniqueId } from '../vutils'
+import { generateUniqueId, generateSecretCode } from '../vutils'
 
 const router = useRouter()
 const route = useRoute()
 
 // State
 const playerName = ref('')
+const secretCode = ref('')
+const defaultSecret = ref('')
 const joinCode = ref('')
 const generatedCode = ref('')
 const isCreating = ref(false)
 const copyStatus = ref('Copy Code')
 
-const gameUrl = computed(() => {
+// Invitation URL for others (redirects to Lobby with joinCode parameter)
+const shareUrl = computed(() => {
   if (!generatedCode.value) return ''
-  const protocol = import.meta.env.VITE_CLIENT_PROTOCOL || 'http'
-  const host = import.meta.env.VITE_CLIENT_URL || 'localhost'
-  const port = import.meta.env.VITE_CLIENT_PORT || '5173'
-  const base = `${protocol}://${host}:${port}`
-  return `${base}/?joinCode=${generatedCode.value}`
+  const url = new URL('/', window.location.origin)
+  url.searchParams.append('joinCode', generatedCode.value)
+  return url.toString()
 })
 
 const checkRouteState = () => {
@@ -197,10 +223,16 @@ const checkRouteState = () => {
     if (!generatedCode.value) {
       generatedCode.value = generateUniqueId()
     }
+    if (!defaultSecret.value) {
+      defaultSecret.value = generateSecretCode()
+    }
+    secretCode.value = ''
   } else {
     isCreating.value = false
     generatedCode.value = ''
-    playerName.value = '' // Reset name when going back
+    playerName.value = ''
+    secretCode.value = ''
+    defaultSecret.value = ''
   }
 }
 
@@ -208,6 +240,12 @@ onMounted(() => {
   checkRouteState()
   if (route.query.joinCode) {
     joinCode.value = route.query.joinCode.toUpperCase()
+  }
+})
+
+watch(() => route.query.joinCode, (newCode) => {
+  if (newCode) {
+    joinCode.value = newCode.toUpperCase()
   }
 })
 
@@ -220,7 +258,7 @@ const isGameCodeValid = computed(() => {
 })
 
 const isValidJoin = computed(() => {
-  return playerName.value.trim().length > 0 && isGameCodeValid.value
+  return playerName.value.trim().length > 0 && isGameCodeValid.value && secretCode.value.length === 4
 })
 
 const joinGame = () => {
@@ -228,7 +266,7 @@ const joinGame = () => {
     router.push({
       name: 'game',
       params: { gameCode: joinCode.value.toUpperCase() },
-      query: { playerName: playerName.value }
+      query: { playerName: playerName.value, secretCode: secretCode.value }
     })
   }
 }
@@ -242,25 +280,13 @@ const cancelCreate = () => {
   router.push({ name: 'home' })
 }
 
-// const copyToClipboard = async () => {
-//   try {
-//     await navigator.clipboard.writeText(gameUrl.value)
-//     copyStatus.value = 'Copied!'
-//     setTimeout(() => {
-//       copyStatus.value = 'Copy Code'
-//     }, 2000)
-//   } catch (err) {
-//     copyStatus.value = 'Error'
-//   }
-// }
-
 const copyToClipboard = async () => {
   try {
     if (navigator.clipboard) {
-      await navigator.clipboard.writeText(gameUrl.value)
+      await navigator.clipboard.writeText(shareUrl.value)
     } else {
       const textarea = document.createElement('textarea')
-      textarea.value = gameUrl.value
+      textarea.value = shareUrl.value
       textarea.style.position = 'fixed'
       textarea.style.opacity = '0'
       document.body.appendChild(textarea)
@@ -279,11 +305,12 @@ const copyToClipboard = async () => {
 }
 
 const startGame = () => {
-  if (playerName.value.trim()) {
+  const finalSecret = secretCode.value.length === 4 ? secretCode.value : defaultSecret.value
+  if (playerName.value.trim() && finalSecret) {
     router.push({
       name: 'game',
       params: { gameCode: generatedCode.value },
-      query: { playerName: playerName.value }
+      query: { playerName: playerName.value, secretCode: finalSecret }
     })
   }
 }

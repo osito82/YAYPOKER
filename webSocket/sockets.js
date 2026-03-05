@@ -1,8 +1,8 @@
 class Socket {
-  static torneoSockets = new Map() // Map<idTorneo, Map<name, socket>>
+  static torneoSockets = new Map() // Map<idTorneo, Map<secretCode, socket>>
 
   static addSocket(socket, idTorneo) {
-    const { id, name } = socket
+    const { id, name, secretCode } = socket
 
     if (!this.torneoSockets.has(idTorneo)) {
       this.torneoSockets.set(idTorneo, new Map())
@@ -10,29 +10,29 @@ class Socket {
 
     const torneoSockets = this.torneoSockets.get(idTorneo)
 
-    if (torneoSockets.has(name)) {
-      torneoSockets.set(name, socket)
-      console.log(`Socket - addSocket - Reconnected - ${name} - ${id}`)
+    if (torneoSockets.has(secretCode)) {
+      torneoSockets.set(secretCode, socket)
+      console.log(`Socket - addSocket - Reconnected - ${name} (${secretCode}) - ${id}`)
     } else {
-      torneoSockets.set(name, socket)
-      console.log(`Socket - addSocket - Connected - ${name} - ${id}.`)
+      torneoSockets.set(secretCode, socket)
+      console.log(`Socket - addSocket - Connected - ${name} (${secretCode}) - ${id}.`)
     }
   }
 
   static removeSocket(socket, idTorneo) {
     const torneoSockets = this.torneoSockets.get(idTorneo)
-    if (torneoSockets?.has(socket.name)) {
-      torneoSockets.delete(socket.name)
+    if (torneoSockets?.has(socket.secretCode)) {
+      torneoSockets.delete(socket.secretCode)
       console.log(
-        `Socket - removeSocket - Removed - ${socket.name} - ${socket.id}.`,
+        `Socket - removeSocket - Removed - ${socket.name} (${socket.secretCode}) - ${socket.id}.`,
       )
     } else if (torneoSockets) {
       console.log(
-        `Socket - removeSocket - Not Found in Torneo - ${socket.name} - ${socket.id}.`,
+        `Socket - removeSocket - Not Found in Torneo - ${socket.name} (${socket.secretCode}) - ${socket.id}.`,
       )
     } else {
       console.log(
-        `Socket - removeSocket - Not Found - ${socket.name} - ${socket.id}.`,
+        `Socket - removeSocket - Not Found - ${socket.name} (${socket.secretCode}) - ${socket.id}.`,
       )
     }
   }
@@ -63,11 +63,11 @@ static socketExists(idTorneo, id) {
   return false
 }
 
-  static sendToPlayer(idTorneo, playerName, data) {
+  static sendToPlayer(idTorneo, secretCode, data) {
     const torneoSockets = this.getSocketsByTorneo(idTorneo)
     if (!torneoSockets) return
 
-    const playerSocketWrapper = torneoSockets.get(playerName)
+    const playerSocketWrapper = torneoSockets.get(secretCode)
 
     if (
       playerSocketWrapper &&
@@ -76,7 +76,7 @@ static socketExists(idTorneo, id) {
     ) {
       playerSocketWrapper.socket.send(JSON.stringify({ message: data }))
     } else {
-      console.log(`Socket not found or invalid for ${playerName}`)
+      console.log(`Socket not found or invalid for secretCode: ${secretCode}`)
     }
   }
 

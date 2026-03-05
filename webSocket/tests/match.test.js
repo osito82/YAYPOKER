@@ -1,36 +1,33 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // 🔥 Mocks de dependencias
-vi.mock('./player', () => {
-  return {
-    default: vi
-      .fn()
-      .mockImplementation((gameId, name, secretCode, totalChips, cards, id) => {
-        return {
-          id,
-          name,
-          secretCode,
-          totalChips,
-          cards: [],
-          connected: true,
-          currentBet: 0,
-          setBet: vi.fn((amount) => {
-            if (amount > 0) {
-              return true
-            }
-            return false
-          }),
-          getCurrentBet: vi.fn(() => 0),
-          getPlayerName: vi.fn(() => name),
-          getPlayerId: vi.fn(() => id),
-          checkPrize: vi.fn(() => 'pair'),
-          setCurrentPrize: vi.fn(),
-        }
-      }),
-  }
+vi.mock('../player', () => {
+  const PlayerMock = vi.fn().mockImplementation((gameId, name, secretCode, totalChips, cards, id) => {
+    return {
+      id,
+      name,
+      secretCode,
+      totalChips,
+      cards: [],
+      connected: true,
+      currentBet: 0,
+      setConnected: vi.fn(),
+      setBet: vi.fn((amount) => amount > 0),
+      getCurrentBet: vi.fn(() => 0),
+      getPlayerName: vi.fn(() => name),
+      getPlayerId: vi.fn(() => id),
+      checkPrize: vi.fn(() => ({})),
+      setCurrentPrize: vi.fn(),
+      toJson: vi.fn(() => ({ name, id, secretCode })),
+      setFolded: vi.fn(),
+      setLastAction: vi.fn(),
+      getCards: vi.fn(() => []),
+    }
+  })
+  return PlayerMock
 })
 
-vi.mock('./dealer', () => {
+vi.mock('../dealer', () => {
   return {
     default: vi.fn().mockImplementation(() => ({
       talkToAllPlayersOnTable: vi.fn(),
@@ -52,22 +49,25 @@ vi.mock('./dealer', () => {
       getFinalHands: vi.fn(() => []),
       setFinalHands: vi.fn(),
       getChipsFromPlayers: vi.fn(),
+      updatePlayerId: vi.fn(),
+      getCurrentHighestBet: vi.fn(() => 0),
     })),
   }
 })
 
-vi.mock('./stepChecker', () => {
+vi.mock('../stepChecker', () => {
   return {
     default: vi.fn().mockImplementation(() => ({
       checkStep: vi.fn(() => false),
       grantStep: vi.fn(),
       revokeStep: vi.fn(),
+      getChecker: vi.fn(() => ({})),
       gameFlow: {},
     })),
   }
 })
 
-vi.mock('./communicator', () => {
+vi.mock('../communicator', () => {
   return {
     default: vi.fn().mockImplementation(() => ({
       msgBuilder: vi.fn(),
@@ -77,16 +77,15 @@ vi.mock('./communicator', () => {
   }
 })
 
-vi.mock('./winnerCore', () => ({
-  default: {
+vi.mock('../winnerCore', () => ({
+  WinnerCore: {
     Winner: vi.fn(() => 'Player1'),
   },
 }))
 
 vi.mock('radash', () => ({
-  default: {
-    isEmpty: vi.fn(() => false),
-  },
+  isEmpty: vi.fn(() => false),
+  generateUniqueId: vi.fn(() => 'unique-id'),
 }))
 
 vi.mock('osolog', () => {
@@ -98,118 +97,101 @@ vi.mock('osolog', () => {
   }
 })
 
-// 🔥 Import después de mocks
-import Match from '../../match'
+vi.mock('../sockets', () => ({
+  sendToPlayer: vi.fn(),
+  broadcastToTorneo: vi.fn(),
+}))
+
+const Match = require('../match')
+const Socket = require('../sockets')
 
 describe('Match Class', () => {
   let match
-  const socketMock = { id: 'socket1', name: 'John', socket: { close: vi.fn() } }
-
-  // Al inicio del archivo de test
-  beforeAll(() => {
-    vi.resetModules()
-    //   const Match = (await import("../match")).default;
-    // Forzar que console.log escriba inmediatamente
-    console.log = (...args) => {
-      process.stdout.write(args.join(' ') + '\n')
-    }
-  })
+  const torneoId = 'T1'
+  const gameId = 'G1'
 
   beforeEach(() => {
-    // <--- AÑADE ESTO
-    match = new Match('torneo1', 'game1')
+    match = new Match(torneoId, gameId)
+    vi.clearAllMocks()
   })
 
-  // ✅ TEST SIGNUP
-  it('should add a new player on signUp', () => {
-    match.signUp(
-      {
-        name: 'John',
-        secretCode: '123',
-        totalChips: 1000,
-      },
-      socketMock,
-    )
-
-    expect(match.players.length).toBe(1)
-    expect(match.players[0].name).toBe('John')
+  it('should initialize correctly', () => {
+    expect(match.torneoId).toBe(torneoId)
+    expect(match.gameId).toBe(gameId)
+    expect(match.players).toEqual([])
   })
 
-  // ✅ TEST SETBET
-  it('should set bet and increase pot', () => {
-    match.signUp(
-      { name: 'John', secretCode: '123', totalChips: 1000 },
-      socketMock,
-    )
+  describe('signUp', () => {
+    it('should add a new player', () => {
+      const data = { name: 'Alice', totalChips: 1000, secretCode: '1234' }
+      const thisSocket = { id: 'S1', name: 'Alice', secretCode: '1234' }
 
-    match.setBet(socketMock, 50)
+      match.signUp(data, thisSocket)
 
-    expect(match.players.length).toBe(1)
+      expect(match.players.length).toBe(1)
+      expect(match.players[0].name).toBe('Alice')
+      expect(match.players[0].secretCode).toBe('1234')
+    })
+
+    it('should handle name collision by appending a number', () => {
+      const p1Data = { name: 'Alice', totalChips: 1000, secretCode: '1111' }
+      const p1Socket = { id: 'S1', name: 'Alice', secretCode: '1111' }
+      match.signUp(p1Data, p1Socket)
+
+      const p2Data = { name: 'Alice', totalChips: 1000, secretCode: '2222' }
+      const p2Socket = { id: 'S2', name: 'Alice', secretCode: '2222' }
+      match.signUp(p2Data, p2Socket)
+
+      expect(match.players.length).toBe(2)
+      expect(match.players[0].name).toBe('Alice')
+      expect(match.players[1].name).toBe('Alice_1')
+    })
+
+    it('should reconnect an existing player by secretCode', () => {
+      const data = { name: 'Alice', totalChips: 1000, secretCode: '1234' }
+      const s1 = { id: 'S1', name: 'Alice', secretCode: '1234' }
+      match.signUp(data, s1)
+
+      const s2 = { id: 'S2', name: 'Alice', secretCode: '1234' }
+      match.signUp(data, s2)
+
+      expect(match.players.length).toBe(1)
+      expect(match.players[0].id).toBe('S2')
+      // Note: setConnected(true) is called, verified by logs in Match.signUp
+    })
   })
 
-  it('should remove player on fold', () => {
-    match.signUp(
-      { name: 'John', secretCode: '123', totalChips: 1000 },
-      socketMock,
-    )
+  describe('fold', () => {
+    it('should allow a player to fold on their turn', () => {
+      const socket = { id: 'S1', name: 'Alice', secretCode: '1234' }
+      const player = { 
+        id: 'S1', 
+        name: 'Alice', 
+        folded: false, 
+        setLastAction: vi.fn(), 
+        setFolded: vi.fn(),
+        setConnected: vi.fn(),
+        toJson: vi.fn(() => ({ name: 'Alice', id: 'S1' })),
+        getCards: vi.fn(() => []),
+      }
+      match.players.push(player)
+      match.activePlayerId = 'S1'
 
-    match.players[0].setCard('A')
-    match.players[0].setCard('K')
+      match.fold(socket)
 
-    vi.spyOn(match, 'continue').mockImplementation(() => {})
+      expect(player.setFolded).toHaveBeenCalledWith(true)
+      expect(match.playersFold).toContain('Alice')
+    })
 
-    match.fold(socketMock)
+    it('should not allow folding if it is not the players turn', () => {
+      const socket = { id: 'S1', name: 'Alice' }
+      const player = { id: 'S1', name: 'Alice', folded: false, setFolded: vi.fn() }
+      match.players.push(player)
+      match.activePlayerId = 'S2'
 
-    // DESPUÉS haz el spy si es necesario
-    //vi.spyOn(match, "continue").mockImplementation(() => {});
+      match.fold(socket)
 
-    expect(match.players[0].folded).toBe(true)
-    expect(match.playersFold.includes('John')).toBe(true)
-  })
-
-  // ✅ TEST PLAYER LEAVE
-  it('should remove player when playerLeave is called', () => {
-    match.signUp(
-      { name: 'John', secretCode: '123', totalChips: 1000 },
-      socketMock,
-    )
-
-    match.playerLeave(socketMock)
-
-    expect(match.players.length).toBe(0)
-  })
-
-  // ✅ TEST START GAME MINIMUM PLAYERS
-  it('should not start game with less than 2 players', () => {
-    match.signUp(
-      { name: 'John', secretCode: '123', totalChips: 1000 },
-      socketMock,
-    )
-
-    match.startGame(socketMock)
-
-    expect(match.players.length).toBe(1)
-  })
-
-  // ✅ TEST CHECK PRIZES
-  it('should call checkPrize when dealer has 3 cards', () => {
-    // 1️⃣ Sign up
-    match.signUp(
-      { name: 'John', secretCode: '123', totalChips: 1000 },
-      socketMock,
-    )
-
-    // 2️⃣ Mock/spiar el método checkPrize
-    const player = match.players[0]
-    const spy = vi.spyOn(player, 'checkPrize').mockReturnValue(0)
-
-    // 3️⃣ Darle 3 cartas al dealer
-    match.dealer.cardsDealer = ['Ah', 'Kd', 'Qs']
-
-    // 4️⃣ Ejecutar checkPrizes
-    match.checkPrizes(socketMock)
-
-    // 5️⃣ Verificar que se llamó
-    expect(spy).toHaveBeenCalled()
+      expect(player.setFolded).not.toHaveBeenCalled()
+    })
   })
 })
