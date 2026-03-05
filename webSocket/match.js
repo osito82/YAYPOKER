@@ -59,6 +59,8 @@ class Match {
 
     this.oddsCalculator = new PokerOddsCalculator()
 
+    this.lastActivity = Date.now()
+
     this.log
       .Template({
         name: 'brakets',
@@ -117,6 +119,7 @@ class Match {
   }
 
   signUp(data, thisSocket) {
+    this.lastActivity = Date.now()
     const { id: thisSocketId, name: thisSocketName, secretCode: thisSecretCode } = thisSocket
     
     // Buscar jugador existente por secretCode para re-conexión
@@ -585,6 +588,7 @@ class Match {
   }
 
   continue(thisSocket) {
+    this.lastActivity = Date.now()
     const delay = this.isRunout ? 2000 : 500
     setTimeout(() => {
       this.startGame(thisSocket)

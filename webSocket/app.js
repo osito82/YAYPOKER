@@ -18,6 +18,27 @@ const Torneo = require('./torneo')
 const startTime = new Date()
 const log = new osolog()
 
+// Global error handlers to prevent server crashes
+process.on('uncaughtException', (error) => {
+  log.Template({ name: 'brakets', title: 'SERVER - Uncaught Exception', date: true })
+    .R({ error: error.message, stack: error.stack })
+})
+
+process.on('unhandledRejection', (reason, promise) => {
+  log.Template({ name: 'brakets', title: 'SERVER - Unhandled Rejection', date: true })
+    .R({ reason: reason?.message || reason, stack: reason?.stack })
+})
+
+// Periodic garbage collector for inactive/abandoned matches
+// Runs every 10 minutes
+setInterval(() => {
+  const removedCount = Torneo.removeInactiveMatches(3600000) // 1 hour idle
+  if (removedCount > 0) {
+    log.Template({ name: 'brakets', title: 'SERVER - GC', date: true })
+      .R({ msg: 'Cleaned up inactive matches', count: removedCount })
+  }
+}, 600000)
+
 // Constantes para mejorar mantenibilidad
 const MAX_ID_LENGTH = 25
 
@@ -129,7 +150,14 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     log.Template({ name: 'brakets', title: 'SERVER - Disconnection', date: true })
       .R({ playerName })
-    match.pause(thisSocket)
+    try {
+      if (match) {
+        match.pause(thisSocket)
+      }
+    } catch (error) {
+      log.Template({ name: 'brakets', title: 'SERVER - Disconnection Error', date: true })
+        .R({ error: error.message, playerName })
+    }
   })
 
   // Manejo de errores del WebSocket

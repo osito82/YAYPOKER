@@ -144,7 +144,7 @@ describe('Match Class', () => {
 
       expect(match.players.length).toBe(2)
       expect(match.players[0].name).toBe('Alice')
-      expect(match.players[1].name).toBe('Alice_1')
+      expect(match.players[1].name).toBe('Alice-1')
     })
 
     it('should reconnect an existing player by secretCode', () => {
