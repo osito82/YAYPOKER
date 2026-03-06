@@ -11,24 +11,26 @@ export const useResponsiveStore = defineStore('responsive', () => {
   }
   window.addEventListener('resize', updateWidth)
 
-  // Computed card size
-  const screenSize = computed(() => {
-    if (windowWidth.value < 640) return 'small'
-    if (windowWidth.value < 1024) return 'medium'
-    return 'large'
-  })
+
+
+    const screenSize = computed(() => {
+  if (windowWidth.value < 640) return 'xsmall'  // Móvil vertical (Portrait)
+  if (windowWidth.value < 768) return 'small'   // Móvil horizontal (Landscape) / Phablet
+  if (windowWidth.value < 1024) return 'medium' // Tableta (iPad) / Laptop pequeño
+  return 'large'  // Desktop estándar
+})
 
   // Computed card size
   const cardSize = computed(() => {
-    if (windowWidth.value < 640) return 'small'
-    if (windowWidth.value < 1024) return 'medium'
+    if (screenSize.value === 'xsmall') return 'small'
+    if (screenSize.value === 'small' || screenSize.value === 'medium') return 'medium'
     return 'large'
   })
 
   // Computed card crop percentage
   const cardPercentage = computed(() => {
-    if (windowWidth.value < 640) return 40
-    if (windowWidth.value < 1024) return 55
+    if (screenSize.value === 'xsmall') return 40
+    if (screenSize.value === 'small' || screenSize.value === 'medium') return 55
     return 100
   })
 

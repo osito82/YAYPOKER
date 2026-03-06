@@ -10,9 +10,9 @@
     >
       <div
         id="main-table-surface"
-        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center border-b-[6px] border-neutral-900/60 transition-all duration-500 pt-16"
+        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center border-b-[6px] border-neutral-900/60 transition-all duration-500"
         :class="[
-          responsive.screenSize === 'large' ? 'justify-center pb-12' : 'justify-end pb-0'
+          responsive.screenSize === 'large' ? 'pt-16 justify-center pb-12' : 'pt-12 justify-center pb-4'
         ]"
       >
         <!-- Modern Grid Pattern -->
@@ -61,7 +61,7 @@
             id="community-cards-row"
             class="flex items-end justify-center px-4 w-full overflow-hidden transition-all duration-300"
             :class="[
-              responsive.screenSize === 'small' ? 'gap-0' : 'gap-2 sm:gap-3 md:gap-4',
+              ['xsmall', 'small'].includes(responsive.screenSize) ? 'gap-0' : 'gap-2 sm:gap-3 md:gap-4',
             ]"
           >
             <template v-for="i in 5" :key="i">
@@ -69,7 +69,7 @@
                 :id="'card-wrapper-' + i"
                 class="shrink-0 flex items-end justify-center transition-all duration-300"
                 :class="{
-                  '-ml-5 first:ml-0': responsive.screenSize === 'small',
+                  '-ml-5 first:ml-0': ['xsmall', 'small'].includes(responsive.screenSize),
                 }"
               >
                 <template v-if="communityCards[i - 1]">
