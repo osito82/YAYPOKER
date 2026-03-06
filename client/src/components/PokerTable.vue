@@ -11,9 +11,7 @@
       <div
         id="main-table-surface"
         class="w-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-start rounded-xl lg:rounded-2xl border-[6px] border-neutral-900/60"
-        :class="[
-          responsive.screenSize === 'large' ? 'h-[85%]' : 'h-[80%]',
-        ]"
+        :class="[responsive.screenSize === 'large' ? 'h-[85%]' : 'h-[80%]']"
       >
         <!-- Modern Grid Pattern -->
         <div
@@ -42,7 +40,9 @@
           id="table-elements-stack"
           class="relative z-10 flex flex-col items-center w-full h-full"
           :class="[
-            responsive.screenSize === 'large' ? 'justify-start pt-8 lg:pt-12 gap-10' : 'justify-between pt-4 pb-0'
+            responsive.screenSize === 'large'
+              ? 'justify-start pt-8 lg:pt-12 gap-10'
+              : 'justify-between pt-4 pb-0',
           ]"
         >
           <!-- Pot -->
@@ -115,4 +115,3 @@ const props = defineProps({
   activePlayerId: String,
 })
 </script>
-

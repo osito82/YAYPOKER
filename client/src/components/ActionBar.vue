@@ -419,7 +419,6 @@ watch(
     if (props.betAmount > props.maxBet) emit('update:betAmount', props.maxBet)
   },
 )
-
 </script>
 
 <style scoped>

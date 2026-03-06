@@ -20,14 +20,13 @@ const routes = [
     name: 'game',
     path: '/game/:gameCode',
     component: Game,
-    beforeEnter: (to, from, next) => {
+    beforeEnter: (to, from) => {
       const { playerName, secretCode } = to.query
       if (!playerName || !secretCode) {
-        // Redirigir a Home si falta info, pasando el código para pre-poblar
-        next({ name: 'home', query: { joinCode: to.params.gameCode } })
-      } else {
-        next()
+        // Redirige a Home si falta info, pasando joinCode
+        return { name: 'home', query: { joinCode: to.params.gameCode } }
       }
+      return true // continuar normalmente
     },
   },
   { name: 'about', path: '/about', component: About },

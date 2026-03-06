@@ -323,7 +323,9 @@ app.get('/*splat', (req, res) => {
 })
 
 // Inicialización del servidor
-const PORT = process.env.PORT || '8888'
+const PORT = process.env.VITE_WS_PORT || '8888'
+const PROTOCOL = 'http'
+const BASE = process.env.VITE_WS_URL || 'localhost'
 
 if (require.main === module) {
   server.listen(PORT, () => {
@@ -331,7 +333,7 @@ if (require.main === module) {
       .Template({ name: 'brakets', title: 'SERVER - Listening', date: true })
       .R({
         port: PORT,
-        url: `http://localhost:${PORT}`,
+        url: `${PROTOCOL}://${BASE}:${PORT}`,
         env: process.env.NODE_ENV || 'development',
       })
   })

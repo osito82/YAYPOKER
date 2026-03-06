@@ -259,7 +259,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import QRCodeVue3 from 'qrcode-vue3'
 import Logo from '../components/Logo.vue'
-import { generateUniqueId, generateSecretCode } from '../vutils'
+import { generateUniqueId, generateSecretCode, urlsFactory } from '../vutils'
 
 const router = useRouter()
 const route = useRoute()
@@ -276,7 +276,9 @@ const copyStatus = ref('Copy Code')
 // Invitation URL for others (redirects to Lobby with joinCode parameter)
 const shareUrl = computed(() => {
   if (!generatedCode.value) return ''
-  const url = new URL('/', window.location.origin)
+
+  const urls = urlsFactory()
+  const url = urls.url
   url.searchParams.append('joinCode', generatedCode.value)
   return url.toString()
 })

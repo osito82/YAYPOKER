@@ -199,7 +199,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePokerStore } from '../store/pokerStore'
 import useWebSocket from '../use/useSockets'
-import { v4 as uuidv4 } from 'uuid'
+import { urlsFactory } from '../vutils'
 
 import PokerTable from '../components/PokerTable.vue'
 import ActionBar from '../components/ActionBar.vue'
@@ -226,15 +226,11 @@ const getSavedName = () => {
 const playerName = getSavedName()
 const secretCode = route.query.secretCode || generateSecretCode()
 
-const wsPort = import.meta.env.VITE_WS_PORT || '8888'
-const wsUrl = import.meta.env.VITE_WS_URL || 'localhost'
-const wsProtocol = import.meta.env.VITE_WS_PROTOCOL || `ws`
-const wsUrlwPort = `${wsProtocol}://${wsUrl}:${wsPort}`
-
 const connectionOptions = { gameCode, playerName, secretCode }
 
+const urls = urlsFactory()
 const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
-  wsUrlwPort,
+  urls.server,
   connectionOptions,
 )
 

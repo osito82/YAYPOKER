@@ -11,7 +11,7 @@ export const useResponsiveStore = defineStore('responsive', () => {
   }
   window.addEventListener('resize', updateWidth)
 
-    // Computed card size
+  // Computed card size
   const screenSize = computed(() => {
     if (windowWidth.value < 640) return 'small'
     if (windowWidth.value < 1024) return 'medium'

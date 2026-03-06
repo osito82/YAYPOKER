@@ -19,10 +19,19 @@
         :class="colorClass"
       >
         <!-- Número más abajo con translate-y y símbolo más gordo con font-black y scale -->
-        <span :class="[sizeOption.cornerText, 'font-extrabold', 'translate-y-1.5']">
+        <span
+          :class="[sizeOption.cornerText, 'font-extrabold', 'translate-y-1.5']"
+        >
           {{ numSymbol.letter }}
         </span>
-        <span :class="[sizeOption.cornerSymbol, 'font-black', 'scale-125', 'inline-block']">
+        <span
+          :class="[
+            sizeOption.cornerSymbol,
+            'font-black',
+            'scale-125',
+            'inline-block',
+          ]"
+        >
           {{ numSymbol.symbol }}
         </span>
       </div>
@@ -30,23 +39,22 @@
       <div
         id="card-center-symbol-container"
         class="absolute inset-0 flex justify-center"
-        :class="[
-          colorClass,
-          isCropped ? 'items-start pt-0' : 'items-center'
-        ]"
+        :class="[colorClass, isCropped ? 'items-start pt-0' : 'items-center']"
       >
-        <div 
-          v-if="isCropped" 
+        <div
+          v-if="isCropped"
           class="flex items-center justify-center w-full gap-4 -mt-0"
         >
-          <span :class="[sizeOption.cropTextSize, 'font-black tracking-tighter']">
+          <span
+            :class="[sizeOption.cropTextSize, 'font-black tracking-tighter']"
+          >
             {{ numSymbol.letter }}
           </span>
           <span :class="sizeOption.cropTextSize">
             {{ numSymbol.symbol }}
           </span>
         </div>
-        
+
         <span v-else :class="sizeOption.centerSymbol">
           {{ numSymbol.symbol }}
         </span>
@@ -59,10 +67,19 @@
         :class="colorClass"
       >
         <!-- Mismos ajustes para la esquina inferior -->
-        <span :class="[sizeOption.cornerText, 'font-extrabold', 'translate-y-1.5']">
+        <span
+          :class="[sizeOption.cornerText, 'font-extrabold', 'translate-y-1.5']"
+        >
           {{ numSymbol.letter }}
         </span>
-        <span :class="[sizeOption.cornerSymbol, 'font-black', 'scale-125', 'inline-block']">
+        <span
+          :class="[
+            sizeOption.cornerSymbol,
+            'font-black',
+            'scale-125',
+            'inline-block',
+          ]"
+        >
           {{ numSymbol.symbol }}
         </span>
       </div>
@@ -103,7 +120,7 @@ const sizeOption = computed(() => {
         cornerText: 'text-2xl',
         cornerSymbol: 'text-xl',
         centerSymbol: 'text-7xl',
-        cropTextSize: 'text-7xl', 
+        cropTextSize: 'text-7xl',
         heightClass: 'h-48',
         width: 'w-36',
         heightPx: 192,

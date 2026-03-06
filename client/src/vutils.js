@@ -1,5 +1,3 @@
-import { v4 } from 'uuid'
-
 function generateUniqueId() {
   const randomStr = () =>
     Math.random().toString(36).substring(2, 7).toUpperCase()
@@ -59,6 +57,34 @@ function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 }
 
+function urlsFactory() {
+  const host = window.location.hostname
+  const pageProtocol = window.location.protocol
+
+  // Detect correct websocket protocol
+  const wsProtocol =
+    import.meta.env.VITE_WS_PROTOCOL ||
+    (pageProtocol === 'https:' ? 'wss' : 'ws')
+
+  const clientProtocol =
+    import.meta.env.VITE_CLIENT_PROTOCOL || pageProtocol.replace(':', '')
+
+  const wsHost = import.meta.env.VITE_WS_URL || host
+  const clientHost = import.meta.env.VITE_CLIENT_URL || host
+
+  const wsPort = import.meta.env.VITE_WS_PORT || '8888'
+  const clientPort =
+    import.meta.env.VITE_CLIENT_PORT || window.location.port || '5173'
+
+  const server = `${wsProtocol}://${wsHost}:${wsPort}`
+  const url = `${clientProtocol}://${clientHost}:${clientPort}`
+
+  return {
+    server,
+    url,
+  }
+}
+
 export {
   generateUniqueId,
   generateSecretCode,
@@ -66,4 +92,5 @@ export {
   letterToSymbol,
   letterToNumber,
   whatColor,
+  urlsFactory,
 }
