@@ -1,13 +1,13 @@
 <template>
   <div
     id="poker-action-hud"
-    class="fixed bottom-0 left-0 right-0 z-50 pointer-events-none"
+    class="w-full z-50"
   >
     <!-- Turn Timer -->
     <div
       v-if="isMyTurn && progress > 0"
       id="hud-turn-timer-container"
-      class="w-full h-0.5 lg:h-1 bg-gray-900/40 backdrop-blur-sm pointer-events-auto"
+      class="w-full h-0.5 lg:h-1 bg-gray-900/40 backdrop-blur-sm"
     >
       <div
         id="hud-turn-timer-progress"

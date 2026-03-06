@@ -51,12 +51,12 @@
     <!-- GAME VIEWPORT & SIDEPANEL CONTAINER -->
     <div
       id="main-layout-container"
-      class="flex-grow flex flex-col lg:flex-row overflow-hidden relative"
+      class="flex-grow flex flex-col md:flex-row overflow-hidden relative"
     >
       <!-- TOP AREA: TABLE & HUD -->
       <div
         id="game-primary-area"
-        class="flex flex-col min-w-0 relative shrink-0 lg:flex-1 lg:h-full"
+        class="flex flex-col min-w-0 relative shrink-0 md:flex-[7] md:h-full"
       >
         <!-- TOP METADATA BAR -->
         <nav
@@ -120,50 +120,39 @@
           </div>
         </nav>
 
-        <!-- MAIN STAGE (Table) -->
+        <!-- MAIN STAGE (Table & Terminal) -->
         <main
           id="viewport-stage"
-          class="h-[40vh] lg:h-auto lg:flex-grow relative overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
+          class="flex-grow flex flex-col overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
         >
-          <PokerTable
-            id="component-poker-table"
-            class="w-full h-full"
-            :pot="pokerStore.getPot"
-            :communityCards="pokerStore.getCommunityCards"
-            :players="allPlayers"
-            :activePlayerId="pokerStore.getActivePlayerId"
-          />
-
-          <!-- Notification Toast -->
-          <Transition
-            enter-active-class="transition duration-300 ease-out"
-            enter-from-class="translate-y-4 opacity-0"
-            enter-to-class="translate-y-0 opacity-100"
-            leave-active-class="transition duration-200 ease-in"
-            leave-from-class="translate-y-0 opacity-100"
-            leave-to-class="translate-y-4 opacity-0"
+          <!-- 1. TABLE AREA: Takes most of the space -->
+          <div
+            id="table-area"
+            class="flex-[3] relative min-h-0"
           >
-            <div
-              v-if="pokerStore.getDisplayMsg && !isMyTurn"
-              id="game-toast"
-              class="absolute bottom-32 left-1/2 -translate-x-1/2 z-30"
-            >
-              <div
-                id="toast-content"
-                class="bg-black/80 backdrop-blur-xl px-6 py-2 rounded-full border border-white/10 shadow-2xl"
-              >
-                <span
-                  id="toast-text"
-                  class="text-sm font-bold text-gray-100 uppercase tracking-widest"
-                  >{{ pokerStore.getDisplayMsg }}</span
-                >
-              </div>
-            </div>
-          </Transition>
+            <PokerTable
+              id="component-poker-table"
+              class="w-full h-full"
+              :pot="pokerStore.getPot"
+              :communityCards="pokerStore.getCommunityCards"
+              :players="allPlayers"
+              :activePlayerId="pokerStore.getActivePlayerId"
+            />
+          </div>
+
+          <!-- 2. TERMINAL AREA: Dedicated space at the bottom of the stage -->
+          <div
+            id="terminal-area"
+            class="flex-1 min-h-[140px] max-h-[220px] bg-black/20 border-t border-white/5 py-2 lg:py-4 flex items-center"
+          >
+            <MessageTerminal
+              :logs="[...pokerStore.getDealerLog].reverse()"
+            />
+          </div>
         </main>
 
-        <!-- PLAYER HUD -->
-        <footer id="hud-zone" class="z-50 shrink-0">
+        <!-- PLAYER HUD: Now part of the flow, doesn't overlap -->
+        <footer id="hud-zone" class="shrink-0 z-50">
           <ActionBar
             id="component-action-bar"
             :isMyTurn="isMyTurn"
@@ -205,6 +194,7 @@ import PokerTable from '../components/PokerTable.vue'
 import ActionBar from '../components/ActionBar.vue'
 import WinnerOverlay from '../components/WinnerOverlay.vue'
 import PlayerSidepanel from '../components/PlayerSidepanel.vue'
+import MessageTerminal from '../components/MessageTerminal.vue'
 
 const route = useRoute()
 const pokerStore = usePokerStore()
