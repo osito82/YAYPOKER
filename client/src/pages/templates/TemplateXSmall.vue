@@ -36,8 +36,8 @@
     <WinnerOverlay :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
 
     <div id="main-game-layout-TemplateXSmall" class="flex-grow flex flex-col overflow-hidden relative">
-      <!-- TOP AREA -->
-      <div id="primary-game-view-TemplateXSmall" class="flex flex-col min-w-0 relative flex-[3]">
+      <!-- TOP AREA: Table Only -->
+      <div id="primary-game-view-TemplateXSmall" class="flex flex-col min-w-0 relative flex-none">
         <main id="poker-table-viewport-TemplateXSmall" class="flex-none h-auto overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]">
           <div id="poker-table-container-TemplateXSmall" class="flex-none relative min-h-0">
             <PokerTable
@@ -50,25 +50,9 @@
             />
           </div>
         </main>
-        <footer id="game-hud-bar-TemplateXSmall" class="shrink-0 z-50">
-          <ActionBar
-            :isMyTurn="isMyTurn"
-            :canBlind="canBlind"
-            :options="options"
-            :balance="myPlayer?.chips || 0"
-            :currentBet="myPlayer?.currentBet || 0"
-            :betAmount="betAmount"
-            :minBet="minBet"
-            :maxBet="maxBet"
-            :playerCards="myPlayer?.cards || []"
-            @action="(a) => $emit('action', a)"
-            @setQuickBet="(m) => $emit('setQuickBet', m)"
-            @update:betAmount="(val) => $emit('update:betAmount', val)"
-          />
-        </footer>
       </div>
 
-      <!-- SIDEPANEL -->
+      <!-- MIDDLE AREA: Sidepanel (Terminal first, then Players) -->
       <PlayerSidepanel
         id="game-sidepanel-container-TemplateXSmall"
         class="flex-1 min-h-0"
@@ -77,7 +61,26 @@
         :myPlayerId="myPlayerId"
         :pot="pot"
         :logs="logs"
+        :invertLayout="true"
       />
+
+      <!-- BOTTOM AREA: Action HUD -->
+      <footer id="game-hud-bar-TemplateXSmall" class="shrink-0 z-50">
+        <ActionBar
+          :isMyTurn="isMyTurn"
+          :canBlind="canBlind"
+          :options="options"
+          :balance="myPlayer?.chips || 0"
+          :currentBet="myPlayer?.currentBet || 0"
+          :betAmount="betAmount"
+          :minBet="minBet"
+          :maxBet="maxBet"
+          :playerCards="myPlayer?.cards || []"
+          @action="(a) => $emit('action', a)"
+          @setQuickBet="(m) => $emit('setQuickBet', m)"
+          @update:betAmount="(val) => $emit('update:betAmount', val)"
+        />
+      </footer>
     </div>
   </div>
 </template>

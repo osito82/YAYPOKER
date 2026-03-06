@@ -223,6 +223,7 @@ const props = defineProps({
   myPlayerId: { type: String, default: null },
   pot: { type: Number, default: 0 },
   logs: { type: Array, default: () => [] },
+  invertLayout: { type: Boolean, default: false },
 })
 
 const delayedActivePlayerId = ref(props.activePlayerId)
