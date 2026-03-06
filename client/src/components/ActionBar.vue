@@ -1,28 +1,28 @@
 <template>
   <div
-    id="poker-action-hud"
+    :id="'poker-action-hud-root-container-' + templateSuffix"
     class="w-full z-50 shrink-0"
   >
     <!-- Turn Timer -->
     <div
       v-if="isMyTurn && progress > 0"
-      id="hud-turn-timer-container"
+      :id="'hud-turn-timer-progress-bar-wrapper-' + templateSuffix"
       class="w-full h-1 bg-gray-900/40 backdrop-blur-sm"
     >
       <div
-        id="hud-turn-timer-progress"
+        :id="'hud-turn-timer-progress-bar-fill-' + templateSuffix"
         class="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(234,179,8,0.3)]"
         :style="{ width: `${progress}%` }"
       ></div>
     </div>
 
     <div
-      id="hud-main-container"
+      :id="'hud-main-actions-container-' + templateSuffix"
       class="relative w-full pointer-events-auto bg-black/95 backdrop-blur-3xl border-t border-white/10 p-2 lg:p-4"
       :class="{ 'border-yellow-500/40 shadow-[0_-15px_40px_rgba(0,0,0,0.8)]': isMyTurn }"
     >
       <div
-        id="hud-content-wrapper"
+        :id="'hud-content-layout-wrapper-' + templateSuffix"
         class="max-w-[1600px] mx-auto flex gap-3 lg:gap-8"
         :class="[
           responsive.screenSize === 'xsmall' ? 'flex-col' : 'flex-row items-end'
@@ -30,13 +30,13 @@
       >
         <!-- LEFT COLUMN: Odds + Identity (Optimized for small) -->
         <div 
-          id="hud-left-column" 
+          :id="'hud-player-info-column-' + templateSuffix" 
           class="flex flex-col gap-2 shrink-0"
           :class="[responsive.screenSize === 'small' ? 'w-[280px]' : '']"
         >
           <!-- Odds Panel (Now on top for small) -->
           <div
-            id="hud-odds-panel"
+            :id="'hud-hand-odds-display-panel-' + templateSuffix"
             class="w-full transition-all duration-500"
             :class="{ 'opacity-20 grayscale pointer-events-none': !playerCards?.length }"
           >
@@ -49,9 +49,9 @@
           </div>
 
           <!-- Cards & Finance Row -->
-          <div id="hud-identity-section" class="flex items-center gap-2 justify-between">
+          <div :id="'hud-player-cards-finance-section-' + templateSuffix" class="flex items-center gap-2 justify-between">
             <!-- Cards -->
-            <div id="hud-cards-flex" class="flex gap-1 items-end bg-white/5 p-1 rounded-lg border border-white/5">
+            <div :id="'hud-player-hand-cards-wrapper-' + templateSuffix" class="flex gap-1 items-end bg-white/5 p-1 rounded-lg border border-white/5">
               <template v-if="playerCards?.length">
                 <Card
                   v-for="(card, i) in playerCards"
@@ -84,7 +84,7 @@
         </div>
 
         <!-- RIGHT COLUMN: Actions (Takes remaining space) -->
-        <div id="hud-actions-area" class="flex flex-col gap-2 flex-1 min-w-0">
+        <div :id="'hud-player-actions-control-area-' + templateSuffix" class="flex flex-col gap-2 flex-1 min-w-0">
           <!-- Slider Area -->
           <div
             v-if="isMyTurn && (options.includes('bet') || options.includes('raise'))"
@@ -179,6 +179,11 @@ const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
 const progress = ref(100)
 let timerInterval = null
+
+const templateSuffix = computed(() => {
+  const size = responsive.screenSize
+  return 'Template' + size.charAt(0).toUpperCase() + size.slice(1)
+})
 
 const activePlayerName = computed(() => {
   const activeId = pokerStore.getActivePlayerId

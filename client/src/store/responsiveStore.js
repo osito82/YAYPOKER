@@ -21,11 +21,12 @@ export const useResponsiveStore = defineStore('responsive', () => {
 })
 
   // Computed card size
-  const cardSize = computed(() => {
-    if (screenSize.value === 'xsmall') return 'small'
-    if (screenSize.value === 'small' || screenSize.value === 'medium') return 'medium'
-    return 'large'
-  })
+const cardSize = computed(() => {
+  if (screenSize.value === 'xsmall') return 'small'   // móvil vertical
+  if (screenSize.value === 'small') return 'small'    // móvil horizontal
+  if (screenSize.value === 'medium') return 'medium'  // tablet
+  return 'large'                                      // desktop
+})
 
   // Computed card crop percentage
   const cardPercentage = computed(() => {
