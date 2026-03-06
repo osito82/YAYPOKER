@@ -1,19 +1,19 @@
 <template>
   <div
     id="poker-viewport"
-    class="w-full h-full relative overflow-hidden bg-neutral-950 flex items-center justify-center"
+    class="w-full h-full relative overflow-hidden bg-neutral-950 flex items-start justify-center"
   >
     <!-- Table Surface Area (With horizontal padding) -->
     <div
       id="table-container"
-      class="w-full h-full relative flex items-center justify-center px-4 md:px-10 lg:px-16"
+      class="w-full h-full relative flex items-start justify-center"
     >
       <div
         id="main-table-surface"
-        class="w-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-start rounded-xl lg:rounded-2xl border-[6px] border-neutral-900/60"
+
+        class="w-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-start border-b-[6px] border-neutral-900/60"
         :class="[responsive.screenSize === 'large' ? 'h-[85%]' : 'h-[80%]']"
       >
-        <!-- Modern Grid Pattern -->
         <div
           id="table-grid-pattern"
           class="absolute inset-0 opacity-[0.04] pointer-events-none"
@@ -58,15 +58,22 @@
           </div>
 
           <!-- Community Cards -->
-          <div
-            id="community-cards-row"
-            class="flex items-end justify-center gap-2 sm:gap-3 md:gap-4 px-4 w-full overflow-hidden"
-            :class="{ 'mb-0': responsive.screenSize !== 'large' }"
+<div
+  id="community-cards-row"
+  class="flex items-end justify-center px-4 w-full overflow-hidden transition-all duration-300"
+  :class="[
+    responsive.screenSize === 'small' ? 'gap-1' : 'gap-2 sm:gap-3 md:gap-4',
+    { 'mb-0': responsive.screenSize !== 'large' },
+    'shadow-2xl shadow-black/50 rounded-lg'  // <-- sombra muy fuerte y oscura
+  ]"
           >
             <template v-for="i in 5" :key="i">
               <div
                 :id="'card-wrapper-' + i"
-                class="shrink-0 flex items-end justify-center"
+                class="shrink-0 flex items-end justify-center transition-all duration-300"
+                :class="{
+                  '-ml-2 first:ml-0': responsive.screenSize === 'small',
+                }"
               >
                 <template v-if="communityCards[i - 1]">
                   <Card
@@ -74,7 +81,8 @@
                     :numSymbol="communityCards[i - 1]"
                     :percentage="responsive.cardPercentage"
                     :size="responsive.cardSize"
-                    class="shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 origin-bottom"
+                    class="shadow-2xl hover:scale-100 hover:-translate-y-2 transition-all duration-300 origin-bottom"
+                    :class="{ 'scale-90': responsive.screenSize === 'small' }"
                   />
                 </template>
                 <template v-else>
@@ -82,7 +90,8 @@
                     :id="'community-card-space-empty-' + (i - 1)"
                     :size="responsive.cardSize"
                     :percentage="responsive.cardPercentage"
-                    class="opacity-30 border-white/10"
+                    class="opacity-30 border-white/10 transition-all duration-300"
+                    :class="{ 'scale-90': responsive.screenSize === 'small' }"
                   />
                 </template>
               </div>
