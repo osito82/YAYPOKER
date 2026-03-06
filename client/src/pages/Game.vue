@@ -143,7 +143,7 @@
           <!-- 2. TERMINAL AREA: Dedicated space at the bottom of the stage -->
           <div
             id="terminal-area"
-            class="flex-1 min-h-[140px] max-h-[220px] bg-black/20 border-t border-white/5 py-2 lg:py-4 flex items-center"
+            class="flex-1 min-h-[140px] max-h-[220px] bg-black/20 border-t border-white/5"
           >
             <MessageTerminal
               :logs="[...pokerStore.getDealerLog].reverse()"

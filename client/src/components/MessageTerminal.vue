@@ -1,47 +1,40 @@
 <template>
   <div
     id="message-terminal"
-    class="w-full max-w-4xl mx-auto px-4"
+    class="w-full h-full"
   >
     <div
       id="terminal-container"
-      class="bg-black/40 backdrop-blur-md border border-white/5 rounded-lg overflow-hidden flex flex-col h-24 lg:h-32 shadow-inner"
+      class="bg-black/60 backdrop-blur-md w-full h-full flex flex-col shadow-inner"
     >
-      <!-- Terminal Header -->
-      <div class="flex items-center justify-between px-3 py-1 bg-white/5 border-b border-white/5">
-        <div class="flex gap-1.5">
-          <div class="w-2 h-2 rounded-full bg-red-500/50"></div>
-          <div class="w-2 h-2 rounded-full bg-yellow-500/50"></div>
-          <div class="w-2 h-2 rounded-full bg-green-500/50"></div>
-        </div>
-        <span class="text-[9px] font-mono text-gray-500 uppercase tracking-widest">Live Event Log</span>
-      </div>
-
-      <!-- Terminal Body -->
+      <!-- Terminal Body (No Header, Full Width) -->
       <div
         ref="logContainer"
-        class="flex-grow overflow-y-auto p-3 font-mono text-[11px] lg:text-xs space-y-1 scrollbar-thin scrollbar-thumb-white/10"
+        class="flex-grow overflow-y-auto p-4 lg:p-6 font-mono text-sm lg:text-base space-y-2 scrollbar-thin scrollbar-thumb-white/20"
       >
         <TransitionGroup
-          enter-active-class="transition duration-300 ease-out"
-          enter-from-class="opacity-0 -translate-x-2"
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="opacity-0 translate-x-4"
           enter-to-class="opacity-100 translate-x-0"
         >
           <div
             v-for="log in logs"
             :key="log.id"
-            class="flex gap-2 items-start"
+            class="flex gap-3 items-start leading-tight"
           >
-            <span class="text-yellow-500/50 shrink-0">>></span>
-            <span :class="[log.type === 'private' ? 'text-blue-400' : 'text-gray-300']">
+            <span class="text-yellow-400 font-bold shrink-0">>></span>
+            <span 
+              class="font-bold tracking-tight"
+              :class="[log.type === 'private' ? 'text-blue-300' : 'text-white']"
+            >
               {{ log.text }}
             </span>
           </div>
         </TransitionGroup>
 
         <!-- Empty State -->
-        <div v-if="logs.length === 0" class="text-gray-600 italic">
-          Initializing secure connection...
+        <div v-if="logs.length === 0" class="text-gray-500 font-bold italic animate-pulse">
+          >> SYSTEM_READY: Waiting for game events...
         </div>
       </div>
     </div>
@@ -71,13 +64,13 @@ watch(() => props.logs.length, async () => {
 
 <style scoped>
 .scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.2);
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
 }
 </style>
