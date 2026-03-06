@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 const Deck = require('../deck')
 
 describe('Deck Class', () => {
-
   it('should have 52 cards in static cards', () => {
     expect(Deck.cards.length).toBe(52)
   })
@@ -13,7 +12,7 @@ describe('Deck Class', () => {
   })
 
   it('originalDeck should be a shuffled copy of cards', () => {
-    expect(Deck.originalDeck).not.toBe(Deck.cards) 
+    expect(Deck.originalDeck).not.toBe(Deck.cards)
     expect(Deck.originalDeck.sort()).toEqual(Deck.cards.sort()) // mismas cartas
   })
 

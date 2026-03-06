@@ -60,7 +60,7 @@ class Dealer {
   allPlayersCheck = () => {
     const activePlayers = this.players.filter((p) => p.connected && !p.folded)
     if (activePlayers.length === 0) return true
-    
+
     const maxBet = Math.max(...activePlayers.map((p) => p.getCurrentBet()))
     return activePlayers.every(
       (p) => p.getCurrentBet() === maxBet && this.playersChecked.includes(p.id),

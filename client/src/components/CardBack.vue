@@ -1,13 +1,19 @@
 <template>
   <div
-    id="card-back-outer"
-    :class="[
-      sizeOption.width,
-      sizeOption.height,
-      'bg-white rounded-lg shadow-md border border-gray-300 relative select-none overflow-hidden flex justify-center items-center',
-    ]"
+    id="card-back-crop-container"
+    class="relative overflow-hidden transition-all duration-300"
+    :style="cropStyle"
   >
-    <div id="card-back-pattern" class="rayas"></div>
+    <div
+      id="card-back-outer"
+      :class="[
+        sizeOption.width,
+        sizeOption.heightClass,
+        'bg-white rounded-lg shadow-md border border-gray-300 relative select-none flex justify-center items-center overflow-hidden',
+      ]"
+    >
+      <div id="card-back-pattern" class="rayas"></div>
+    </div>
   </div>
 </template>
 
@@ -16,36 +22,34 @@ import { computed } from 'vue'
 
 const props = defineProps({
   size: String,
+  percentage: {
+    type: Number,
+    default: 100,
+  },
 })
 
-
+// Define los tamaños de la carta
 const sizeOption = computed(() => {
   switch (props.size) {
     case 'extraLarge':
-      return {
-        height: 'h-64',
-        width: 'w-48',
-      }
+      return { heightClass: 'h-64', width: 'w-48', heightPx: 256 }
     case 'large':
-      return {
-        height: 'h-48',
-        width: 'w-36',
-      }
+      return { heightClass: 'h-48', width: 'w-36', heightPx: 192 }
     case 'medium':
-      return {
-        height: 'h-40',
-        width: 'w-28',
-      }
+      return { heightClass: 'h-40', width: 'w-28', heightPx: 160 }
     case 'small':
-      return {
-        height: 'h-28',
-        width: 'w-20',
-      }
+      return { heightClass: 'h-28', width: 'w-20', heightPx: 112 }
     default:
-      return {
-        height: 'h-48',
-        width: 'w-36',
-      }
+      return { heightClass: 'h-48', width: 'w-36', heightPx: 192 }
+  }
+})
+
+// Calculamos el estilo de recorte dinámicamente
+const cropStyle = computed(() => {
+  const pct = props.percentage ?? 100
+  if (pct >= 100) return {}
+  return {
+    height: `${(sizeOption.value.heightPx * pct) / 100}px`,
   }
 })
 </script>
@@ -62,10 +66,6 @@ const sizeOption = computed(() => {
     #183b5a 5px,
     #183b5a 10px
   );
-    opacity: 0.5;
-}
-
-.centered {
-  margin: auto;
+  opacity: 0.5;
 }
 </style>

@@ -30,12 +30,9 @@
 
 <script setup>
 import QRCodeVue3 from 'qrcode-vue3'
-import {
-  computed,
-  ref,
-  nextTick,
-} from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
+import { urlsFactory } from '../vutils'
 
 const pokerStore = usePokerStore()
 
@@ -47,10 +44,9 @@ const forceRender = async () => {
   renderComponent.value = true
 }
 
-
 const computedGameCode = computed(() => {
   forceRender()
-  const base = window.location.origin
-  return `${base}/?joinCode=${pokerStore.getGameCredentials.gameCode}`
+  const urls = urlsFactory()
+  return `${urls.url}/?game=${pokerStore.getGameCredentials.gameCode}`
 })
 </script>

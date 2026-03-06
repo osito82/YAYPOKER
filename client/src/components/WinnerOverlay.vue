@@ -45,7 +45,10 @@
           class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"
         ></div>
 
-        <div id="winner-modal-content" class="p-6 sm:p-8 flex flex-col items-center text-center">
+        <div
+          id="winner-modal-content"
+          class="p-6 sm:p-8 flex flex-col items-center text-center"
+        >
           <!-- Trophy Icon -->
           <div
             id="winner-trophy-container"
@@ -70,7 +73,9 @@
             class="text-4xl sm:text-5xl font-black text-white uppercase tracking-tighter mb-1 sm:mb-2"
           >
             {{ winnerNames }}
-            <span id="winner-title-suffix" class="text-yellow-500">{{ winners.length > 1 ? ' Split the Pot!' : ' Wins!' }}</span>
+            <span id="winner-title-suffix" class="text-yellow-500">{{
+              winners.length > 1 ? ' Split the Pot!' : ' Wins!'
+            }}</span>
           </h2>
 
           <div
@@ -98,22 +103,36 @@
               <span
                 :id="'winner-label-' + idx"
                 class="text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-2 sm:mb-3 relative z-10"
-                >{{ winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand' }}</span
+                >{{
+                  winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand'
+                }}</span
               >
-              <div :id="'winner-hand-name-' + idx" class="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4 relative z-10">
+              <div
+                :id="'winner-hand-name-' + idx"
+                class="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4 relative z-10"
+              >
                 {{ winner.handName }}
               </div>
 
-              <div v-if="flattenCards(winner.winningCards).length > 0" :id="'winner-cards-flex-' + idx" class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100">
+              <div
+                v-if="flattenCards(winner.winningCards).length > 0"
+                :id="'winner-cards-flex-' + idx"
+                class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100"
+              >
                 <Card
                   v-for="(card, i) in flattenCards(winner.winningCards)"
                   :id="'winner-card-' + idx + '-' + i"
                   :key="'card-' + i"
-                  size="medium"
+                  :size="responsive.cardSize"
+                  :percentage="responsive.cardPercentage"
                   :numSymbol="card"
                 />
               </div>
-              <div v-else :id="'winner-no-cards-' + idx" class="text-[12px] text-gray-400 italic relative z-10">
+              <div
+                v-else
+                :id="'winner-no-cards-' + idx"
+                class="text-[12px] text-gray-400 italic relative z-10"
+              >
                 (No cards shown)
               </div>
             </div>
@@ -126,25 +145,39 @@
               class="text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-2 sm:mb-3 border-b border-white/5 pb-2"
               >Showdown / Opponents</span
             >
-            <div id="opponents-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-h-40 sm:max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+            <div
+              id="opponents-grid"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-h-40 sm:max-h-48 overflow-y-auto pr-2 custom-scrollbar"
+            >
               <div
                 v-for="player in opponentsHands"
                 :id="'opponent-box-' + player.playerId"
                 :key="player.playerId"
                 class="flex items-center justify-between bg-black/20 p-2 sm:p-3 rounded-xl border border-white/5"
               >
-                <div :id="'opponent-info-' + player.playerId" class="flex-1 min-w-0">
-                  <div :id="'opponent-name-' + player.playerId" class="text-sm font-bold text-white truncate">
+                <div
+                  :id="'opponent-info-' + player.playerId"
+                  class="flex-1 min-w-0"
+                >
+                  <div
+                    :id="'opponent-name-' + player.playerId"
+                    class="text-sm font-bold text-white truncate"
+                  >
                     {{ player.name }}
                   </div>
                   <div
                     :id="'opponent-hand-type-' + player.playerId"
                     class="text-[10px] text-gray-400 italic uppercase tracking-tighter truncate"
                   >
-                    {{ player.pokerHand || (player.folded ? 'Folded' : 'Active') }}
+                    {{
+                      player.pokerHand || (player.folded ? 'Folded' : 'Active')
+                    }}
                   </div>
                 </div>
-                <div :id="'opponent-cards-visual-' + player.playerId" class="flex -space-x-4 sm:-space-x-5 opacity-80 scale-75 sm:scale-90 origin-right">
+                <div
+                  :id="'opponent-cards-visual-' + player.playerId"
+                  class="flex -space-x-4 sm:-space-x-5 opacity-80 scale-75 sm:scale-90 origin-right"
+                >
                   <template
                     v-if="player.show && flattenCards(player.show).length > 0"
                   >
@@ -157,17 +190,23 @@
                     />
                   </template>
                   <template v-else>
-                     <div
+                    <div
                       :id="'opponent-placeholder-1-' + player.playerId"
                       class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
-                      <div :id="'opponent-card-pattern-1-' + player.playerId" class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
+                      <div
+                        :id="'opponent-card-pattern-1-' + player.playerId"
+                        class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"
+                      ></div>
                     </div>
-                     <div
+                    <div
                       :id="'opponent-placeholder-2-' + player.playerId"
                       class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
-                      <div :id="'opponent-card-pattern-2-' + player.playerId" class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
+                      <div
+                        :id="'opponent-card-pattern-2-' + player.playerId"
+                        class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"
+                      ></div>
                     </div>
                   </template>
                 </div>
@@ -180,16 +219,28 @@
             id="winner-footer-section"
             class="mt-6 sm:mt-8 w-full flex flex-col items-center gap-3 sm:gap-4"
           >
-            <div id="timer-info-flex" class="flex gap-4 sm:gap-6 text-[12px] font-black text-gray-300 uppercase tracking-widest">
-              <div id="next-round-timer-wrapper" class="flex items-center gap-2">
-                <div id="timer-indicator-dot" class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
+            <div
+              id="timer-info-flex"
+              class="flex gap-4 sm:gap-6 text-[12px] font-black text-gray-300 uppercase tracking-widest"
+            >
+              <div
+                id="next-round-timer-wrapper"
+                class="flex items-center gap-2"
+              >
+                <div
+                  id="timer-indicator-dot"
+                  class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"
+                ></div>
                 Next Round in {{ countdown }}s
               </div>
               <div id="pot-status-label">Pot Cleared</div>
             </div>
-            
+
             <!-- Visual Timer Bar -->
-            <div id="visual-timer-bar-container" class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div
+              id="visual-timer-bar-container"
+              class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden"
+            >
               <div
                 id="visual-timer-bar-progress"
                 class="h-full bg-yellow-500 transition-all duration-50 ease-linear"
@@ -203,7 +254,11 @@
               :disabled="isWaiting"
               class="mt-2 px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 disabled:hover:bg-white/10 border border-white/10 rounded-full text-[12px] sm:text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
             >
-              <div v-if="isWaiting" id="waiting-spinner" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div
+                v-if="isWaiting"
+                id="waiting-spinner"
+                class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+              ></div>
               {{ isWaiting ? 'Waiting for others...' : 'Play New Game' }}
             </button>
           </div>
@@ -217,6 +272,9 @@
 import { computed, ref, onUnmounted, watch } from 'vue'
 import Card from './Card.vue'
 import { usePokerStore } from '../store/pokerStore'
+import { useResponsiveStore } from '../store/responsiveStore'
+
+const responsive = useResponsiveStore()
 
 const props = defineProps({
   winnerInfo: Object,
@@ -287,7 +345,7 @@ const winners = computed(() => {
 })
 
 const winnerNames = computed(() => {
-  return winners.value.map(w => w.name).join(' & ')
+  return winners.value.map((w) => w.name).join(' & ')
 })
 
 const totalAmount = computed(() => {
@@ -300,15 +358,19 @@ const flattenCards = (cards) => {
   return cards.flat()
 }
 
-watch(() => props.winnerInfo, (newVal) => {
-  if (newVal) {
-    startTimer()
-  } else {
-    stopTimer()
-    isVisible.value = false
-    isWaiting.value = false
-  }
-}, { immediate: true })
+watch(
+  () => props.winnerInfo,
+  (newVal) => {
+    if (newVal) {
+      startTimer()
+    } else {
+      stopTimer()
+      isVisible.value = false
+      isWaiting.value = false
+    }
+  },
+  { immediate: true },
+)
 
 onUnmounted(() => {
   stopTimer()
@@ -316,7 +378,7 @@ onUnmounted(() => {
 
 const opponentsHands = computed(() => {
   if (!props.winnerInfo?.allHands) return []
-  const winnerIds = winners.value.map(w => w.playerId)
+  const winnerIds = winners.value.map((w) => w.playerId)
   return props.winnerInfo.allHands.filter(
     (h) => !winnerIds.includes(h.playerId) && h.lastAction !== 'Out',
   )

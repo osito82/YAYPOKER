@@ -176,10 +176,12 @@ describe('Dealer Class', () => {
     const sendMock = vi.fn()
 
     // Definimos el comportamiento del mock específicamente para este test
-    vi.spyOn(Socket, 'getSocketsByTorneo').mockReturnValue(new Map([
-      ['p1', { socket: { send: sendMock, readyState: 1 } }],
-      ['p2', { socket: { send: sendMock, readyState: 1 } }],
-    ]))
+    vi.spyOn(Socket, 'getSocketsByTorneo').mockReturnValue(
+      new Map([
+        ['p1', { socket: { send: sendMock, readyState: 1 } }],
+        ['p2', { socket: { send: sendMock, readyState: 1 } }],
+      ]),
+    )
 
     dealer.talkToAllSockets('hello')
 
@@ -197,12 +199,10 @@ describe('Dealer Class', () => {
     dealer.talkToSocketById('p1', 'direct message')
 
     expect(Socket.getSocket).toHaveBeenCalledWith('torneo1', 'p1')
-    expect(sendMock).toHaveBeenCalledWith(JSON.stringify({ message: 'direct message' }))
+    expect(sendMock).toHaveBeenCalledWith(
+      JSON.stringify({ message: 'direct message' }),
+    )
   })
-
-
-
-
 
   // ================================
   // 🟢 jugadores folded / disconnected

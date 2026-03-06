@@ -2,28 +2,30 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 // 🔥 Mocks de dependencias
 vi.mock('../player', () => {
-  const PlayerMock = vi.fn().mockImplementation((gameId, name, secretCode, totalChips, cards, id) => {
-    return {
-      id,
-      name,
-      secretCode,
-      totalChips,
-      cards: [],
-      connected: true,
-      currentBet: 0,
-      setConnected: vi.fn(),
-      setBet: vi.fn((amount) => amount > 0),
-      getCurrentBet: vi.fn(() => 0),
-      getPlayerName: vi.fn(() => name),
-      getPlayerId: vi.fn(() => id),
-      checkPrize: vi.fn(() => ({})),
-      setCurrentPrize: vi.fn(),
-      toJson: vi.fn(() => ({ name, id, secretCode })),
-      setFolded: vi.fn(),
-      setLastAction: vi.fn(),
-      getCards: vi.fn(() => []),
-    }
-  })
+  const PlayerMock = vi
+    .fn()
+    .mockImplementation((gameId, name, secretCode, totalChips, cards, id) => {
+      return {
+        id,
+        name,
+        secretCode,
+        totalChips,
+        cards: [],
+        connected: true,
+        currentBet: 0,
+        setConnected: vi.fn(),
+        setBet: vi.fn((amount) => amount > 0),
+        getCurrentBet: vi.fn(() => 0),
+        getPlayerName: vi.fn(() => name),
+        getPlayerId: vi.fn(() => id),
+        checkPrize: vi.fn(() => ({})),
+        setCurrentPrize: vi.fn(),
+        toJson: vi.fn(() => ({ name, id, secretCode })),
+        setFolded: vi.fn(),
+        setLastAction: vi.fn(),
+        getCards: vi.fn(() => []),
+      }
+    })
   return PlayerMock
 })
 
@@ -164,11 +166,11 @@ describe('Match Class', () => {
   describe('fold', () => {
     it('should allow a player to fold on their turn', () => {
       const socket = { id: 'S1', name: 'Alice', secretCode: '1234' }
-      const player = { 
-        id: 'S1', 
-        name: 'Alice', 
-        folded: false, 
-        setLastAction: vi.fn(), 
+      const player = {
+        id: 'S1',
+        name: 'Alice',
+        folded: false,
+        setLastAction: vi.fn(),
         setFolded: vi.fn(),
         setConnected: vi.fn(),
         toJson: vi.fn(() => ({ name: 'Alice', id: 'S1' })),
@@ -185,7 +187,12 @@ describe('Match Class', () => {
 
     it('should not allow folding if it is not the players turn', () => {
       const socket = { id: 'S1', name: 'Alice' }
-      const player = { id: 'S1', name: 'Alice', folded: false, setFolded: vi.fn() }
+      const player = {
+        id: 'S1',
+        name: 'Alice',
+        folded: false,
+        setFolded: vi.fn(),
+      }
       match.players.push(player)
       match.activePlayerId = 'S2'
 

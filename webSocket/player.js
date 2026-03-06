@@ -84,7 +84,7 @@ class Player {
   setBet(chipsToBet) {
     const amount = Number(chipsToBet)
     if (isNaN(amount) || amount <= 0) return false
-    
+
     if (amount > this.chips) {
       return false
     } else {

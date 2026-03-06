@@ -64,7 +64,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
       // Reset winner info ONLY if a new hand/action starts and we don't want the old one
       if (
         [
-          // 'askForBlindBets', 
+          // 'askForBlindBets',
           // 'gameRestarted',
           // 'dealtPrivateCards',
         ].includes(gameData.action)
@@ -128,7 +128,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
       } else if (gameData.action === 'signUp' && gameData.type === 'private') {
         myInfo.value.id = gameData.data?.id
       } else if (gameData.action === 'oddsUpdate') {
-        odds.value = gameData.data.odds
+        odds.value = {
+          win: Number(gameData.data.odds.win),
+          tie: Number(gameData.data.odds.tie),
+        }
       } else if (gameData.action === 'winner' || gameData.method === 'winner') {
         winnerInfo.value = gameData.data || gameData
         activePlayerId.value = null

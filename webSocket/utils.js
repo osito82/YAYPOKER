@@ -18,12 +18,13 @@ const shuffle = (array) => {
 }
 
 function generateUniqueId() {
-  const randomStr = () => Math.random().toString(36).substring(2, 7).toUpperCase()
+  const randomStr = () =>
+    Math.random().toString(36).substring(2, 7).toUpperCase()
   return `${randomStr()}-${randomStr()}`
 }
 
 function generateSecretCode() {
-  return String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 }
 
 ///[ 'Ks', '8c', 'Js', 'Td', 'Qc' ] =>  [ 'K', '8', 'J', 'T', 'Q' ]
