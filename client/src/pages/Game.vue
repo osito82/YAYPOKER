@@ -104,7 +104,7 @@
       <!-- TOP AREA: TABLE & HUD -->
       <div
         id="game-primary-area"
-        class="flex flex-col min-w-0 relative flex-[3] md:flex-[7] md:h-full"
+        class="flex flex-col min-w-0 relative flex-[4] md:flex-[7] md:h-full"
       >
         <!-- MAIN STAGE (Table only) -->
         <main
