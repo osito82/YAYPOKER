@@ -274,13 +274,17 @@ const isCreating = ref(false)
 const copyStatus = ref('Copy Code')
 
 // Invitation URL for others (redirects to Lobby with joinCode parameter)
+
 const shareUrl = computed(() => {
+  
+  const urls = urlsFactory()
   if (!generatedCode.value) return ''
 
-  const urls = urlsFactory()
-  const url = urls.url
-  url.searchParams.append('joinCode', generatedCode.value)
+  const url = new URL(urls.url)
+  url.searchParams.set('joinCode', generatedCode.value)
+  
   return url.toString()
+
 })
 
 const checkRouteState = () => {

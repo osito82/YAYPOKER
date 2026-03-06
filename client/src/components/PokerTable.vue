@@ -3,15 +3,17 @@
     id="poker-viewport"
     class="w-full h-full relative overflow-hidden bg-neutral-950 flex items-center justify-center"
   >
-    <!-- Table Surface Area (With horizontal padding) -->
+    <!-- Table Surface Area -->
     <div
       id="table-container"
-      class="w-full h-full relative flex items-center justify-center px-4 md:px-10 lg:px-16"
+      class="w-full h-full relative flex items-center justify-center"
     >
       <div
         id="main-table-surface"
-        class="w-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-start rounded-xl lg:rounded-2xl border-[6px] border-neutral-900/60"
-        :class="[responsive.screenSize === 'large' ? 'h-[85%]' : 'h-[80%]']"
+        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center border-b-[6px] border-neutral-900/60 transition-all duration-500 pt-16"
+        :class="[
+          responsive.screenSize === 'large' ? 'justify-center pb-12' : 'justify-end pb-0'
+        ]"
       >
         <!-- Modern Grid Pattern -->
         <div
@@ -35,38 +37,40 @@
           class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-20 pointer-events-none"
         ></div>
 
-        <!-- TOP-CENTERED CONTENT ZONE -->
+        <!-- TOP-CENTERED NOTCH (POT) -->
+        <div
+          id="table-pot-display-container"
+          class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform transition-all duration-300"
+        >
+          <PotDisplay
+            :id="'pot-display-main'"
+            :amount="pot"
+          />
+        </div>
+
+        <!-- CONTENT ZONE -->
         <div
           id="table-elements-stack"
-          class="relative z-10 flex flex-col items-center w-full h-full"
+          class="relative z-10 flex flex-col items-center w-full transition-all duration-500"
           :class="[
-            responsive.screenSize === 'large'
-              ? 'justify-start pt-8 lg:pt-12 gap-10'
-              : 'justify-between pt-4 pb-0',
+            responsive.screenSize === 'large' ? 'gap-10' : 'gap-4'
           ]"
         >
-          <!-- Pot -->
-          <div
-            id="table-pot-display-container"
-            class="transform transition-transform duration-300"
-          >
-            <PotDisplay
-              :id="'pot-display-main'"
-              :amount="pot"
-              class="scale-90 lg:scale-100"
-            />
-          </div>
-
           <!-- Community Cards -->
           <div
             id="community-cards-row"
-            class="flex items-end justify-center gap-2 sm:gap-3 md:gap-4 px-4 w-full overflow-hidden"
-            :class="{ 'mb-0': responsive.screenSize !== 'large' }"
+            class="flex items-end justify-center px-4 w-full overflow-hidden transition-all duration-300"
+            :class="[
+              responsive.screenSize === 'small' ? 'gap-0' : 'gap-2 sm:gap-3 md:gap-4',
+            ]"
           >
             <template v-for="i in 5" :key="i">
               <div
                 :id="'card-wrapper-' + i"
-                class="shrink-0 flex items-end justify-center"
+                class="shrink-0 flex items-end justify-center transition-all duration-300"
+                :class="{
+                  '-ml-5 first:ml-0': responsive.screenSize === 'small',
+                }"
               >
                 <template v-if="communityCards[i - 1]">
                   <Card
@@ -82,7 +86,7 @@
                     :id="'community-card-space-empty-' + (i - 1)"
                     :size="responsive.cardSize"
                     :percentage="responsive.cardPercentage"
-                    class="opacity-30 border-white/10"
+                    class="opacity-30 border-white/10 transition-all duration-300"
                   />
                 </template>
               </div>

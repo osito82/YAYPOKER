@@ -1,17 +1,39 @@
 <template>
   <div
-    class="flex flex-col items-center justify-center py-4 px-10 bg-black/60 backdrop-blur-xl rounded-[2rem] border-2 border-yellow-500/30 shadow-[0_0_50px_rgba(0,0,0,0.5),inset_0_0_20px_rgba(234,179,8,0.1)] transition-all duration-500 hover:border-yellow-500/50"
+    class="flex items-center justify-center py-1 px-8
+    bg-black/85 backdrop-blur-2xl
+    rounded-b-2xl
+    border-x border-b border-yellow-500/40
+    shadow-[0_10px_40px_rgba(0,0,0,0.9),0_0_25px_rgba(234,179,8,0.15)]
+    transition-all duration-500
+    hover:border-yellow-400/70
+    hover:shadow-[0_15px_60px_rgba(0,0,0,1),0_0_40px_rgba(234,179,8,0.35)]
+    group"
   >
-    <span
-      class="text-[10px] text-yellow-500/70 uppercase font-black tracking-[0.4em] mb-1"
-      >TOTAL POT</span
-    >
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center gap-2">
+      
       <span
-        class="text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] tracking-tight"
+        class="text-2xl md:text-3xl font-mono font-black text-white
+        drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]
+        tracking-tight
+        group-hover:scale-105
+        transition-transform"
       >
-        ${{ amount }}
+        Pot
       </span>
+
+      <span class="text-yellow-500/60 font-black text-[10px] tracking-tighter mt-1">$</span>
+
+      <span
+        class="text-2xl md:text-3xl font-mono font-black text-white
+        drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]
+        tracking-tight
+        group-hover:scale-105
+        transition-transform"
+      >
+        {{ amount }}
+      </span>
+
     </div>
   </div>
 </template>
