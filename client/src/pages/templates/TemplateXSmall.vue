@@ -76,9 +76,11 @@
           :minBet="minBet"
           :maxBet="maxBet"
           :playerCards="myPlayer?.cards || []"
+          :myPlayer="myPlayer"
           @action="(a) => $emit('action', a)"
           @setQuickBet="(m) => $emit('setQuickBet', m)"
           @update:betAmount="(val) => $emit('update:betAmount', val)"
+          @sendReady="$emit('sendReady')"
         />
       </footer>
     </div>
@@ -108,8 +110,9 @@ defineProps({
   activePlayerId: String,
   myPlayerId: String,
   logs: Array,
-  winnerInfo: Object
+  winnerInfo: Object,
+  lobbyCountdown: Number
 })
 
-defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
+defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'sendReady'])
 </script>

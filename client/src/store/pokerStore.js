@@ -27,6 +27,9 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const autofoldStartTime = ref(null)
   const autofoldDuration = ref(600)
 
+  const lobbyCountdown = ref(null)
+  const lobbyStartTime = ref(null)
+
   // Getters
   const getSocketMessage = computed(() => socketMessage.value)
   const getConnected = computed(() => connected.value)
@@ -43,6 +46,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getCurrentHighestBet = computed(() => currentHighestBet.value)
   const getAutofoldStartTime = computed(() => autofoldStartTime.value)
   const getAutofoldDuration = computed(() => autofoldDuration.value)
+  const getLobbyCountdown = computed(() => lobbyCountdown.value)
 
   const getCurrentHand = computed(() => {
     const me = players.value.find((p) => p.id === myInfo.value.id)
@@ -115,12 +119,17 @@ export const usePokerStore = defineStore('pokerStore', () => {
       }
 
       // Handle Actions and Turns
-      if (gameData.action === 'askForBlindBets') {
+      if (gameData.action === 'lobbyTimer') {
+        lobbyCountdown.value = gameData.data.timeRemaining
+        lobbyStartTime.value = Date.now()
+      } else if (gameData.action === 'askForBlindBets') {
+        lobbyCountdown.value = null
         activePlayerId.value = gameData.data.id
         bettingOptions.value = ['blind']
         autofoldStartTime.value = Date.now()
         autofoldDuration.value = gameData.autofoldDuration || 600
       } else if (gameData.action?.startsWith('bettingCore')) {
+        lobbyCountdown.value = null
         if (gameData.data?.messageForId) {
           activePlayerId.value = gameData.data.messageForId
         }
@@ -207,6 +216,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     odds,
     autofoldStartTime,
     autofoldDuration,
+    lobbyCountdown,
+    lobbyStartTime,
 
     // Getters (computeds)
     getOdds,
@@ -225,6 +236,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getAutofoldStartTime,
     getAutofoldDuration,
     getCurrentHand,
+    getLobbyCountdown,
 
     // Actions
     setSocketMessage,

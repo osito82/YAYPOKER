@@ -19,10 +19,12 @@
     :myPlayerId="pokerStore.myInfo.id"
     :logs="[...pokerStore.getDealerLog].reverse()"
     :winnerInfo="pokerStore.getWinnerInfo"
+    :lobbyCountdown="pokerStore.getLobbyCountdown"
     @action="sendAction"
     @setQuickBet="setQuickBet"
     @update:betAmount="(val) => betAmount = val"
     @sendMessage="sendMessage"
+    @sendReady="sendReady"
   />
 </template>
 
@@ -131,6 +133,11 @@ watch([minBet, maxBet], ([newMin, newMax]) => {
 
 function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
+}
+
+const sendReady = () => {
+  if (!isConnected.value) return
+  sendMessage({ action: 'playerReady' })
 }
 
 const sendAction = (action) => {

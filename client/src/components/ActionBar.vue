@@ -102,7 +102,7 @@
 
           <!-- Waiting State (When not my turn) -->
           <div
-            v-else-if="!isMyTurn"
+            v-else-if="!isMyTurn && myPlayer?.isStarted"
             class="h-8 flex items-center justify-center gap-2 bg-yellow-500/5 rounded-lg border border-white/5 px-3"
           >
             <div class="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-ping"></div>
@@ -113,7 +113,18 @@
 
           <!-- Action Buttons Row -->
           <div class="flex gap-1.5 w-full h-10 lg:h-12">
-            <template v-if="canBlind">
+            <!-- LOBBY / START GAME MODE -->
+            <template v-if="!myPlayer?.isStarted">
+              <button
+                @click="$emit('sendReady')"
+                class="flex-1 bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg active:scale-95 text-[10px] lg:text-sm flex items-center justify-center gap-2"
+              >
+                <span>Start Game</span>
+                <span v-if="pokerStore.getLobbyCountdown !== null" class="bg-black/20 px-2 py-0.5 rounded text-[10px]">{{ pokerStore.getLobbyCountdown }}s</span>
+              </button>
+            </template>
+
+            <template v-else-if="canBlind">
               <button
                 @click="$emit('action', 'blind')"
                 class="flex-1 bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg active:scale-95 text-[10px] lg:text-sm"
@@ -169,12 +180,13 @@ const props = defineProps({
   balance: { type: Number, default: 0 },
   currentBet: { type: Number, default: 0 },
   betAmount: { type: Number, default: 0 },
-  minBet: { type: Number, default: 0 },
-  maxBet: { type: Number, default: 0 },
+  minBet: Number,
+  maxBet: Number,
   playerCards: { type: Array, default: () => [] },
+  myPlayer: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits(['action', 'update:betAmount', 'setQuickBet'])
+const emit = defineEmits(['action', 'update:betAmount', 'setQuickBet', 'sendReady'])
 const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
 const progress = ref(100)

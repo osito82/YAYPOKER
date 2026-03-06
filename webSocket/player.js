@@ -12,11 +12,16 @@ class Player {
     this.connected = true
     this.folded = false
     this.isAllIn = false
+    this.isStarted = false
     this.playerNumber = playerNumber
     this.currentBet = 0
   }
 
   currentPrize = {}
+
+  setStarted = (status) => {
+    this.isStarted = !!status
+  }
 
   setCard = (card) => {
     this.cards.push(card)
@@ -117,6 +122,7 @@ class Player {
       currentBet: this.currentBet,
       folded: this.folded,
       isAllIn: this.isAllIn,
+      isStarted: this.isStarted,
       connected: this.connected,
       lastAction: this.lastAction,
       playerNumber: this.playerNumber,
