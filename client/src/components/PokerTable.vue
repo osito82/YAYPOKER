@@ -76,7 +76,7 @@
                   <Card
                     :id="'community-card-item-' + (i - 1) + '-' + templateSuffix"
                     :numSymbol="communityCards[i - 1]"
-                    :percentage="responsive.cardPercentage"
+                    :percentage="(responsive.screenSize === 'medium') ? 100 : responsive.cardPercentage"
                     :size="responsive.cardSize"
                     class="shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 origin-bottom"
                   />
@@ -85,7 +85,7 @@
                   <CardSpace
                     :id="'community-card-space-empty-' + (i - 1) + '-' + templateSuffix"
                     :size="responsive.cardSize"
-                    :percentage="responsive.cardPercentage"
+                    :percentage="(responsive.screenSize === 'medium') ? 100 : responsive.cardPercentage"
                     class="opacity-30 border-white/10 transition-all duration-300"
                   />
                 </template>

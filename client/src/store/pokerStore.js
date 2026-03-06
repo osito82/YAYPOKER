@@ -119,12 +119,16 @@ export const usePokerStore = defineStore('pokerStore', () => {
         activePlayerId.value = gameData.data.id
         bettingOptions.value = ['blind']
         autofoldStartTime.value = Date.now()
-        autofoldDuration.value = gameData.autofoldDuration || 600 //10 minutes autoFold
+        autofoldDuration.value = gameData.autofoldDuration || 600
       } else if (gameData.action?.startsWith('bettingCore')) {
-        activePlayerId.value = gameData.data?.messageForId
-        bettingOptions.value = gameData.data?.action || []
+        if (gameData.data?.messageForId) {
+          activePlayerId.value = gameData.data.messageForId
+        }
+        if (gameData.data?.action) {
+          bettingOptions.value = gameData.data.action
+        }
         autofoldStartTime.value = Date.now()
-        autofoldDuration.value = gameData.autofoldDuration || 600 //10 minutes autoFold
+        autofoldDuration.value = gameData.autofoldDuration || 600
       } else if (gameData.action === 'signUp' && gameData.type === 'private') {
         myInfo.value.id = gameData.data?.id
       } else if (gameData.action === 'oddsUpdate') {
@@ -137,7 +141,6 @@ export const usePokerStore = defineStore('pokerStore', () => {
         activePlayerId.value = null
         bettingOptions.value = []
         autofoldStartTime.value = null
-        // Keep winner info for 15 seconds
         const currentWinnerData = gameData.data || gameData
         setTimeout(() => {
           if (winnerInfo.value === currentWinnerData) {
@@ -149,10 +152,18 @@ export const usePokerStore = defineStore('pokerStore', () => {
           gameData.action,
         )
       ) {
-        activePlayerId.value = null
-        bettingOptions.value = []
-        autofoldStartTime.value = null
-      } else if (gameData.action === 'gameRestarted') {
+        // ONLY clear if the message doesn't contain a new turn update
+        if (!gameData.data?.messageForId && !gameData.action?.startsWith('bettingCore')) {
+          activePlayerId.value = null
+          bettingOptions.value = []
+          autofoldStartTime.value = null
+        } else {
+          // If it DOES have new turn info, update it
+          if (gameData.data?.messageForId) activePlayerId.value = gameData.data.messageForId
+          if (gameData.data?.action) bettingOptions.value = gameData.data.action
+        }
+      }
+ else if (gameData.action === 'gameRestarted') {
         // Clear board and pot for new hand
         communityCards.value = []
         pot.value = 0
