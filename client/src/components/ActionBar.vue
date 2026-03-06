@@ -141,8 +141,8 @@
               
               <button
                 @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
-                :disabled="!isMyTurn || (!options.includes('bet') && !options.includes('raise'))"
-                class="flex-[1.5] bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg disabled:opacity-20 text-[10px] lg:text-sm active:scale-95"
+                :disabled="isRaiseActionDisabled"
+                class="flex-[1.5] bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed text-[10px] lg:text-sm active:scale-95 transition-all"
               >
                 {{ options.includes('bet') ? 'Bet' : 'Raise' }}
               </button>
@@ -183,6 +183,16 @@ let timerInterval = null
 const templateSuffix = computed(() => {
   const size = responsive.screenSize
   return 'Template' + size.charAt(0).toUpperCase() + size.slice(1)
+})
+
+const isRaiseActionDisabled = computed(() => {
+  if (!props.isMyTurn) return true
+  const hasActionOption = props.options.includes('bet') || props.options.includes('raise')
+  if (!hasActionOption) return true
+
+  // Disable if amount hasn't been increased from the original minimum
+  // Exception: Allow if it's an All-in situation (betAmount equals maxBet)
+  return props.betAmount <= props.minBet && props.betAmount < props.maxBet
 })
 
 const activePlayerName = computed(() => {

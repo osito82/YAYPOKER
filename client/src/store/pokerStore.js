@@ -152,18 +152,18 @@ export const usePokerStore = defineStore('pokerStore', () => {
           gameData.action,
         )
       ) {
-        // ONLY clear if the message doesn't contain a new turn update
-        if (!gameData.data?.messageForId && !gameData.action?.startsWith('bettingCore')) {
+        // Only clear if this message doesn't have new turn info
+        // (Action confirmations usually don't, but let's be safe)
+        if (!gameData.data?.messageForId && !gameData.data?.id) {
           activePlayerId.value = null
           bettingOptions.value = []
           autofoldStartTime.value = null
         } else {
-          // If it DOES have new turn info, update it
-          if (gameData.data?.messageForId) activePlayerId.value = gameData.data.messageForId
-          if (gameData.data?.action) bettingOptions.value = gameData.data.action
+          // If it HAS turn info, use it
+          activePlayerId.value = gameData.data.messageForId || gameData.data.id
+          if (gameData.data.action) bettingOptions.value = gameData.data.action
         }
-      }
- else if (gameData.action === 'gameRestarted') {
+      } else if (gameData.action === 'gameRestarted') {
         // Clear board and pot for new hand
         communityCards.value = []
         pot.value = 0
