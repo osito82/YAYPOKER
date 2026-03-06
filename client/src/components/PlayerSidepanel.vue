@@ -1,19 +1,19 @@
 <template>
   <aside
-    id="sidepanel-root"
+    :id="'player-sidepanel-root-container-' + templateSuffix"
     class="w-full lg:w-[350px] flex-1 lg:h-full bg-black/40 backdrop-blur-3xl border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col shrink-0 min-h-0 z-40"
   >
     <!-- Sidepanel Header -->
     <div
-      id="sidepanel-header-container"
+      :id="'sidepanel-header-wrapper-' + templateSuffix"
       class="py-2 px-4 border-b border-white/5 bg-white/[0.01] flex items-center shrink-0"
     >
       <h2
-        id="sidepanel-main-title"
+        :id="'sidepanel-main-heading-' + templateSuffix"
         class="text-[10px] lg:text-xs font-black text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2"
       >
         <div
-          id="sidepanel-live-pulse"
+          :id="'sidepanel-status-pulse-dot-' + templateSuffix"
           class="w-1.5 h-1.5 bg-green-500/50 rounded-full"
         ></div>
         Players List
@@ -24,13 +24,13 @@
     <TransitionGroup
       name="player-list"
       tag="div"
-      id="sidepanel-players-list"
+      :id="'sidepanel-players-scroll-list-' + templateSuffix"
       class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar min-h-0"
     >
       <div
         v-for="player in sortedPlayers"
         :key="player.id"
-        :id="'sidepanel-player-card-' + player.id"
+        :id="'player-item-card-' + player.id + '-' + templateSuffix"
         class="group relative flex flex-col p-3 rounded-xl transition-all duration-500 border border-transparent"
         :class="[
           player.id === delayedActivePlayerId
@@ -40,12 +40,12 @@
       >
         <!-- Player Info -->
         <div
-          :id="'sidepanel-player-info-' + player.id"
+          :id="'player-item-info-wrapper-' + player.id + '-' + templateSuffix"
           class="flex-1 flex flex-col min-w-0"
         >
           <!-- Main Header Row: Name & Roles -->
           <div
-            :id="'sidepanel-player-header-' + player.id"
+            :id="'player-item-header-row-' + player.id + '-' + templateSuffix"
             class="flex items-start justify-between gap-2 mb-1"
           >
             <div class="flex flex-col min-w-0">
@@ -56,7 +56,7 @@
                   class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse shrink-0"
                 ></div>
                 <span
-                  :id="'sidepanel-player-name-' + player.id"
+                  :id="'player-item-display-name-' + player.id + '-' + templateSuffix"
                   class="font-black text-xl text-gray-100 truncate uppercase tracking-tight transition-all duration-500"
                   :class="{
                     'text-yellow-400': player.id === delayedActivePlayerId,
@@ -66,7 +66,7 @@
                 </span>
                 <!-- Connection Status -->
                 <div
-                  :id="'sidepanel-player-status-' + player.id"
+                  :id="'player-item-connection-dot-' + player.id + '-' + templateSuffix"
                   class="w-1.5 h-1.5 rounded-full shrink-0"
                   :class="
                     player.isConnected
@@ -110,7 +110,7 @@
                   >$</span
                 >
                 <span
-                  :id="'sidepanel-player-chips-' + player.id"
+                  :id="'player-item-chip-stack-count-' + player.id + '-' + templateSuffix"
                   class="text-lg font-mono font-black text-white leading-none"
                   >{{ player.chips }}</span
                 >
@@ -120,7 +120,7 @@
 
           <!-- Bottom Row: Action & Bet -->
           <div
-            :id="'sidepanel-player-bottom-row-' + player.id"
+            :id="'player-item-footer-row-' + player.id + '-' + templateSuffix"
             class="flex items-end justify-between mt-2 pt-2 border-t border-white/5"
           >
             <!-- Current Bet (Bottom Left) -->
@@ -131,7 +131,7 @@
                   >Live Bet</span
                 >
                 <span
-                  :id="'sidepanel-player-card-bet-' + player.id"
+                  :id="'player-item-current-bet-amount-' + player.id + '-' + templateSuffix"
                   class="text-xl font-mono font-black text-emerald-400 leading-none transition-all duration-500"
                   >${{ player.currentBet }}</span
                 >
@@ -141,23 +141,23 @@
             <!-- Action Display (Bottom Right) -->
             <div
               v-if="player.lastAction"
-              :id="'sidepanel-player-action-container-' + player.id"
+              :id="'player-item-action-display-wrapper-' + player.id + '-' + templateSuffix"
               class="flex flex-col items-end text-right"
             >
               <span
-                :id="'sidepanel-player-action-label-' + player.id"
+                :id="'player-item-action-label-text-' + player.id + '-' + templateSuffix"
                 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1"
               >
                 Last Action
               </span>
               <div
-                :id="'sidepanel-player-action-value-wrapper-' + player.id"
+                :id="'player-item-action-badge-wrapper-' + player.id + '-' + templateSuffix"
                 class="flex justify-end"
               >
                 <Transition name="action-highlight" mode="out-in">
                   <span
                     :key="player.lastAction"
-                    :id="'sidepanel-player-action-badge-' + player.id"
+                    :id="'player-item-action-status-badge-' + player.id + '-' + templateSuffix"
                     class="text-xl font-black uppercase px-4 py-1.5 rounded-lg transition-all duration-500 bg-white/10 border border-white/10 shadow-lg"
                     :class="[
                       getActionColor(player.lastAction),
@@ -178,7 +178,7 @@
 
     <!-- Terminal Area (Bottom Integrated) -->
     <div
-      id="terminal"
+      :id="'game-message-terminal-wrapper-' + templateSuffix"
       class="h-[180px] lg:h-[220px] border-t border-white/5 bg-black/20 shrink-0"
     >
       <MessageTerminal :logs="logs" />
@@ -186,17 +186,17 @@
 
     <!-- Sidepanel Footer -->
     <div
-      id="sidepanel-footer-container"
+      :id="'sidepanel-footer-summary-wrapper-' + templateSuffix"
       class="hidden lg:block p-4 bg-black/60 border-t border-white/5 shrink-0"
     >
-      <div id="sidepanel-pot-summary" class="flex justify-between items-center">
+      <div :id="'sidepanel-pot-total-display-' + templateSuffix" class="flex justify-between items-center">
         <span
-          id="sidepanel-pot-label"
+          :id="'sidepanel-pot-total-label-' + templateSuffix"
           class="text-[10px] font-black text-gray-500 uppercase tracking-widest"
           >Global Pot</span
         >
         <span
-          id="sidepanel-pot-value"
+          :id="'sidepanel-pot-total-amount-' + templateSuffix"
           class="text-emerald-400 text-sm font-mono font-black italic shadow-emerald-500/20 shadow-sm"
           >${{ pot }}</span
         >
@@ -208,6 +208,14 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import MessageTerminal from './MessageTerminal.vue'
+import { useResponsiveStore } from '../store/responsiveStore'
+
+const responsive = useResponsiveStore()
+
+const templateSuffix = computed(() => {
+  const size = responsive.screenSize
+  return 'Template' + size.charAt(0).toUpperCase() + size.slice(1)
+})
 
 const props = defineProps({
   players: { type: Array, default: () => [] },
