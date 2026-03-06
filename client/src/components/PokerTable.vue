@@ -10,7 +10,10 @@
     >
       <div
         id="main-table-surface"
-        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center justify-center border-b-[6px] border-neutral-900/60"
+        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center border-b-[6px] border-neutral-900/60 transition-all duration-500 pt-16"
+        :class="[
+          responsive.screenSize === 'large' ? 'justify-center pb-12' : 'justify-end pb-0'
+        ]"
       >
         <!-- Modern Grid Pattern -->
         <div
@@ -34,23 +37,25 @@
           class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-20 pointer-events-none"
         ></div>
 
-        <!-- CENTERED CONTENT ZONE -->
+        <!-- TOP-CENTERED NOTCH (POT) -->
+        <div
+          id="table-pot-display-container"
+          class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform transition-all duration-300"
+        >
+          <PotDisplay
+            :id="'pot-display-main'"
+            :amount="pot"
+          />
+        </div>
+
+        <!-- CONTENT ZONE -->
         <div
           id="table-elements-stack"
-          class="relative z-10 flex flex-col items-center justify-center w-full gap-6 lg:gap-12 transition-all duration-500"
+          class="relative z-10 flex flex-col items-center w-full transition-all duration-500"
+          :class="[
+            responsive.screenSize === 'large' ? 'gap-10' : 'gap-4'
+          ]"
         >
-          <!-- Pot -->
-          <div
-            id="table-pot-display-container"
-            class="transform transition-transform duration-300"
-          >
-            <PotDisplay
-              :id="'pot-display-main'"
-              :amount="pot"
-              class="scale-90 lg:scale-125"
-            />
-          </div>
-
           <!-- Community Cards -->
           <div
             id="community-cards-row"
@@ -74,7 +79,6 @@
                     :percentage="responsive.cardPercentage"
                     :size="responsive.cardSize"
                     class="shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 origin-bottom"
-                    :class="{ 'scale-90': responsive.screenSize === 'small' }"
                   />
                 </template>
                 <template v-else>
@@ -83,7 +87,6 @@
                     :size="responsive.cardSize"
                     :percentage="responsive.cardPercentage"
                     class="opacity-30 border-white/10 transition-all duration-300"
-                    :class="{ 'scale-90': responsive.screenSize === 'small' }"
                   />
                 </template>
               </div>
