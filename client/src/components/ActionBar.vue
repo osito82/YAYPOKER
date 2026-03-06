@@ -78,7 +78,7 @@
         <!-- SECTION 2: INFO COLUMN -->
         <div
           id="hud-info-column"
-          class="flex flex-col gap-1 w-[95%] lg:w-auto lg:flex-1 lg:min-w-[450px]"
+          class="flex flex-col gap-1 w-full lg:flex-1 min-w-0 min-h-[100px] lg:min-h-[140px] justify-center"
         >
           <div
             id="hud-odds-wrapper"
@@ -155,7 +155,7 @@
         <!-- SECTION 3: ACTIONS AREA -->
         <div
           id="hud-actions-area"
-          class="flex flex-col gap-1 lg:gap-2 w-[95%] lg:w-auto lg:flex-1 lg:min-w-[450px]"
+          class="flex flex-col gap-1 lg:gap-2 w-full lg:flex-1 min-w-0 min-h-[100px] lg:min-h-[140px] justify-center"
         >
           <!-- PERSISTENT TOP MODULE: Raise Slider OR Full-width Waiting State -->
           <div
