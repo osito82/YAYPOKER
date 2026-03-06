@@ -40,6 +40,10 @@ const TemplateSmall = defineAsyncComponent(() => import('./templates/TemplateSma
 const TemplateMedium = defineAsyncComponent(() => import('./templates/TemplateMedium.vue'))
 const TemplateLarge = defineAsyncComponent(() => import('./templates/TemplateLarge.vue'))
 
+const props = defineProps({
+  isGuest: { type: Boolean, default: false }
+})
+
 const route = useRoute()
 const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
@@ -60,6 +64,7 @@ const activeTemplate = computed(() => {
 
 // Logic for name/uuid generation
 const getSavedName = () => {
+  if (props.isGuest) return `Spectator_${Math.floor(Math.random() * 1000)}`
   if (route.query.playerName) return route.query.playerName
   const saved = sessionStorage.getItem(`poker_name_${gameCode}`)
   if (saved) return saved
@@ -69,9 +74,9 @@ const getSavedName = () => {
 }
 
 const playerName = getSavedName()
-const secretCode = route.query.secretCode || generateSecretCode()
+const secretCode = props.isGuest ? 'spectator' : (route.query.secretCode || generateSecretCode())
 
-const connectionOptions = { gameCode, playerName, secretCode }
+const connectionOptions = { gameCode, playerName, secretCode, role: props.isGuest ? 'guest' : 'player' }
 
 const urls = urlsFactory()
 const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
@@ -84,9 +89,9 @@ const isConnected = computed(() => pokerStore.getConnected)
 const currentMaxBetOnTable = computed(() => pokerStore.getCurrentHighestBet || 0)
 const allPlayers = computed(() => pokerStore.getPlayers || [])
 const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName))
-const isMyTurn = computed(() => pokerStore.getActivePlayerId === myPlayer.value?.id)
-const options = computed(() => pokerStore.getBettingOptions || [])
-const canBlind = computed(() => isMyTurn.value && options.value.includes('blind'))
+const isMyTurn = computed(() => !props.isGuest && pokerStore.getActivePlayerId === myPlayer.value?.id)
+const options = computed(() => props.isGuest ? [] : (pokerStore.getBettingOptions || []))
+const canBlind = computed(() => !props.isGuest && isMyTurn.value && options.value.includes('blind'))
 
 const minBet = computed(() => {
   const baseMin = currentMaxBetOnTable.value > 0 ? currentMaxBetOnTable.value + 20 : 20
