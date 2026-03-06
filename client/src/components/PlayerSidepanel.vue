@@ -6,29 +6,18 @@
     <!-- Sidepanel Header -->
     <div
       id="sidepanel-header-container"
-      class="p-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between shrink-0"
+      class="py-2 px-4 border-b border-white/5 bg-white/[0.01] flex items-center shrink-0"
     >
       <h2
         id="sidepanel-main-title"
-        class="text-sm font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2"
+        class="text-[10px] lg:text-xs font-black text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2"
       >
         <div
           id="sidepanel-live-pulse"
-          class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+          class="w-1.5 h-1.5 bg-green-500/50 rounded-full"
         ></div>
-        Players
+        Players List
       </h2>
-      <!-- Live Players Counter -->
-      <div
-        id="sidepanel-live-players-counter"
-        class="bg-white/5 px-2 py-0.5 rounded-md border border-white/5"
-      >
-        <span
-          id="sidepanel-counter-value"
-          class="text-[10px] font-mono font-bold text-gray-300"
-          >{{ players.length }} online</span
-        >
-      </div>
     </div>
 
     <!-- Players Scrollable List with Smooth Transitions -->

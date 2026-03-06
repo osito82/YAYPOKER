@@ -10,9 +10,9 @@
     >
       <div
         id="main-table-surface"
-        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center border-b-[6px] border-neutral-900/60 transition-all duration-500 pt-16"
+        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center border-b-[6px] border-neutral-900/60 transition-all duration-500"
         :class="[
-          responsive.screenSize === 'large' ? 'justify-center pb-12' : 'justify-end pb-0'
+          responsive.screenSize === 'large' ? 'pt-16 justify-center pb-12' : 'pt-12 justify-center pb-4'
         ]"
       >
         <!-- Modern Grid Pattern -->

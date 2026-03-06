@@ -3,41 +3,89 @@
     id="game-root"
     class="h-screen w-screen bg-neutral-950 overflow-hidden flex flex-col font-sans text-white select-none"
   >
-    <!-- GLOBAL HEADER -->
+    <!-- UNIFIED COMPACT HEADER -->
     <header
-      id="id-header"
-      class="w-full bg-black/60 backdrop-blur-xl border-b border-white/5 py-2 px-6 flex items-center justify-between z-50 shrink-0"
+      id="unified-game-header"
+      class="w-full bg-black/80 backdrop-blur-xl border-b border-white/5 px-3 py-1.5 lg:px-6 lg:py-2 flex items-center justify-between z-50 shrink-0"
     >
-      <div id="header-logo-section" class="flex items-center gap-3">
+      <!-- LEFT SECTION: Game Identity & Table Context -->
+      <div id="header-left-section" class="flex items-center gap-2 lg:gap-4">
+        <!-- Brand Icon -->
         <div
           id="logo-icon-container"
-          class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.4)]"
+          class="w-7 h-7 bg-yellow-500 rounded flex items-center justify-center shadow-[0_0_10px_rgba(234,179,8,0.3)] shrink-0"
         >
-          <span id="logo-letter" class="text-black font-black text-2xl">O</span>
+          <span id="logo-letter" class="text-black font-black text-lg">O</span>
         </div>
-        <span
-          id="logo-text"
-          class="text-2xl font-black tracking-tighter text-white uppercase italic"
-        >
-          oso<span class="text-yellow-500">POker</span>
-        </span>
+        
+        <div class="h-6 w-px bg-white/10 hidden sm:block"></div>
+
+        <!-- Table Context -->
+        <div id="table-metadata" class="flex flex-col justify-center">
+          <div class="flex items-center gap-2 leading-none">
+            <span
+              id="blinds-display"
+              class="text-[10px] lg:text-xs font-mono font-bold text-white uppercase tracking-wider"
+              >Blinds $10/$20</span
+            >
+            <span
+              id="game-id-display"
+              class="hidden md:inline text-[9px] font-mono text-gray-500 border-l border-white/10 pl-2"
+              >ID: {{ gameCode }}</span
+            >
+          </div>
+          <h1
+            id="game-type-label"
+            class="text-[8px] lg:text-[10px] font-black text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80"
+          >
+            No Limit Hold'em
+          </h1>
+        </div>
       </div>
 
-      <div
-        id="header-metadata-section"
-        class="hidden md:flex items-center gap-4"
-      >
-        <div id="server-time-container" class="flex flex-col items-end">
+      <!-- RIGHT SECTION: Social, Connection & Personal Identity -->
+      <div id="header-right-section" class="flex items-center gap-1.5 lg:gap-4">
+        <!-- 1. Social Presence (Online Players) -->
+        <div
+          id="header-players-counter"
+          class="hidden sm:flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded border border-white/5"
+        >
+          <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+          <span class="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-tighter">
+            {{ allPlayers.length }} Online
+          </span>
+        </div>
+
+        <!-- 2. Technical Health (Connection) -->
+        <div
+          id="status-panel"
+          class="bg-black/40 px-2 py-0.5 lg:px-3 lg:py-1 rounded-full border border-white/5 flex items-center gap-1.5 lg:gap-2 shrink-0"
+        >
+          <div
+            id="connection-indicator"
+            class="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full shadow-[0_0_8px_currentColor]"
+            :class="isConnected ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500'"
+          ></div>
+          <span class="text-[8px] lg:text-[10px] font-bold uppercase tracking-widest text-gray-200">
+            {{ isConnected ? 'LIVE' : 'OFFLINE' }}
+          </span>
+        </div>
+
+        <!-- 3. Personal Identity -->
+        <div
+          id="player-badge"
+          class="bg-yellow-500/10 px-2 py-0.5 lg:px-4 lg:py-1 rounded-full border border-yellow-500/20 max-w-[70px] sm:max-w-none shrink-0"
+        >
           <span
-            id="label-server-time"
-            class="text-[10px] font-black text-gray-300 uppercase tracking-widest"
-            >Server Time</span
+            id="player-name-display"
+            class="text-[9px] lg:text-[12px] font-black text-yellow-500 uppercase tracking-widest truncate block"
+            >{{ playerName }}</span
           >
-          <span
-            id="display-server-time"
-            class="text-[12px] font-mono font-bold text-gray-100"
-            >{{ serverTime }}</span
-          >
+        </div>
+
+        <!-- 4. System Time -->
+        <div id="server-time-container" class="hidden lg:flex flex-col items-end leading-none border-l border-white/10 pl-4">
+          <span class="text-[11px] font-mono font-bold text-gray-400">{{ serverTime }}</span>
         </div>
       </div>
     </header>
@@ -56,70 +104,8 @@
       <!-- TOP AREA: TABLE & HUD -->
       <div
         id="game-primary-area"
-        class="flex flex-col min-w-0 relative shrink-0 md:flex-[7] md:h-full"
+        class="flex flex-col min-w-0 relative flex-[3] md:flex-[7] md:h-full"
       >
-        <!-- TOP METADATA BAR -->
-        <nav
-          id="top-bar"
-          class="w-full bg-neutral-900/40 backdrop-blur-md border-b border-white/5 p-3 px-6 z-40 flex justify-between items-center shrink-0"
-        >
-          <div id="info-panel" class="flex items-center gap-4">
-            <div id="table-metadata" class="flex flex-col">
-              <h1
-                id="game-type-label"
-                class="text-[11px] font-black text-yellow-500 uppercase tracking-[0.2em] leading-none mb-1"
-              >
-                No Limit Hold'em
-              </h1>
-              <div id="table-details" class="flex items-center gap-2">
-                <span
-                  id="blinds-display"
-                  class="text-sm font-mono font-bold text-white"
-                  >Blinds $10/$20</span
-                >
-                <span
-                  id="game-id-display"
-                  class="text-[11px] font-mono text-gray-400"
-                  >ID: {{ gameCode }}</span
-                >
-              </div>
-            </div>
-          </div>
-
-          <div id="header-status-section" class="flex items-center gap-3">
-            <div
-              id="status-panel"
-              class="bg-black/40 px-3 py-1 rounded-full border border-white/5 flex items-center gap-2"
-            >
-              <div
-                id="connection-indicator"
-                class="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]"
-                :class="
-                  isConnected
-                    ? 'bg-green-500 text-green-500'
-                    : 'bg-red-500 text-red-500'
-                "
-              ></div>
-              <span
-                id="connection-text"
-                class="text-[10px] font-bold uppercase tracking-widest text-gray-200"
-              >
-                {{ isConnected ? 'LIVE' : 'RECONNECTING' }}
-              </span>
-            </div>
-            <div
-              id="player-badge"
-              class="bg-yellow-500/10 px-4 py-1 rounded-full border border-yellow-500/20"
-            >
-              <span
-                id="player-name-display"
-                class="text-[12px] font-black text-yellow-500 uppercase tracking-widest"
-                >{{ playerName }}</span
-              >
-            </div>
-          </div>
-        </nav>
-
         <!-- MAIN STAGE (Table & Terminal) -->
         <main
           id="viewport-stage"
@@ -143,7 +129,7 @@
           <!-- 2. TERMINAL AREA: Dedicated space at the bottom of the stage -->
           <div
             id="terminal-area"
-            class="flex-1 min-h-[140px] max-h-[220px] bg-black/20 border-t border-white/5"
+            class="hidden sm:flex flex-1 min-h-[140px] max-h-[220px] bg-black/20 border-t border-white/5"
           >
             <MessageTerminal
               :logs="[...pokerStore.getDealerLog].reverse()"
@@ -151,7 +137,7 @@
           </div>
         </main>
 
-        <!-- PLAYER HUD: Now part of the flow, doesn't overlap -->
+        <!-- PLAYER HUD -->
         <footer id="hud-zone" class="shrink-0 z-50">
           <ActionBar
             id="component-action-bar"
@@ -170,7 +156,7 @@
         </footer>
       </div>
 
-      <!-- SIDEPANEL: PLAYERS (Con min-h-0 para activar scroll) -->
+      <!-- SIDEPANEL: PLAYERS -->
       <PlayerSidepanel
         id="sidepanel-container"
         class="flex-1 min-h-0"
