@@ -25,42 +25,19 @@
       name="player-list"
       tag="div"
       id="sidepanel-players-list"
-      class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar min-h-0 pb-10"
+      class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 custom-scrollbar min-h-0"
     >
       <div
         v-for="player in sortedPlayers"
         :key="player.id"
         :id="'sidepanel-player-card-' + player.id"
-        class="group relative flex items-center gap-4 p-3 rounded-xl transition-all duration-500 border border-transparent"
+        class="group relative flex flex-col p-3 rounded-xl transition-all duration-500 border border-transparent"
         :class="[
           player.id === delayedActivePlayerId
             ? 'bg-yellow-500/20 border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.15)] z-10'
             : 'bg-white/[0.03] hover:bg-white/[0.06]',
         ]"
       >
-        <!-- Player Avatar -->
-        <div :id="'sidepanel-player-avatar-box-' + player.id" class="relative">
-          <div
-            :id="'sidepanel-player-initial-' + player.id"
-            class="w-10 h-10 rounded-lg flex items-center justify-center font-black text-lg border-2 transition-colors duration-500"
-            :class="
-              player.id === delayedActivePlayerId
-                ? 'bg-yellow-500 border-yellow-400 text-black'
-                : 'bg-gray-800 border-white/10 text-gray-400'
-            "
-          >
-            {{ player.name?.charAt(0).toUpperCase() }}
-          </div>
-          <!-- Turn Indicator -->
-          <div
-            v-if="player.id === delayedActivePlayerId"
-            :id="'sidepanel-turn-dot-' + player.id"
-            class="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-black flex items-center justify-center animate-bounce"
-          >
-            <div class="w-1.5 h-1.5 bg-black rounded-full"></div>
-          </div>
-        </div>
-
         <!-- Player Info -->
         <div
           :id="'sidepanel-player-info-' + player.id"
@@ -73,6 +50,11 @@
           >
             <div class="flex flex-col min-w-0">
               <div class="flex items-center gap-2">
+                <!-- Turn Indicator Dot -->
+                <div
+                  v-if="player.id === delayedActivePlayerId"
+                  class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse shrink-0"
+                ></div>
                 <span
                   :id="'sidepanel-player-name-' + player.id"
                   class="font-black text-xl text-gray-100 truncate uppercase tracking-tight transition-all duration-500"
@@ -85,7 +67,7 @@
                 <!-- Connection Status -->
                 <div
                   :id="'sidepanel-player-status-' + player.id"
-                  class="w-2 h-2 rounded-full shrink-0"
+                  class="w-1.5 h-1.5 rounded-full shrink-0"
                   :class="
                     player.isConnected
                       ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'
@@ -194,6 +176,14 @@
       </div>
     </TransitionGroup>
 
+    <!-- Terminal Area (Bottom Integrated) -->
+    <div
+      id="terminal"
+      class="h-[180px] lg:h-[220px] border-t border-white/5 bg-black/20 shrink-0"
+    >
+      <MessageTerminal :logs="logs" />
+    </div>
+
     <!-- Sidepanel Footer -->
     <div
       id="sidepanel-footer-container"
@@ -217,12 +207,14 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
+import MessageTerminal from './MessageTerminal.vue'
 
 const props = defineProps({
   players: { type: Array, default: () => [] },
   activePlayerId: { type: String, default: null },
   myPlayerId: { type: String, default: null },
   pot: { type: Number, default: 0 },
+  logs: { type: Array, default: () => [] },
 })
 
 const delayedActivePlayerId = ref(props.activePlayerId)

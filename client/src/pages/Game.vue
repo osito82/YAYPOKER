@@ -106,15 +106,15 @@
         id="game-primary-area"
         class="flex flex-col min-w-0 relative flex-[3] md:flex-[7] md:h-full"
       >
-        <!-- MAIN STAGE (Table & Terminal) -->
+        <!-- MAIN STAGE (Table only) -->
         <main
           id="viewport-stage"
           class="flex-grow flex flex-col overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
         >
-          <!-- 1. TABLE AREA: Takes most of the space -->
+          <!-- TABLE AREA: Now takes full stage space -->
           <div
             id="table-area"
-            class="flex-[3] relative min-h-0"
+            class="flex-grow relative min-h-0"
           >
             <PokerTable
               id="component-poker-table"
@@ -123,16 +123,6 @@
               :communityCards="pokerStore.getCommunityCards"
               :players="allPlayers"
               :activePlayerId="pokerStore.getActivePlayerId"
-            />
-          </div>
-
-          <!-- 2. TERMINAL AREA: Dedicated space at the bottom of the stage -->
-          <div
-            id="terminal-area"
-            class="hidden sm:flex flex-1 min-h-[140px] max-h-[220px] bg-black/20 border-t border-white/5"
-          >
-            <MessageTerminal
-              :logs="[...pokerStore.getDealerLog].reverse()"
             />
           </div>
         </main>
@@ -156,7 +146,7 @@
         </footer>
       </div>
 
-      <!-- SIDEPANEL: PLAYERS -->
+      <!-- SIDEPANEL: PLAYERS & TERMINAL -->
       <PlayerSidepanel
         id="sidepanel-container"
         class="flex-1 min-h-0"
@@ -164,6 +154,7 @@
         :activePlayerId="pokerStore.getActivePlayerId"
         :myPlayerId="pokerStore.myInfo.id"
         :pot="pokerStore.getPot"
+        :logs="[...pokerStore.getDealerLog].reverse()"
       />
     </div>
   </div>
