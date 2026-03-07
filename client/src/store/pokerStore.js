@@ -107,8 +107,9 @@ export const usePokerStore = defineStore('pokerStore', () => {
             id: Date.now(),
             text: newMsg,
             type: gameData.type || 'public',
+            action: gameData.action || gameData.method
           })
-          if (dealerLog.value.length > 10) dealerLog.value.pop()
+          if (dealerLog.value.length > 500) dealerLog.value.pop()
         }
       }
 
