@@ -184,6 +184,7 @@
 
     <!-- Terminal Area (Bottom Integrated) -->
     <div
+      v-if="!hideTerminal"
       :id="'game-message-terminal-wrapper-' + templateSuffix"
       class="h-[180px] lg:h-[220px] border-t border-white/5 bg-black/20 shrink-0"
     >
@@ -230,6 +231,7 @@ const props = defineProps({
   pot: { type: Number, default: 0 },
   logs: { type: Array, default: () => [] },
   invertLayout: { type: Boolean, default: false },
+  hideTerminal: { type: Boolean, default: false },
 })
 
 const delayedActivePlayerId = ref(props.activePlayerId)
