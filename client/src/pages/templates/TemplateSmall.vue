@@ -34,7 +34,8 @@
       </div>
     </header>
 
-    <WinnerOverlay :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
+    <WinnerTournamentOverlay v-if="winnerInfo?.isTournamentWinner" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
+    <WinnerOverlay v-else :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
 
     <div id="main-game-layout-TemplateSmall" class="flex-grow flex flex-col overflow-hidden relative">
       <!-- TOP AREA -->
@@ -87,6 +88,7 @@
 import PokerTable from '../../components/PokerTable.vue'
 import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
+import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 
 defineProps({

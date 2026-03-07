@@ -164,17 +164,28 @@ export const usePokerStore = defineStore('pokerStore', () => {
           win: Number(gameData.data.odds.win),
           tie: Number(gameData.data.odds.tie),
         }
-      } else if (gameData.action === 'winner' || gameData.method === 'winner') {
+      } else if (
+        ['winner', 'winnerTournament'].includes(gameData.action) ||
+        ['winner', 'winnerTournament'].includes(gameData.method)
+      ) {
         winnerInfo.value = gameData.data || gameData
         activePlayerId.value = null
         bettingOptions.value = []
         autofoldStartTime.value = null
+
         const currentWinnerData = gameData.data || gameData
+        const timeoutDuration =
+          gameData.action === 'winnerTournament' ||
+          gameData.method === 'winnerTournament' ||
+          gameData.isTournamentWinner
+            ? 60000
+            : 15000
+
         setTimeout(() => {
           if (winnerInfo.value === currentWinnerData) {
             winnerInfo.value = null
           }
-        }, 15000)
+        }, timeoutDuration)
       } else if (
         ['setBet', 'setRise', 'setCall', 'setCheck', 'fold'].includes(
           gameData.action,
