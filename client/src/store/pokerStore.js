@@ -26,6 +26,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const odds = ref({ win: 0, tie: 0 })
   const autofoldStartTime = ref(null)
   const autofoldDuration = ref(600)
+  const lobbyTimer = ref(null)
 
   // Getters
   const getSocketMessage = computed(() => socketMessage.value)
@@ -43,6 +44,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getCurrentHighestBet = computed(() => currentHighestBet.value)
   const getAutofoldStartTime = computed(() => autofoldStartTime.value)
   const getAutofoldDuration = computed(() => autofoldDuration.value)
+  const getLobbyTimer = computed(() => lobbyTimer.value)
 
   const getCurrentHand = computed(() => {
     const me = players.value.find((p) => p.id === myInfo.value.id)
@@ -60,6 +62,19 @@ export const usePokerStore = defineStore('pokerStore', () => {
       if (!gameData) return
 
       console.log('POKER_STORE - Received:', gameData.action, gameData)
+
+      // Reset lobby timer if game starts or hand is in progress
+      if (
+        [
+          'askForBlindBets',
+          'dealtPrivateCards',
+          'gameRestarted',
+          'noMorePlayers',
+        ].includes(gameData.action) ||
+        gameData.action?.startsWith('bettingCore')
+      ) {
+        lobbyTimer.value = null
+      }
 
       // Reset winner info ONLY if a new hand/action starts and we don't want the old one
       if (
@@ -115,7 +130,20 @@ export const usePokerStore = defineStore('pokerStore', () => {
       }
 
       // Handle Actions and Turns
-      if (gameData.action === 'askForBlindBets') {
+      if (gameData.action === 'lobbyTimer') {
+        lobbyTimer.value = {
+          timeRemaining: gameData.data.timeRemaining,
+          totalDuration: gameData.data.totalDuration,
+          connectedPlayers: gameData.data.connectedPlayers,
+          readyPlayers: gameData.data.readyPlayers,
+          timestamp: Date.now(),
+        }
+      } else if (gameData.action === 'lobbyError') {
+        // We can use this to show why game hasn't started
+        if (lobbyTimer.value) {
+          lobbyTimer.value.error = gameData.data.displayMsg
+        }
+      } else if (gameData.action === 'askForBlindBets') {
         activePlayerId.value = gameData.data.id
         bettingOptions.value = ['blind']
         autofoldStartTime.value = Date.now()
@@ -207,6 +235,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     odds,
     autofoldStartTime,
     autofoldDuration,
+    lobbyTimer,
 
     // Getters (computeds)
     getOdds,
@@ -225,6 +254,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getAutofoldStartTime,
     getAutofoldDuration,
     getCurrentHand,
+    getLobbyTimer,
 
     // Actions
     setSocketMessage,

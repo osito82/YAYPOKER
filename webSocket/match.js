@@ -33,6 +33,10 @@ class Match {
     this.waitingForNextRound = false
     this.isRunout = false
 
+    this.lobbyTimer = null
+    this.lobbyTimerDuration = 60000 // 1 minuto
+    this.lobbyStartTime = null
+
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.shuffledDeck = initialDeck
 
@@ -122,6 +126,140 @@ class Match {
     }
   }
 
+  startLobbyTimer() {
+    this.clearLobbyTimer()
+    this.lobbyStartTime = Date.now()
+
+    const connectedCount = this.players.filter((p) => p.connected).length
+    const readyCount = this.players.filter((p) => p.isStarted && p.connected).length
+
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'MATCH - Lobby Timer Started',
+        date: true,
+      })
+      .R({ 
+        duration: `${this.lobbyTimerDuration / 1000}s`,
+        connected: connectedCount,
+        ready: readyCount
+      })
+
+    this.communicator.msgBuilder('lobbyTimer', 'public', null, {
+      displayMsg: `Game will start in ${this.lobbyTimerDuration / 1000} seconds.`,
+      timeRemaining: this.lobbyTimerDuration / 1000,
+      totalDuration: this.lobbyTimerDuration / 1000,
+      connectedPlayers: connectedCount,
+      readyPlayers: readyCount,
+    })
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+
+    this.lobbyTimer = setTimeout(() => {
+      this.forceStartGame()
+    }, this.lobbyTimerDuration)
+  }
+
+  clearLobbyTimer() {
+    if (this.lobbyTimer) {
+      clearTimeout(this.lobbyTimer)
+      this.lobbyTimer = null
+      this.lobbyStartTime = null
+    }
+  }
+
+  playerReady(thisSocket) {
+    const foundPlayer = this.players.find((p) => p.id === thisSocket.id)
+    if (foundPlayer) {
+      foundPlayer.setStarted(true)
+      
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Player Ready',
+          date: true,
+        })
+        .R({ player: foundPlayer.name })
+
+      this.communicator.msgBuilder('playerReady', 'public', foundPlayer, {
+        displayMsg: `${foundPlayer.name} is ready!`,
+      })
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+
+      // Check if all connected players are ready
+      const connectedPlayers = this.players.filter((p) => p.connected)
+      const readyPlayers = connectedPlayers.filter((p) => p.isStarted)
+
+      if (
+        readyPlayers.length === connectedPlayers.length &&
+        readyPlayers.length >= 2
+      ) {
+        this.log
+          .Template({
+            name: 'brakets',
+            title: 'MATCH - All Players Ready',
+            date: true,
+          })
+          .R({ count: readyPlayers.length })
+        this.clearLobbyTimer()
+        this.forceStartGame()
+      } else {
+        // Reset lobby timer to give others more time as someone just showed interest
+        if (!this.stepChecker.checkStep('blindsBetting')) {
+          this.startLobbyTimer()
+        }
+      }
+    }
+  }
+
+  forceStartGame() {
+    this.clearLobbyTimer()
+
+    // 🔥 Force all connected players to be ready when timer expires
+    this.players.forEach((p) => {
+      if (p.connected) p.setStarted(true)
+    })
+
+    const readyPlayers = this.players.filter((p) => p.isStarted && p.connected)
+
+    if (readyPlayers.length < 2) {
+      const connectedCount = this.players.filter((p) => p.connected).length
+
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Start Failed',
+          date: true,
+        })
+        .R({
+          reason: 'Not enough ready players',
+          readyCount: readyPlayers.length,
+          connectedCount,
+        })
+
+      this.communicator.msgBuilder('lobbyError', 'public', null, {
+        displayMsg:
+          readyPlayers.length < 2
+            ? 'Waiting for at least 2 players to be ready...'
+            : 'Not enough players ready. Game delayed.',
+        readyPlayers: readyPlayers.length,
+        connectedPlayers: connectedCount,
+      })
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+
+      // If we have people connected but not ready, we don't "cancel", we just wait.
+      // The timer will restart when someone else joins or someone clicks ready.
+      return
+    }
+
+    this.log
+      .Template({ name: 'brakets', title: 'MATCH - Game Starting', date: true })
+      .R({ readyPlayers: readyPlayers.map((p) => p.name) })
+
+    this.noMorePlayers()
+    this.stepChecker.grantStep('signUp')
+    this.startGame()
+  }
+
   signUp(data, thisSocket) {
     this.lastActivity = Date.now()
     const {
@@ -137,8 +275,13 @@ class Match {
 
     let player
     if (existingPlayerIndex !== -1) {
+      // ✅ LÓGICA DE RE-CONEXIÓN (Mismo usuario, otra pestaña o reconexión)
       player = this.players[existingPlayerIndex]
       const oldId = player.id
+      
+      // Si el ID es el mismo, es un re-envío del mismo socket, ignoramos
+      if (oldId === thisSocketId && player.connected) return
+
       player.id = thisSocketId
       player.setConnected(true)
 
@@ -155,7 +298,7 @@ class Match {
       }
 
       const stillPaused = this.players.some((p) => !p.connected)
-      if (!stillPaused) {
+      if (!stillPaused && this.stepChecker.checkStep('pause')) {
         this.stepChecker.revokeStep('pause')
         this.continue(thisSocket)
       }
@@ -167,8 +310,36 @@ class Match {
           date: true,
         })
         .R({ name: player.name, id: player.id, secretCode: player.secretCode })
+
+      // 🔥 SINCRONIZAR TIMER SI ESTÁ ACTIVO
+      if (this.lobbyTimer) {
+        const timeElapsed = (Date.now() - this.lobbyStartTime) / 1000
+        const timeRemaining = Math.max(
+          0,
+          this.lobbyTimerDuration / 1000 - timeElapsed,
+        )
+
+        const connectedCount = this.players.filter((p) => p.connected).length
+        const readyCount = this.players.filter(
+          (p) => p.isStarted && p.connected,
+        ).length
+
+        this.communicator.msgBuilder('lobbyTimer', 'public', null, {
+          displayMsg: `Game will start in ${Math.ceil(timeRemaining)} seconds.`,
+          timeRemaining: timeRemaining,
+          totalDuration: this.lobbyTimerDuration / 1000,
+          connectedPlayers: connectedCount,
+          readyPlayers: readyCount,
+        })
+        // Enviamos SOLO al jugador que reconectó
+        Socket.sendToPlayer(
+          this.torneoId,
+          player.secretCode,
+          this.communicator.getMsg(),
+        )
+      }
     } else {
-      // Máximo 10 jugadores
+      // 🆕 LÓGICA DE NUEVO JUGADOR
       if (this.players.length >= 10) {
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Table is full (max 10 players).',
@@ -177,11 +348,7 @@ class Match {
         return
       }
 
-      // No permitir nuevos jugadores si el juego ya empezó
       if (!this.acceptingPlayers) {
-        console.log(
-          `[DEBUG] Blocking new player ${data.name} join because acceptingPlayers=false`,
-        )
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Game in progress. Please wait for next round.',
         })
@@ -189,7 +356,6 @@ class Match {
         return
       }
 
-      // Manejar nombres duplicados
       let finalName = data.name
       let counter = 1
       while (this.players.some((p) => p.name === finalName)) {
@@ -197,7 +363,6 @@ class Match {
         counter++
       }
 
-      // Actualizar el nombre en el socket también para consistencia
       thisSocket.name = finalName
 
       const playerNumber = this.players.length + 1
@@ -213,7 +378,6 @@ class Match {
       player.setConnected(true)
       this.players.push(player)
 
-      // Si llegamos a 10, cerramos registro inmediatamente
       if (this.players.length >= 10) {
         this.noMorePlayers()
       }
@@ -230,12 +394,18 @@ class Match {
           num: playerNumber,
           secretCode: player.secretCode,
         })
+
+      // Reset lobby timer ONLY for genuinely new players
+      if (!this.stepChecker.checkStep('blindsBetting')) {
+        this.startLobbyTimer()
+      }
     }
 
     this.communicator.msgBuilder('signUp', 'public', player, {
       msg: `Welcome ${player.name}!`,
     })
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+    
     this.communicator.msgBuilder('signUp', 'private', player, {
       method: 'signUp',
       id: thisSocketId,
@@ -247,7 +417,6 @@ class Match {
       this.communicator.getMsg(),
     )
 
-    // 🔥 REENVIAR ODDS AL RECONECTAR (Después de la confirmación privada)
     if (existingPlayerIndex !== -1) {
       this.sendOdds(player)
     }
@@ -257,15 +426,7 @@ class Match {
       connectedPlayers.length >= 2 &&
       !this.stepChecker.checkStep('blindsBetting')
     ) {
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'MATCH - Enough Players To Start',
-          date: true,
-        })
-        .R({ count: connectedPlayers.length })
       this.stepChecker.grantStep('signUp')
-      this.askForBlindBets(thisSocket)
     }
   }
 
@@ -523,7 +684,7 @@ class Match {
 
   askForBlindBets(thisSocket) {
     // Filter active players (connected and with chips)
-    const activePlayers = this.players.filter((p) => p.connected && p.chips > 0)
+    const activePlayers = this.players.filter((p) => p.connected && p.chips > 0 && p.isStarted)
 
     if (activePlayers.length < 2) {
       this.log
@@ -796,7 +957,7 @@ class Match {
     if (this.stepChecker.checkStep('winner')) return
 
     const allPlayers = this.players
-    const activePlayers = allPlayers.filter((p) => p.connected && !p.folded)
+    const activePlayers = allPlayers.filter((p) => p.connected && !p.folded && p.isStarted)
 
     if (activePlayers.length === 1) {
       this.winner(activePlayers[0], true)
@@ -869,6 +1030,7 @@ class Match {
         p.connected &&
         !p.folded &&
         !p.isAllIn &&
+        p.isStarted &&
         (p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id)),
     )
 
@@ -1004,9 +1166,11 @@ class Match {
   startGame(thisSocket = {}) {
     if (this.stepChecker.checkStep('pause')) return
 
-    if (!this.dealer.hasMinimumPlayers()) {
+    const readyPlayers = this.players.filter((p) => p.isStarted && p.connected)
+
+    if (readyPlayers.length < 2) {
       this.communicator.msgBuilder('startGame', 'public', null, {
-        displayMsg: 'Waiting for players...',
+        displayMsg: 'Waiting for at least 2 players to be ready...',
       })
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       return
