@@ -1,27 +1,35 @@
-import { ref } from 'vue'
+import { ref, onBeforeUnmount } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
 
 export default function useWebSocket(url, options) {
   const socketUrl = new URL(url)
   if (options) {
-    console.log(options)
     Object.keys(options).forEach((key) => {
       socketUrl.searchParams.set(key, options[key])
     })
   }
 
   const socket = ref(null)
-
+  const reconnectTimeout = ref(null)
+  const isManuallyClosed = ref(false)
   const pokerStore = usePokerStore()
 
   const connectSocket = () => {
+    if (socket.value && (socket.value.readyState === WebSocket.OPEN || socket.value.readyState === WebSocket.CONNECTING)) {
+      return
+    }
+
+    isManuallyClosed.value = false
     socket.value = new WebSocket(socketUrl)
 
     socket.value.addEventListener('open', () => {
       console.log('Conexión establecida')
       pokerStore.setConnected(true)
+      if (reconnectTimeout.value) {
+        clearTimeout(reconnectTimeout.value)
+        reconnectTimeout.value = null
+      }
 
-      // Llamas a sendMessage después de que la conexión está establecida
       sendMessage({
         action: 'signUp',
         totalChips: 1000,
@@ -29,40 +37,58 @@ export default function useWebSocket(url, options) {
     })
 
     socket.value.addEventListener('message', (event) => {
-      console.log('Mensaje recibido:', event.data)
       pokerStore.setSocketMessage(event.data)
     })
 
     socket.value.addEventListener('close', () => {
       console.log('Conexión cerrada')
       pokerStore.setConnected(false)
+      
+      if (!isManuallyClosed.value) {
+        attemptReconnect()
+      }
     })
 
     socket.value.addEventListener('error', (error) => {
-      handleSocketError(error)
+      console.error('Error en la conexión del socket:', error)
       pokerStore.setConnected(false)
+      // The close event will follow and trigger reconnection if needed
     })
   }
 
+  const attemptReconnect = () => {
+    if (reconnectTimeout.value) return
+    
+    console.log('Intentando reconectar en 3 segundos...')
+    reconnectTimeout.value = setTimeout(() => {
+      reconnectTimeout.value = null
+      connectSocket()
+    }, 3000)
+  }
+
   const disconnectSocket = () => {
+    isManuallyClosed.value = true
+    if (reconnectTimeout.value) {
+      clearTimeout(reconnectTimeout.value)
+      reconnectTimeout.value = null
+    }
     if (socket.value) {
       socket.value.close()
-      pokerStore.setConnected(false)
     }
+    pokerStore.setConnected(false)
   }
 
   const sendMessage = (message) => {
     if (socket.value && socket.value.readyState === WebSocket.OPEN) {
       socket.value.send(JSON.stringify(message))
-      console.log('Mensaje enviado:', message)
     } else {
       console.error('Error: Socket no está abierto.')
     }
   }
 
-  const handleSocketError = (error) => {
-    console.error('Error en la conexión del socket:', error)
-  }
+  onBeforeUnmount(() => {
+    disconnectSocket()
+  })
 
   return {
     socket,
