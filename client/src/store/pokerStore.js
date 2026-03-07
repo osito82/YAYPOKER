@@ -29,6 +29,9 @@ export const usePokerStore = defineStore('pokerStore', () => {
 
   const lobbyCountdown = ref(null)
   const lobbyStartTime = ref(null)
+  let lobbyInterval = null
+  
+  const stepChecker = ref(null)
 
   // Getters
   const getSocketMessage = computed(() => socketMessage.value)
@@ -47,12 +50,37 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getAutofoldStartTime = computed(() => autofoldStartTime.value)
   const getAutofoldDuration = computed(() => autofoldDuration.value)
   const getLobbyCountdown = computed(() => lobbyCountdown.value)
+  const getIsLobby = computed(() => {
+    // Si no tenemos stepChecker, asumimos que estamos en lobby por defecto
+    if (!stepChecker.value) return true
+    return !stepChecker.value.blindsBetting
+  })
 
   const getCurrentHand = computed(() => {
     const me = players.value.find((p) => p.id === myInfo.value.id)
     if (!me || !me.currentPrize || !me.currentPrize.pokerHand) return null
     return me.currentPrize
   })
+
+  const stopLobbyTimer = () => {
+    if (lobbyInterval) {
+      clearInterval(lobbyInterval)
+      lobbyInterval = null
+    }
+  }
+
+  const startLocalLobbyTimer = (seconds) => {
+    stopLobbyTimer()
+    lobbyCountdown.value = seconds
+    lobbyInterval = setInterval(() => {
+      if (lobbyCountdown.value !== null && lobbyCountdown.value > 0) {
+        lobbyCountdown.value--
+      } else {
+        stopLobbyTimer()
+        lobbyCountdown.value = null
+      }
+    }, 1000)
+  }
 
   // Actions
   function setSocketMessage(message) {
@@ -64,6 +92,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
       if (!gameData) return
 
       console.log('POKER_STORE - Received:', gameData.action, gameData)
+      
+      if (gameData.stepChecker) {
+        stepChecker.value = gameData.stepChecker
+      }
 
       // Reset winner info ONLY if a new hand/action starts and we don't want the old one
       if (
@@ -120,15 +152,16 @@ export const usePokerStore = defineStore('pokerStore', () => {
 
       // Handle Actions and Turns
       if (gameData.action === 'lobbyTimer') {
-        lobbyCountdown.value = gameData.data.timeRemaining
-        lobbyStartTime.value = Date.now()
+        startLocalLobbyTimer(gameData.data.timeRemaining)
       } else if (gameData.action === 'askForBlindBets') {
+        stopLobbyTimer()
         lobbyCountdown.value = null
         activePlayerId.value = gameData.data.id
         bettingOptions.value = ['blind']
         autofoldStartTime.value = Date.now()
         autofoldDuration.value = gameData.autofoldDuration || 600
       } else if (gameData.action?.startsWith('bettingCore')) {
+        stopLobbyTimer()
         lobbyCountdown.value = null
         if (gameData.data?.messageForId) {
           activePlayerId.value = gameData.data.messageForId
@@ -218,6 +251,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     autofoldDuration,
     lobbyCountdown,
     lobbyStartTime,
+    stepChecker,
 
     // Getters (computeds)
     getOdds,
@@ -237,6 +271,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getAutofoldDuration,
     getCurrentHand,
     getLobbyCountdown,
+    getIsLobby,
 
     // Actions
     setSocketMessage,

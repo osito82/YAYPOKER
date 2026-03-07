@@ -110,21 +110,30 @@
               Wait: {{ activePlayerName }}
             </span>
           </div>
+<!-- Action Buttons Row -->
+<div class="flex gap-1.5 w-full h-10 lg:h-12">
+  <!-- LOBBY / START GAME MODE -->
+  <template v-if="pokerStore.getIsLobby">
+    <button
+      :disabled="myPlayer?.isStarted"
+      @click="$emit('sendReady')"
+      class="flex-1 bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg active:scale-95 text-[10px] lg:text-sm flex items-center justify-center gap-2 transition-all overflow-hidden"
+      :class="{ 'opacity-60 grayscale cursor-default': myPlayer?.isStarted }"
+    >
+      <div v-if="!myPlayer?.isStarted" class="flex items-center gap-2">
+        <span>Start Game</span>
+        <div v-if="pokerStore.getLobbyCountdown !== null" class="h-4 w-px bg-black/20"></div>
+        <span v-if="pokerStore.getLobbyCountdown !== null" class="font-mono">{{ pokerStore.getLobbyCountdown }}s</span>
+      </div>
+      <div v-else class="flex items-center gap-2">
+        <span class="animate-pulse">Game Starting in</span>
+        <span class="bg-black/20 px-2 py-0.5 rounded font-mono">{{ pokerStore.getLobbyCountdown ?? 60 }}s</span>
+      </div>
+    </button>
+  </template>
 
-          <!-- Action Buttons Row -->
-          <div class="flex gap-1.5 w-full h-10 lg:h-12">
-            <!-- LOBBY / START GAME MODE -->
-            <template v-if="!myPlayer?.isStarted">
-              <button
-                @click="$emit('sendReady')"
-                class="flex-1 bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg active:scale-95 text-[10px] lg:text-sm flex items-center justify-center gap-2"
-              >
-                <span>Start Game</span>
-                <span v-if="pokerStore.getLobbyCountdown !== null" class="bg-black/20 px-2 py-0.5 rounded text-[10px]">{{ pokerStore.getLobbyCountdown }}s</span>
-              </button>
-            </template>
-
-            <template v-else-if="canBlind">
+  <template v-else-if="canBlind">
+...
               <button
                 @click="$emit('action', 'blind')"
                 class="flex-1 bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg active:scale-95 text-[10px] lg:text-sm"
