@@ -94,8 +94,14 @@
                   v-else-if="!player.isConnected"
                   class="text-[10px] font-bold uppercase tracking-widest text-red-500/70"
                 >
-                  Played
+                  Done
                 </span>
+                <span
+  v-else-if="!player.isConnected"
+  class="text-[10px] font-bold uppercase tracking-widest text-red-500/70"
+>
+  Offline
+</span>
               </div>
             </div>
 
