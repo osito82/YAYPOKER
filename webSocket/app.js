@@ -130,6 +130,7 @@ const actionHandlers = {
   stats: (match, socket) => match.stats(socket.id),
   nextRound: (match) => match.nextRound(),
   startGame: (match, socket) => match.startGame(socket),
+  playerReady: (match, socket) => match.playerReady(socket),
 }
 
 wss.on('connection', (ws, req) => {
