@@ -995,7 +995,8 @@ class Match {
       (p) => p.connected && p.chips > 0,
     )
     if (playersWithChips.length < 2) {
-      this.resetStacks()
+      this.log.R({ info: 'Tournament finished. No more rounds.' })
+      return
     }
     this.restartMatch()
   }

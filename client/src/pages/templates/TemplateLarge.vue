@@ -63,6 +63,12 @@
             />
           </div>
         </main>
+
+        <!-- Terminal Area (Bottom of table) -->
+        <div id="game-message-terminal-wrapper-TemplateLarge" class="h-[150px] border-t border-white/5 bg-black/40 shrink-0">
+          <MessageTerminal :logs="logs" />
+        </div>
+
         <footer id="game-hud-bar-TemplateLarge" class="shrink-0 z-50">
           <ActionBar
             :isMyTurn="isMyTurn"
@@ -90,6 +96,7 @@
         :myPlayerId="myPlayerId"
         :pot="pot"
         :logs="logs"
+        hideTerminal
       />
     </div>
   </div>
@@ -101,6 +108,7 @@ import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
+import MessageTerminal from '../../components/MessageTerminal.vue'
 
 defineProps({
   gameCode: String,
