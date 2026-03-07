@@ -143,18 +143,14 @@ describe('Poker Game Integration Tests', () => {
     await alice.waitAction('dealtPrivateCards')
 
     // 5. Turno de apuestas - Alice iguala (Call)
-    await alice.waitAction(
-      'bettingCore-firstBetting',
-      5000,
-      (r) => r.message.data?.displayMsg?.includes(MOCK_PLAYERS.ALICE.name),
+    await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data?.displayMsg?.includes(MOCK_PLAYERS.ALICE.name),
     )
     alice.send(MOCK_ACTIONS.CALL)
 
     // 6. Turno de Bob - Pasa (Check)
-    await bob.waitAction(
-      'bettingCore-firstBetting',
-      5000,
-      (r) => r.message.data?.displayMsg?.includes(MOCK_PLAYERS.BOB.name),
+    await bob.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data?.displayMsg?.includes(MOCK_PLAYERS.BOB.name),
     )
     bob.send(MOCK_ACTIONS.CHECK)
 

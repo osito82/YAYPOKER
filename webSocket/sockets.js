@@ -48,6 +48,17 @@ class Socket {
   static getSocketsByTorneo(idTorneo) {
     return this.torneoSockets.get(idTorneo) || null
   }
+
+  static getAllSockets() {
+    const all = []
+    for (const torneoMap of this.torneoSockets.values()) {
+      for (const socket of torneoMap.values()) {
+        all.push(socket)
+      }
+    }
+    return all
+  }
+
   static getSocket(idTorneo, id) {
     const torneoSockets = this.torneoSockets.get(idTorneo)
     if (!torneoSockets) return null

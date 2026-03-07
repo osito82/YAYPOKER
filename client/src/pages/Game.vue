@@ -73,8 +73,18 @@ const getSavedName = () => {
   return newName
 }
 
+const getSavedSecretCode = () => {
+  if (props.isGuest) return 'spectator'
+  if (route.query.secretCode) return route.query.secretCode
+  const saved = sessionStorage.getItem(`poker_secret_${gameCode}`)
+  if (saved) return saved
+  const newSecret = generateSecretCode()
+  sessionStorage.setItem(`poker_secret_${gameCode}`, newSecret)
+  return newSecret
+}
+
 const playerName = getSavedName()
-const secretCode = props.isGuest ? 'spectator' : (route.query.secretCode || generateSecretCode())
+const secretCode = getSavedSecretCode()
 
 const connectionOptions = { gameCode, playerName, secretCode, role: props.isGuest ? 'guest' : 'player' }
 

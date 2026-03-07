@@ -131,7 +131,9 @@ class Match {
     this.lobbyStartTime = Date.now()
 
     const connectedCount = this.players.filter((p) => p.connected).length
-    const readyCount = this.players.filter((p) => p.isStarted && p.connected).length
+    const readyCount = this.players.filter(
+      (p) => p.isStarted && p.connected,
+    ).length
 
     this.log
       .Template({
@@ -139,10 +141,10 @@ class Match {
         title: 'MATCH - Lobby Timer Started',
         date: true,
       })
-      .R({ 
+      .R({
         duration: `${this.lobbyTimerDuration / 1000}s`,
         connected: connectedCount,
-        ready: readyCount
+        ready: readyCount,
       })
 
     this.communicator.msgBuilder('lobbyTimer', 'public', null, {
@@ -171,7 +173,7 @@ class Match {
     const foundPlayer = this.players.find((p) => p.id === thisSocket.id)
     if (foundPlayer) {
       foundPlayer.setStarted(true)
-      
+
       this.log
         .Template({
           name: 'brakets',
@@ -278,7 +280,7 @@ class Match {
       // ✅ LÓGICA DE RE-CONEXIÓN (Mismo usuario, otra pestaña o reconexión)
       player = this.players[existingPlayerIndex]
       const oldId = player.id
-      
+
       // Si el ID es el mismo, es un re-envío del mismo socket, ignoramos
       if (oldId === thisSocketId && player.connected) return
 
@@ -405,7 +407,7 @@ class Match {
       msg: `Welcome ${player.name}!`,
     })
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-    
+
     this.communicator.msgBuilder('signUp', 'private', player, {
       method: 'signUp',
       id: thisSocketId,
@@ -497,7 +499,7 @@ class Match {
           player: thisSocket.name,
           reason: 'Not your turn or no active player',
           expected: this.activePlayerId,
-          received: thisSocket.id
+          received: thisSocket.id,
         })
       return
     }
@@ -506,7 +508,7 @@ class Match {
     if (!foundPlayer) return
 
     const amount = Number(chipsToBet)
-    
+
     // Validar que si es un Raise, realmente aumente la apuesta
     if (type === 'setRise' && amount <= this.dealer.getCurrentHighestBet()) {
       this.log
@@ -519,7 +521,7 @@ class Match {
           player: foundPlayer.name,
           amount,
           currentMax: this.dealer.getCurrentHighestBet(),
-          reason: 'Raise must be higher than current highest bet'
+          reason: 'Raise must be higher than current highest bet',
         })
       return
     }
@@ -565,7 +567,7 @@ class Match {
         bet: foundPlayer.getCurrentBet(),
       })
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-      
+
       // If we are in blinds phase, use shorter delay to avoid test timeouts/race conditions
       const delay = !this.stepChecker.checkStep('blindsBetting') ? 100 : 500
       this.continue(thisSocket, delay)
@@ -580,7 +582,7 @@ class Match {
           player: foundPlayer.name,
           amount,
           chips: foundPlayer.chips,
-          reason: 'Insufficient chips or invalid amount'
+          reason: 'Insufficient chips or invalid amount',
         })
     }
   }
@@ -624,7 +626,7 @@ class Match {
           date: true,
         })
         .R({ player: foundPlayer.name, diff })
-      
+
       const checkSuccess = this.performCheck(foundPlayer)
       if (checkSuccess) {
         this.continue(thisSocket, 100)
@@ -693,11 +695,15 @@ class Match {
       return true
     } else {
       this.log
-        .Template({ name: 'brakets', title: 'MATCH - Invalid Check', date: true })
-        .R({ 
-          player: foundPlayer.name, 
-          currentBet: foundPlayer.getCurrentBet(), 
-          maxBet: this.dealer.getCurrentHighestBet() 
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Invalid Check',
+          date: true,
+        })
+        .R({
+          player: foundPlayer.name,
+          currentBet: foundPlayer.getCurrentBet(),
+          maxBet: this.dealer.getCurrentHighestBet(),
         })
       return false
     }
@@ -706,8 +712,16 @@ class Match {
   setCheck = (thisSocket) => {
     if (!this.activePlayerId || this.activePlayerId !== thisSocket.id) {
       this.log
-        .Template({ name: 'brakets', title: 'MATCH - Action Rejected', date: true })
-        .R({ player: thisSocket.name, reason: 'Not your turn', action: 'Check' })
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Action Rejected',
+          date: true,
+        })
+        .R({
+          player: thisSocket.name,
+          reason: 'Not your turn',
+          action: 'Check',
+        })
       return
     }
 
@@ -829,7 +843,8 @@ class Match {
 
   continue(thisSocket, customDelay = null) {
     this.lastActivity = Date.now()
-    const delay = customDelay !== null ? customDelay : (this.isRunout ? 2000 : 500)
+    const delay =
+      customDelay !== null ? customDelay : this.isRunout ? 2000 : 500
     setTimeout(() => {
       this.startGame(thisSocket)
     }, delay)
@@ -860,21 +875,28 @@ class Match {
     this.dealer.setFinalHands()
 
     const winnerPlayers = Array.isArray(winnerData) ? winnerData : [winnerData]
+
     const pot = this.dealer.getPot()
     const splitPot = Math.floor(pot / winnerPlayers.length)
     const finalHands = this.dealer.getFinalHands()
 
+    // repartir dinero
     winnerPlayers.forEach((wp) => {
       const player = this.players.find((p) => p.id === (wp.playerId || wp.id))
+
       if (player) {
         player.chips += splitPot
 
         this.log
-          .Template({ name: 'brakets', title: 'MATCH - WINNER', date: true })
+          .Template({
+            name: 'brakets',
+            title: 'MATCH - HAND WINNER',
+            date: true,
+          })
           .R({
             winner: player.name,
             amount: splitPot,
-            isFold: isFold,
+            isFold,
           })
       }
     })
@@ -882,6 +904,7 @@ class Match {
     const winnersInfo = winnerPlayers.map((wp) => {
       const player = this.players.find((p) => p.id === (wp.playerId || wp.id))
       const winningHand = finalHands.find((h) => h.playerId === player?.id)
+
       return {
         name: player?.name || 'Unknown',
         playerId: player?.id,
@@ -893,22 +916,77 @@ class Match {
       }
     })
 
+    // verificar si ya hay ganador del torneo
+    const playersWithChips = this.players.filter(
+      (p) => p.chips > 0 && p.connected,
+    )
+
+    const isTournamentWinner = playersWithChips.length === 1
+
+    if (isTournamentWinner) {
+      this.winnerTournament(winnersInfo)
+    } else {
+      this.winnerHand(winnersInfo, isFold, pot, finalHands)
+    }
+
+    this.waitingForNextRound = true
+  }
+
+  winnerHand(winnersInfo, isFold, pot, finalHands) {
     const displayMsg =
       winnersInfo.length > 1
         ? `Tie! ${winnersInfo.map((w) => w.name).join(' and ')} split $${pot}!`
         : `${winnersInfo[0].name} wins $${pot}${isFold ? ' (Fold)' : ''}!`
+
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'MATCH - HAND RESULT',
+        date: true,
+      })
+      .R({
+        winners: winnersInfo.map((w) => w.name),
+        pot,
+        isFold,
+      })
 
     this.communicator.msgBuilder('winner', 'public', null, {
       method: 'winner',
       displayMsg,
       winners: winnersInfo,
       allHands: finalHands,
-      isFold: isFold,
+      isFold,
+      isTournamentWinner: false,
     })
-    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
-    this.waitingForNextRound = true
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
   }
+
+  winnerTournament(winnersInfo) {
+    const winner = winnersInfo[0]
+
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'MATCH - TOURNAMENT WINNER',
+        date: true,
+      })
+      .R({
+        winner: winner.name,
+        playerId: winner.playerId,
+        chipsWon: winner.amount,
+      })
+
+    this.communicator.msgBuilder('winnerTournament', 'public', null, {
+      method: 'winnerTournament',
+      displayMsg: `🏆 ${winner.name} wins the tournament!`,
+      winner,
+      isTournamentWinner: true,
+    })
+
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+  }
+
 
   nextRound() {
     if (!this.waitingForNextRound) return
@@ -995,7 +1073,9 @@ class Match {
     if (this.stepChecker.checkStep('winner')) return
 
     const allPlayers = this.players
-    const activePlayers = allPlayers.filter((p) => p.connected && !p.folded && p.isStarted)
+    const activePlayers = allPlayers.filter(
+      (p) => p.connected && !p.folded && p.isStarted,
+    )
 
     if (activePlayers.length === 1) {
       this.winner(activePlayers[0], true)
@@ -1075,7 +1155,7 @@ class Match {
     } else {
       const p = playersToAct[0]
       if (this.activePlayerId === p.id) return
-      
+
       this.activePlayerId = p.id
       if (p.lastAction !== 'Out') p.setLastAction('')
 
@@ -1099,13 +1179,15 @@ class Match {
           title: 'MATCH - Waiting Player Act',
           date: true,
         })
-        .R({ 
-          player: p.name, 
+        .R({
+          player: p.name,
           options: opts,
           maxBet,
           playerBet: p.getCurrentBet(),
           playerChips: p.chips,
-          actedPlayers: actedPlayers.map(id => this.players.find(pl => pl.id === id)?.name)
+          actedPlayers: actedPlayers.map(
+            (id) => this.players.find((pl) => pl.id === id)?.name,
+          ),
         })
 
       this.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'private', p, {
