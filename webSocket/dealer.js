@@ -67,6 +67,7 @@ class Dealer {
     )
   }
 
+
   getPlayersActed = () => {
     return this.playersActed
   }
