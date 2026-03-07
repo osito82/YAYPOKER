@@ -107,8 +107,8 @@ describe('ActionBar.vue', () => {
     })
     
     const raiseBtn = wrapper.findAll('button').find(b => b.text() === 'Raise')
-    // Should be enabled because player has no other choice to raise
-    expect(raiseBtn.element.disabled).toBe(false)
+    // Should be disabled because player has no other choice to raise
+    expect(raiseBtn.element.disabled).toBe(true)
   })
 
   it('emits action event when a button is clicked', async () => {

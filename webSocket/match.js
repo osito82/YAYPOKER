@@ -33,7 +33,8 @@ class Match {
     this.isRunout = false
 
     this.lobbyTimer = null
-    this.lobbyTimerDuration = 60000 // 1 minuto
+    // this.lobbyTimerDuration = 60000 // 1 minuto
+    this.lobbyTimerDuration = 5000 // 1 minuto
     this.lobbyStartTime = null
 
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
@@ -1080,11 +1081,14 @@ class Match {
 
       let opts = []
       if (maxBet === 0) {
+        // Nadie ha apostado aún en esta calle
         opts = ['check', 'bet', 'fold']
       } else {
         if (p.getCurrentBet() < maxBet) {
+          // Alguien apostó más que yo
           opts = ['fold', 'call', 'raise']
         } else {
+          // Ya igualé la apuesta máxima (ej. BB pre-flop o después de un Call mutuo)
           opts = ['check', 'raise', 'fold']
         }
       }
@@ -1095,7 +1099,14 @@ class Match {
           title: 'MATCH - Waiting Player Act',
           date: true,
         })
-        .R({ player: p.name, options: opts })
+        .R({ 
+          player: p.name, 
+          options: opts,
+          maxBet,
+          playerBet: p.getCurrentBet(),
+          playerChips: p.chips,
+          actedPlayers: actedPlayers.map(id => this.players.find(pl => pl.id === id)?.name)
+        })
 
       this.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'private', p, {
         messageForId: p.id,
