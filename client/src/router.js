@@ -29,6 +29,12 @@ const routes = [
       return true // continuar normalmente
     },
   },
+  {
+    name: 'guest',
+    path: '/game/:gameCode/guest',
+    component: Game,
+    props: { isGuest: true }
+  },
   { name: 'about', path: '/about', component: About },
 ]
 
