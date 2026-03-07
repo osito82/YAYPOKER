@@ -47,7 +47,7 @@ vi.mock('../dealer', () => {
       hasPlayerBet: vi.fn(() => false),
       getDealerCards: vi.fn(() => ['A', 'K', 'Q']),
       allPlayersCheck: vi.fn(() => false),
-      removeChecks: vi.fn(),
+      clearActedPlayers: vi.fn(),
       getFinalHands: vi.fn(() => []),
       setFinalHands: vi.fn(),
       getChipsFromPlayers: vi.fn(),

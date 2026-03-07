@@ -90,17 +90,17 @@ describe('Dealer Class', () => {
   // 🟢 CHECK LOGIC
   // ================================
 
-  it('should mark player as checked', () => {
-    dealer.setChecked('p1')
-    expect(dealer.getPlayersChecked()).toContain('p1')
+  it('should mark player as acted', () => {
+    dealer.setPlayerActed('p1')
+    expect(dealer.getPlayersActed()).toContain('p1')
   })
 
-  it('should detect when all players checked with same bet', () => {
+  it('should detect when all players acted with same bet', () => {
     players[0].currentBet = 100
     players[1].currentBet = 100
 
-    dealer.setChecked('p1')
-    dealer.setChecked('p2')
+    dealer.setPlayerActed('p1')
+    dealer.setPlayerActed('p2')
 
     expect(dealer.allPlayersCheck()).toBe(true)
   })
@@ -109,7 +109,7 @@ describe('Dealer Class', () => {
     players[0].currentBet = 100
     players[1].currentBet = 100
 
-    dealer.setChecked('p1')
+    dealer.setPlayerActed('p1')
 
     expect(dealer.allPlayersCheck()).toBe(false)
   })
@@ -237,7 +237,7 @@ describe('Dealer Class', () => {
 
     const dealer = new Dealer('game1', players, [], 'torneo1', 0, [])
 
-    dealer.setChecked('p1')
+    dealer.setPlayerActed('p1')
 
     expect(dealer.allPlayersCheck()).toBe(true)
   })

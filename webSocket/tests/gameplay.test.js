@@ -36,13 +36,15 @@ describe('Poker Game Integration Tests', () => {
       responses.push(JSON.parse(data.toString()))
     })
 
-    const waitAction = (action, timeout = 3000) => {
+    const waitAction = (action, timeout = 3000, filterFn = null) => {
       return new Promise((resolve, reject) => {
         const start = Date.now()
         const check = setInterval(() => {
-          const found = responses.find(
-            (r) => r.message && r.message.action === action,
-          )
+          const found = responses.find((r) => {
+            if (!r.message || r.message.action !== action) return false
+            if (filterFn) return filterFn(r)
+            return true
+          })
           if (found) {
             clearInterval(check)
             resolve(found)
@@ -86,8 +88,9 @@ describe('Poker Game Integration Tests', () => {
     await alice.waitAction('signUp')
     await bob.waitAction('signUp')
 
-    // Iniciar juego
+    // Iniciar juego - AMBOS deben estar listos
     alice.send(MOCK_ACTIONS.START_GAME)
+    bob.send(MOCK_ACTIONS.START_GAME)
     await alice.waitAction('askForBlindBets')
 
     // Alice hace Fold
@@ -123,24 +126,36 @@ describe('Poker Game Integration Tests', () => {
 
     // 2. Iniciar juego
     alice.send(MOCK_ACTIONS.START_GAME)
+    bob.send(MOCK_ACTIONS.START_GAME)
 
     // 3. Poner Blinds
-    await alice.waitAction('askForBlindBets')
+    await alice.waitAction('askForBlindBets', 3000, (r) =>
+      r.message.data?.displayMsg?.includes(MOCK_PLAYERS.ALICE.name),
+    )
     alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
 
-    await bob.waitAction('askForBlindBets')
+    await bob.waitAction('askForBlindBets', 3000, (r) =>
+      r.message.data?.displayMsg?.includes(MOCK_PLAYERS.BOB.name),
+    )
     bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     // 4. Esperar a que se repartan las cartas
     await alice.waitAction('dealtPrivateCards')
 
     // 5. Turno de apuestas - Alice iguala (Call)
-    // Aumentamos el timeout porque el servidor tiene retardos deliberados (setTimeout)
-    await alice.waitAction('bettingCore-firstBetting', 5000)
+    await alice.waitAction(
+      'bettingCore-firstBetting',
+      5000,
+      (r) => r.message.data?.displayMsg?.includes(MOCK_PLAYERS.ALICE.name),
+    )
     alice.send(MOCK_ACTIONS.CALL)
 
     // 6. Turno de Bob - Pasa (Check)
-    await bob.waitAction('bettingCore-firstBetting', 5000)
+    await bob.waitAction(
+      'bettingCore-firstBetting',
+      5000,
+      (r) => r.message.data?.displayMsg?.includes(MOCK_PLAYERS.BOB.name),
+    )
     bob.send(MOCK_ACTIONS.CHECK)
 
     // 7. Verificar el Flop y el Pot

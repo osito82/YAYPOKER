@@ -89,12 +89,14 @@
           <div
             v-if="isMyTurn && (options.includes('bet') || options.includes('raise'))"
             class="flex items-center gap-3 bg-black/40 p-1.5 rounded-lg border border-yellow-500/20 h-8 lg:h-10"
+            :class="{ 'opacity-40 grayscale pointer-events-none': isSliderDisabled }"
           >
             <input
               type="range"
               v-model.number="betProxy"
               :min="minBet"
               :max="maxBet"
+              :disabled="isSliderDisabled"
               class="flex-1 h-1 accent-yellow-500 bg-gray-800 rounded-full appearance-none cursor-pointer"
             />
             <span class="text-xs font-mono font-black text-yellow-500 min-w-[50px] text-right">${{ betAmount }}</span>
@@ -185,10 +187,19 @@ const templateSuffix = computed(() => {
   return 'Template' + size.charAt(0).toUpperCase() + size.slice(1)
 })
 
+const isSliderDisabled = computed(() => {
+  if (!props.isMyTurn) return true
+  // Disable if stack is not enough to raise above the minimum
+  return props.maxBet <= props.minBet
+})
+
 const isRaiseActionDisabled = computed(() => {
   if (!props.isMyTurn) return true
   const hasActionOption = props.options.includes('bet') || props.options.includes('raise')
   if (!hasActionOption) return true
+
+  // If stack is too small to even reach minBet, button should be disabled
+  if (isSliderDisabled.value) return true
 
   // Disable if amount hasn't been increased from the original minimum
   // Exception: Allow if it's an All-in situation (betAmount equals maxBet)
