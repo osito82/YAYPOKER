@@ -11,7 +11,7 @@ class Dealer {
     this.players = players
     this.pot = Number(pot) || 0
     this.cardsDealer = cardsDealer || []
-    this.playersChecked = []
+    this.playersActed = []
     this.finalHands = []
     this.currentHighestBet = 0
     this.lastRaiser = null
@@ -63,31 +63,31 @@ class Dealer {
 
     const maxBet = Math.max(...activePlayers.map((p) => p.getCurrentBet()))
     return activePlayers.every(
-      (p) => p.getCurrentBet() === maxBet && this.playersChecked.includes(p.id),
+      (p) => p.getCurrentBet() === maxBet && this.playersActed.includes(p.id),
     )
   }
 
-  getPlayersChecked = () => {
-    return this.playersChecked
+  getPlayersActed = () => {
+    return this.playersActed
   }
 
-  removeChecks = () => {
-    this.playersChecked = []
+  clearActedPlayers = () => {
+    this.playersActed = []
   }
 
   updatePlayerId = (oldId, newId) => {
-    const checkIndex = this.playersChecked.indexOf(oldId)
+    const checkIndex = this.playersActed.indexOf(oldId)
     if (checkIndex !== -1) {
-      this.playersChecked[checkIndex] = newId
+      this.playersActed[checkIndex] = newId
     }
     if (this.lastRaiser === oldId) {
       this.lastRaiser = newId
     }
   }
 
-  setChecked = (thisSocketId) => {
-    if (thisSocketId && !this.playersChecked.includes(thisSocketId)) {
-      this.playersChecked.push(thisSocketId)
+  setPlayerActed = (thisSocketId) => {
+    if (thisSocketId && !this.playersActed.includes(thisSocketId)) {
+      this.playersActed.push(thisSocketId)
     }
   }
 

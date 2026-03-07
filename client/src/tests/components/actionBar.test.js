@@ -131,3 +131,4 @@ describe('ActionBar.vue', () => {
     expect(wrapper.text()).not.toContain('Raise')
   })
 })
+

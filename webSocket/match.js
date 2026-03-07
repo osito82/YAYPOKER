@@ -1,4 +1,3 @@
-// match 2
 const Player = require('./player')
 const Dealer = require('./dealer')
 const Deck = require('./deck')
@@ -432,12 +431,8 @@ class Match {
 
   noMorePlayers() {
     if (!this.acceptingPlayers) {
-      console.log(
-        `[DEBUG] noMorePlayers called but acceptingPlayers already false for game ${this.gameId}`,
-      )
       return
     }
-    console.log(`[DEBUG] Closing registration for game ${this.gameId}`)
     this.acceptingPlayers = false
 
     this.log
@@ -459,7 +454,12 @@ class Match {
     try {
       this.dealer.dealCardsEachPlayer(2)
       this.stepChecker.grantStep('dealtPrivateCards')
-      this.dealer.removeChecks()
+      this.dealer.clearActedPlayers()
+
+      this.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
+        displayMsg: 'Cards dealt!',
+      })
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
       this.log
         .Template({
@@ -477,10 +477,6 @@ class Match {
           this.communicator.getMsg(),
         )
       }
-      this.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
-        displayMsg: 'Cards dealt!',
-      })
-      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       this.sendOdds()
       this.continue(thisSocket)
     } catch (error) {
@@ -489,7 +485,7 @@ class Match {
   }
 
   setBet(thisSocket, chipsToBet, type = 'setBet') {
-    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) {
+    if (!this.activePlayerId || this.activePlayerId !== thisSocket.id) {
       this.log
         .Template({
           name: 'brakets',
@@ -498,67 +494,98 @@ class Match {
         })
         .R({
           player: thisSocket.name,
-          reason: 'Not your turn',
+          reason: 'Not your turn or no active player',
           expected: this.activePlayerId,
+          received: thisSocket.id
         })
+      return
+    }
+
+    const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
+    if (!foundPlayer) return
+
+    const amount = Number(chipsToBet)
+    
+    // Validar que si es un Raise, realmente aumente la apuesta
+    if (type === 'setRise' && amount <= this.dealer.getCurrentHighestBet()) {
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Raise Rejected',
+          date: true,
+        })
+        .R({
+          player: foundPlayer.name,
+          amount,
+          currentMax: this.dealer.getCurrentHighestBet(),
+          reason: 'Raise must be higher than current highest bet'
+        })
+      // No llamar a continue, el jugador debe re-intentar con un monto válido
       return
     }
 
     this.clearAutofold()
     if (this.acceptingPlayers) {
-      console.log(
-        `[DEBUG] Action ${type} from ${thisSocket.name} closing registration`,
-      )
       this.noMorePlayers()
     }
 
-    const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
-    if (foundPlayer) {
-      const amount = Number(chipsToBet)
-      const currentBetBefore = foundPlayer.getCurrentBet()
-      const success = foundPlayer.setTotalBet(amount)
+    const currentBetBefore = foundPlayer.getCurrentBet()
+    const success = foundPlayer.setTotalBet(amount)
 
-      if (success) {
-        this.activePlayerId = null // Clear turn
-        const addedChips = amount - currentBetBefore
-        foundPlayer.setLastAction(type === 'setBet' ? 'Bet' : 'Raise')
-        this.dealer.setPot(addedChips)
+    if (success) {
+      this.activePlayerId = null // Clear turn
+      const addedChips = amount - currentBetBefore
+      foundPlayer.setLastAction(type === 'setBet' ? 'Bet' : 'Raise')
+      this.dealer.setPot(addedChips)
 
-        if (amount > this.dealer.getCurrentHighestBet()) {
-          this.dealer.setCurrentHighestBet(amount)
-          this.dealer.setLastRaiser(foundPlayer.id)
-          this.dealer.removeChecks()
-        }
-
-        this.dealer.setChecked(foundPlayer.id)
-
-        this.log
-          .Template({
-            name: 'brakets',
-            title: `MATCH - ${type.toUpperCase()}`,
-            date: true,
-          })
-          .R({
-            player: foundPlayer.name,
-            added: addedChips,
-            totalBet: foundPlayer.getCurrentBet(),
-            newPot: this.dealer.getPot(),
-          })
-
-        this.communicator.msgBuilder('setBet', 'public', foundPlayer, {
-          displayMsg: `${foundPlayer.name} ${type === 'setBet' ? 'bets' : 'raises to'} ${amount}`,
-          name: foundPlayer.name,
-          bet: foundPlayer.getCurrentBet(),
-        })
-        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+      if (amount > this.dealer.getCurrentHighestBet()) {
+        this.dealer.setCurrentHighestBet(amount)
+        this.dealer.setLastRaiser(foundPlayer.id)
+        this.dealer.clearActedPlayers()
       }
+
+      this.dealer.setPlayerActed(foundPlayer.id)
+
+      this.log
+        .Template({
+          name: 'brakets',
+          title: `MATCH - ${type.toUpperCase()}`,
+          date: true,
+        })
+        .R({
+          player: foundPlayer.name,
+          added: addedChips,
+          totalBet: foundPlayer.getCurrentBet(),
+          newPot: this.dealer.getPot(),
+        })
+
+      this.communicator.msgBuilder('setBet', 'public', foundPlayer, {
+        displayMsg: `${foundPlayer.name} ${type === 'setBet' ? 'bets' : 'raises to'} ${amount}`,
+        name: foundPlayer.name,
+        bet: foundPlayer.getCurrentBet(),
+      })
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+      
+      this.continue(thisSocket)
+    } else {
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Bet Failed',
+          date: true,
+        })
+        .R({
+          player: foundPlayer.name,
+          amount,
+          chips: foundPlayer.chips,
+          reason: 'Insufficient chips or invalid amount'
+        })
     }
-    this.continue(thisSocket)
   }
 
   setCall(thisSocket) {
     // 🔒 Validar turno
-    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) {
+    if (!this.activePlayerId || this.activePlayerId !== thisSocket.id) {
       this.log
         .Template({
           name: 'brakets',
@@ -581,9 +608,6 @@ class Match {
 
     this.clearAutofold()
     if (this.acceptingPlayers) {
-      console.log(
-        `[DEBUG] Action setCall from ${foundPlayer.name} closing registration`,
-      )
       this.noMorePlayers()
     }
 
@@ -599,7 +623,13 @@ class Match {
           date: true,
         })
         .R({ player: foundPlayer.name, diff })
-      return this.setCheck(thisSocket)
+      
+      // Intentar hacer check propiamente
+      const checkSuccess = this.performCheck(foundPlayer)
+      if (checkSuccess) {
+        this.continue(thisSocket)
+      }
+      return
     }
 
     this.activePlayerId = null
@@ -625,7 +655,7 @@ class Match {
     this.dealer.setPot(amountAdded)
 
     // Marcar como que ya actuó
-    this.dealer.setChecked(foundPlayer.id)
+    this.dealer.setPlayerActed(foundPlayer.id)
     foundPlayer.setLastAction(actionType)
 
     // Log
@@ -655,27 +685,48 @@ class Match {
     this.continue(thisSocket)
   }
 
+  performCheck(foundPlayer) {
+    if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
+      this.clearAutofold()
+      this.activePlayerId = null
+      this.dealer.setPlayerActed(foundPlayer.id)
+
+      foundPlayer.setLastAction('Check')
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH - CHECK', date: true })
+        .R({ player: foundPlayer.name })
+      this.communicator.msgBuilder('setCheck', 'public', foundPlayer, {
+        displayMsg: `${foundPlayer.name} checks`,
+      })
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+      return true
+    } else {
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH - Invalid Check', date: true })
+        .R({ 
+          player: foundPlayer.name, 
+          currentBet: foundPlayer.getCurrentBet(), 
+          maxBet: this.dealer.getCurrentHighestBet() 
+        })
+      return false
+    }
+  }
+
   setCheck = (thisSocket) => {
-    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
+    if (!this.activePlayerId || this.activePlayerId !== thisSocket.id) {
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH - Action Rejected', date: true })
+        .R({ player: thisSocket.name, reason: 'Not your turn', action: 'Check' })
+      return
+    }
 
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
-      if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
-        this.clearAutofold()
-        this.activePlayerId = null
-        this.dealer.setChecked(thisSocket.id)
-
-        foundPlayer.setLastAction('Check')
-        this.log
-          .Template({ name: 'brakets', title: 'MATCH - CHECK', date: true })
-          .R({ player: foundPlayer.name })
-        this.communicator.msgBuilder('setCheck', 'public', foundPlayer, {
-          displayMsg: `${foundPlayer.name} checks`,
-        })
-        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+      const success = this.performCheck(foundPlayer)
+      if (success) {
+        this.continue(thisSocket)
       }
     }
-    this.continue(thisSocket)
   }
 
   setRise(thisSocket, chipsToBet) {
@@ -739,22 +790,18 @@ class Match {
           p.secretCode,
           this.communicator.getMsg(),
         )
-        // this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
         this.startAutofold()
       }
     }
   }
 
   fold(thisSocket) {
-    if (this.activePlayerId && this.activePlayerId !== thisSocket.id) return
+    if (!this.activePlayerId || this.activePlayerId !== thisSocket.id) return
 
     const foundPlayer = this.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer && !foundPlayer.folded) {
       this.clearAutofold()
       if (this.acceptingPlayers) {
-        console.log(
-          `[DEBUG] Action fold from ${foundPlayer.name} closing registration`,
-        )
         this.noMorePlayers()
       }
       this.activePlayerId = null
@@ -762,7 +809,7 @@ class Match {
       foundPlayer.setLastAction('Fold')
       foundPlayer.setFolded(true)
       this.playersFold.push(foundPlayer.name)
-      this.dealer.setChecked(foundPlayer.id)
+      this.dealer.setPlayerActed(foundPlayer.id)
 
       this.log
         .Template({ name: 'brakets', title: 'MATCH - FOLD', date: true })
@@ -872,7 +919,7 @@ class Match {
     )
 
     if (playersWithChips.length < 2) {
-      this.resetStacks() // 👈 NUEVO
+      this.resetStacks()
     }
 
     this.restartMatch()
@@ -928,7 +975,7 @@ class Match {
     this.dealer.cardsDealer = []
     this.cardsDealer = this.dealer.getDealerCards()
     this.dealer.pot = 0
-    this.dealer.removeChecks()
+    this.dealer.clearActedPlayers()
     this.dealer.setCurrentHighestBet(0)
     this.dealer.setLastRaiser(null)
 
@@ -965,7 +1012,7 @@ class Match {
     }
 
     const maxBet = this.dealer.getCurrentHighestBet()
-    const checkedPlayers = this.dealer.getPlayersChecked()
+    const actedPlayers = this.dealer.getPlayersActed()
 
     const canActPlayers = activePlayers.filter((p) => !p.isAllIn)
 
@@ -1014,14 +1061,8 @@ class Match {
       }
     } else {
       // Post-flop (Flop, Turn, River):
-      if (allPlayers.length === 2) {
-        // Heads-up post-flop: SB(0) acts first, BB(1) acts last
-        // This matches the user's requirement to avoid consecutive checks for the same player
-        sorted = [...allPlayers]
-      } else {
-        // 3+ players post-flop: SB(1) acts first
-        sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]
-      }
+      // SB(1) acts first (standard and heads-up BB is at index 1)
+      sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]
     }
 
     // Now filter only those who are still in the hand but KEEP the sorted order
@@ -1031,23 +1072,8 @@ class Match {
         !p.folded &&
         !p.isAllIn &&
         p.isStarted &&
-        (p.getCurrentBet() < maxBet || !checkedPlayers.includes(p.id)),
+        (p.getCurrentBet() < maxBet || !actedPlayers.includes(p.id)),
     )
-
-    this.log
-      .Template({
-        name: 'brakets',
-        title: `MATCH - Debug Betting ${bettingFor}`,
-        date: true,
-      })
-      .R({
-        maxBet,
-        checkedCount: checkedPlayers.length,
-        checkedPlayers: checkedPlayers.map(
-          (id) => this.players.find((pl) => pl.id === id)?.name,
-        ),
-        playersToAct: playersToAct.map((p) => p.name),
-      })
 
     if (playersToAct.length === 0) {
       this.log
@@ -1058,7 +1084,7 @@ class Match {
         })
         .R({ pot: this.dealer.getPot() })
       this.activePlayerId = null
-      this.dealer.removeChecks()
+      this.dealer.clearActedPlayers()
       this.dealer.setCurrentHighestBet(0)
       this.dealer.setLastRaiser(null)
 
@@ -1081,7 +1107,6 @@ class Match {
           opts = ['fold', 'call', 'raise']
         } else {
           // Ya igualé la apuesta máxima (ej. BB pre-flop o después de un Call mutuo)
-          // Se puede hacer Check para pasar o Raise para subir
           opts = ['check', 'raise', 'fold']
         }
       }
@@ -1099,7 +1124,6 @@ class Match {
         action: opts,
         displayMsg: 'Your turn',
       })
-      // this.dealer.talkToPLayerById(p.id, this.communicator.getMsg())
       Socket.sendToPlayer(
         this.torneoId,
         p.secretCode,
@@ -1112,7 +1136,6 @@ class Match {
       })
 
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-      // 0021 this.dealer.talkToPlayerBUTid(p.id, this.communicator.getMsg())
       this.startAutofold()
     }
   }
@@ -1183,6 +1206,7 @@ class Match {
     if (!this.stepChecker.checkStep('firstBetting'))
       return this.bettingCore(thisSocket, 'firstBetting')
     if (!this.stepChecker.checkStep('flop_Dealer_Hand')) {
+      this.dealer.clearActedPlayers()
       this.dealer.getChipsFromPlayers()
       return this.dealerHand(thisSocket, 'flop')
     }
@@ -1191,6 +1215,7 @@ class Match {
     if (!this.stepChecker.checkStep('flop_Bet_Step'))
       return this.bettingCore(thisSocket, 'flopBetting')
     if (!this.stepChecker.checkStep('turn_Dealer_Hand')) {
+      this.dealer.clearActedPlayers()
       this.dealer.getChipsFromPlayers()
       return this.dealerHand(thisSocket, 'turn')
     }
@@ -1199,6 +1224,7 @@ class Match {
     if (!this.stepChecker.checkStep('turn_Bet_Step'))
       return this.bettingCore(thisSocket, 'turnBetting')
     if (!this.stepChecker.checkStep('river_Dealer_Hand')) {
+      this.dealer.clearActedPlayers()
       this.dealer.getChipsFromPlayers()
       return this.dealerHand(thisSocket, 'river')
     }
