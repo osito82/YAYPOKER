@@ -12,8 +12,20 @@ const R = require('radash')
 const { WinnerCore } = require('./winnerCore')
 const PokerOddsCalculator = require('./pokerOdds')
 
+const isTest = process.env.NODE_ENV === 'test'
+
+const timeouts = {
+  autofold: isTest ? 1000 : 600000, // 1s in test, else 10 minutes
+  lobby: isTest ? 100 : 5000, // 100ms in test, else 5 seconds
+  fast: isTest ? 10 : 100, // 10ms in test, else 100ms
+  standard: isTest ? 50 : 500, // 50ms in test, else 500ms
+  runout: isTest ? 100 : 2000, // 100ms in test, else 2 seconds
+  pause: isTest ? 1000 : 60000, // 1s in test, else 1 minute
+}
+
 class Match {
   log = new osolog()
+  static timeouts = timeouts
 
   constructor(torneoId, gameId) {
     this.torneoId = torneoId
@@ -23,7 +35,7 @@ class Match {
     this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
     this.autofoldTimer = null
-    this.autofoldDuration = 600000 // 10 minutos
+    this.autofoldDuration = timeouts.autofold
 
     this.playersFold = []
     this.pot = 0
@@ -33,8 +45,7 @@ class Match {
     this.isRunout = false
 
     this.lobbyTimer = null
-    // this.lobbyTimerDuration = 60000 // 1 minuto
-    this.lobbyTimerDuration = 5000 // 1 minuto
+    this.lobbyTimerDuration = timeouts.lobby
     this.lobbyStartTime = null
 
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
@@ -481,7 +492,7 @@ class Match {
         )
       }
       this.sendOdds()
-      this.continue(thisSocket, 100) // ✅ Fast transition to bettingCore
+      this.continue(thisSocket, timeouts.fast) // ✅ Fast transition to bettingCore
     } catch (error) {
       console.error('Error in dealtPrivateCards:', error)
     }
@@ -579,7 +590,7 @@ class Match {
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
       // If we are in blinds phase, use shorter delay to avoid test timeouts/race conditions
-      const delay = !this.stepChecker.checkStep('blindsBetting') ? 100 : 500
+      const delay = !this.stepChecker.checkStep('blindsBetting') ? timeouts.fast : timeouts.standard
       this.continue(thisSocket, delay)
     } else {
       this.log
@@ -639,7 +650,7 @@ class Match {
 
       const checkSuccess = this.performCheck(foundPlayer)
       if (checkSuccess) {
-        this.continue(thisSocket, 100)
+        this.continue(thisSocket, timeouts.fast)
       }
       return
     }
@@ -685,7 +696,7 @@ class Match {
     })
 
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-    this.continue(thisSocket, 100) // ✅ Fast transition
+    this.continue(thisSocket, timeouts.fast) // ✅ Fast transition
   }
 
   performCheck(foundPlayer) {
@@ -739,7 +750,7 @@ class Match {
     if (foundPlayer) {
       const success = this.performCheck(foundPlayer)
       if (success) {
-        this.continue(thisSocket, 100) // ✅ Fast transition
+        this.continue(thisSocket, timeouts.fast) // ✅ Fast transition
       }
     }
   }
@@ -784,7 +795,7 @@ class Match {
         .R({ pot: this.dealer.getPot() })
       this.activePlayerId = null
       this.stepChecker.grantStep('blindsBetting')
-      this.continue(thisSocket, 100) // ✅ Fast transition
+      this.continue(thisSocket, timeouts.fast) // ✅ Fast transition
     } else {
       let p = null
       if (p1Bet === 0) {
@@ -851,14 +862,14 @@ class Match {
       })
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       this.sendOdds()
-      this.continue(thisSocket, 100) // ✅ Fast transition
+      this.continue(thisSocket, timeouts.fast) // ✅ Fast transition
     }
   }
 
   continue(thisSocket, customDelay = null) {
     this.lastActivity = Date.now()
     const delay =
-      customDelay !== null ? customDelay : this.isRunout ? 2000 : 500
+      customDelay !== null ? customDelay : this.isRunout ? timeouts.runout : timeouts.standard
     setTimeout(() => {
       this.startGame(thisSocket)
     }, delay)
@@ -1166,7 +1177,7 @@ class Match {
       this.dealer.setLastRaiser(null)
 
       this.stepChecker.grantStep(steps[bettingFor])
-      this.continue(thisSocket, 100) // ✅ Fast transition
+      this.continue(thisSocket, timeouts.fast) // ✅ Fast transition
     } else {
       const p = playersToAct[0]
       if (this.activePlayerId === p.id) return
@@ -1245,7 +1256,7 @@ class Match {
     })
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
     this.sendOdds()
-    this.continue(thisSocket, 100) // ✅ Fast transition
+    this.continue(thisSocket, timeouts.fast) // ✅ Fast transition
   }
 
   checkPrizes(thisSocket) {
@@ -1268,7 +1279,7 @@ class Match {
       }
       this.stepChecker.grantStep(steps[cards.length])
     }
-    this.continue(thisSocket, 100) // ✅ Fast transition
+    this.continue(thisSocket, timeouts.fast) // ✅ Fast transition
   }
 
   startGame(thisSocket = {}) {
@@ -1356,7 +1367,7 @@ class Match {
   }
 
   pause(thisSocket) {
-    const time = 60000
+    const time = timeouts.pause
     const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
     const foundPlayer = this.players.find((p) => p.id === socketId)
     if (foundPlayer) {
@@ -1369,7 +1380,7 @@ class Match {
 
       this.communicator.msgBuilder('pause', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} disconnected. Waiting ${time / 1000} seconds for reconnection...`,
-        timeout: 60,
+        timeout: time / 1000,
       })
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 

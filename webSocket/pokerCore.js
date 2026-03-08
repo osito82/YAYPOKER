@@ -256,51 +256,42 @@ class PokerCore {
   constructor() {}
 
   static betterHand(dealerCards, playerCards) {
-    let bestHand = { prizeRank: 11 }
+    let bestHand = { prizeRank: 11, cards: [] }
     const joinedCards = dealerCards.concat(playerCards)
     const combinationsArray = combinar(joinedCards, 5)
 
+    const detectors = [
+      detectRoyalFlush,
+      detectStraightFlush,
+      detectFourOfaKind,
+      detectFullHouse,
+      detectFlush,
+      detectStraight,
+      detectThreeOfAKind,
+      detectTwoPairs,
+      detectPairs,
+      detectHighCard,
+    ]
+
     for (const array of combinationsArray) {
-      let tempHand = detectRoyalFlush(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-      if (bestHand.prizeRank === 1) break
-
-      tempHand = detectStraightFlush(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-
-      tempHand = detectFourOfaKind(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-
-      tempHand = detectFullHouse(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-
-      tempHand = detectFlush(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-
-      tempHand = detectStraight(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-
-      tempHand = detectThreeOfAKind(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-
-      tempHand = detectTwoPairs(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-
-      tempHand = detectPairs(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
-
-      tempHand = detectHighCard(array)
-      if (tempHand && tempHand.prizeRank < bestHand.prizeRank)
-        bestHand = tempHand
+      for (const detector of detectors) {
+        const tempHand = detector(array)
+        if (tempHand) {
+          if (tempHand.prizeRank < bestHand.prizeRank) {
+            bestHand = tempHand
+          } else if (tempHand.prizeRank === bestHand.prizeRank) {
+            // Si tienen el mismo rank, comparar cual es mejor
+            // Usamos sumArrayNumbers como heurística rápida para la mejor combinación de 5
+            const tempSum = sumAllValuesArray(cardsToSingleNumValsArray(tempHand.cards))
+            const bestSum = sumAllValuesArray(cardsToSingleNumValsArray(bestHand.cards))
+            if (tempSum > bestSum) {
+              bestHand = tempHand
+            }
+          }
+          // Una vez que encontramos el mejor rank para ESTA combinación, pasamos a la siguiente combinación
+          break 
+        }
+      }
     }
 
     return bestHand

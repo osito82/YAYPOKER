@@ -29,6 +29,9 @@ export const MOCK_ACTIONS = {
   START_GAME: {
     action: 'startGame',
   },
+  PLAYER_READY: {
+    action: 'playerReady',
+  },
   FOLD: {
     action: 'fold',
   },
@@ -41,6 +44,16 @@ export const MOCK_ACTIONS = {
   BET: (amount) => ({
     action: 'setBet',
     chipsToBet: amount,
+  }),
+  SET_BET: (amount) => ({
+    action: 'setBet',
+    chipsToBet: amount,
+  }),
+  SET_CHECK: () => ({
+    action: 'setCheck',
+  }),
+  SET_CALL: () => ({
+    action: 'setCall',
   }),
   SMALL_BLIND: (amount = 10) => ({
     action: 'setBet',

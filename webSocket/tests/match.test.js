@@ -13,17 +13,33 @@ vi.mock('../player', () => {
         cards: [],
         connected: true,
         currentBet: 0,
+        isStarted: false,
+        isAllIn: false,
+        setStarted: vi.fn(function (status) {
+          this.isStarted = !!status
+        }),
         setConnected: vi.fn(),
         setBet: vi.fn((amount) => amount > 0),
-        getCurrentBet: vi.fn(() => 0),
+        getCurrentBet: vi.fn(function () {
+          return this.currentBet
+        }),
+        setCurrentBet: vi.fn(function (amount) {
+          this.currentBet = amount
+        }),
+        setTotalBet: vi.fn(function (amount) {
+          this.currentBet = amount
+          return true
+        }),
         getPlayerName: vi.fn(() => name),
         getPlayerId: vi.fn(() => id),
         checkPrize: vi.fn(() => ({})),
         setCurrentPrize: vi.fn(),
+        getCurrentPrize: vi.fn(() => ({})),
         toJson: vi.fn(() => ({ name, id, secretCode })),
         setFolded: vi.fn(),
         setLastAction: vi.fn(),
         getCards: vi.fn(() => []),
+        countCards: vi.fn(() => 0),
       }
     })
   return PlayerMock
@@ -173,6 +189,7 @@ describe('Match Class', () => {
         setLastAction: vi.fn(),
         setFolded: vi.fn(),
         setConnected: vi.fn(),
+        setStarted: vi.fn(),
         toJson: vi.fn(() => ({ name: 'Alice', id: 'S1' })),
         getCards: vi.fn(() => []),
       }
