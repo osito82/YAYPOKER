@@ -106,7 +106,14 @@ class Player {
 
     const diff = amount - this.currentBet
     if (diff < 0) return false
-    if (diff > this.chips) return false
+
+    // Poker Rule: If you don't have enough, you go All-In for the rest
+    if (diff > this.chips) {
+      this.currentBet += this.chips
+      this.chips = 0
+      this.isAllIn = true
+      return true
+    }
 
     this.chips -= diff
     this.currentBet = amount

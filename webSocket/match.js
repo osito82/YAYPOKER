@@ -536,12 +536,22 @@ class Match {
 
     if (success) {
       this.activePlayerId = null // ✅ CLEAR TURN IMMEDIATELY
-      const addedChips = amount - currentBetBefore
-      foundPlayer.setLastAction(type === 'setBet' ? 'Bet' : 'Raise')
+      const currentBetAfter = foundPlayer.getCurrentBet()
+      const addedChips = currentBetAfter - currentBetBefore
+
+      let actionType = type === 'setBet' ? 'Bet' : 'Raise'
+      let broadcastAction = 'setBet'
+
+      if (foundPlayer.isAllIn) {
+        actionType = 'All-In'
+        broadcastAction = 'setCall'
+      }
+
+      foundPlayer.setLastAction(actionType)
       this.dealer.setPot(addedChips)
 
-      if (amount > this.dealer.getCurrentHighestBet()) {
-        this.dealer.setCurrentHighestBet(amount)
+      if (currentBetAfter > this.dealer.getCurrentHighestBet()) {
+        this.dealer.setCurrentHighestBet(currentBetAfter)
         this.dealer.setLastRaiser(foundPlayer.id)
         this.dealer.clearActedPlayers()
       }
@@ -551,20 +561,20 @@ class Match {
       this.log
         .Template({
           name: 'brakets',
-          title: `MATCH - ${type.toUpperCase()}`,
+          title: `MATCH - ${actionType.toUpperCase()}`,
           date: true,
         })
         .R({
           player: foundPlayer.name,
           added: addedChips,
-          totalBet: foundPlayer.getCurrentBet(),
+          totalBet: currentBetAfter,
           newPot: this.dealer.getPot(),
         })
 
-      this.communicator.msgBuilder('setBet', 'public', foundPlayer, {
-        displayMsg: `${foundPlayer.name} ${type === 'setBet' ? 'bets' : 'raises to'} ${amount}`,
+      this.communicator.msgBuilder(broadcastAction, 'public', foundPlayer, {
+        displayMsg: `${foundPlayer.name} ${actionType === 'All-In' ? 'goes all-in' : type === 'setBet' ? 'bets' : 'raises to'} ${currentBetAfter}`,
         name: foundPlayer.name,
-        bet: foundPlayer.getCurrentBet(),
+        bet: currentBetAfter,
       })
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
@@ -740,7 +750,11 @@ class Match {
 
   askForBlindBets(thisSocket) {
     const activePlayers = this.players.filter(
-      (p) => p.connected && p.chips > 0 && p.isStarted,
+      (p) =>
+        p.connected &&
+        (p.chips > 0 || p.getCurrentBet() > 0) &&
+        p.isStarted &&
+        !p.folded,
     )
 
     if (activePlayers.length < 2) {
@@ -1100,7 +1114,7 @@ class Match {
       activePlayers.length > 1
     ) {
       const p = canActPlayers[0]
-      if (!p || p.getCurrentBet() >= maxBet) {
+      if (!p || (p.getCurrentBet() >= maxBet && actedPlayers.includes(p.id))) {
         this.isRunout = true
         this.log
           .Template({ name: 'brakets', title: 'MATCH - RUNOUT', date: true })
@@ -1123,7 +1137,7 @@ class Match {
       if (allPlayers.length === 2) {
         sorted = [...allPlayers]
       } else {
-        sorted = [...allPlayers.slice(3), ...allPlayers.slice(0, 3)]
+        sorted = [...allPlayers.slice(2), ...allPlayers.slice(0, 2)]
       }
     } else {
       sorted = [...allPlayers.slice(1), ...allPlayers.slice(0, 1)]

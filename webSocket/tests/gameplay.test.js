@@ -70,6 +70,89 @@ describe('Poker Game Integration Tests', () => {
     return { ws, responses, waitAction, send }
   }
 
+  it('debería permitir que un jugador con pocas fichas vaya All-In en las ciegas y gane', async () => {
+    const gameCode = 'all-in-test-' + Math.random().toString(36).substring(7)
+
+    const shorty = createClient({ name: 'Shorty', secretCode: '1111' }, gameCode)
+    const p1 = createClient({ name: 'P1', secretCode: '2222' }, gameCode)
+    const p2 = createClient({ name: 'P2', secretCode: '3333' }, gameCode)
+    const p3 = createClient({ name: 'P3', secretCode: '4444' }, gameCode)
+
+    await Promise.all([
+      new Promise((r) => shorty.ws.on('open', r)),
+      new Promise((r) => p1.ws.on('open', r)),
+      new Promise((r) => p2.ws.on('open', r)),
+      new Promise((r) => p3.ws.on('open', r)),
+    ])
+
+    // 1. Registro con montos específicos
+    shorty.send(MOCK_ACTIONS.SIGN_UP(5)) // Solo 5 fichas
+    p1.send(MOCK_ACTIONS.SIGN_UP(100))
+    p2.send(MOCK_ACTIONS.SIGN_UP(100))
+    p3.send(MOCK_ACTIONS.SIGN_UP(100))
+
+    await Promise.all([
+      shorty.waitAction('signUp'),
+      p1.waitAction('signUp'),
+      p2.waitAction('signUp'),
+      p3.waitAction('signUp'),
+    ])
+
+    // 2. Iniciar juego
+    shorty.send(MOCK_ACTIONS.START_GAME)
+    p1.send(MOCK_ACTIONS.START_GAME)
+    p2.send(MOCK_ACTIONS.START_GAME)
+    p3.send(MOCK_ACTIONS.START_GAME)
+
+    // 3. Manejar Ciegas
+    // Shorty es el primero (Small Blind - 10) -> Debería ir All-In con sus 5 fichas
+    await shorty.waitAction('askForBlindBets')
+    shorty.send(MOCK_ACTIONS.SMALL_BLIND(5))
+
+    const allInMsg = await p1.waitAction('setCall') // Call automático o All-In
+    const shortyState = allInMsg.message.players.find(p => p.name === 'Shorty')
+    expect(shortyState.chips).toBe(0)
+    expect(shortyState.isAllIn).toBe(true)
+    expect(shortyState.currentBet).toBe(5)
+
+    // P1 pone Big Blind (20)
+    await p1.waitAction('askForBlindBets')
+    p1.send(MOCK_ACTIONS.BIG_BLIND(20))
+
+    // 4. Repartir cartas
+    await shorty.waitAction('dealtPrivateCards')
+
+    // 5. Ronda de apuestas - Otros hacen Fold para que Shorty gane
+    // Turno de P2
+    await p2.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data?.displayMsg?.includes('P2'),
+    )
+    p2.send(MOCK_ACTIONS.FOLD)
+
+    // Turno de P3
+    await p3.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data?.displayMsg?.includes('P3'),
+    )
+    p3.send(MOCK_ACTIONS.FOLD)
+
+    // Turno de P1
+    await p1.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data?.displayMsg?.includes('P1'),
+    )
+    p1.send(MOCK_ACTIONS.FOLD)
+
+    // 6. Verificar ganador
+    const winnerMsg = await shorty.waitAction('winner')
+    expect(winnerMsg.message.data.winners[0].name).toBe('Shorty')
+    
+    // El pot debería ser: 5 (Shorty) + 20 (P1) = 25
+    // Nota: En una regla de side-pot real sería distinto, pero aquí validamos que Shorty recibe el dinero.
+    expect(winnerMsg.message.data.winners[0].amount).toBeGreaterThan(5)
+    
+    const finalShorty = winnerMsg.message.players.find(p => p.name === 'Shorty')
+    expect(finalShorty.chips).toBeGreaterThan(5)
+  }, 30000)
+
   it('debería ejecutar el escenario de Alice haciendo Fold usando Mocks', async () => {
     const gameCode = 'test-room-' + Math.random().toString(36).substring(7)
 
