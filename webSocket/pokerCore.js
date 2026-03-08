@@ -118,23 +118,17 @@ function sumAllValuesArray(array) {
   const suma = array.reduce((acumulador, valor) => acumulador + valor, 0)
   return suma
 }
-
 function detectRoyalFlush(cartas) {
-  const realValues = cardsToSingleNumValsArray(cartas)
+  const flush = detectFlush(cartas)
+  if (!flush) return false
 
-  let isFlush = true
-  const sumValues = sumAllValuesArray(realValues)
-
-  if (detectFlush(cartas) == false) isFlush = false
-
-  if (Number(sumValues) == 60 && isFlush) {
-    return {
-      pokerHand: 'royalFlush',
-      prizeRank: 1,
-      show: cartas,
-      cards: cartas,
-    }
-  } else return false
+  const values = new Set(cardsToSingleNumValsArray(cartas))
+  const royalValues = new Set([10, 11, 12, 13, 14])
+  const isRoyal = [...royalValues].every(v => values.has(v))
+  if (isRoyal) {
+    return { pokerHand: 'royalFlush', prizeRank: 1, show: cartas, cards: cartas }
+  }
+  return false
 }
 
 function isArrayOrderedAndConsecutive(arr) {
@@ -186,18 +180,18 @@ const detectHighCard = (cartas) => {
 }
 
 function detectFullHouse(cartas) {
-  const isThreeSome = detectThreeOfAKind(cartas)
-  const isPairs = detectPairs(cartas)
+  const threeOfAKind = detectThreeOfAKind(cartas)
+  if (!threeOfAKind) return false
 
-  if (isThreeSome && isPairs) {
-    return {
-      pokerHand: 'fullHouse',
-      prizeRank: 4,
-      show: [isThreeSome.show, isPairs.show],
-      cards: cartas,
-    }
-  } else {
-    return false
+  const remainingCards = cartas.filter(c => !threeOfAKind.show.includes(c))
+  const pair = detectPairs(remainingCards)
+  if (!pair) return false
+
+  return {
+    pokerHand: 'fullHouse',
+    prizeRank: 4,
+    show: [...threeOfAKind.show, ...pair.show],
+    cards: cartas
   }
 }
 

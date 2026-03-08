@@ -17,30 +17,31 @@ class Dealer {
     this.lastRaiser = null
   }
 
-  getCurrentHighestBet = () => {
+  // ===== Métodos clásicos =====
+  getCurrentHighestBet() {
     return this.currentHighestBet
   }
 
-  setCurrentHighestBet = (amount) => {
+  setCurrentHighestBet(amount) {
     this.currentHighestBet = Number(amount) || 0
   }
 
-  getLastRaiser = () => {
+  getLastRaiser() {
     return this.lastRaiser
   }
 
-  setLastRaiser = (playerId) => {
+  setLastRaiser(playerId) {
     this.lastRaiser = playerId
   }
 
-  setFinalHands = () => {
+  setFinalHands() {
     this.log
       .Template({ name: 'brakets', title: 'DEALER - Final Hands', date: true })
       .R({ gameId: this.gameId })
-    this.finalHands = []
-    this.players.forEach((player) => {
+
+    this.finalHands = this.players.map((player) => {
       const prize = player.getCurrentPrize() || {}
-      this.finalHands.push({
+      return {
         ...prize,
         name: player.name,
         playerId: player.id,
@@ -49,44 +50,39 @@ class Dealer {
         folded: player.folded,
         connected: player.connected,
         lastAction: player.lastAction,
-      })
+      }
     })
   }
 
-  getFinalHands = () => {
+  getFinalHands() {
     return this.finalHands
   }
 
-  allPlayersCheck = () => {
+  allPlayersCheck() {
     const activePlayers = this.players.filter((p) => p.connected && !p.folded)
     if (activePlayers.length === 0) return true
 
     const maxBet = Math.max(...activePlayers.map((p) => p.getCurrentBet()))
     return activePlayers.every(
-      (p) => p.getCurrentBet() === maxBet && this.playersActed.includes(p.id),
+      (p) => p.getCurrentBet() === maxBet && this.playersActed.includes(p.id)
     )
   }
 
-
-  getPlayersActed = () => {
+  getPlayersActed() {
     return this.playersActed
   }
 
-  clearActedPlayers = () => {
+  clearActedPlayers() {
     this.playersActed = []
   }
 
-  updatePlayerId = (oldId, newId) => {
-    const checkIndex = this.playersActed.indexOf(oldId)
-    if (checkIndex !== -1) {
-      this.playersActed[checkIndex] = newId
-    }
-    if (this.lastRaiser === oldId) {
-      this.lastRaiser = newId
-    }
+  updatePlayerId(oldId, newId) {
+    const idx = this.playersActed.indexOf(oldId)
+    if (idx !== -1) this.playersActed[idx] = newId
+    if (this.lastRaiser === oldId) this.lastRaiser = newId
   }
 
-  setPlayerActed = (thisSocketId) => {
+  setPlayerActed(thisSocketId) {
     if (thisSocketId && !this.playersActed.includes(thisSocketId)) {
       this.playersActed.push(thisSocketId)
     }
@@ -94,42 +90,36 @@ class Dealer {
 
   setPot(chipsToBet) {
     const amount = Number(chipsToBet)
-    if (!isNaN(amount)) {
-      this.pot = Number(this.pot) + amount
-    }
+    if (!isNaN(amount)) this.pot += amount
   }
 
   getPot() {
     return this.pot
   }
 
-  getChipsFromPlayers = () => {
+  getChipsFromPlayers() {
     this.log
-      .Template({
-        name: 'brakets',
-        title: 'DEALER - Collecting Chips',
-        date: true,
-      })
+      .Template({ name: 'brakets', title: 'DEALER - Collecting Chips', date: true })
       .R({ currentPot: this.pot })
+
     this.players.forEach((player) => player.giveChipsToDealer())
   }
 
-  dealCardsEachPlayer = (numberOfCards = 1) => {
+  dealCardsEachPlayer(numberOfCards = 1) {
     this.log
-      .Template({
-        name: 'brakets',
-        title: 'DEALER - Dealing Players',
-        date: true,
-      })
+      .Template({ name: 'brakets', title: 'DEALER - Dealing Players', date: true })
       .R({ count: numberOfCards, deckLeft: this.deck.length })
+
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
-        if (player.connected && !player.folded) {
-          if (player.countCards() < 2) {
-            const cardToDeal = this.deck.shift()
-            if (cardToDeal) {
-              player.setCard(cardToDeal)
-            }
+        if (player.connected && !player.folded && player.countCards() < 2) {
+          const cardToDeal = this.deck.shift()
+          if (cardToDeal) {
+            player.setCard(cardToDeal)
+            this.talkToSocketById(player.id, {
+              type: 'dealtPrivateCards',
+              cards: player.cards,
+            })
           }
         }
       })
@@ -138,18 +128,15 @@ class Dealer {
 
   dealCardsDealer(numberOfCards = 1) {
     this.log
-      .Template({
-        name: 'brakets',
-        title: 'DEALER - Dealing Table',
-        date: true,
-      })
+      .Template({ name: 'brakets', title: 'DEALER - Dealing Table', date: true })
       .R({ count: numberOfCards, deckLeft: this.deck.length })
+
     for (let i = 0; i < numberOfCards; i++) {
       const cardToDeal = this.deck.shift()
-      if (cardToDeal) {
-        this.setCard(cardToDeal)
-      }
+      if (cardToDeal) this.setCard(cardToDeal)
     }
+
+    this.talkToAllSockets({ type: 'dealerHand-update', cardsDealer: this.cardsDealer })
   }
 
   getDealerCards() {
@@ -157,68 +144,41 @@ class Dealer {
   }
 
   setCard(card) {
-    if (card) {
-      this.cardsDealer.push(card)
-    }
+    if (card) this.cardsDealer.push(card)
   }
 
   hasMinimumPlayers() {
-    const connectedPlayers = this.players.filter((p) => p.connected)
-    return connectedPlayers.length >= 2
+    return this.players.filter((p) => p.connected).length >= 2
   }
 
   getPlayerByNumber(number) {
-    const idx = Number(number) - 1
-    const foundPlayer = this.players[idx]
-
-    if (foundPlayer) {
-      return foundPlayer
-    } else {
-      return null
-    }
+    return this.players[number - 1] || null
   }
 
   getPlayerById(id) {
-    const foundPlayer = this.players.find((myPlayer) => myPlayer.id === id)
-    if (foundPlayer) {
-      return foundPlayer
-    } else {
-      return null
-    }
-  }
-
-  hasPlayerBetByNumber = (playerNumber) => {
-    const playerToCheck = this.getPlayerByNumber(playerNumber)
-    if (playerToCheck) {
-      return playerToCheck.getCurrentBet() !== 0
-    }
-    return false
+    return this.players.find((p) => p.id === id) || null
   }
 
   hasPlayerBet(player) {
-    if (player) {
-      return player.getCurrentBet() !== 0
-    } else {
-      return false
-    }
+    return player ? player.getCurrentBet() !== 0 : false
   }
 
-  hasAllPlayersBet = () => {
+  hasPlayerBetByNumber(playerNumber) {
+    const player = this.getPlayerByNumber(playerNumber)
+    return player ? player.getCurrentBet() !== 0 : false
+  }
+
+  hasAllPlayersBet() {
     const activePlayers = this.players.filter((p) => p.connected && !p.folded)
     if (activePlayers.length === 0) return true
-    return activePlayers.every((player) => {
-      return Number(player.getCurrentBet()) !== 0
-    })
+    return activePlayers.every((player) => Number(player.getCurrentBet()) !== 0)
   }
 
-  talkToSocketById(socketId, targetMessage) {
+  // ===== Arrow functions solo si se pierden contextos =====
+  talkToSocketById = (socketId, targetMessage) => {
     try {
       const targetSocket = Socket.getSocket(this.torneoId, socketId)
-      if (
-        targetSocket &&
-        targetSocket.socket &&
-        targetSocket.socket.readyState === 1
-      ) {
+      if (targetSocket?.socket?.readyState === 1) {
         targetSocket.socket.send(JSON.stringify({ message: targetMessage }))
       }
     } catch (error) {
@@ -226,22 +186,14 @@ class Dealer {
     }
   }
 
-  talkToAllSockets(targetMessage) {
+  talkToAllSockets = (targetMessage) => {
     try {
       const allSockets = Socket.getSocketsByTorneo(this.torneoId)
-      if (allSockets) {
-        allSockets.forEach((socketWrapper) => {
-          if (
-            socketWrapper &&
-            socketWrapper.socket &&
-            socketWrapper.socket.readyState === 1
-          ) {
-            socketWrapper.socket.send(
-              JSON.stringify({ message: targetMessage }),
-            )
-          }
-        })
-      }
+      allSockets?.forEach((socketWrapper) => {
+        if (socketWrapper?.socket?.readyState === 1) {
+          socketWrapper.socket.send(JSON.stringify({ message: targetMessage }))
+        }
+      })
     } catch (error) {
       console.log('Error in talkToAllSockets:', error)
     }
