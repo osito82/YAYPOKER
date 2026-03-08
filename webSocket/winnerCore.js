@@ -100,6 +100,21 @@ function betterFullHouse(hands) {
   return singleValsToSymbolsArray(bestHand.hand)
 }
 
+function tieBreakerByNums(hands) {
+  const handsWithValues = hands.map((h) => ({
+    ...h,
+    nums: cardsToSingleNumValsArray(h.cards.flat()).sort((a, b) => b - a),
+  }))
+
+  let candidates = handsWithValues
+  for (let i = 0; i < 5; i++) {
+    const maxVal = Math.max(...candidates.map((h) => h.nums[i]))
+    candidates = candidates.filter((h) => h.nums[i] === maxVal)
+    if (candidates.length === 1) break
+  }
+  return candidates
+}
+
 function betterStraight(cards) {
   const numerics = cards.map((c) =>
     cardsToSingleNumValsArray(c).sort((a, b) => b - a),
@@ -122,24 +137,15 @@ class WinnerCore {
         const handsWithValues = bestHands.map((h) => ({
           ...h,
           pairVal: betterPair(h.show),
+          nums: cardsToSingleNumValsArray(h.cards).sort((a, b) => b - a),
         }))
         const maxPairVal = Math.max(...handsWithValues.map((h) => h.pairVal))
-        const candidates = handsWithValues.filter(
-          (h) => h.pairVal === maxPairVal,
-        )
+        let candidates = handsWithValues.filter((h) => h.pairVal === maxPairVal)
 
         if (candidates.length === 1) return [candidates[0]]
 
-        // Tie breaker: compare other cards
-        const highestSum = Math.max(
-          ...candidates.map((h) =>
-            sumArrayNumbers(cardsToSingleNumValsArray(h.cards)),
-          ),
-        )
-        return candidates.filter(
-          (h) =>
-            sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) === highestSum,
-        )
+        // Tie breaker: reuse la función
+        return tieBreakerByNums(candidates)
       }
 
       case 'twoPairs': {
@@ -147,7 +153,12 @@ class WinnerCore {
           const nums = cardsToSingleNumValsArray(h.show.flat()).sort(
             (a, b) => b - a,
           )
-          return { ...h, highPair: nums[0], lowPair: nums[2] }
+          return {
+            ...h,
+            highPair: nums[0],
+            lowPair: nums[2],
+            allNums: cardsToSingleNumValsArray(h.cards).sort((a, b) => b - a),
+          }
         })
         const maxHigh = Math.max(...handsWithValues.map((h) => h.highPair))
         let candidates = handsWithValues.filter((h) => h.highPair === maxHigh)
@@ -156,16 +167,7 @@ class WinnerCore {
           candidates = candidates.filter((h) => h.lowPair === maxLow)
         }
         if (candidates.length > 1) {
-          const highestSum = Math.max(
-            ...candidates.map((h) =>
-              sumArrayNumbers(cardsToSingleNumValsArray(h.cards)),
-            ),
-          )
-          candidates = candidates.filter(
-            (h) =>
-              sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) ===
-              highestSum,
-          )
+          return tieBreakerByNums(candidates)
         }
         return candidates
       }
@@ -174,20 +176,12 @@ class WinnerCore {
         const handsWithValues = bestHands.map((h) => ({
           ...h,
           trioVal: Math.max(...cardsToSingleNumValsArray(h.show.flat())),
+          nums: cardsToSingleNumValsArray(h.cards).sort((a, b) => b - a),
         }))
         const maxTrio = Math.max(...handsWithValues.map((h) => h.trioVal))
         let candidates = handsWithValues.filter((h) => h.trioVal === maxTrio)
         if (candidates.length > 1) {
-          const highestSum = Math.max(
-            ...candidates.map((h) =>
-              sumArrayNumbers(cardsToSingleNumValsArray(h.cards)),
-            ),
-          )
-          candidates = candidates.filter(
-            (h) =>
-              sumArrayNumbers(cardsToSingleNumValsArray(h.cards)) ===
-              highestSum,
-          )
+          return tieBreakerByNums(candidates)
         }
         return candidates
       }
@@ -196,9 +190,14 @@ class WinnerCore {
         const handsWithValues = bestHands.map((h) => ({
           ...h,
           quadVal: Math.max(...cardsToSingleNumValsArray(h.show.flat())),
+          nums: cardsToSingleNumValsArray(h.cards).sort((a, b) => b - a),
         }))
         const maxQuad = Math.max(...handsWithValues.map((h) => h.quadVal))
-        return handsWithValues.filter((h) => h.quadVal === maxQuad)
+        let candidates = handsWithValues.filter((h) => h.quadVal === maxQuad)
+        if (candidates.length > 1) {
+          return tieBreakerByNums(candidates)
+        }
+        return candidates
       }
 
       case 'fullHouse': {
@@ -222,40 +221,15 @@ class WinnerCore {
       case 'straight':
       case 'straightFlush':
       case 'royalFlush': {
-        const handsWithValues = bestHands.map((h) => ({
-          ...h,
-          sum: sumArrayNumbers(cardsToSingleNumValsArray(h.show.flat())),
-        }))
-        const maxSum = Math.max(...handsWithValues.map((h) => h.sum))
-        return handsWithValues.filter((h) => h.sum === maxSum)
+        return tieBreakerByNums(bestHands)
       }
 
       case 'flush': {
-        const handsWithValues = bestHands.map((h) => ({
-          ...h,
-          nums: cardsToSingleNumValsArray(h.show.flat()).sort((a, b) => b - a),
-        }))
-        let candidates = handsWithValues
-        for (let i = 0; i < 5; i++) {
-          const maxVal = Math.max(...candidates.map((h) => h.nums[i]))
-          candidates = candidates.filter((h) => h.nums[i] === maxVal)
-          if (candidates.length === 1) break
-        }
-        return candidates
+        return tieBreakerByNums(bestHands)
       }
 
       case 'highCard': {
-        const handsWithValues = bestHands.map((h) => ({
-          ...h,
-          nums: cardsToSingleNumValsArray(h.cards.flat()).sort((a, b) => b - a),
-        }))
-        let candidates = handsWithValues
-        for (let i = 0; i < 5; i++) {
-          const maxVal = Math.max(...candidates.map((h) => h.nums[i]))
-          candidates = candidates.filter((h) => h.nums[i] === maxVal)
-          if (candidates.length === 1) break
-        }
-        return candidates
+        return tieBreakerByNums(bestHands)
       }
 
       default:
