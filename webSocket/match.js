@@ -96,8 +96,172 @@ class Match {
     const delay =
       customDelay !== null ? customDelay : this.isRunout ? timeouts.runout : timeouts.standard
     setTimeout(() => {
-      this.lobby.startGame(thisSocket)
+      this.startGame(thisSocket)
     }, delay)
+  }
+
+  startGame(thisSocket = {}) {
+    if (this.stepChecker.checkStep('pause')) return
+
+    // Si el juego aún no ha sido iniciado formalmente
+    if (!this.stepChecker.checkStep('startGame')) {
+      // Solo el host puede iniciar el juego la primera vez
+      if (thisSocket.id !== this.hostId) {
+        this.communicator.msgBuilder('lobbyError', 'private', null, {
+          displayMsg: 'Only the host can start the game.',
+        })
+        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
+        return
+      }
+
+      // 🔥 Forzar a todos los jugadores conectados a estar listos
+      this.players.forEach((p) => {
+        if (p.connected) p.setStarted(true)
+      })
+
+      const connectedPlayers = this.players.filter((p) => p.connected)
+      if (connectedPlayers.length < 2) {
+        this.communicator.msgBuilder('lobbyError', 'public', null, {
+          displayMsg: 'Waiting for at least 2 players to be connected...',
+        })
+        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+        return
+      }
+
+      // Al empezar el juego, cerramos el registro
+      this.lobby.noMorePlayers()
+      this.stepChecker.grantStep('startGame')
+    }
+
+    if (!this.stepChecker.checkStep('blindsBetting'))
+      return this.actions.askForBlindBets(thisSocket)
+    if (!this.stepChecker.checkStep('dealtPrivateCards'))
+      return this.actions.dealtPrivateCards(thisSocket)
+    if (!this.stepChecker.checkStep('firstBetting'))
+      return this.actions.bettingCore(thisSocket, 'firstBetting')
+    if (!this.stepChecker.checkStep('flop_Dealer_Hand')) {
+      this.dealer.clearActedPlayers()
+      this.dealer.getChipsFromPlayers()
+      return this.actions.dealerHand(thisSocket, 'flop')
+    }
+    if (!this.stepChecker.checkStep('flop_Check_Prize_Step'))
+      return this.actions.checkPrizes(thisSocket)
+    if (!this.stepChecker.checkStep('flop_Bet_Step'))
+      return this.actions.bettingCore(thisSocket, 'flopBetting')
+    if (!this.stepChecker.checkStep('turn_Dealer_Hand')) {
+      this.dealer.clearActedPlayers()
+      this.dealer.getChipsFromPlayers()
+      return this.actions.dealerHand(thisSocket, 'turn')
+    }
+    if (!this.stepChecker.checkStep('turn_Check_Prize_Step'))
+      return this.actions.checkPrizes(thisSocket)
+    if (!this.stepChecker.checkStep('turn_Bet_Step'))
+      return this.actions.bettingCore(thisSocket, 'turnBetting')
+    if (!this.stepChecker.checkStep('river_Dealer_Hand')) {
+      this.dealer.clearActedPlayers()
+      this.dealer.getChipsFromPlayers()
+      return this.actions.dealerHand(thisSocket, 'river')
+    }
+    if (!this.stepChecker.checkStep('river_Check_Prize_Step'))
+      return this.actions.checkPrizes(thisSocket)
+    if (!this.stepChecker.checkStep('river_Bet_Step'))
+      return this.actions.bettingCore(thisSocket, 'riverBetting')
+    if (!this.stepChecker.checkStep('finalHands')) {
+      this.dealer.getChipsFromPlayers()
+      this.dealer.setFinalHands()
+      this.stepChecker.grantStep('finalHands')
+      return this.continue(thisSocket)
+    }
+    if (!this.stepChecker.checkStep('showDown')) {
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH - Showdown', date: true })
+        .R(this.dealer.getFinalHands())
+      this.communicator.msgBuilder('showDown', 'public', null, {
+        method: 'showDown',
+        showDown: this.dealer.getFinalHands(),
+      })
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+      this.stepChecker.grantStep('showDown')
+      return this.continue(thisSocket)
+    }
+    if (!this.stepChecker.checkStep('winner')) {
+      const { WinnerCore } = require('./winnerCore')
+      const winnerData = WinnerCore.Winner(this.dealer.getFinalHands())
+      if (
+        !winnerData ||
+        (Array.isArray(winnerData) && winnerData.length === 0)
+      ) {
+        return this.continue(thisSocket)
+      }
+      this.actions.winner(winnerData)
+      return
+    }
+  }
+
+  nextRound() {
+    if (!this.waitingForNextRound) return
+    this.waitingForNextRound = false
+    const playersWithChips = this.players.filter(
+      (p) => p.connected && p.chips > 0,
+    )
+    if (playersWithChips.length < 2) {
+      this.log.R({ info: 'Tournament finished. No more rounds.' })
+      return
+    }
+    this.restartMatch()
+  }
+
+  restartMatch() {
+    this.acceptingPlayers = false
+    const oldGameId = this.gameId
+    this.gameId = generateUniqueId()
+
+    this.log
+      .Template({ name: 'brakets', title: 'MATCH - Restarting', date: true })
+      .R({ oldGameId, newGameId: this.gameId })
+
+    this.pot = 0
+    this.playersFold = []
+    this.activePlayerId = null
+    this.isRunout = false
+
+    this.players.forEach((p) => {
+      p.gameId = this.gameId
+      p.cards = []
+      p.currentBet = 0
+      p.folded = p.chips <= 0
+      p.lastAction = p.chips <= 0 ? 'Out' : ''
+      p.isAllIn = false
+      p.setCurrentPrize({})
+    })
+
+    const Deck = require('./deck')
+    this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)
+    this.dealer.gameId = this.gameId
+    this.dealer.deck = this.shuffledDeck
+    this.dealer.cardsDealer = []
+    this.cardsDealer = this.dealer.getDealerCards()
+    this.dealer.pot = 0
+    this.dealer.clearActedPlayers()
+    this.dealer.setCurrentHighestBet(0)
+    this.dealer.setLastRaiser(null)
+
+    this.communicator.gameId = this.gameId
+    this.stepChecker.reset()
+    this.stepChecker.gameFlow.gameId = this.gameId
+
+    if (this.players.length > 1) {
+      this.players.push(this.players.shift())
+    }
+
+    this.communicator.msgBuilder('gameRestarted', 'public', null, {
+      displayMsg: 'New hand starting...',
+      newGameId: this.gameId,
+    })
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+
+    this.stepChecker.grantStep('startGame')
+    this.startGame()
   }
 }
 
