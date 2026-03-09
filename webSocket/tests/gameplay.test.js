@@ -549,8 +549,174 @@ it('Min-raise: raise debe ser al menos el tamaño del raise anterior', async () 
   expect(raiseAccepted.message.data.displayMsg).toMatch(/raises to 110/i)
 }, 40000)
 
+
+
+it('T0001 - No se puede check si hay raise pendiente', async () => {
+  const gameCode = 'no-check-raise-' + Math.random().toString(36).substring(7)
+  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
+
+  await Promise.all([new Promise(r => alice.ws.on('open', r)), new Promise(r => bob.ws.on('open', r))])
+
+  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
+  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
+  await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
+
+  alice.send(MOCK_ACTIONS.START_GAME)
+  bob.send(MOCK_ACTIONS.START_GAME)
+
+  await alice.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
+  alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
+
+  await bob.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
+  bob.send(MOCK_ACTIONS.BIG_BLIND(20))
+
+  await alice.waitAction('dealtPrivateCards')
+
+  await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
+  alice.send(MOCK_ACTIONS.RISE(80))
+
+  await bob.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
+
+  // Bob intenta CHECK (inválido)
+  bob.send(MOCK_ACTIONS.CHECK)
+
+  const reject = await bob.waitAction('actionRejected', 5000, r =>
+    r.message?.data?.reason?.toLowerCase().includes('check') || r.message?.data?.displayMsg?.toLowerCase().includes('invalid')
+  )
+  expect(reject).toBeDefined()
+
+  // Ahora sí: call
+  bob.send(MOCK_ACTIONS.CALL)
+  const callMsg = await alice.waitAction('setCall', 5000)
+  expect(callMsg.message.data.displayMsg).toMatch(/calls/i)
+}, 35000)
+
+
+
+it('T0002 - Kicker decide: mismo par, diferente kicker', async () => {
+  const gameCode = 'kicker-pair-' + Math.random().toString(36).substring(7)
+
+  // Alice: A♠ K♦ → par de Ases con K kicker
+  // Bob: A♥ Q♣ → par de Ases con Q kicker
+  // Board: A♦ 7♠ 2♥ 9♣ 4♠
+  // Objetivo:
+// Alice: As Kd  → par de Ases, kicker K
+// Bob:   Ah Qc  → par de Ases, kicker Q
+// Board sin más Ases
+
+const mockedDeck = [
+  'As', 'Kd',     // Alice: As Kd
+  'Ah', 'Qc',     // Bob:   Ah Qc
+  '7s', '2h', '9c',   // Flop
+  '4d',           // Turn
+  '3s'            // River
+  // puedes agregar más cartas si tu Deck.shuffleDeck devuelve más de 9, pero no se usan
+];
+  vi.spyOn(Deck, 'shuffleDeck').mockReturnValue(mockedDeck)
+
+  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
+
+  await Promise.all([new Promise(r => alice.ws.on('open', r)), new Promise(r => bob.ws.on('open', r))])
+
+  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
+  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
+  await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
+
+  alice.send(MOCK_ACTIONS.START_GAME)
+  bob.send(MOCK_ACTIONS.START_GAME)
+
+  await alice.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
+  alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
+
+  await bob.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
+  bob.send(MOCK_ACTIONS.BIG_BLIND(20))
+
+  await alice.waitAction('dealtPrivateCards')
+
+  await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
+  alice.send(MOCK_ACTIONS.CALL)
+
+  await bob.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
+  bob.send(MOCK_ACTIONS.CHECK)
+
+  // Pasamos todas las calles con check
+  for (const street of ['flop', 'turn', 'river']) {
+    await alice.waitAction(`dealerHand-${street}`, 8000)
+    await bob.waitAction(`bettingCore-${street}Betting`, 5000, r => r.message.data?.displayMsg?.includes('Bob'))
+    bob.send(MOCK_ACTIONS.CHECK)
+    await alice.waitAction(`bettingCore-${street}Betting`, 5000, r => r.message.data?.displayMsg?.includes('Alice'))
+    alice.send(MOCK_ACTIONS.CHECK)
+  }
+
+  const winnerMsg = await alice.waitAction('winner', 12000)
+  expect(winnerMsg.message.data.winners[0].name).toBe('Alice')
+  expect(winnerMsg.message.data.winners[0].handName).toMatch(/pair/i)
+
+  vi.restoreAllMocks()
+}, 60000)
+
+
+
+
+
+it('T0003 Reconexión durante mano: mantiene estado y turno', async () => {
+  const gameCode = '8888'
+  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
+
+  await Promise.all([new Promise(r => alice.ws.on('open', r)), new Promise(r => bob.ws.on('open', r))])
+
+  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
+  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
+  await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
+
+  alice.send(MOCK_ACTIONS.START_GAME)
+  bob.send(MOCK_ACTIONS.START_GAME)
+
+  await alice.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
+  alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
+
+  await bob.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
+  bob.send(MOCK_ACTIONS.BIG_BLIND(20))
+
+  await alice.waitAction('dealtPrivateCards')
+
+  // Alice llama
+  await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
+  alice.send(MOCK_ACTIONS.CALL)
+
+  // Simulamos desconexión de Bob justo antes de su turno
+  bob.ws.close()
+
+  // Esperamos un poco (debe ser MENOS que el timeout de desconexión de 3s)
+  await new Promise(r => setTimeout(r, 500))
+
+  // Reconectamos a Bob (mismo secretCode)
+  const bobReconnect = createClient(MOCK_PLAYERS.BOB, gameCode)
+  await new Promise(r => bobReconnect.ws.on('open', r))
+  bobReconnect.send(MOCK_ACTIONS.SIGN_UP(1000))  // reconexión
+
+  const reconnectedMsg = await bobReconnect.waitAction('signUp', 5000)
+  // Nota: secretCode no viaja al cliente, buscamos por nombre
+  expect(reconnectedMsg.message.players.find(p => p.name === 'Bob')).toBeDefined()
+
+  // Debería seguir en su turno
+  const bobTurnAfter = await bobReconnect.waitAction('bettingCore-firstBetting', 8000, r =>
+    r.message.data?.displayMsg?.includes('Bob')
+  )
+  expect(bobTurnAfter).toBeDefined()
+
+  bobReconnect.send(MOCK_ACTIONS.CHECK)
+
+  await alice.waitAction('dealerHand-flop', 10000)
+}, 45000)
+
+
 /*
 GEMINI NO BORRAR
+
 it('Side pot: all-in con 3 jugadores crea side pot', async () => {
   const gameCode = 'sidepot-3p-' + Math.random().toString(36).substring(7)
   const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
@@ -606,149 +772,6 @@ it('Side pot: all-in con 3 jugadores crea side pot', async () => {
   expect(flopMsg).toBeDefined()
 }, 45000)
 
-it('No se puede check si hay raise pendiente', async () => {
-  const gameCode = 'no-check-raise-' + Math.random().toString(36).substring(7)
-  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
-  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
-
-  await Promise.all([new Promise(r => alice.ws.on('open', r)), new Promise(r => bob.ws.on('open', r))])
-
-  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
-  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
-  await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
-
-  alice.send(MOCK_ACTIONS.START_GAME)
-  bob.send(MOCK_ACTIONS.START_GAME)
-
-  await alice.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-  alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-
-  await bob.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
-  bob.send(MOCK_ACTIONS.BIG_BLIND(20))
-
-  await alice.waitAction('dealtPrivateCards')
-
-  await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-  alice.send(MOCK_ACTIONS.RISE(80))
-
-  await bob.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
-
-  // Bob intenta CHECK (inválido)
-  bob.send(MOCK_ACTIONS.CHECK)
-
-  const reject = await bob.waitAction('actionRejected', 5000, r =>
-    r.message?.data?.reason?.toLowerCase().includes('check') || r.message?.data?.displayMsg?.toLowerCase().includes('invalid')
-  )
-  expect(reject).toBeDefined()
-
-  // Ahora sí: call
-  bob.send(MOCK_ACTIONS.CALL)
-  const callMsg = await alice.waitAction('setCall', 5000)
-  expect(callMsg.message.data.displayMsg).toMatch(/calls/i)
-}, 35000)
-
-it('Kicker decide: mismo par, diferente kicker', async () => {
-  const gameCode = 'kicker-pair-' + Math.random().toString(36).substring(7)
-
-  // Alice: A♠ K♦ → par de Ases con K kicker
-  // Bob: A♥ Q♣ → par de Ases con Q kicker
-  // Board: A♦ 7♠ 2♥ 9♣ 4♠
-  const mockedDeck = ['As','Kd','Ah','Qc','Ad','7s','2h','9c','4s','3d','5h']
-  vi.spyOn(Deck, 'shuffleDeck').mockReturnValue(mockedDeck)
-
-  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
-  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
-
-  await Promise.all([new Promise(r => alice.ws.on('open', r)), new Promise(r => bob.ws.on('open', r))])
-
-  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
-  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
-  await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
-
-  alice.send(MOCK_ACTIONS.START_GAME)
-  bob.send(MOCK_ACTIONS.START_GAME)
-
-  await alice.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-  alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-
-  await bob.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
-  bob.send(MOCK_ACTIONS.BIG_BLIND(20))
-
-  await alice.waitAction('dealtPrivateCards')
-
-  await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-  alice.send(MOCK_ACTIONS.CALL)
-
-  await bob.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
-  bob.send(MOCK_ACTIONS.CHECK)
-
-  // Pasamos todas las calles con check
-  for (const street of ['flop', 'turn', 'river']) {
-    await alice.waitAction(`dealerHand-${street}`, 8000)
-    await bob.waitAction(`bettingCore-${street}Betting`, 5000, r => r.message.data?.displayMsg?.includes('Bob'))
-    bob.send(MOCK_ACTIONS.CHECK)
-    await alice.waitAction(`bettingCore-${street}Betting`, 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-    alice.send(MOCK_ACTIONS.CHECK)
-  }
-
-  const winnerMsg = await alice.waitAction('winner', 12000)
-  expect(winnerMsg.message.data.winners[0].name).toBe('Alice')
-  expect(winnerMsg.message.data.winners[0].handName).toMatch(/pair/i)
-
-  vi.restoreAllMocks()
-}, 60000)
-
-it('Reconexión durante mano: mantiene estado y turno', async () => {
-  const gameCode = '8888'
-  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
-  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
-
-  await Promise.all([new Promise(r => alice.ws.on('open', r)), new Promise(r => bob.ws.on('open', r))])
-
-  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
-  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
-  await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
-
-  alice.send(MOCK_ACTIONS.START_GAME)
-  bob.send(MOCK_ACTIONS.START_GAME)
-
-  await alice.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-  alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-
-  await bob.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
-  bob.send(MOCK_ACTIONS.BIG_BLIND(20))
-
-  await alice.waitAction('dealtPrivateCards')
-
-  // Alice llama
-  await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-  alice.send(MOCK_ACTIONS.CALL)
-
-  // Simulamos desconexión de Bob justo antes de su turno
-  bob.ws.close()
-
-  // Esperamos un poco (debe ser MENOS que el timeout de desconexión de 3s)
-  await new Promise(r => setTimeout(r, 500))
-
-  // Reconectamos a Bob (mismo secretCode)
-  const bobReconnect = createClient(MOCK_PLAYERS.BOB, gameCode)
-  await new Promise(r => bobReconnect.ws.on('open', r))
-  bobReconnect.send(MOCK_ACTIONS.SIGN_UP(1000))  // reconexión
-
-  const reconnectedMsg = await bobReconnect.waitAction('signUp', 5000)
-  // Nota: secretCode no viaja al cliente, buscamos por nombre
-  expect(reconnectedMsg.message.players.find(p => p.name === 'Bob')).toBeDefined()
-
-  // Debería seguir en su turno
-  const bobTurnAfter = await bobReconnect.waitAction('bettingCore-firstBetting', 8000, r =>
-    r.message.data?.displayMsg?.includes('Bob')
-  )
-  expect(bobTurnAfter).toBeDefined()
-
-  bobReconnect.send(MOCK_ACTIONS.CHECK)
-
-  await alice.waitAction('dealerHand-flop', 10000)
-}, 45000)
 
 
 */
