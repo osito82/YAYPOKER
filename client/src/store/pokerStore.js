@@ -27,6 +27,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const autofoldStartTime = ref(null)
   const autofoldDuration = ref(600)
   const lobbyTimer = ref(null)
+  const hostId = ref(null)
+  const isGameStarted = ref(false)
 
   // Getters
   const getSocketMessage = computed(() => socketMessage.value)
@@ -45,6 +47,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getAutofoldStartTime = computed(() => autofoldStartTime.value)
   const getAutofoldDuration = computed(() => autofoldDuration.value)
   const getLobbyTimer = computed(() => lobbyTimer.value)
+  const getHostId = computed(() => hostId.value)
+  const getIsGameStarted = computed(() => isGameStarted.value)
 
   const getCurrentHand = computed(() => {
     const me = players.value.find((p) => p.id === myInfo.value.id)
@@ -74,6 +78,19 @@ export const usePokerStore = defineStore('pokerStore', () => {
         gameData.action?.startsWith('bettingCore')
       ) {
         lobbyTimer.value = null
+        isGameStarted.value = true
+      }
+
+      // Update hostId if provided
+      if (gameData.data?.hostId) {
+        hostId.value = gameData.data.hostId
+      } else if (gameData.hostId) {
+        hostId.value = gameData.hostId
+      }
+
+      // Handle newHost message specifically if needed (though the above might cover it)
+      if (gameData.action === 'newHost') {
+        hostId.value = gameData.data.hostId
       }
 
       // Reset winner info ONLY if a new hand/action starts and we don't want the old one
@@ -248,6 +265,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     autofoldStartTime,
     autofoldDuration,
     lobbyTimer,
+    hostId,
+    isGameStarted,
 
     // Getters (computeds)
     getOdds,
@@ -267,6 +286,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getAutofoldDuration,
     getCurrentHand,
     getLobbyTimer,
+    getHostId,
+    getIsGameStarted,
 
     // Actions
     setSocketMessage,

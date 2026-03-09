@@ -97,10 +97,10 @@ const actionHandlers = {
   setRise: (match, socket, data) => match.actions.setRise(socket, data.chipsToRiseBet),
   setCall: (match, socket) => match.actions.setCall(socket),
   setCheck: (match, socket) => match.actions.setCheck(socket),
-  dealtPrivateCards: (match, socket) => match.lobby.dealtPrivateCards(socket),
+  dealtPrivateCards: (match, socket) => match.actions.dealtPrivateCards(socket),
   stats: (match, socket) => match.comms.stats(socket.id),
-  nextRound: (match) => match.lobby.nextRound(),
-  startGame: (match, socket) => match.lobby.startGame(socket),
+  nextRound: (match) => match.nextRound(),
+  startGame: (match, socket) => match.startGame(socket),
   playerReady: (match, socket) => match.lobby.playerReady(socket),
 }
 

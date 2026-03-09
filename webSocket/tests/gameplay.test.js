@@ -138,10 +138,11 @@ describe('Poker Game Integration Tests', () => {
       charlie.waitAction('signUp'),
     ])
 
-    // Paso 2: Todos marcan listos
+    // Paso 2: Todos marcan listos y el host inicia el juego
     alice.send(MOCK_ACTIONS.PLAYER_READY)
     bob.send(MOCK_ACTIONS.PLAYER_READY)
     charlie.send(MOCK_ACTIONS.PLAYER_READY)
+    alice.send(MOCK_ACTIONS.START_GAME)
 
     // Wait for blinds - only Alice and Bob should be asked in this setup
     await alice.waitAction('askForBlindBets', 5000, (r) =>

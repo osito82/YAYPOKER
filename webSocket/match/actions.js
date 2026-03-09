@@ -335,7 +335,17 @@ class MatchActions {
           title: 'MATCH - Not Enough Active Players',
           date: true,
         })
-        .R({ activeCount: activePlayers.length })
+        .R({ 
+          activeCount: activePlayers.length,
+          totalCount: this.match.players.length,
+          players: this.match.players.map(p => ({
+            name: p.name,
+            connected: p.connected,
+            chips: p.chips,
+            isStarted: p.isStarted,
+            folded: p.folded
+          }))
+        })
       return
     }
 
@@ -719,6 +729,40 @@ class MatchActions {
       this.match.stepChecker.grantStep(steps[cards.length])
     }
     this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
+  }
+
+  dealtPrivateCards(thisSocket) {
+    try {
+      this.match.dealer.dealCardsEachPlayer(2)
+      this.match.stepChecker.grantStep('dealtPrivateCards')
+      this.match.dealer.clearActedPlayers()
+
+      this.match.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
+        displayMsg: 'Cards dealt!',
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+
+      this.match.log
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Private Cards Dealt',
+          date: true,
+        })
+        .R(this.match.communicator.getFullInfo())
+
+      for (const player of this.match.players) {
+        this.match.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
+        Socket.sendToPlayer(
+          this.match.torneoId,
+          player.secretCode,
+          this.match.communicator.getMsg(),
+        )
+      }
+      this.match.comms.sendOdds()
+      this.match.continue(thisSocket, this.match.constructor.timeouts.fast)
+    } catch (error) {
+      console.error('Error in dealtPrivateCards:', error)
+    }
   }
 }
 
