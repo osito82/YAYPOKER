@@ -6,7 +6,9 @@ class MatchActions {
   }
 
   autofold() {
-    const foundPlayer = this.match.players.find((p) => p.id == this.match.activePlayerId)
+    const foundPlayer = this.match.players.find(
+      (p) => p.id == this.match.activePlayerId,
+    )
     if (foundPlayer) {
       this.match.log
         .Template({ name: 'brakets', title: 'MATCH - AUTOFOLD', date: true })
@@ -30,7 +32,11 @@ class MatchActions {
   }
 
   fold(thisSocket) {
-    if (!this.match.activePlayerId || this.match.activePlayerId !== thisSocket.id) return
+    if (
+      !this.match.activePlayerId ||
+      this.match.activePlayerId !== thisSocket.id
+    )
+      return
 
     const foundPlayer = this.match.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer && !foundPlayer.folded) {
@@ -52,14 +58,19 @@ class MatchActions {
       this.match.communicator.msgBuilder('fold', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} folded.`,
       })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
       this.match.comms.sendOdds()
       this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
     }
   }
 
   performCheck(foundPlayer) {
-    if (foundPlayer.getCurrentBet() === this.match.dealer.getCurrentHighestBet()) {
+    if (
+      foundPlayer.getCurrentBet() === this.match.dealer.getCurrentHighestBet()
+    ) {
       this.clearAutofold()
       this.match.activePlayerId = null // ✅ CLEAR TURN IMMEDIATELY
       this.match.dealer.setPlayerActed(foundPlayer.id)
@@ -75,7 +86,10 @@ class MatchActions {
       this.match.communicator.msgBuilder('setCheck', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} checks`,
       })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
       return true
     } else {
       this.match.log
@@ -89,19 +103,31 @@ class MatchActions {
           currentBet: foundPlayer.getCurrentBet(),
           maxBet: this.match.dealer.getCurrentHighestBet(),
         })
-      
-      this.match.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
-        reason: 'check',
-        displayMsg: 'Check invalid: there is an active bet.',
-      })
-      Socket.sendToPlayer(this.match.torneoId, foundPlayer.secretCode, this.match.communicator.getMsg())
-      
+
+      this.match.communicator.msgBuilder(
+        'actionRejected',
+        'private',
+        foundPlayer,
+        {
+          reason: 'check',
+          displayMsg: 'Check invalid: there is an active bet.',
+        },
+      )
+      Socket.sendToPlayer(
+        this.match.torneoId,
+        foundPlayer.secretCode,
+        this.match.communicator.getMsg(),
+      )
+
       return false
     }
   }
 
   setCheck = (thisSocket) => {
-    if (!this.match.activePlayerId || this.match.activePlayerId !== thisSocket.id) {
+    if (
+      !this.match.activePlayerId ||
+      this.match.activePlayerId !== thisSocket.id
+    ) {
       this.match.log
         .Template({
           name: 'brakets',
@@ -126,7 +152,10 @@ class MatchActions {
   }
 
   setCall(thisSocket) {
-    if (!this.match.activePlayerId || this.match.activePlayerId !== thisSocket.id) {
+    if (
+      !this.match.activePlayerId ||
+      this.match.activePlayerId !== thisSocket.id
+    ) {
       this.match.log
         .Template({
           name: 'brakets',
@@ -212,12 +241,18 @@ class MatchActions {
       bet: foundPlayer.getCurrentBet(),
     })
 
-    Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+    Socket.broadcastToTorneo(
+      this.match.torneoId,
+      this.match.communicator.getMsg(),
+    )
     this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
   }
 
   setBet(thisSocket, chipsToBet, type = 'setBet') {
-    if (!this.match.activePlayerId || this.match.activePlayerId !== thisSocket.id) {
+    if (
+      !this.match.activePlayerId ||
+      this.match.activePlayerId !== thisSocket.id
+    ) {
       this.match.log
         .Template({
           name: 'brakets',
@@ -244,22 +279,35 @@ class MatchActions {
     if (type === 'setRise') {
       const myRaiseAmount = amount - currentMaxBet
       if (myRaiseAmount < lastRaise && !foundPlayer.isAllIn) {
-         this.match.log
-          .Template({ name: 'brakets', title: 'MATCH - Raise Rejected', date: true })
+        this.match.log
+          .Template({
+            name: 'brakets',
+            title: 'MATCH - Raise Rejected',
+            date: true,
+          })
           .R({
             player: foundPlayer.name,
             amount,
             currentMax: currentMaxBet,
             myRaise: myRaiseAmount,
             requiredMinRaise: lastRaise,
-            reason: 'Raise must be at least the size of the previous raise'
+            reason: 'Raise must be at least the size of the previous raise',
           })
-        
-        this.match.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
-          reason: 'minimum raise',
-          displayMsg: `Raise invalid: minimum raise is ${currentMaxBet + lastRaise}.`,
-        })
-        Socket.sendToPlayer(this.match.torneoId, foundPlayer.secretCode, this.match.communicator.getMsg())
+
+        this.match.communicator.msgBuilder(
+          'actionRejected',
+          'private',
+          foundPlayer,
+          {
+            reason: 'minimum raise',
+            displayMsg: `Raise invalid: minimum raise is ${currentMaxBet + lastRaise}.`,
+          },
+        )
+        Socket.sendToPlayer(
+          this.match.torneoId,
+          foundPlayer.secretCode,
+          this.match.communicator.getMsg(),
+        )
         return
       }
     }
@@ -278,13 +326,22 @@ class MatchActions {
           currentMax: currentMaxBet,
           reason: 'Raise must be higher than current highest bet',
         })
-      
-      this.match.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
-        reason: 'minimum raise',
-        displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
-      })
-      Socket.sendToPlayer(this.match.torneoId, foundPlayer.secretCode, this.match.communicator.getMsg())
-      
+
+      this.match.communicator.msgBuilder(
+        'actionRejected',
+        'private',
+        foundPlayer,
+        {
+          reason: 'minimum raise',
+          displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
+        },
+      )
+      Socket.sendToPlayer(
+        this.match.torneoId,
+        foundPlayer.secretCode,
+        this.match.communicator.getMsg(),
+      )
+
       return
     }
 
@@ -336,15 +393,25 @@ class MatchActions {
           newPot: this.match.dealer.getPot(),
         })
 
-      this.match.communicator.msgBuilder(broadcastAction, 'public', foundPlayer, {
-        displayMsg: `${foundPlayer.name} ${actionType === 'All-In' ? 'goes all-in' : type === 'setBet' ? 'bets' : 'raises to'} ${currentBetAfter}`,
-        name: foundPlayer.name,
-        bet: currentBetAfter,
-      })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      this.match.communicator.msgBuilder(
+        broadcastAction,
+        'public',
+        foundPlayer,
+        {
+          displayMsg: `${foundPlayer.name} ${actionType === 'All-In' ? 'goes all-in' : type === 'setBet' ? 'bets' : 'raises to'} ${currentBetAfter}`,
+          name: foundPlayer.name,
+          bet: currentBetAfter,
+        },
+      )
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
 
       // If we are in blinds phase, use shorter delay to avoid test timeouts/race conditions
-      const delay = !this.match.stepChecker.checkStep('blindsBetting') ? this.match.constructor.timeouts.fast : this.match.constructor.timeouts.standard
+      const delay = !this.match.stepChecker.checkStep('blindsBetting')
+        ? this.match.constructor.timeouts.fast
+        : this.match.constructor.timeouts.standard
       this.match.continue(thisSocket, delay)
     } else {
       this.match.log
@@ -359,12 +426,21 @@ class MatchActions {
           chips: foundPlayer.chips,
           reason: 'Insufficient chips or invalid amount',
         })
-      
-      this.match.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
-        reason: 'insufficient chips',
-        displayMsg: 'Bet failed: insufficient chips.',
-      })
-      Socket.sendToPlayer(this.match.torneoId, foundPlayer.secretCode, this.match.communicator.getMsg())
+
+      this.match.communicator.msgBuilder(
+        'actionRejected',
+        'private',
+        foundPlayer,
+        {
+          reason: 'insufficient chips',
+          displayMsg: 'Bet failed: insufficient chips.',
+        },
+      )
+      Socket.sendToPlayer(
+        this.match.torneoId,
+        foundPlayer.secretCode,
+        this.match.communicator.getMsg(),
+      )
     }
   }
 
@@ -388,16 +464,16 @@ class MatchActions {
           title: 'MATCH - Not Enough Active Players',
           date: true,
         })
-        .R({ 
+        .R({
           activeCount: activePlayers.length,
           totalCount: this.match.players.length,
-          players: this.match.players.map(p => ({
+          players: this.match.players.map((p) => ({
             name: p.name,
             connected: p.connected,
             chips: p.chips,
             isStarted: p.isStarted,
-            folded: p.folded
-          }))
+            folded: p.folded,
+          })),
         })
       return
     }
@@ -445,7 +521,10 @@ class MatchActions {
         this.match.communicator.msgBuilder(`askForBlindBets`, 'public', p, {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
         })
-        Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+        Socket.broadcastToTorneo(
+          this.match.torneoId,
+          this.match.communicator.getMsg(),
+        )
         this.match.communicator.msgBuilder(`askForBlindBets`, 'private', p, {
           id: p.id,
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
@@ -492,7 +571,9 @@ class MatchActions {
 
     // repartir dinero
     winnerPlayers.forEach((wp) => {
-      const player = this.match.players.find((p) => p.id === (wp.playerId || wp.id))
+      const player = this.match.players.find(
+        (p) => p.id === (wp.playerId || wp.id),
+      )
 
       if (player) {
         player.chips += splitPot
@@ -512,7 +593,9 @@ class MatchActions {
     })
 
     const winnersInfo = winnerPlayers.map((wp) => {
-      const player = this.match.players.find((p) => p.id === (wp.playerId || wp.id))
+      const player = this.match.players.find(
+        (p) => p.id === (wp.playerId || wp.id),
+      )
       const winningHand = finalHands.find((h) => h.playerId === player?.id)
 
       return {
@@ -569,7 +652,10 @@ class MatchActions {
       isTournamentWinner: false,
     })
 
-    Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+    Socket.broadcastToTorneo(
+      this.match.torneoId,
+      this.match.communicator.getMsg(),
+    )
   }
 
   winnerTournament(winnersInfo) {
@@ -594,7 +680,10 @@ class MatchActions {
       isTournamentWinner: true,
     })
 
-    Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+    Socket.broadcastToTorneo(
+      this.match.torneoId,
+      this.match.communicator.getMsg(),
+    )
   }
 
   bettingCore = (thisSocket, bettingFor) => {
@@ -636,7 +725,10 @@ class MatchActions {
         this.match.communicator.msgBuilder('runout', 'public', null, {
           displayMsg: 'All-in runout! Dealing remaining cards...',
         })
-        Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+        Socket.broadcastToTorneo(
+          this.match.torneoId,
+          this.match.communicator.getMsg(),
+        )
       }
     }
 
@@ -680,7 +772,10 @@ class MatchActions {
       this.match.dealer.setLastRaiser(null)
 
       this.match.stepChecker.grantStep(steps[bettingFor])
-      this.match.continue(thisSocket, this.match.constructor.timeouts.collectChips) // ✅ Delay for chip movement
+      this.match.continue(
+        thisSocket,
+        this.match.constructor.timeouts.collectChips,
+      ) // ✅ Delay for chip movement
     } else {
       const p = playersToAct[0]
       if (this.match.activePlayerId === p.id) return
@@ -719,22 +814,35 @@ class MatchActions {
           ),
         })
 
-      this.match.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'private', p, {
-        messageForId: p.id,
-        action: opts,
-        displayMsg: 'Your turn',
-      })
+      this.match.communicator.msgBuilder(
+        `bettingCore-${bettingFor}`,
+        'private',
+        p,
+        {
+          messageForId: p.id,
+          action: opts,
+          displayMsg: 'Your turn',
+        },
+      )
       Socket.sendToPlayer(
         this.match.torneoId,
         p.secretCode,
         this.match.communicator.getMsg(),
       )
-      this.match.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'public', p, {
-        messageForId: p.id,
-        action: opts,
-        displayMsg: `Waiting for ${p.name}`,
-      })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      this.match.communicator.msgBuilder(
+        `bettingCore-${bettingFor}`,
+        'public',
+        p,
+        {
+          messageForId: p.id,
+          action: opts,
+          displayMsg: `Waiting for ${p.name}`,
+        },
+      )
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
       this.startAutofold()
     }
   }
@@ -754,10 +862,18 @@ class MatchActions {
       river: 'river_Dealer_Hand',
     }
     this.match.stepChecker.grantStep(steps[whatHand])
-    this.match.communicator.msgBuilder(`dealerHand-${whatHand}`, 'public', null, {
-      displayMsg: `Dealer deals the ${whatHand}`,
-    })
-    Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+    this.match.communicator.msgBuilder(
+      `dealerHand-${whatHand}`,
+      'public',
+      null,
+      {
+        displayMsg: `Dealer deals the ${whatHand}`,
+      },
+    )
+    Socket.broadcastToTorneo(
+      this.match.torneoId,
+      this.match.communicator.getMsg(),
+    )
     this.match.comms.sendOdds()
     this.match.continue(thisSocket, this.match.constructor.timeouts.standard) // ✅ Standard transition for dealing
   }
@@ -794,7 +910,10 @@ class MatchActions {
       this.match.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
         displayMsg: 'Cards dealt!',
       })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
 
       this.match.log
         .Template({
@@ -805,7 +924,12 @@ class MatchActions {
         .R(this.match.communicator.getFullInfo())
 
       for (const player of this.match.players) {
-        this.match.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
+        this.match.communicator.msgBuilder(
+          'dealtPrivateCards',
+          'private',
+          player,
+          {},
+        )
         Socket.sendToPlayer(
           this.match.torneoId,
           player.secretCode,

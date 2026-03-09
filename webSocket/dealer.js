@@ -76,7 +76,6 @@ class Dealer {
     )
   }
 
-
   getPlayersActed = () => {
     return this.playersActed
   }
@@ -124,11 +123,13 @@ class Dealer {
   }
 
   dealCardsEachPlayer = (numberOfCards = 2) => {
-    this.log.Template({
-      name: 'brakets',
-      title: 'DEALER - Dealing Players',
-      date: true,
-    }).R({ count: numberOfCards, deckLeft: this.deck.length })
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'DEALER - Dealing Players',
+        date: true,
+      })
+      .R({ count: numberOfCards, deckLeft: this.deck.length })
 
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
@@ -139,7 +140,6 @@ class Dealer {
       })
     }
   }
-
 
   dealCardsDealer(numberOfCards = 1) {
     this.log

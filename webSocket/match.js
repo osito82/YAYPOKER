@@ -96,7 +96,11 @@ class Match {
   continue(thisSocket, customDelay = null) {
     this.lastActivity = Date.now()
     const delay =
-      customDelay !== null ? customDelay : this.isRunout ? timeouts.runout : timeouts.standard
+      customDelay !== null
+        ? customDelay
+        : this.isRunout
+          ? timeouts.runout
+          : timeouts.standard
     setTimeout(() => {
       this.startGame(thisSocket)
     }, delay)
