@@ -1,11 +1,12 @@
 class Communicator {
-  constructor(gameId, torneoId, playerFold, stepChecker, players, dealer) {
+  constructor(gameId, torneoId, playerFold, stepChecker, players, dealer, match) {
     this.gameId = gameId
     this.torneoId = torneoId
     this.stepChecker = stepChecker
     this.playerFold = playerFold
     this.players = players
     this.dealer = dealer
+    this.match = match
   }
 
   msg = {}
@@ -38,7 +39,7 @@ class Communicator {
       currentHighestBet: this.dealer.getCurrentHighestBet(),
       myPlayerInfo,
       data,
-      autofoldDuration: 600, // 10 minutes to autofold
+      autofoldDuration: Math.floor(this.match.autofoldDuration / 1000), // Use match duration in seconds
       stepChecker: this.stepChecker.getChecker(),
       players: this.censoredPlayersInfo(players),
       dealerCards: this.dealer.getDealerCards(),
