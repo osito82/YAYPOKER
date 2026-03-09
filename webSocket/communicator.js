@@ -1,5 +1,13 @@
 class Communicator {
-  constructor(gameId, torneoId, playerFold, stepChecker, players, dealer, match) {
+  constructor(
+    gameId,
+    torneoId,
+    playerFold,
+    stepChecker,
+    players,
+    dealer,
+    match,
+  ) {
     this.gameId = gameId
     this.torneoId = torneoId
     this.stepChecker = stepChecker

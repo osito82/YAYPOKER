@@ -23,17 +23,25 @@ class MatchComms {
   stats(socketId) {
     this.match.log
       .Template({ name: 'brakets', title: 'MATCH - Stats', date: true })
-      .R({ pot: this.match.dealer.getPot(), players: this.match.players.length })
+      .R({
+        pot: this.match.dealer.getPot(),
+        players: this.match.players.length,
+      })
   }
 
   sendOdds(targetPlayer = null) {
-    const activePlayers = this.match.players.filter((p) => !p.folded && p.connected)
+    const activePlayers = this.match.players.filter(
+      (p) => !p.folded && p.connected,
+    )
     if (activePlayers.length < 2) return
 
     const playerHands = activePlayers.map((p) => p.getCards())
     const boardCards = this.match.dealer.getDealerCards()
 
-    const results = this.match.oddsCalculator.calculateOdds(playerHands, boardCards)
+    const results = this.match.oddsCalculator.calculateOdds(
+      playerHands,
+      boardCards,
+    )
 
     activePlayers.forEach((p, idx) => {
       // Si se especificó un targetPlayer, solo enviar a él

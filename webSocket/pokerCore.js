@@ -120,14 +120,19 @@ function sumAllValuesArray(array) {
 }
 
 function detectRoyalFlush(cartas) {
-    const flush = detectFlush(cartas)
+  const flush = detectFlush(cartas)
   if (!flush) return false
 
   const values = new Set(cardsToSingleNumValsArray(cartas))
   const royalValues = new Set([10, 11, 12, 13, 14])
-  const isRoyal = [...royalValues].every(v => values.has(v))
+  const isRoyal = [...royalValues].every((v) => values.has(v))
   if (isRoyal) {
-    return { pokerHand: 'royalFlush', prizeRank: 1, show: cartas, cards: cartas }
+    return {
+      pokerHand: 'royalFlush',
+      prizeRank: 1,
+      show: cartas,
+      cards: cartas,
+    }
   }
   return false
 }
@@ -184,7 +189,7 @@ function detectFullHouse(cartas) {
   const threeOfAKind = detectThreeOfAKind(cartas)
   if (!threeOfAKind) return false
 
-  const remainingCards = cartas.filter(c => !threeOfAKind.show.includes(c))
+  const remainingCards = cartas.filter((c) => !threeOfAKind.show.includes(c))
   const pair = detectPairs(remainingCards)
   if (!pair) return false
 
@@ -192,7 +197,7 @@ function detectFullHouse(cartas) {
     pokerHand: 'fullHouse',
     prizeRank: 4,
     show: [...threeOfAKind.show, ...pair.show],
-    cards: cartas
+    cards: cartas,
   }
 }
 
@@ -277,14 +282,18 @@ class PokerCore {
           } else if (tempHand.prizeRank === bestHand.prizeRank) {
             // Si tienen el mismo rank, comparar cual es mejor
             // Usamos sumArrayNumbers como heurística rápida para la mejor combinación de 5
-            const tempSum = sumAllValuesArray(cardsToSingleNumValsArray(tempHand.cards))
-            const bestSum = sumAllValuesArray(cardsToSingleNumValsArray(bestHand.cards))
+            const tempSum = sumAllValuesArray(
+              cardsToSingleNumValsArray(tempHand.cards),
+            )
+            const bestSum = sumAllValuesArray(
+              cardsToSingleNumValsArray(bestHand.cards),
+            )
             if (tempSum > bestSum) {
               bestHand = tempHand
             }
           }
           // Una vez que encontramos el mejor rank para ESTA combinación, pasamos a la siguiente combinación
-          break 
+          break
         }
       }
     }

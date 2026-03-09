@@ -93,8 +93,10 @@ const actionHandlers = {
   sendMessage: (match, socket, data) => match.comms.sendMessage(data),
   fold: (match, socket) => match.actions.fold(socket),
   close: (match, socket) => match.lobby.close(socket),
-  setBet: (match, socket, data) => match.actions.setBet(socket, data.chipsToBet),
-  setRise: (match, socket, data) => match.actions.setRise(socket, data.chipsToRiseBet),
+  setBet: (match, socket, data) =>
+    match.actions.setBet(socket, data.chipsToBet),
+  setRise: (match, socket, data) =>
+    match.actions.setRise(socket, data.chipsToRiseBet),
   setCall: (match, socket) => match.actions.setCall(socket),
   setCheck: (match, socket) => match.actions.setCheck(socket),
   dealtPrivateCards: (match, socket) => match.actions.dealtPrivateCards(socket),

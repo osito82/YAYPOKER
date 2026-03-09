@@ -22,7 +22,10 @@ class MatchLobby {
       this.match.communicator.msgBuilder('playerReady', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} is ready!`,
       })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
     }
   }
 
@@ -32,7 +35,10 @@ class MatchLobby {
       this.match.communicator.msgBuilder('lobbyError', 'private', null, {
         displayMsg: 'Only the host can start the game.',
       })
-      this.match.dealer.talkToSocketById(thisSocket.id, this.match.communicator.getMsg())
+      this.match.dealer.talkToSocketById(
+        thisSocket.id,
+        this.match.communicator.getMsg(),
+      )
       return
     }
 
@@ -41,10 +47,14 @@ class MatchLobby {
       if (p.connected) p.setStarted(true)
     })
 
-    const readyPlayers = this.match.players.filter((p) => p.isStarted && p.connected)
+    const readyPlayers = this.match.players.filter(
+      (p) => p.isStarted && p.connected,
+    )
 
     if (readyPlayers.length < 2) {
-      const connectedCount = this.match.players.filter((p) => p.connected).length
+      const connectedCount = this.match.players.filter(
+        (p) => p.connected,
+      ).length
 
       this.match.log
         .Template({
@@ -59,11 +69,15 @@ class MatchLobby {
         })
 
       this.match.communicator.msgBuilder('lobbyError', 'public', null, {
-        displayMsg: 'Waiting for at least 2 players to be connected to start...',
+        displayMsg:
+          'Waiting for at least 2 players to be connected to start...',
         readyPlayers: readyPlayers.length,
         connectedPlayers: connectedCount,
       })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
       return
     }
 
@@ -135,7 +149,10 @@ class MatchLobby {
         this.match.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Table is full (max 10 players).',
         })
-        this.match.dealer.talkToSocketById(thisSocket.id, this.match.communicator.getMsg())
+        this.match.dealer.talkToSocketById(
+          thisSocket.id,
+          this.match.communicator.getMsg(),
+        )
         return
       }
 
@@ -143,7 +160,10 @@ class MatchLobby {
         this.match.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Game in progress. Please wait for next round.',
         })
-        this.match.dealer.talkToSocketById(thisSocket.id, this.match.communicator.getMsg())
+        this.match.dealer.talkToSocketById(
+          thisSocket.id,
+          this.match.communicator.getMsg(),
+        )
         return
       }
 
@@ -197,7 +217,10 @@ class MatchLobby {
       msg: `Welcome ${player.name}!`,
       hostId: this.match.hostId,
     })
-    Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+    Socket.broadcastToTorneo(
+      this.match.torneoId,
+      this.match.communicator.getMsg(),
+    )
 
     this.match.communicator.msgBuilder('signUp', 'private', player, {
       method: 'signUp',
@@ -242,7 +265,10 @@ class MatchLobby {
       displayMsg: 'Registration closed. Game in progress.',
     })
 
-    Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+    Socket.broadcastToTorneo(
+      this.match.torneoId,
+      this.match.communicator.getMsg(),
+    )
   }
 
   pause(thisSocket) {
@@ -261,7 +287,10 @@ class MatchLobby {
         displayMsg: `${foundPlayer.name} disconnected. Waiting ${time / 1000} seconds for reconnection...`,
         timeout: time / 1000,
       })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
 
       const timeout = setTimeout(() => {
         this.playerLeave(thisSocket)
@@ -280,10 +309,18 @@ class MatchLobby {
     const index = this.match.players.findIndex((p) => p.id === socketId)
     if (index !== -1) {
       const playerLeaving = this.match.players[index]
-      this.match.communicator.msgBuilder('playerLeave', 'public', playerLeaving, {
-        displayMsg: `${playerLeaving.name} has left the game.`,
-      })
-      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      this.match.communicator.msgBuilder(
+        'playerLeave',
+        'public',
+        playerLeaving,
+        {
+          displayMsg: `${playerLeaving.name} has left the game.`,
+        },
+      )
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
       this.match.log
         .Template({
           name: 'brakets',
@@ -309,7 +346,10 @@ class MatchLobby {
               displayMsg: `${nextHost.name} is the new host.`,
               hostId: this.match.hostId,
             })
-            Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+            Socket.broadcastToTorneo(
+              this.match.torneoId,
+              this.match.communicator.getMsg(),
+            )
           }
         }
       } else {

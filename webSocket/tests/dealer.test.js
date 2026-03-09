@@ -266,4 +266,129 @@ describe('Dealer Class', () => {
 
     expect(dealer.hasMinimumPlayers()).toBe(false)
   })
+  // ================================
+  // 🟢 DEALING ORDER AND MULTIPLE GAMES
+  // ================================
+
+  describe('Card dealing logic', () => {
+    // --------------------------------
+    // 1 PLAYER
+    // --------------------------------
+    it('deals two cards to a single player in order', () => {
+      const players = [createMockPlayer('p1')]
+      const deck = ['C1', 'C2', 'C3', 'C4']
+
+      const dealer = new Dealer('game1', players, deck, 'torneo1', 0, [])
+
+      dealer.dealCardsEachPlayer(2)
+
+      // Player should simply receive the first two cards
+      expect(players[0].cards).toEqual(['C1', 'C2'])
+    })
+
+    // --------------------------------
+    // 5 PLAYERS
+    // --------------------------------
+    it('deals cards in round-robin order with 5 players', () => {
+      const players = Array.from({ length: 5 }, (_, i) =>
+        createMockPlayer(`p${i + 1}`),
+      )
+
+      const deck = Array.from({ length: 52 }, (_, i) => `C${i + 1}`)
+
+      const dealer = new Dealer('game1', players, deck, 'torneo1', 0, [])
+
+      dealer.dealCardsEachPlayer(2)
+
+      // First round
+      expect(players[0].cards[0]).toBe('C1')
+      expect(players[1].cards[0]).toBe('C2')
+      expect(players[2].cards[0]).toBe('C3')
+      expect(players[3].cards[0]).toBe('C4')
+      expect(players[4].cards[0]).toBe('C5')
+
+      // Second round
+      expect(players[0].cards[1]).toBe('C6')
+      expect(players[1].cards[1]).toBe('C7')
+    })
+
+    // --------------------------------
+    // 9 PLAYERS
+    // --------------------------------
+    it('deals cards correctly with a full table of 9 players', () => {
+      const players = Array.from({ length: 9 }, (_, i) =>
+        createMockPlayer(`p${i + 1}`),
+      )
+
+      const deck = Array.from({ length: 52 }, (_, i) => `C${i + 1}`)
+
+      const dealer = new Dealer('game1', players, deck, 'torneo1', 0, [])
+
+      dealer.dealCardsEachPlayer(2)
+
+      // First player should receive card 1 and card 10
+      expect(players[0].cards).toEqual(['C1', 'C10'])
+
+      // Second player should receive card 2 and card 11
+      expect(players[1].cards).toEqual(['C2', 'C11'])
+    })
+
+    // --------------------------------
+    // DEALER COMMUNITY CARDS
+    // --------------------------------
+    it('deals community cards in correct order (flop, turn, river)', () => {
+      const deck = ['D1', 'D2', 'D3', 'D4', 'D5']
+
+      const dealer = new Dealer('game1', [], deck, 'torneo1', 0, [])
+
+      // Flop
+      dealer.dealCardsDealer(3)
+      expect(dealer.getDealerCards()).toEqual(['D1', 'D2', 'D3'])
+
+      // Turn
+      dealer.dealCardsDealer(1)
+      expect(dealer.getDealerCards()).toEqual(['D1', 'D2', 'D3', 'D4'])
+
+      // River
+      dealer.dealCardsDealer(1)
+      expect(dealer.getDealerCards()).toEqual(['D1', 'D2', 'D3', 'D4', 'D5'])
+    })
+
+    // --------------------------------
+    // MULTIPLE GAMES CONSISTENCY
+    // --------------------------------
+    it('keeps dealing logic consistent across multiple games', () => {
+      const players = [createMockPlayer('p1'), createMockPlayer('p2')]
+
+      for (let game = 1; game <= 5; game++) {
+        const deck = Array.from({ length: 20 }, (_, i) => `G${game}-C${i + 1}`)
+
+        const dealer = new Dealer(
+          `game${game}`,
+          players,
+          deck,
+          'torneo1',
+          0,
+          [],
+        )
+
+        // reset player cards
+        players.forEach((p) => (p.cards = []))
+
+        dealer.dealCardsEachPlayer(2)
+
+        expect(players[0].cards).toEqual([`G${game}-C1`, `G${game}-C3`])
+
+        expect(players[1].cards).toEqual([`G${game}-C2`, `G${game}-C4`])
+
+        dealer.dealCardsDealer(3)
+
+        expect(dealer.getDealerCards()).toEqual([
+          `G${game}-C5`,
+          `G${game}-C6`,
+          `G${game}-C7`,
+        ])
+      }
+    })
+  })
 })

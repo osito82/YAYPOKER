@@ -96,7 +96,11 @@ class Match {
   continue(thisSocket, customDelay = null) {
     this.lastActivity = Date.now()
     const delay =
-      customDelay !== null ? customDelay : this.isRunout ? timeouts.runout : timeouts.standard
+      customDelay !== null
+        ? customDelay
+        : this.isRunout
+          ? timeouts.runout
+          : timeouts.standard
     setTimeout(() => {
       this.startGame(thisSocket)
     }, delay)
@@ -213,7 +217,7 @@ class Match {
     this.restartMatch()
   }
 
-  restartMatch() {
+  restartMatch(customDeck = null) {
     this.acceptingPlayers = false
     const oldGameId = this.gameId
     this.gameId = generateUniqueId()
@@ -234,11 +238,12 @@ class Match {
       p.folded = p.chips <= 0
       p.lastAction = p.chips <= 0 ? 'Out' : ''
       p.isAllIn = false
+      p.setStarted(p.connected && p.chips > 0)
       p.setCurrentPrize({})
     })
 
     const Deck = require('./deck')
-    this.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)
+    this.shuffledDeck = customDeck || Deck.shuffleDeck(Deck.cards, 101)
     this.dealer.gameId = this.gameId
     this.dealer.deck = this.shuffledDeck
     this.dealer.cardsDealer = []
@@ -249,10 +254,11 @@ class Match {
     this.dealer.setLastRaiser(null)
 
     this.communicator.gameId = this.gameId
+    const shouldRotate = this.stepChecker.checkStep('winner')
     this.stepChecker.reset()
     this.stepChecker.gameFlow.gameId = this.gameId
 
-    if (this.players.length > 1) {
+    if (this.players.length > 1 && shouldRotate) {
       this.players.push(this.players.shift())
     }
 
