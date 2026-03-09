@@ -66,7 +66,11 @@ class MatchActions {
 
       foundPlayer.setLastAction('Check')
       this.match.log
-        .Template({ name: 'brakets', title: 'MATCH - CHECK', date: true })
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - CHECK',
+          date: true,
+        })
         .R({ player: foundPlayer.name })
       this.match.communicator.msgBuilder('setCheck', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} checks`,
@@ -626,7 +630,7 @@ class MatchActions {
       this.match.dealer.setLastRaiser(null)
 
       this.match.stepChecker.grantStep(steps[bettingFor])
-      this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
+      this.match.continue(thisSocket, this.match.constructor.timeouts.collectChips) // ✅ Delay for chip movement
     } else {
       const p = playersToAct[0]
       if (this.match.activePlayerId === p.id) return
@@ -705,7 +709,7 @@ class MatchActions {
     })
     Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
     this.match.comms.sendOdds()
-    this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
+    this.match.continue(thisSocket, this.match.constructor.timeouts.standard) // ✅ Standard transition for dealing
   }
 
   checkPrizes(thisSocket) {
@@ -759,7 +763,7 @@ class MatchActions {
         )
       }
       this.match.comms.sendOdds()
-      this.match.continue(thisSocket, this.match.constructor.timeouts.fast)
+      this.match.continue(thisSocket, this.match.constructor.timeouts.standard) // ✅ Standard transition after dealing
     } catch (error) {
       console.error('Error in dealtPrivateCards:', error)
     }

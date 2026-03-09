@@ -19,11 +19,12 @@ const isTest = process.env.NODE_ENV === 'test'
 
 const timeouts = {
   autofold: isTest ? 1000 : 600000, // 1s in test, else 10 minutes
-  lobby: isTest ? 100 : 5000, // 100ms in test, else 5 seconds
   fast: isTest ? 10 : 100, // 10ms in test, else 100ms
   standard: isTest ? 50 : 500, // 50ms in test, else 500ms
   runout: isTest ? 100 : 2000, // 100ms in test, else 2 seconds
-  pause: isTest ? 1000 : 60000, // 1s in test, else 1 minute
+  pause: isTest ? 3000 : 60000, // 3s in test, else 1 minute
+  nextRound: isTest ? 500 : 5000, // 500ms in test, else 5 seconds
+  collectChips: isTest ? 100 : 1500, // 100ms in test, else 1.5 seconds
 }
 
 class Match {
@@ -71,6 +72,7 @@ class Match {
       this.stepChecker,
       this.players,
       this.dealer,
+      this, // Pass match instance to access timeouts
     )
 
     this.oddsCalculator = new PokerOddsCalculator()
@@ -260,8 +262,10 @@ class Match {
     })
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
-    this.stepChecker.grantStep('startGame')
-    this.startGame()
+    setTimeout(() => {
+      this.stepChecker.grantStep('startGame')
+      this.startGame()
+    }, timeouts.nextRound)
   }
 }
 
