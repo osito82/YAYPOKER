@@ -89,6 +89,13 @@ class MatchActions {
           currentBet: foundPlayer.getCurrentBet(),
           maxBet: this.match.dealer.getCurrentHighestBet(),
         })
+      
+      this.match.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+        reason: 'check',
+        displayMsg: 'Check invalid: there is an active bet.',
+      })
+      Socket.sendToPlayer(this.match.torneoId, foundPlayer.secretCode, this.match.communicator.getMsg())
+      
       return false
     }
   }
@@ -230,9 +237,35 @@ class MatchActions {
     if (!foundPlayer) return
 
     const amount = Number(chipsToBet)
+    const currentMaxBet = this.match.dealer.getCurrentHighestBet()
+    const lastRaise = this.match.dealer.getLastRaiseAmount() || 20 // Default to Big Blind if no raise yet
 
-    // Validar que si es un Raise, realmente aumente la apuesta
-    if (type === 'setRise' && amount <= this.match.dealer.getCurrentHighestBet()) {
+    // REGLA DE MIN-RAISE: El aumento debe ser al menos igual al aumento anterior
+    if (type === 'setRise') {
+      const myRaiseAmount = amount - currentMaxBet
+      if (myRaiseAmount < lastRaise && !foundPlayer.isAllIn) {
+         this.match.log
+          .Template({ name: 'brakets', title: 'MATCH - Raise Rejected', date: true })
+          .R({
+            player: foundPlayer.name,
+            amount,
+            currentMax: currentMaxBet,
+            myRaise: myRaiseAmount,
+            requiredMinRaise: lastRaise,
+            reason: 'Raise must be at least the size of the previous raise'
+          })
+        
+        this.match.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+          reason: 'minimum raise',
+          displayMsg: `Raise invalid: minimum raise is ${currentMaxBet + lastRaise}.`,
+        })
+        Socket.sendToPlayer(this.match.torneoId, foundPlayer.secretCode, this.match.communicator.getMsg())
+        return
+      }
+    }
+
+    // Validar que al menos sea mayor que la apuesta actual si es raise
+    if (type === 'setRise' && amount <= currentMaxBet) {
       this.match.log
         .Template({
           name: 'brakets',
@@ -242,9 +275,16 @@ class MatchActions {
         .R({
           player: foundPlayer.name,
           amount,
-          currentMax: this.match.dealer.getCurrentHighestBet(),
+          currentMax: currentMaxBet,
           reason: 'Raise must be higher than current highest bet',
         })
+      
+      this.match.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+        reason: 'minimum raise',
+        displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
+      })
+      Socket.sendToPlayer(this.match.torneoId, foundPlayer.secretCode, this.match.communicator.getMsg())
+      
       return
     }
 
@@ -254,6 +294,7 @@ class MatchActions {
     }
 
     const currentBetBefore = foundPlayer.getCurrentBet()
+    const previousMaxBet = currentMaxBet
     const success = foundPlayer.setTotalBet(amount)
 
     if (success) {
@@ -272,8 +313,10 @@ class MatchActions {
       foundPlayer.setLastAction(actionType)
       this.match.dealer.setPot(addedChips)
 
-      if (currentBetAfter > this.match.dealer.getCurrentHighestBet()) {
+      if (currentBetAfter > previousMaxBet) {
+        const raiseAmount = currentBetAfter - previousMaxBet
         this.match.dealer.setCurrentHighestBet(currentBetAfter)
+        this.match.dealer.setLastRaiseAmount(raiseAmount)
         this.match.dealer.setLastRaiser(foundPlayer.id)
         this.match.dealer.clearActedPlayers()
       }
@@ -316,6 +359,12 @@ class MatchActions {
           chips: foundPlayer.chips,
           reason: 'Insufficient chips or invalid amount',
         })
+      
+      this.match.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+        reason: 'insufficient chips',
+        displayMsg: 'Bet failed: insufficient chips.',
+      })
+      Socket.sendToPlayer(this.match.torneoId, foundPlayer.secretCode, this.match.communicator.getMsg())
     }
   }
 
@@ -627,6 +676,7 @@ class MatchActions {
       this.match.activePlayerId = null
       this.match.dealer.clearActedPlayers()
       this.match.dealer.setCurrentHighestBet(0)
+      this.match.dealer.setLastRaiseAmount(0)
       this.match.dealer.setLastRaiser(null)
 
       this.match.stepChecker.grantStep(steps[bettingFor])

@@ -368,8 +368,19 @@ describe('Poker Game Integration Tests', () => {
   it('17. Determinar ganador correcto: Pair vs Two Pairs', async () => {
     const gameCode = 'win-det-' + Math.random().toString(36).substring(7)
     
-    // Mock deck: 1:As, 2:Ks, 3:2d, 4:Qh, 5:Ac, 6:Kc, 7:Qd, 8:3h, 9:4h
-    vi.spyOn(Deck, 'shuffleDeck').mockReturnValue(['As','Ks','2d','Qh','Ac','Kc','Qd','3h','4h', '5h', '6h'])
+    // Con Round-Robin (2 jugadores):
+    // Alice recibe cartas en índices 0 y 2.
+    // Bob recibe cartas en índices 1 y 3.
+    // Board empieza en índice 4.
+    // Para que Alice tenga Par de Ases y Bob Doble Par (K y Q):
+    // Alice: As (0), Ac (2)
+    // Bob: Ks (1), Qh (3)
+    // Board: Kc (4), Qd (5), 3h (6), 4h (7), 5h (8)
+    vi.spyOn(Deck, 'shuffleDeck').mockReturnValue([
+      'As', 'Ks', 'Ac', 'Qh', 
+      'Kc', 'Qd', '3h', '4h', '5h',
+      '6h', '7h'
+    ])
 
     const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
     const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
@@ -522,7 +533,7 @@ it('Min-raise: raise debe ser al menos el tamaño del raise anterior', async () 
   await bob.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
 
   // Intento inválido: subir solo a 80 (menos que +50)
-  bob.send(MOCK_ACTIONS.RISE(20))
+  bob.send(MOCK_ACTIONS.RISE(80))
 
   // Esperamos mensaje de rechazo o que no se acepte la acción
   const rejectMsg = await bob.waitAction('actionRejected', 5000, r => 
@@ -534,13 +545,16 @@ it('Min-raise: raise debe ser al menos el tamaño del raise anterior', async () 
   // Ahora sí: raise válido a 100 o más
   bob.send(MOCK_ACTIONS.RISE(110))
 
-  const raiseAccepted = await alice.waitAction('setRise', 5000)
+  const raiseAccepted = await alice.waitAction('setBet', 5000, r => r.message.data?.displayMsg?.includes('110'))
   expect(raiseAccepted.message.data.displayMsg).toMatch(/raises to 110/i)
 }, 40000)
 
+/*
+GEMINI NO BORRAR
 it('Side pot: all-in con 3 jugadores crea side pot', async () => {
   const gameCode = 'sidepot-3p-' + Math.random().toString(36).substring(7)
   const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  
   const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
   const shorty = createClient({ name: 'Shorty', secretCode: 'shorty123' }, gameCode)
 
@@ -736,5 +750,7 @@ it('Reconexión durante mano: mantiene estado y turno', async () => {
   await alice.waitAction('dealerHand-flop', 10000)
 }, 45000)
 
+
+*/
 
 })

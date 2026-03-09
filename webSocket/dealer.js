@@ -15,6 +15,15 @@ class Dealer {
     this.finalHands = []
     this.currentHighestBet = 0
     this.lastRaiser = null
+    this.lastRaiseAmount = 0
+  }
+
+  setLastRaiseAmount = (amount) => {
+    this.lastRaiseAmount = Number(amount) || 0
+  }
+
+  getLastRaiseAmount = () => {
+    return this.lastRaiseAmount
   }
 
   getCurrentHighestBet = () => {
@@ -115,21 +124,21 @@ class Dealer {
   }
 
   dealCardsEachPlayer = (numberOfCards = 2) => {
-  this.log.Template({
-    name: 'brakets',
-    title: 'DEALER - Dealing Players',
-    date: true,
-  }).R({ count: numberOfCards, deckLeft: this.deck.length })
+    this.log.Template({
+      name: 'brakets',
+      title: 'DEALER - Dealing Players',
+      date: true,
+    }).R({ count: numberOfCards, deckLeft: this.deck.length })
 
-  this.players.forEach((player) => {
-    if (player.connected && !player.folded) {
-      for (let i = 0; i < numberOfCards; i++) {
-        const cardToDeal = this.deck.shift()
-        if (cardToDeal) player.setCard(cardToDeal)
-      }
+    for (let i = 0; i < numberOfCards; i++) {
+      this.players.forEach((player) => {
+        if (player.connected && !player.folded) {
+          const cardToDeal = this.deck.shift()
+          if (cardToDeal) player.setCard(cardToDeal)
+        }
+      })
     }
-  })
-}
+  }
 
 
   dealCardsDealer(numberOfCards = 1) {
