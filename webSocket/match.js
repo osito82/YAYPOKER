@@ -22,7 +22,7 @@ const timeouts = {
   fast: isTest ? 10 : 100, // 10ms in test, else 100ms
   standard: isTest ? 50 : 500, // 50ms in test, else 500ms
   runout: isTest ? 100 : 2000, // 100ms in test, else 2 seconds
-  pause: isTest ? 1000 : 60000, // 1s in test, else 1 minute
+  pause: isTest ? 3000 : 60000, // 3s in test, else 1 minute
   nextRound: isTest ? 500 : 5000, // 500ms in test, else 5 seconds
   collectChips: isTest ? 100 : 1500, // 100ms in test, else 1.5 seconds
 }

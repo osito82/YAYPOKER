@@ -114,27 +114,23 @@ class Dealer {
     this.players.forEach((player) => player.giveChipsToDealer())
   }
 
-  dealCardsEachPlayer = (numberOfCards = 1) => {
-    this.log
-      .Template({
-        name: 'brakets',
-        title: 'DEALER - Dealing Players',
-        date: true,
-      })
-      .R({ count: numberOfCards, deckLeft: this.deck.length })
-    for (let i = 0; i < numberOfCards; i++) {
-      this.players.forEach((player) => {
-        if (player.connected && !player.folded) {
-          if (player.countCards() < 2) {
-            const cardToDeal = this.deck.shift()
-            if (cardToDeal) {
-              player.setCard(cardToDeal)
-            }
-          }
-        }
-      })
+  dealCardsEachPlayer = (numberOfCards = 2) => {
+  this.log.Template({
+    name: 'brakets',
+    title: 'DEALER - Dealing Players',
+    date: true,
+  }).R({ count: numberOfCards, deckLeft: this.deck.length })
+
+  this.players.forEach((player) => {
+    if (player.connected && !player.folded) {
+      for (let i = 0; i < numberOfCards; i++) {
+        const cardToDeal = this.deck.shift()
+        if (cardToDeal) player.setCard(cardToDeal)
+      }
     }
-  }
+  })
+}
+
 
   dealCardsDealer(numberOfCards = 1) {
     this.log
