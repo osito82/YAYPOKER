@@ -5,6 +5,27 @@ class MatchComms {
     this.match = match
   }
 
+  sendMessage(data) {
+    const { targetPlayerId, targetMessage } = data
+    const targetSocket = Socket.getSocket(this.match.torneoId, targetPlayerId)
+
+    if (targetSocket?.socket) {
+      targetSocket.socket.send(
+        JSON.stringify({ message: { displayMsg: targetMessage } }),
+      )
+    } else {
+      this.match.log
+        .Template({ name: 'brakets', title: 'MATCH - Chat Error', date: true })
+        .R({ msg: 'Target not found', targetPlayerId })
+    }
+  }
+
+  stats(socketId) {
+    this.match.log
+      .Template({ name: 'brakets', title: 'MATCH - Stats', date: true })
+      .R({ pot: this.match.dealer.getPot(), players: this.match.players.length })
+  }
+
   sendOdds(targetPlayer = null) {
     const activePlayers = this.match.players.filter((p) => !p.folded && p.connected)
     if (activePlayers.length < 2) return

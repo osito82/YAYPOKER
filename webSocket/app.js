@@ -5,7 +5,7 @@ const osolog = require('osolog')
 const http = require('http')
 const WebSocket = require('ws')
 
-const { generateUniqueId, randomName, generateSecretCode } = require('./utils')
+const { generateUniqueId, randomName } = require('./utils')
 
 const app = express()
 const server = http.createServer(app)
@@ -87,49 +87,20 @@ const validateAction = (action, data) => {
 }
 
 // Mapeo de acciones a manejadores para mejor organización
+// Option 3: Acceso Explícito por Espacio de Nombres
 const actionHandlers = {
-  signUp: (match, socket, data, playerName, secretCode, torneoId) => {
-    data.name = playerName
-    data.secretCode = secretCode
-
-    if (!torneoId || !Torneo.torneoExists(torneoId)) {
-      log
-        .Template({ name: 'brakets', title: 'SERVER - Error', date: true })
-        .R({ msg: 'Torneo not found during signUp', torneoId })
-      socket.socket.close()
-      return
-    }
-
-    match.lobby.signUp(data, socket)
-  },
-
-  sendMessage: (match, socket, data, torneoId) => {
-    const targetPlayerId = data.targetPlayerId
-    const targetMessage = data.targetMessage
-
-    const targetSocket = Socket.getSocket(torneoId, targetPlayerId)
-
-    if (targetSocket?.socket) {
-      targetSocket.socket.send(
-        JSON.stringify({ message: { displayMsg: targetMessage } }),
-      )
-    } else {
-      log
-        .Template({ name: 'brakets', title: 'SERVER - Chat Error', date: true })
-        .R({ msg: 'Target not found', targetPlayerId })
-    }
-  },
-
+  signUp: (match, socket, data) => match.lobby.signUp(data, socket),
+  sendMessage: (match, socket, data) => match.comms.sendMessage(data),
   fold: (match, socket) => match.actions.fold(socket),
-  close: (match, socket, data, torneoId) => match.lobby.close(socket, torneoId),
+  close: (match, socket) => match.lobby.close(socket),
   setBet: (match, socket, data) => match.actions.setBet(socket, data.chipsToBet),
   setRise: (match, socket, data) => match.actions.setRise(socket, data.chipsToRiseBet),
-  setCall: (match, socket, data, torneoId) => match.actions.setCall(socket, torneoId),
-  setCheck: (match, socket, data, torneoId) => match.actions.setCheck(socket, torneoId),
-  dealtPrivateCards: (match, socket) => match.dealtPrivateCards(socket),
-  stats: (match, socket) => match.stats(socket.id),
-  nextRound: (match) => match.nextRound(),
-  startGame: (match, socket) => match.startGame(socket),
+  setCall: (match, socket) => match.actions.setCall(socket),
+  setCheck: (match, socket) => match.actions.setCheck(socket),
+  dealtPrivateCards: (match, socket) => match.lobby.dealtPrivateCards(socket),
+  stats: (match, socket) => match.comms.stats(socket.id),
+  nextRound: (match) => match.lobby.nextRound(),
+  startGame: (match, socket) => match.lobby.startGame(socket),
   playerReady: (match, socket) => match.lobby.playerReady(socket),
 }
 
@@ -222,7 +193,7 @@ wss.on('connection', (ws, req) => {
       const handler = actionHandlers[jsonData.action]
       if (handler) {
         try {
-          handler(match, thisSocket, jsonData, playerName, secretCode, torneoId)
+          handler(match, thisSocket, jsonData)
         } catch (error) {
           log
             .Template({

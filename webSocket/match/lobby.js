@@ -139,7 +139,7 @@ class MatchLobby {
 
     this.noMorePlayers()
     this.match.stepChecker.grantStep('signUp')
-    this.match.startGame()
+    this.startGame()
   }
 
   signUp(data, thisSocket) {
@@ -238,10 +238,10 @@ class MatchLobby {
         return
       }
 
-      let finalName = data.name
+      let finalName = data.name || thisSocketName
       let counter = 1
       while (this.match.players.some((p) => p.name === finalName)) {
-        finalName = `${data.name}-${counter}`
+        finalName = `${data.name || thisSocketName}-${counter}`
         counter++
       }
 
@@ -251,7 +251,7 @@ class MatchLobby {
       player = new Player(
         this.match.gameId,
         finalName,
-        data.secretCode,
+        thisSecretCode,
         data.totalChips,
         [],
         thisSocketId,
@@ -361,6 +361,196 @@ class MatchLobby {
 
   close(thisSocket) {
     this.playerLeave(thisSocket)
+  }
+
+  dealtPrivateCards(thisSocket) {
+    try {
+      this.match.dealer.dealCardsEachPlayer(2)
+      this.match.stepChecker.grantStep('dealtPrivateCards')
+      this.match.dealer.clearActedPlayers()
+
+      this.match.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
+        displayMsg: 'Cards dealt!',
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+
+      this.match.log
+        .Template({
+          name: 'brakets',
+          title: 'MATCH - Private Cards Dealt',
+          date: true,
+        })
+        .R(this.match.communicator.getFullInfo())
+
+      for (const player of this.match.players) {
+        this.match.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
+        Socket.sendToPlayer(
+          this.match.torneoId,
+          player.secretCode,
+          this.match.communicator.getMsg(),
+        )
+      }
+      this.match.comms.sendOdds()
+      this.match.continue(thisSocket, this.match.constructor.timeouts.fast)
+    } catch (error) {
+      console.error('Error in dealtPrivateCards:', error)
+    }
+  }
+
+  nextRound() {
+    if (!this.match.waitingForNextRound) return
+    this.match.waitingForNextRound = false
+    const playersWithChips = this.match.players.filter(
+      (p) => p.connected && p.chips > 0,
+    )
+    if (playersWithChips.length < 2) {
+      this.match.log.R({ info: 'Tournament finished. No more rounds.' })
+      return
+    }
+    this.restartMatch()
+  }
+
+  restartMatch() {
+    this.match.acceptingPlayers = false
+    const oldGameId = this.match.gameId
+    this.match.gameId = this.match.lobby.generateUniqueId() // Usar helper local si existe o el de utils
+
+    this.match.log
+      .Template({ name: 'brakets', title: 'MATCH - Restarting', date: true })
+      .R({ oldGameId, newGameId: this.match.gameId })
+
+    this.match.pot = 0
+    this.match.playersFold = []
+    this.match.activePlayerId = null
+    this.match.isRunout = false
+
+    this.match.players.forEach((p) => {
+      p.gameId = this.match.gameId
+      p.cards = []
+      p.currentBet = 0
+      p.folded = p.chips <= 0
+      p.lastAction = p.chips <= 0 ? 'Out' : ''
+      p.isAllIn = false
+      p.setCurrentPrize({})
+    })
+
+    const Deck = require('../deck')
+    this.match.shuffledDeck = Deck.shuffleDeck(Deck.cards, 101)
+    this.match.dealer.gameId = this.match.gameId
+    this.match.dealer.deck = this.match.shuffledDeck
+    this.match.dealer.cardsDealer = []
+    this.match.cardsDealer = this.match.dealer.getDealerCards()
+    this.match.dealer.pot = 0
+    this.match.dealer.clearActedPlayers()
+    this.match.dealer.setCurrentHighestBet(0)
+    this.match.dealer.setLastRaiser(null)
+
+    this.match.communicator.gameId = this.match.gameId
+    this.match.stepChecker.reset()
+    this.match.stepChecker.gameFlow.gameId = this.match.gameId
+
+    if (this.match.players.length > 1) {
+      this.match.players.push(this.match.players.shift())
+    }
+
+    this.match.communicator.msgBuilder('gameRestarted', 'public', null, {
+      displayMsg: 'New hand starting...',
+      newGameId: this.match.gameId,
+    })
+    Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+
+    this.match.stepChecker.grantStep('signUp')
+    this.startGame()
+  }
+
+  generateUniqueId() {
+    const { generateUniqueId } = require('../utils')
+    return generateUniqueId()
+  }
+
+  startGame(thisSocket = {}) {
+    if (this.match.stepChecker.checkStep('pause')) return
+
+    if (!this.match.stepChecker.checkStep('blindsBetting') && thisSocket.id) {
+      const p = this.match.players.find((p) => p.id === thisSocket.id)
+      if (p && !p.isStarted) {
+        this.playerReady(thisSocket)
+      }
+    }
+
+    const readyPlayers = this.match.players.filter((p) => p.isStarted && p.connected)
+
+    if (readyPlayers.length < 2) {
+      this.match.communicator.msgBuilder('startGame', 'public', null, {
+        displayMsg: 'Waiting for at least 2 players to be ready...',
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      return
+    }
+
+    if (!this.match.stepChecker.checkStep('blindsBetting'))
+      return this.match.actions.askForBlindBets(thisSocket)
+    if (!this.match.stepChecker.checkStep('dealtPrivateCards'))
+      return this.dealtPrivateCards(thisSocket)
+    if (!this.match.stepChecker.checkStep('firstBetting'))
+      return this.match.actions.bettingCore(thisSocket, 'firstBetting')
+    if (!this.match.stepChecker.checkStep('flop_Dealer_Hand')) {
+      this.match.dealer.clearActedPlayers()
+      this.match.dealer.getChipsFromPlayers()
+      return this.match.actions.dealerHand(thisSocket, 'flop')
+    }
+    if (!this.match.stepChecker.checkStep('flop_Check_Prize_Step'))
+      return this.match.actions.checkPrizes(thisSocket)
+    if (!this.match.stepChecker.checkStep('flop_Bet_Step'))
+      return this.match.actions.bettingCore(thisSocket, 'flopBetting')
+    if (!this.match.stepChecker.checkStep('turn_Dealer_Hand')) {
+      this.match.dealer.clearActedPlayers()
+      this.match.dealer.getChipsFromPlayers()
+      return this.match.actions.dealerHand(thisSocket, 'turn')
+    }
+    if (!this.match.stepChecker.checkStep('turn_Check_Prize_Step'))
+      return this.match.actions.checkPrizes(thisSocket)
+    if (!this.match.stepChecker.checkStep('turn_Bet_Step'))
+      return this.match.actions.bettingCore(thisSocket, 'turnBetting')
+    if (!this.match.stepChecker.checkStep('river_Dealer_Hand')) {
+      this.match.dealer.clearActedPlayers()
+      this.match.dealer.getChipsFromPlayers()
+      return this.match.actions.dealerHand(thisSocket, 'river')
+    }
+    if (!this.match.stepChecker.checkStep('river_Check_Prize_Step'))
+      return this.match.actions.checkPrizes(thisSocket)
+    if (!this.match.stepChecker.checkStep('river_Bet_Step'))
+      return this.match.actions.bettingCore(thisSocket, 'riverBetting')
+    if (!this.match.stepChecker.checkStep('finalHands')) {
+      this.match.dealer.getChipsFromPlayers()
+      this.match.dealer.setFinalHands()
+      this.match.stepChecker.grantStep('finalHands')
+      return this.match.continue(thisSocket)
+    }
+    if (!this.match.stepChecker.checkStep('showDown')) {
+      this.match.log
+        .Template({ name: 'brakets', title: 'MATCH - Showdown', date: true })
+        .R(this.match.dealer.getFinalHands())
+      this.match.communicator.msgBuilder('showDown', 'public', null, {
+        method: 'showDown',
+        showDown: this.match.dealer.getFinalHands(),
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.match.communicator.getMsg())
+      this.match.stepChecker.grantStep('showDown')
+      return this.match.continue(thisSocket)
+    }
+    if (!this.match.stepChecker.checkStep('winner')) {
+      const { WinnerCore } = require('../winnerCore')
+      const winnerData = WinnerCore.Winner(this.match.dealer.getFinalHands())
+      if (
+        !winnerData ||
+        (Array.isArray(winnerData) && winnerData.length === 0)
+      ) {
+        return this.match.continue(thisSocket)
+      }
+      this.match.actions.winner(winnerData)
+      return
+    }
   }
 
   playerLeave(thisSocket) {
