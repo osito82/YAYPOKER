@@ -47,9 +47,7 @@ class Match {
     this.waitingForNextRound = false
     this.isRunout = false
 
-    this.lobbyTimer = null
-    this.lobbyTimerDuration = timeouts.lobby
-    this.lobbyStartTime = null
+    this.hostId = null
 
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.shuffledDeck = initialDeck

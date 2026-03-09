@@ -335,7 +335,17 @@ class MatchActions {
           title: 'MATCH - Not Enough Active Players',
           date: true,
         })
-        .R({ activeCount: activePlayers.length })
+        .R({ 
+          activeCount: activePlayers.length,
+          totalCount: this.match.players.length,
+          players: this.match.players.map(p => ({
+            name: p.name,
+            connected: p.connected,
+            chips: p.chips,
+            isStarted: p.isStarted,
+            folded: p.folded
+          }))
+        })
       return
     }
 

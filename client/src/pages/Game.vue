@@ -1,5 +1,14 @@
 <template>
+  <LobbyView 
+    v-if="!pokerStore.getIsGameStarted"
+    :players="allPlayers"
+    :hostId="pokerStore.getHostId"
+    :myId="pokerStore.myInfo.id"
+    :gameCode="gameCode"
+    @start="startGame"
+  />
   <component
+    v-else
     :is="activeTemplate"
     :gameCode="gameCode"
     :playerName="playerName"
@@ -33,6 +42,7 @@ import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import useWebSocket from '../use/useSockets'
 import { urlsFactory } from '../vutils'
+import LobbyView from '../components/LobbyView.vue'
 
 // Async loading of templates for performance
 const TemplateXSmall = defineAsyncComponent(() => import('./templates/TemplateXSmall.vue'))
@@ -141,6 +151,12 @@ watch([minBet, maxBet], ([newMin, newMax]) => {
 
 function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
+}
+
+const startGame = () => {
+  if (isConnected.value) {
+    sendMessage({ action: 'startGame' })
+  }
 }
 
 const sendAction = (action) => {
