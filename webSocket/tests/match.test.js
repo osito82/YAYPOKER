@@ -144,7 +144,7 @@ describe('Match Class', () => {
       const data = { name: 'Alice', totalChips: 1000, secretCode: '1234' }
       const thisSocket = { id: 'S1', name: 'Alice', secretCode: '1234' }
 
-      match.signUp(data, thisSocket)
+      match.lobby.signUp(data, thisSocket)
 
       expect(match.players.length).toBe(1)
       expect(match.players[0].name).toBe('Alice')
@@ -154,11 +154,11 @@ describe('Match Class', () => {
     it('should handle name collision by appending a number', () => {
       const p1Data = { name: 'Alice', totalChips: 1000, secretCode: '1111' }
       const p1Socket = { id: 'S1', name: 'Alice', secretCode: '1111' }
-      match.signUp(p1Data, p1Socket)
+      match.lobby.signUp(p1Data, p1Socket)
 
       const p2Data = { name: 'Alice', totalChips: 1000, secretCode: '2222' }
       const p2Socket = { id: 'S2', name: 'Alice', secretCode: '2222' }
-      match.signUp(p2Data, p2Socket)
+      match.lobby.signUp(p2Data, p2Socket)
 
       expect(match.players.length).toBe(2)
       expect(match.players[0].name).toBe('Alice')
@@ -168,10 +168,10 @@ describe('Match Class', () => {
     it('should reconnect an existing player by secretCode', () => {
       const data = { name: 'Alice', totalChips: 1000, secretCode: '1234' }
       const s1 = { id: 'S1', name: 'Alice', secretCode: '1234' }
-      match.signUp(data, s1)
+      match.lobby.signUp(data, s1)
 
       const s2 = { id: 'S2', name: 'Alice', secretCode: '1234' }
-      match.signUp(data, s2)
+      match.lobby.signUp(data, s2)
 
       expect(match.players.length).toBe(1)
       expect(match.players[0].id).toBe('S2')
@@ -196,7 +196,7 @@ describe('Match Class', () => {
       match.players.push(player)
       match.activePlayerId = 'S1'
 
-      match.fold(socket)
+      match.actions.fold(socket)
 
       expect(player.setFolded).toHaveBeenCalledWith(true)
       expect(match.playersFold).toContain('Alice')
@@ -213,7 +213,7 @@ describe('Match Class', () => {
       match.players.push(player)
       match.activePlayerId = 'S2'
 
-      match.fold(socket)
+      match.actions.fold(socket)
 
       expect(player.setFolded).not.toHaveBeenCalled()
     })

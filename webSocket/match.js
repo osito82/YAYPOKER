@@ -95,17 +95,6 @@ class Match {
       .R({ torneoId, gameId })
   }
 
-  // Proxies para compatibilidad y legibilidad (opcional, pero ayuda al orquestador)
-  signUp(data, socket) { this.lobby.signUp(data, socket) }
-  playerReady(socket) { this.lobby.playerReady(socket) }
-  setBet(socket, chips, type) { this.actions.setBet(socket, chips, type) }
-  setCall(socket) { this.actions.setCall(socket) }
-  setCheck(socket) { this.actions.setCheck(socket) }
-  setRise(socket, chips) { this.actions.setRise(socket, chips) }
-  fold(socket) { this.actions.fold(socket) }
-  pause(socket) { this.lobby.pause(socket) }
-  close(socket) { this.lobby.close(socket) }
-
   dealtPrivateCards(thisSocket) {
     try {
       this.dealer.dealCardsEachPlayer(2)

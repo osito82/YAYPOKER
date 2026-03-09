@@ -100,7 +100,7 @@ const actionHandlers = {
       return
     }
 
-    match.signUp(data, socket)
+    match.lobby.signUp(data, socket)
   },
 
   sendMessage: (match, socket, data, torneoId) => {
@@ -120,17 +120,17 @@ const actionHandlers = {
     }
   },
 
-  fold: (match, socket) => match.fold(socket),
-  close: (match, socket, data, torneoId) => match.close(socket, torneoId),
-  setBet: (match, socket, data) => match.setBet(socket, data.chipsToBet),
-  setRise: (match, socket, data) => match.setRise(socket, data.chipsToRiseBet),
-  setCall: (match, socket, data, torneoId) => match.setCall(socket, torneoId),
-  setCheck: (match, socket, data, torneoId) => match.setCheck(socket, torneoId),
+  fold: (match, socket) => match.actions.fold(socket),
+  close: (match, socket, data, torneoId) => match.lobby.close(socket, torneoId),
+  setBet: (match, socket, data) => match.actions.setBet(socket, data.chipsToBet),
+  setRise: (match, socket, data) => match.actions.setRise(socket, data.chipsToRiseBet),
+  setCall: (match, socket, data, torneoId) => match.actions.setCall(socket, torneoId),
+  setCheck: (match, socket, data, torneoId) => match.actions.setCheck(socket, torneoId),
   dealtPrivateCards: (match, socket) => match.dealtPrivateCards(socket),
   stats: (match, socket) => match.stats(socket.id),
   nextRound: (match) => match.nextRound(),
   startGame: (match, socket) => match.startGame(socket),
-  playerReady: (match, socket) => match.playerReady(socket),
+  playerReady: (match, socket) => match.lobby.playerReady(socket),
 }
 
 wss.on('connection', (ws, req) => {
@@ -257,7 +257,7 @@ wss.on('connection', (ws, req) => {
       .R({ playerName })
     try {
       if (match) {
-        match.pause(thisSocket)
+        match.lobby.pause(thisSocket)
       }
     } catch (error) {
       log
