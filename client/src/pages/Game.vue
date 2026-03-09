@@ -5,6 +5,7 @@
     :hostId="pokerStore.getHostId"
     :myId="pokerStore.myInfo.id"
     :gameCode="gameCode"
+    templateSuffix="Game"
     @start="startGame"
   />
   <component
