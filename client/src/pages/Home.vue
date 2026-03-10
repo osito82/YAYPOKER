@@ -26,7 +26,7 @@
         <!-- MODE: Selection (Home /) -->
         <template v-if="!isCreating">
           <!-- Create Game Section -->
-          <div id="create-game-action-section-Home" class="space-y-6">
+          <div v-if="!joinCode" id="create-game-action-section-Home" class="space-y-6">
             <button
               id="create-game-submit-button-Home"
               @click="goToCreate"
@@ -45,11 +45,14 @@
           </div>
 
           <!-- Join Game Section -->
-          <div
+          <form
             id="join-game-form-section-Home"
-            class="space-y-6 pt-8 border-t border-white/5"
+            @submit.prevent="joinGame"
+            class="space-y-6"
+            :class="{ 'pt-8 border-t border-white/5': !joinCode }"
           >
             <label
+              v-if="!joinCode"
               id="join-game-input-label-Home"
               class="block text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
             >
@@ -60,6 +63,7 @@
               <input
                 id="player-name-input-field-Home"
                 v-model="playerName"
+                v-focus
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-yellow-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
                 type="text"
                 placeholder="Enter Your Name"
@@ -71,7 +75,7 @@
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-yellow-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
                 type="password"
                 maxlength="4"
-                placeholder="Enter 4-Digit Pin (Secret)"
+                placeholder="Invent 4-Digit Pin"
                 @input="secretCode = secretCode.replace(/\D/g, '')"
               />
 
@@ -107,7 +111,7 @@
                   />
                   <button
                     id="join-game-submit-button-Home"
-                    @click="joinGame"
+                    type="submit"
                     :disabled="!isValidJoin"
                     class="bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-8 rounded-xl focus:outline-none transition-all shadow-lg disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
                   >
@@ -123,7 +127,7 @@
                 </p>
               </div>
             </div>
-          </div>
+          </form>
         </template>
 
         <!-- MODE: New Game Created (/newgame) -->
@@ -184,7 +188,7 @@
           </div>
 
           <!-- Name Input for Creator -->
-          <div id="creator-info-setup-section-Home" class="space-y-3">
+          <form id="creator-info-setup-section-Home" @submit.prevent="startGame" class="space-y-3">
             <label
               id="creator-name-setup-label-Home"
               class="block text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2"
@@ -195,9 +199,10 @@
               <input
                 id="creator-name-input-field-Home"
                 v-model="playerName"
+                v-focus
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
                 type="text"
-                placeholder="Ex: Doyle Brunson"
+                placeholder="Ex: Osito Malafama"
               />
               <input
                 id="creator-secret-pin-input-Home"
@@ -205,32 +210,33 @@
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
                 type="password"
                 maxlength="4"
-                placeholder="4-Digit Pin (Secret)"
+                placeholder="Invent 4-Digit Pin"
                 @input="secretCode = secretCode.replace(/\D/g, '')"
               />
             </div>
-          </div>
 
-          <div id="creator-actions-button-grid-Home" class="grid grid-cols-2 gap-4">
-            <button
-              id="copy-invite-link-button-Home"
-              @click="copyToClipboard"
-              class="flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black py-4 px-4 rounded-xl transition-all uppercase tracking-widest text-xs"
-            >
-              <span id="copy-link-status-message-Home">{{ copyStatus }}</span>
-            </button>
-            <button
-              id="start-game-submit-button-Home"
-              @click="startGame"
-              :disabled="
-                !playerName.trim() ||
-                (secretCode.length > 0 && secretCode.length !== 4)
-              "
-              class="bg-green-600 hover:bg-green-500 text-white font-black py-4 px-4 rounded-xl shadow-xl transition-all transform hover:scale-105 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-xs"
-            >
-              Start Playing
-            </button>
-          </div>
+            <div id="creator-actions-button-grid-Home" class="grid grid-cols-2 gap-4 mt-8">
+              <button
+                id="copy-invite-link-button-Home"
+                type="button"
+                @click="copyToClipboard"
+                class="flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black py-4 px-4 rounded-xl transition-all uppercase tracking-widest text-xs"
+              >
+                <span id="copy-link-status-message-Home">{{ copyStatus }}</span>
+              </button>
+              <button
+                id="start-game-submit-button-Home"
+                type="submit"
+                :disabled="
+                  !playerName.trim() ||
+                  (secretCode.length > 0 && secretCode.length !== 4)
+                "
+                class="bg-green-600 hover:bg-green-500 text-white font-black py-4 px-4 rounded-xl shadow-xl transition-all transform hover:scale-105 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-xs"
+              >
+                Start Playing
+              </button>
+            </div>
+          </form>
 
           <button
             id="cancel-creation-back-button-Home"
@@ -263,6 +269,11 @@ import { generateUniqueId, generateSecretCode, urlsFactory } from '../vutils'
 
 const router = useRouter()
 const route = useRoute()
+
+// Focus directive
+const vFocus = {
+  mounted: (el) => el.focus()
+}
 
 // State
 const playerName = ref('')
