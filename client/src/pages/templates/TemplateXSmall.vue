@@ -38,10 +38,10 @@
     />
   </div>
 
-  <!-- PLAYER SIDEPANEL (now footer) -->
+  <!-- PLAYER SIDEPANEL & TERMINAL (now footer) -->
   <footer
     id="game-sidepanel-container-TemplateXSmall"
-    class="flex-1 min-h-0 z-50"
+    class="flex-1 min-h-0 z-50 flex flex-col"
   >
     <PlayerSidepanel
       :players="allPlayers"
@@ -51,6 +51,9 @@
       :logs="logs"
       :invertLayout="true"
     />
+    <div id="game-message-terminal-wrapper-TemplateXSmall" class="h-[150px] border-t border-white/5 bg-black/20 shrink-0">
+      <MessageTerminal :logs="logs" />
+    </div>
   </footer>
 
 </div>
@@ -62,6 +65,7 @@ import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
+import MessageTerminal from '../../components/MessageTerminal.vue'
 
 defineProps({
   gameCode: String,

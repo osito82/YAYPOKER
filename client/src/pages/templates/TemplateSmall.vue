@@ -70,16 +70,21 @@
         </footer>
       </div>
 
-      <!-- SIDEPANEL -->
-      <PlayerSidepanel
-        id="game-sidepanel-container-TemplateSmall"
-        class="flex-1 min-h-0"
-        :players="allPlayers"
-        :activePlayerId="activePlayerId"
-        :myPlayerId="myPlayerId"
-        :pot="pot"
-        :logs="logs"
-      />
+      <!-- SIDEPANEL & TERMINAL -->
+      <div id="game-sidepanel-terminal-container-TemplateSmall" class="flex-1 min-h-0 flex flex-col bg-black/40 backdrop-blur-3xl border-t border-white/5">
+        <PlayerSidepanel
+          id="game-sidepanel-component-TemplateSmall"
+          class="flex-1 min-h-0"
+          :players="allPlayers"
+          :activePlayerId="activePlayerId"
+          :myPlayerId="myPlayerId"
+          :pot="pot"
+          :logs="logs"
+        />
+        <div id="game-message-terminal-wrapper-TemplateSmall" class="h-[180px] border-t border-white/5 bg-black/20 shrink-0">
+          <MessageTerminal :logs="logs" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -90,6 +95,7 @@ import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
+import MessageTerminal from '../../components/MessageTerminal.vue'
 
 defineProps({
   gameCode: String,
