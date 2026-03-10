@@ -38,7 +38,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, defineAsyncComponent } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import useWebSocket from '../use/useSockets'
@@ -59,6 +59,7 @@ const route = useRoute()
 const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
 const gameCode = route.params.gameCode || 'default_Torneo'
+const secretCode = route.params.secretCode
 
 const serverTime = ref(new Date().toLocaleTimeString())
 let timeInterval = null
@@ -74,30 +75,28 @@ const activeTemplate = computed(() => {
 })
 
 // Logic for name/uuid generation
-const getSavedName = () => {
-  if (props.isGuest) return `Spectator_${Math.floor(Math.random() * 1000)}`
-  if (route.query.playerName) return route.query.playerName
-  const saved = sessionStorage.getItem(`poker_name_${gameCode}`)
-  if (saved) return saved
-  const newName = `Guest_${Math.floor(Math.random() * 1000)}`
-  sessionStorage.setItem(`poker_name_${gameCode}`, newName)
-  return newName
+const playerName = ref(route.query.playerName || 'Guest')
+
+if (props.isGuest) {
+  playerName.value = `Spectator_${Math.floor(Math.random() * 1000)}`
 }
 
-const getSavedSecretCode = () => {
-  if (props.isGuest) return 'spectator'
-  if (route.query.secretCode) return route.query.secretCode
-  const saved = sessionStorage.getItem(`poker_secret_${gameCode}`)
-  if (saved) return saved
-  const newSecret = generateSecretCode()
-  sessionStorage.setItem(`poker_secret_${gameCode}`, newSecret)
-  return newSecret
+// Update playerName when players list arrives if we don't have it
+watch(() => pokerStore.players, (newPlayers) => {
+  if (!props.isGuest && secretCode) {
+    const me = newPlayers.find(p => p.secretCode === secretCode)
+    if (me && me.name !== playerName.value) {
+      playerName.value = me.name
+    }
+  }
+}, { immediate: true, deep: true })
+
+const connectionOptions = { 
+  gameCode, 
+  playerName: playerName.value, 
+  secretCode: props.isGuest ? 'spectator' : secretCode, 
+  role: props.isGuest ? 'guest' : 'player' 
 }
-
-const playerName = getSavedName()
-const secretCode = getSavedSecretCode()
-
-const connectionOptions = { gameCode, playerName, secretCode, role: props.isGuest ? 'guest' : 'player' }
 
 const urls = urlsFactory()
 const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
@@ -109,7 +108,7 @@ const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
 const isConnected = computed(() => pokerStore.getConnected)
 const currentMaxBetOnTable = computed(() => pokerStore.getCurrentHighestBet || 0)
 const allPlayers = computed(() => pokerStore.getPlayers || [])
-const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName))
+const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName.value))
 const isMyTurn = computed(() => !props.isGuest && pokerStore.getActivePlayerId === myPlayer.value?.id)
 const options = computed(() => props.isGuest ? [] : (pokerStore.getBettingOptions || []))
 const canBlind = computed(() => !props.isGuest && isMyTurn.value && options.value.includes('blind'))
@@ -178,8 +177,11 @@ const sendAction = (action) => {
   }
 }
 
+const router = useRouter()
+
 onMounted(() => {
   if (!isConnected.value) connectSocket()
+  
   timeInterval = setInterval(() => {
     serverTime.value = new Date().toLocaleTimeString()
   }, 1000)

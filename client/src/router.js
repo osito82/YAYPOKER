@@ -1,41 +1,55 @@
-// src/router.js
 import { createRouter, createWebHistory } from 'vue-router'
+import Home from './pages/Home.vue'
 import LobbyHome from './pages/LobbyHome.vue'
 import About from './pages/About.vue'
 import Game from './pages/Game.vue'
+import NotFound from './pages/NotFound.vue'
 
 const routes = [
   {
-    name: 'home',
+    name: 'landing',
     path: '/',
+    component: Home,
+  },
+  {
+    name: 'lobby.home',
+    path: '/lobby',
     component: LobbyHome,
   },
   {
-    name: 'newgame',
-    path: '/newgame',
+    name: 'lobby.new',
+    path: '/new',
     component: LobbyHome,
     props: { isNewGame: true },
   },
   {
-    name: 'game',
-    path: '/game/:gameCode',
-    component: Game,
-    beforeEnter: (to, from) => {
-      const { playerName, secretCode } = to.query
-      if (!playerName || !secretCode) {
-        // Redirige a Home si falta info, pasando joinCode
-        return { name: 'home', query: { joinCode: to.params.gameCode } }
-      }
-      return true // continuar normalmente
-    },
+    name: 'game.join',
+    path: '/join/:gameCode/:secretCode?',
+    component: LobbyHome,
+    props: true,
   },
+{
+  name: 'game.play',
+  path: '/play/:gameCode([A-Za-z0-9]{5}-[A-Za-z0-9]{5})/:secretCode(\\d{4})',
+  component: Game,
+  props: route => ({
+    gameCode: route.params.gameCode,
+    secretCode: route.params.secretCode,
+  }),
+},
   {
-    name: 'guest',
-    path: '/game/:gameCode/guest',
+    name: 'game.spectate',
+    path: '/watch/:gameCode',
     component: Game,
     props: { isGuest: true }
   },
   { name: 'about', path: '/about', component: About },
+  // Catch-all 404
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: NotFound,
+  },
 ]
 
 const router = createRouter({

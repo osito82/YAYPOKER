@@ -67,6 +67,12 @@ export const usePokerStore = defineStore('pokerStore', () => {
 
       console.log('POKER_STORE - Received:', gameData.action, gameData)
 
+      // Update game started state based on server stepChecker
+      if (gameData.stepChecker?.startGame) {
+        isGameStarted.value = true
+        lobbyTimer.value = null
+      }
+
       // Reset lobby timer if game starts or hand is in progress
       if (
         [
