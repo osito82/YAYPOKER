@@ -59,6 +59,7 @@ const route = useRoute()
 const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
 const gameCode = route.params.gameCode || 'default_Torneo'
+const secretCode = route.params.secretCode
 
 const serverTime = ref(new Date().toLocaleTimeString())
 let timeInterval = null
@@ -74,23 +75,28 @@ const activeTemplate = computed(() => {
 })
 
 // Logic for name/uuid generation
-const getSavedCredentials = () => {
-  if (props.isGuest) return { name: `Spectator_${Math.floor(Math.random() * 1000)}`, secret: 'spectator' }
+const playerName = ref(route.query.playerName || 'Guest')
 
-  // secretCode is in params, playerName is in query (for initial join)
-  const pName = route.query.playerName
-  const pSecret = route.params.secretCode
-
-  if (pSecret) {
-    return { name: pName || 'Guest', secret: pSecret }
-  }
-
-  return { name: 'Guest', secret: '0000' } // Fallback
+if (props.isGuest) {
+  playerName.value = `Spectator_${Math.floor(Math.random() * 1000)}`
 }
 
-const { name: playerName, secret: secretCode } = getSavedCredentials()
+// Update playerName when players list arrives if we don't have it
+watch(() => pokerStore.players, (newPlayers) => {
+  if (!props.isGuest && secretCode) {
+    const me = newPlayers.find(p => p.secretCode === secretCode)
+    if (me && me.name !== playerName.value) {
+      playerName.value = me.name
+    }
+  }
+}, { immediate: true, deep: true })
 
-const connectionOptions = { gameCode, playerName, secretCode, role: props.isGuest ? 'guest' : 'player' }
+const connectionOptions = { 
+  gameCode, 
+  playerName: playerName.value, 
+  secretCode: props.isGuest ? 'spectator' : secretCode, 
+  role: props.isGuest ? 'guest' : 'player' 
+}
 
 const urls = urlsFactory()
 const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
@@ -102,7 +108,7 @@ const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
 const isConnected = computed(() => pokerStore.getConnected)
 const currentMaxBetOnTable = computed(() => pokerStore.getCurrentHighestBet || 0)
 const allPlayers = computed(() => pokerStore.getPlayers || [])
-const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName))
+const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName.value))
 const isMyTurn = computed(() => !props.isGuest && pokerStore.getActivePlayerId === myPlayer.value?.id)
 const options = computed(() => props.isGuest ? [] : (pokerStore.getBettingOptions || []))
 const canBlind = computed(() => !props.isGuest && isMyTurn.value && options.value.includes('blind'))

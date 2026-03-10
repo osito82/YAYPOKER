@@ -1,4 +1,3 @@
-// src/router.js
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from './pages/Home.vue'
 import LobbyHome from './pages/LobbyHome.vue'
@@ -29,12 +28,15 @@ const routes = [
     component: LobbyHome,
     props: true,
   },
-  {
-    name: 'game.play',
-    path: '/play/:gameCode/:secretCode',
-    component: Game,
-    props: true
-  },
+{
+  name: 'game.play',
+  path: '/play/:gameCode([A-Za-z0-9]{5}-[A-Za-z0-9]{5})/:secretCode(\\d{4})',
+  component: Game,
+  props: route => ({
+    gameCode: route.params.gameCode,
+    secretCode: route.params.secretCode,
+  }),
+},
   {
     name: 'game.spectate',
     path: '/watch/:gameCode',
