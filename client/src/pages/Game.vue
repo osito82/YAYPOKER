@@ -38,7 +38,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch, defineAsyncComponent } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import useWebSocket from '../use/useSockets'
@@ -74,28 +74,27 @@ const activeTemplate = computed(() => {
 })
 
 // Logic for name/uuid generation
-const getSavedName = () => {
-  if (props.isGuest) return `Spectator_${Math.floor(Math.random() * 1000)}`
-  if (route.query.playerName) return route.query.playerName
-  const saved = sessionStorage.getItem(`poker_name_${gameCode}`)
-  if (saved) return saved
-  const newName = `Guest_${Math.floor(Math.random() * 1000)}`
-  sessionStorage.setItem(`poker_name_${gameCode}`, newName)
-  return newName
+const getSavedCredentials = () => {
+  if (props.isGuest) return { name: `Spectator_${Math.floor(Math.random() * 1000)}`, secret: 'spectator' }
+
+  // 1. Mirar si vienen por Query (primera vez tras el formulario)
+  const qName = route.query.playerName
+  const qSecret = route.query.secretCode
+
+  if (qName && qSecret) {
+    const sessionData = { playerName: qName, secretCode: qSecret }
+    sessionStorage.setItem(`poker_session_${gameCode}`, JSON.stringify(sessionData))
+    return { name: qName, secret: qSecret }
+  }
+
+  // 2. Mirar si están en el Storage (Refresco F5)
+  const saved = JSON.parse(sessionStorage.getItem(`poker_session_${gameCode}`))
+  if (saved) return { name: saved.playerName, secret: saved.secretCode }
+
+  return { name: 'Guest', secret: '0000' } // Fallback
 }
 
-const getSavedSecretCode = () => {
-  if (props.isGuest) return 'spectator'
-  if (route.query.secretCode) return route.query.secretCode
-  const saved = sessionStorage.getItem(`poker_secret_${gameCode}`)
-  if (saved) return saved
-  const newSecret = generateSecretCode()
-  sessionStorage.setItem(`poker_secret_${gameCode}`, newSecret)
-  return newSecret
-}
-
-const playerName = getSavedName()
-const secretCode = getSavedSecretCode()
+const { name: playerName, secret: secretCode } = getSavedCredentials()
 
 const connectionOptions = { gameCode, playerName, secretCode, role: props.isGuest ? 'guest' : 'player' }
 
@@ -178,8 +177,20 @@ const sendAction = (action) => {
   }
 }
 
+const router = useRouter()
+
 onMounted(() => {
   if (!isConnected.value) connectSocket()
+  
+  // Limpiar la URL de los Query Params sensibles inmediatamente
+  if (route.query.secretCode) {
+    router.replace({ 
+      name: route.name, 
+      params: route.params, 
+      query: {} 
+    })
+  }
+
   timeInterval = setInterval(() => {
     serverTime.value = new Date().toLocaleTimeString()
   }, 1000)

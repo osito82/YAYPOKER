@@ -365,20 +365,8 @@ const generatedBoxPadding = computed(() => {
 
 // Invitation URL for others (redirects to Lobby with joinCode parameter)
 
-const shareUrl = computed(() => {
-  
-  const urls = urlsFactory()
-  if (!generatedCode.value) return ''
-
-  const url = new URL(urls.url)
-  url.searchParams.set('joinCode', generatedCode.value)
-  
-  return url.toString()
-
-})
-
 const checkRouteState = () => {
-  if (route.name === 'newgame') {
+  if (route.name === 'lobby.new' || route.path === '/newgame') {
     isCreating.value = true
     if (!generatedCode.value) {
       generatedCode.value = generateUniqueId()
@@ -387,6 +375,12 @@ const checkRouteState = () => {
       defaultSecret.value = generateSecretCode()
     }
     secretCode.value = ''
+  } else if (route.name === 'game.join' || route.query.joinCode) {
+    isCreating.value = false
+    joinCode.value = (route.params.gameCode || route.query.joinCode || '').toUpperCase()
+    playerName.value = ''
+    secretCode.value = ''
+    defaultSecret.value = ''
   } else {
     isCreating.value = false
     generatedCode.value = ''
@@ -398,21 +392,23 @@ const checkRouteState = () => {
 
 onMounted(() => {
   checkRouteState()
-  if (route.query.joinCode) {
-    joinCode.value = route.query.joinCode.toUpperCase()
-  }
 })
 
 watch(
-  () => route.query.joinCode,
-  (newCode) => {
-    if (newCode) {
-      joinCode.value = newCode.toUpperCase()
-    }
-  },
+  () => [route.name, route.params.gameCode, route.query.joinCode],
+  () => {
+    checkRouteState()
+  }
 )
 
-watch(() => route.name, checkRouteState)
+// Invitation URL for others (redirects to /join/:gameCode)
+const shareUrl = computed(() => {
+  const urls = urlsFactory()
+  const code = isCreating.value ? generatedCode.value : joinCode.value
+  if (!code) return ''
+
+  return `${urls.url}/join/${code}`
+})
 
 // Join Logic
 const isGameCodeValid = computed(() => {
@@ -431,7 +427,7 @@ const isValidJoin = computed(() => {
 const joinGame = () => {
   if (isValidJoin.value) {
     router.push({
-      name: 'game',
+      name: 'game.play',
       params: { gameCode: joinCode.value.toUpperCase() },
       query: { playerName: playerName.value, secretCode: secretCode.value },
     })
@@ -440,11 +436,11 @@ const joinGame = () => {
 
 // Create Logic
 const goToCreate = () => {
-  router.push({ name: 'newgame' })
+  router.push({ name: 'lobby.new' })
 }
 
 const cancelCreate = () => {
-  router.push({ name: 'home' })
+  router.push({ name: 'lobby.home' })
 }
 
 const copyToClipboard = async () => {
@@ -476,7 +472,7 @@ const startGame = () => {
     secretCode.value.length === 4 ? secretCode.value : defaultSecret.value
   if (playerName.value.trim() && finalSecret) {
     router.push({
-      name: 'game',
+      name: 'game.play',
       params: { gameCode: generatedCode.value },
       query: { playerName: playerName.value, secretCode: finalSecret },
     })
