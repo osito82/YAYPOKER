@@ -77,12 +77,12 @@ const activeTemplate = computed(() => {
 const getSavedCredentials = () => {
   if (props.isGuest) return { name: `Spectator_${Math.floor(Math.random() * 1000)}`, secret: 'spectator' }
 
-  // Now everything is in Params
-  const pName = route.params.playerName
+  // secretCode is in params, playerName is in query (for initial join)
+  const pName = route.query.playerName
   const pSecret = route.params.secretCode
 
-  if (pName && pSecret) {
-    return { name: pName, secret: pSecret }
+  if (pSecret) {
+    return { name: pName || 'Guest', secret: pSecret }
   }
 
   return { name: 'Guest', secret: '0000' } // Fallback

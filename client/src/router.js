@@ -25,13 +25,13 @@ const routes = [
   },
   {
     name: 'game.join',
-    path: '/join/:gameCode',
+    path: '/join/:gameCode/:secretCode?',
     component: LobbyHome,
     props: true,
   },
   {
     name: 'game.play',
-    path: '/play/:gameCode/:secretCode/:playerName',
+    path: '/play/:gameCode/:secretCode',
     component: Game,
     props: true
   },

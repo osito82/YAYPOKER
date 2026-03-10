@@ -379,7 +379,8 @@ const checkRouteState = () => {
     isCreating.value = false
     joinCode.value = (route.params.gameCode || route.query.joinCode || '').toUpperCase()
     playerName.value = ''
-    secretCode.value = ''
+    // Pre-fill secret if provided in path
+    secretCode.value = route.params.secretCode || ''
     defaultSecret.value = ''
   } else {
     isCreating.value = false
@@ -395,7 +396,7 @@ onMounted(() => {
 })
 
 watch(
-  () => [route.name, route.params.gameCode, route.query.joinCode],
+  () => [route.name, route.params.gameCode, route.params.secretCode, route.query.joinCode],
   () => {
     checkRouteState()
   }
@@ -430,9 +431,9 @@ const joinGame = () => {
       name: 'game.play',
       params: { 
         gameCode: joinCode.value.toUpperCase(),
-        playerName: playerName.value,
         secretCode: secretCode.value
       },
+      query: { playerName: playerName.value }
     })
   }
 }
@@ -478,9 +479,9 @@ const startGame = () => {
       name: 'game.play',
       params: { 
         gameCode: generatedCode.value,
-        playerName: playerName.value,
         secretCode: finalSecret
       },
+      query: { playerName: playerName.value }
     })
   }
 }
