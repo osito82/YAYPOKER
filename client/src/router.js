@@ -1,6 +1,6 @@
 // src/router.js
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from './pages/Home.vue'
+import LobbyHome from './pages/LobbyHome.vue'
 import About from './pages/About.vue'
 import Game from './pages/Game.vue'
 
@@ -8,12 +8,12 @@ const routes = [
   {
     name: 'home',
     path: '/',
-    component: Home,
+    component: LobbyHome,
   },
   {
     name: 'newgame',
     path: '/newgame',
-    component: Home,
+    component: LobbyHome,
     props: { isNewGame: true },
   },
   {
