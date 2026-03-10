@@ -231,12 +231,17 @@ class Match {
     }
   }
 
+
+
+
   nextRound() {
     if (!this.waitingForNextRound) return
     this.waitingForNextRound = false
-    const playersWithChips = this.getActivePlayers(true).filter(
-      (p) => p.chips > 0,
+    
+    const playersWithChips = this.getConnectedPlayers().filter(
+      (p) => p.chips > 0
     )
+ 
     if (playersWithChips.length < 2) {
       this.log.R({ info: 'Tournament finished. No more rounds.' })
       return

@@ -43,6 +43,7 @@ class Communicator {
     this.msg = {
       action,
       type,
+      gameId: this.gameId,
       pot: this.dealer.getPot(),
       currentHighestBet: this.dealer.getCurrentHighestBet(),
       myPlayerInfo,
@@ -58,6 +59,7 @@ class Communicator {
     this.fullInfo = {
       action,
       type,
+      gameId: this.gameId,
       pot: this.dealer.getPot(),
       currentHighestBet: this.dealer.getCurrentHighestBet(),
       data,

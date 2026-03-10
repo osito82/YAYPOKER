@@ -630,11 +630,11 @@ class MatchActions {
 
     this.match.waitingForNextRound = true
 
-    // Si es victoria por FOLD, auto-iniciar la siguiente ronda tras 5s
+    // Si es victoria por FOLD, auto-iniciar la siguiente ronda tras el delay estándar
     if (isFold && !isTournamentWinner) {
       setTimeout(() => {
         this.match.nextRound()
-      }, 5000)
+      }, this.match.constructor.timeouts.nextRound)
     }
   }
 
