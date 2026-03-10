@@ -77,19 +77,13 @@ const activeTemplate = computed(() => {
 const getSavedCredentials = () => {
   if (props.isGuest) return { name: `Spectator_${Math.floor(Math.random() * 1000)}`, secret: 'spectator' }
 
-  // 1. Mirar si vienen por Query (primera vez tras el formulario)
-  const qName = route.query.playerName
-  const qSecret = route.query.secretCode
+  // Now everything is in Params
+  const pName = route.params.playerName
+  const pSecret = route.params.secretCode
 
-  if (qName && qSecret) {
-    const sessionData = { playerName: qName, secretCode: qSecret }
-    sessionStorage.setItem(`poker_session_${gameCode}`, JSON.stringify(sessionData))
-    return { name: qName, secret: qSecret }
+  if (pName && pSecret) {
+    return { name: pName, secret: pSecret }
   }
-
-  // 2. Mirar si están en el Storage (Refresco F5)
-  const saved = JSON.parse(sessionStorage.getItem(`poker_session_${gameCode}`))
-  if (saved) return { name: saved.playerName, secret: saved.secretCode }
 
   return { name: 'Guest', secret: '0000' } // Fallback
 }
@@ -182,15 +176,6 @@ const router = useRouter()
 onMounted(() => {
   if (!isConnected.value) connectSocket()
   
-  // Limpiar la URL de los Query Params sensibles inmediatamente
-  if (route.query.secretCode) {
-    router.replace({ 
-      name: route.name, 
-      params: route.params, 
-      query: {} 
-    })
-  }
-
   timeInterval = setInterval(() => {
     serverTime.value = new Date().toLocaleTimeString()
   }, 1000)

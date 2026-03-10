@@ -428,8 +428,11 @@ const joinGame = () => {
   if (isValidJoin.value) {
     router.push({
       name: 'game.play',
-      params: { gameCode: joinCode.value.toUpperCase() },
-      query: { playerName: playerName.value, secretCode: secretCode.value },
+      params: { 
+        gameCode: joinCode.value.toUpperCase(),
+        playerName: playerName.value,
+        secretCode: secretCode.value
+      },
     })
   }
 }
@@ -473,8 +476,11 @@ const startGame = () => {
   if (playerName.value.trim() && finalSecret) {
     router.push({
       name: 'game.play',
-      params: { gameCode: generatedCode.value },
-      query: { playerName: playerName.value, secretCode: finalSecret },
+      params: { 
+        gameCode: generatedCode.value,
+        playerName: playerName.value,
+        secretCode: finalSecret
+      },
     })
   }
 }
