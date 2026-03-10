@@ -63,6 +63,14 @@ class MatchActions {
         this.match.communicator.getMsg(),
       )
       this.match.comms.sendOdds()
+
+      // Check if only one player remains after folding
+      const activePlayers = this.match.getActivePlayers(true)
+
+      if (activePlayers.length === 1) {
+        return this.winner(activePlayers[0], true)
+      }
+
       this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
     }
   }
@@ -449,13 +457,7 @@ class MatchActions {
   }
 
   askForBlindBets(thisSocket) {
-    const activePlayers = this.match.players.filter(
-      (p) =>
-        p.connected &&
-        (p.chips > 0 || p.getCurrentBet() > 0) &&
-        p.isStarted &&
-        !p.folded,
-    )
+    const activePlayers = this.match.getActivePlayers(true)
 
     if (activePlayers.length < 2) {
       this.match.log
@@ -475,6 +477,10 @@ class MatchActions {
             folded: p.folded,
           })),
         })
+
+      if (activePlayers.length === 1) {
+        this.winner(activePlayers[0], true)
+      }
       return
     }
 
@@ -623,6 +629,13 @@ class MatchActions {
     }
 
     this.match.waitingForNextRound = true
+
+    // Si es victoria por FOLD, auto-iniciar la siguiente ronda tras el delay estándar
+    if (isFold && !isTournamentWinner) {
+      setTimeout(() => {
+        this.match.nextRound()
+      }, this.match.constructor.timeouts.nextRound)
+    }
   }
 
   winnerHand(winnersInfo, isFold, pot, finalHands) {
@@ -689,10 +702,7 @@ class MatchActions {
   bettingCore = (thisSocket, bettingFor) => {
     if (this.match.stepChecker.checkStep('winner')) return
 
-    const allPlayers = this.match.players
-    const activePlayers = allPlayers.filter(
-      (p) => p.connected && !p.folded && p.isStarted,
-    )
+    const activePlayers = this.match.getActivePlayers(true)
 
     if (activePlayers.length === 1) {
       this.winner(activePlayers[0], true)
@@ -738,6 +748,7 @@ class MatchActions {
     }
 
     let sorted = []
+    const allPlayers = this.match.players
     if (bettingFor === 'firstBetting') {
       if (allPlayers.length === 2) {
         sorted = [...allPlayers]
@@ -945,3 +956,4 @@ class MatchActions {
 }
 
 module.exports = MatchActions
+

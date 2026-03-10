@@ -1125,4 +1125,44 @@ it('Side pot: all-in con 3 jugadores crea side pot', async () => {
 
 
 */
+
+  it('T0005 - Regression: Autofold during blinds should declare winner and auto-restart', async () => {
+    const gameCode = 'regr-auto-' + Math.random().toString(36).substring(7)
+    const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
+    const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
+
+    await Promise.all([
+      new Promise((r) => alice.ws.on('open', r)),
+      new Promise((r) => bob.ws.on('open', r))
+    ])
+
+    // Signup and Start
+    alice.send(MOCK_ACTIONS.SIGN_UP(1000))
+    bob.send(MOCK_ACTIONS.SIGN_UP(1000))
+    await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
+    
+    alice.send(MOCK_ACTIONS.START_GAME)
+    bob.send(MOCK_ACTIONS.START_GAME)
+
+    // Capture first round gameId
+    const firstRoundMsg = await alice.waitAction('askForBlindBets')
+    const firstGameId = firstRoundMsg.message.gameId
+
+    // Alice posts Small Blind
+    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
+
+    // Bob is asked for Big Blind, we WAIT for autofold (1s in test mode)
+    await bob.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
+    
+    // The server should trigger autofold for Bob after ~1s
+    // Then Alice should be the winner
+    const winnerMsg = await alice.waitAction('winner', 10000)
+    expect(winnerMsg.message.data.winners[0].name).toBe('Alice')
+    expect(winnerMsg.message.data.isFold).toBe(true)
+
+    // Verify auto-restart: wait for a NEW hand with a DIFFERENT gameId
+    // Standard nextRound delay is used (500ms in test)
+    const nextRoundMsg = await bob.waitAction('askForBlindBets', 15000, r => r.message.gameId !== firstGameId)
+    expect(nextRoundMsg.message.gameId).not.toBe(firstGameId)
+  }, 40000)
 })

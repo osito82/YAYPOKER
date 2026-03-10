@@ -67,7 +67,9 @@ class Dealer {
   }
 
   allPlayersCheck = () => {
-    const activePlayers = this.players.filter((p) => p.connected && !p.folded)
+    const activePlayers = this.players.filter(
+      (p) => p.connected && !p.folded && p.isStarted,
+    )
     if (activePlayers.length === 0) return true
 
     const maxBet = Math.max(...activePlayers.map((p) => p.getCurrentBet()))
@@ -209,7 +211,9 @@ class Dealer {
   }
 
   hasAllPlayersBet = () => {
-    const activePlayers = this.players.filter((p) => p.connected && !p.folded)
+    const activePlayers = this.players.filter(
+      (p) => p.connected && !p.folded && p.isStarted,
+    )
     if (activePlayers.length === 0) return true
     return activePlayers.every((player) => {
       return Number(player.getCurrentBet()) !== 0

@@ -93,7 +93,6 @@
         :myPlayerId="myPlayerId"
         :pot="pot"
         :logs="logs"
-        hideTerminal
       />
     </div>
   </div>

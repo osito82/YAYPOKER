@@ -1,34 +1,37 @@
 <template>
   <div
-    id="home-page-viewport-Home"
+    :id="`home-page-viewport-${templateSuffix}`"
     class="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4 select-none"
   >
     <div
-      id="lobby-main-card-Home"
-      class="w-full max-w-lg bg-gray-900 rounded-[2rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden border border-white/5"
+      :id="`lobby-main-card-${templateSuffix}`"
+      class="w-full bg-gray-900 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden border border-white/5"
+      :class="cardClasses"
     >
       <!-- Header -->
       <div
-        id="lobby-card-header-Home"
-        class="bg-black/40 p-8 flex flex-col items-center border-b border-white/5"
+        :id="`lobby-card-header-${templateSuffix}`"
+        class="bg-black/40 flex flex-col items-center border-b border-white/5"
+        :class="headerPadding"
       >
-        <Logo id="lobby-brand-logo-Home" class="mb-6 transform scale-150" />
+        <Logo :id="`lobby-brand-logo-${templateSuffix}`" :class="logoScale" />
         <h2
-          id="lobby-game-subtitle-Home"
-          class="text-gray-200 text-xl font-black uppercase tracking-[0.3em] italic"
+          :id="`lobby-game-subtitle-${templateSuffix}`"
+          class="text-gray-200 font-black uppercase tracking-[0.3em] italic"
+          :class="subtitleSize"
         >
           Texas Hold'em <span class="text-yellow-500">Lobby</span>
         </h2>
       </div>
 
       <!-- Form -->
-      <div id="lobby-form-container-Home" class="p-10 space-y-10">
+      <div :id="`lobby-form-container-${templateSuffix}`" class="space-y-10" :class="formPadding">
         <!-- MODE: Selection (Home /) -->
         <template v-if="!isCreating">
           <!-- Create Game Section -->
-          <div id="create-game-action-section-Home" class="space-y-6">
+          <div v-if="!joinCode" :id="`create-game-action-section-${templateSuffix}`" class="space-y-6">
             <button
-              id="create-game-submit-button-Home"
+              :id="`create-game-submit-button-${templateSuffix}`"
               @click="goToCreate"
               :disabled="joinCode.length > 0"
               class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 px-6 rounded-xl focus:outline-none transition-all transform hover:-translate-y-1 shadow-xl uppercase tracking-[0.2em] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed text-base"
@@ -37,7 +40,7 @@
             </button>
             <p
               v-if="joinCode.length > 0"
-              id="create-game-disabled-message-Home"
+              :id="`create-game-disabled-message-${templateSuffix}`"
               class="text-gray-400 text-[12px] text-center uppercase tracking-widest italic font-bold"
             >
               Clear join code to create new table
@@ -45,56 +48,60 @@
           </div>
 
           <!-- Join Game Section -->
-          <div
-            id="join-game-form-section-Home"
-            class="space-y-6 pt-8 border-t border-white/5"
+          <form
+            :id="`join-game-form-section-${templateSuffix}`"
+            @submit.prevent="joinGame"
+            class="space-y-6"
+            :class="{ 'pt-8 border-t border-white/5': !joinCode }"
           >
             <label
-              id="join-game-input-label-Home"
+              v-if="!joinCode"
+              :id="`join-game-input-label-${templateSuffix}`"
               class="block text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
             >
               Or Join Existing Table
             </label>
 
-            <div id="join-game-inputs-wrapper-Home" class="space-y-4">
+            <div :id="`join-game-inputs-wrapper-${templateSuffix}`" class="space-y-4">
               <input
-                id="player-name-input-field-Home"
+                :id="`player-name-input-field-${templateSuffix}`"
                 v-model="playerName"
+                v-focus
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-yellow-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
                 type="text"
                 placeholder="Enter Your Name"
               />
 
               <input
-                id="player-secret-pin-input-Home"
+                :id="`player-secret-pin-input-${templateSuffix}`"
                 v-model="secretCode"
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-yellow-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
                 type="password"
                 maxlength="4"
-                placeholder="Enter 4-Digit Pin (Secret)"
+                placeholder="Invent 4-Digit Pin"
                 @input="secretCode = secretCode.replace(/\D/g, '')"
               />
 
               <div
-                id="game-join-code-input-wrapper-Home"
+                :id="`game-join-code-input-wrapper-${templateSuffix}`"
                 class="space-y-2 relative group"
               >
                 <!-- Tooltip -->
                 <div
                   v-if="joinCode && !isGameCodeValid"
-                  id="join-code-error-tooltip-Home"
+                  :id="`join-code-error-tooltip-${templateSuffix}`"
                   class="absolute bottom-full left-0 mb-4 px-4 py-2 bg-red-600 text-white text-[12px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-widest z-20 whitespace-nowrap shadow-2xl border border-red-500"
                 >
                   Format: XXXXX-XXXXX
                   <div
-                    id="error-tooltip-pointer-Home"
+                    :id="`error-tooltip-pointer-${templateSuffix}`"
                     class="absolute top-full left-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-red-600"
                   ></div>
                 </div>
 
-                <div id="join-controls-action-layout-Home" class="flex space-x-3">
+                <div :id="`join-controls-action-layout-${templateSuffix}`" class="flex space-x-3">
                   <input
-                    id="game-table-join-code-input-Home"
+                    :id="`game-table-join-code-input-${templateSuffix}`"
                     v-model="joinCode"
                     class="shadow-inner appearance-none border rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none transition-colors font-mono uppercase text-lg tracking-widest placeholder:text-gray-600"
                     :class="
@@ -106,8 +113,8 @@
                     placeholder="ABC12-DEF34"
                   />
                   <button
-                    id="join-game-submit-button-Home"
-                    @click="joinGame"
+                    :id="`join-game-submit-button-${templateSuffix}`"
+                    type="submit"
                     :disabled="!isValidJoin"
                     class="bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-8 rounded-xl focus:outline-none transition-all shadow-lg disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
                   >
@@ -116,35 +123,36 @@
                 </div>
                 <p
                   v-if="joinCode && !isGameCodeValid"
-                  id="join-code-format-error-message-Home"
+                  :id="`join-code-format-error-message-${templateSuffix}`"
                   class="text-red-500 text-[12px] uppercase tracking-widest font-black ml-2 mt-2"
                 >
                   Format must be XXXXX-XXXXX
                 </p>
               </div>
             </div>
-          </div>
+          </form>
         </template>
 
         <!-- MODE: New Game Created (/newgame) -->
         <div
           v-else
-          id="create-game-success-view-Home"
+          :id="`create-game-success-view-${templateSuffix}`"
           class="space-y-8 animate-fade-in"
         >
           <!-- Game Code Display -->
           <div
-            id="generated-table-code-display-box-Home"
-            class="bg-black/40 p-6 rounded-2xl border border-yellow-500/20 text-center relative overflow-hidden shadow-inner"
+            :id="`generated-table-code-display-box-${templateSuffix}`"
+            class="bg-black/40 rounded-2xl border border-yellow-500/20 text-center relative overflow-hidden shadow-inner"
+            :class="generatedBoxPadding"
           >
             <p
-              id="table-code-display-label-Home"
+              :id="`table-code-display-label-${templateSuffix}`"
               class="text-gray-300 text-xs uppercase tracking-[0.3em] mb-3 font-black"
             >
               Your Table Code
             </p>
             <p
-              id="table-code-text-display-Home"
+              :id="`table-code-text-display-${templateSuffix}`"
               class="text-3xl font-mono font-black text-yellow-500 tracking-[0.2em] mb-6"
             >
               {{ generatedCode }}
@@ -152,14 +160,14 @@
 
             <!-- QR Code Section -->
             <div
-              id="invite-qr-code-container-Home"
+              :id="`invite-qr-code-container-${templateSuffix}`"
               class="mt-4 flex flex-col items-center bg-white p-4 rounded-2xl mx-auto w-fit shadow-2xl animate-fade-in"
             >
               <QRCodeVue3
-                id="invite-qr-code-component-Home"
+                :id="`invite-qr-code-component-${templateSuffix}`"
                 :key="shareUrl"
-                :width="180"
-                :height="180"
+                :width="qrSize"
+                :height="qrSize"
                 :value="shareUrl"
                 :qrOptions="{
                   typeNumber: 0,
@@ -175,7 +183,7 @@
                 :download="false"
               />
               <p
-                id="qr-code-instruction-text-Home"
+                :id="`qr-code-instruction-text-${templateSuffix}`"
                 class="text-[11px] font-black text-gray-400 mt-4 uppercase tracking-tighter"
               >
                 Share to invite players
@@ -184,56 +192,58 @@
           </div>
 
           <!-- Name Input for Creator -->
-          <div id="creator-info-setup-section-Home" class="space-y-3">
+          <form :id="`creator-info-setup-section-${templateSuffix}`" @submit.prevent="startGame" class="space-y-3">
             <label
-              id="creator-name-setup-label-Home"
+              :id="`creator-name-setup-label-${templateSuffix}`"
               class="block text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2"
             >
               Set Your Display Name & Pin
             </label>
-            <div id="creator-info-inputs-wrapper-Home" class="space-y-4">
+            <div :id="`creator-info-inputs-wrapper-${templateSuffix}`" class="space-y-4">
               <input
-                id="creator-name-input-field-Home"
+                :id="`creator-name-input-field-${templateSuffix}`"
                 v-model="playerName"
+                v-focus
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
                 type="text"
-                placeholder="Ex: Doyle Brunson"
+                placeholder="Ex: Osito Malafama"
               />
               <input
-                id="creator-secret-pin-input-Home"
+                :id="`creator-secret-pin-input-${templateSuffix}`"
                 v-model="secretCode"
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
                 type="password"
                 maxlength="4"
-                placeholder="4-Digit Pin (Secret)"
+                placeholder="Invent 4-Digit Pin"
                 @input="secretCode = secretCode.replace(/\D/g, '')"
               />
             </div>
-          </div>
 
-          <div id="creator-actions-button-grid-Home" class="grid grid-cols-2 gap-4">
-            <button
-              id="copy-invite-link-button-Home"
-              @click="copyToClipboard"
-              class="flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black py-4 px-4 rounded-xl transition-all uppercase tracking-widest text-xs"
-            >
-              <span id="copy-link-status-message-Home">{{ copyStatus }}</span>
-            </button>
-            <button
-              id="start-game-submit-button-Home"
-              @click="startGame"
-              :disabled="
-                !playerName.trim() ||
-                (secretCode.length > 0 && secretCode.length !== 4)
-              "
-              class="bg-green-600 hover:bg-green-500 text-white font-black py-4 px-4 rounded-xl shadow-xl transition-all transform hover:scale-105 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-xs"
-            >
-              Start Playing
-            </button>
-          </div>
+            <div :id="`creator-actions-button-grid-${templateSuffix}`" class="grid grid-cols-2 gap-4 mt-8">
+              <button
+                :id="`copy-invite-link-button-${templateSuffix}`"
+                type="button"
+                @click="copyToClipboard"
+                class="flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black py-4 px-4 rounded-xl transition-all uppercase tracking-widest text-xs"
+              >
+                <span :id="`copy-link-status-message-${templateSuffix}`">{{ copyStatus }}</span>
+              </button>
+              <button
+                :id="`start-game-submit-button-${templateSuffix}`"
+                type="submit"
+                :disabled="
+                  !playerName.trim() ||
+                  (secretCode.length > 0 && secretCode.length !== 4)
+                "
+                class="bg-green-600 hover:bg-green-500 text-white font-black py-4 px-4 rounded-xl shadow-xl transition-all transform hover:scale-105 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-xs"
+              >
+                Start Playing
+              </button>
+            </div>
+          </form>
 
           <button
-            id="cancel-creation-back-button-Home"
+            :id="`cancel-creation-back-button-${templateSuffix}`"
             @click="cancelCreate"
             class="w-full text-gray-400 hover:text-white text-[12px] font-black uppercase tracking-[0.2em] transition-colors"
           >
@@ -244,8 +254,9 @@
 
       <!-- Footer -->
       <div
-        id="lobby-page-footer-Home"
-        class="bg-black/60 p-6 text-center text-gray-400 text-[11px] font-bold uppercase tracking-[0.2em] border-t border-white/5"
+        :id="`lobby-page-footer-${templateSuffix}`"
+        class="bg-black/60 text-center text-gray-400 text-[11px] font-bold uppercase tracking-[0.2em] border-t border-white/5"
+        :class="footerPadding"
       >
         &copy; 2026 <span class="text-yellow-500">OsoPoker</span>. All chips are
         virtual.
@@ -257,12 +268,19 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useResponsiveStore } from '../store/responsiveStore'
 import QRCodeVue3 from 'qrcode-vue3'
 import Logo from '../components/Logo.vue'
 import { generateUniqueId, generateSecretCode, urlsFactory } from '../vutils'
 
+const responsive = useResponsiveStore()
 const router = useRouter()
 const route = useRoute()
+
+// Focus directive
+const vFocus = {
+  mounted: (el) => el.focus()
+}
 
 // State
 const playerName = ref('')
@@ -272,6 +290,78 @@ const joinCode = ref('')
 const generatedCode = ref('')
 const isCreating = ref(false)
 const copyStatus = ref('Copy Code')
+
+const templateSuffix = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 'TemplateXSmall'
+    case 'small': return 'TemplateSmall'
+    case 'medium': return 'TemplateMedium'
+    default: return 'TemplateLarge'
+  }
+})
+
+// Responsive UI Computeds
+const cardClasses = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 'max-w-full rounded-[1.5rem]'
+    case 'small': return 'max-w-[400px] rounded-[2rem]'
+    default: return 'max-w-lg rounded-[2rem]'
+  }
+})
+
+const headerPadding = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 'p-4'
+    case 'small': return 'p-6'
+    default: return 'p-8'
+  }
+})
+
+const logoScale = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 'mb-3 scale-100'
+    case 'small': return 'mb-4 scale-125'
+    default: return 'mb-6 scale-150'
+  }
+})
+
+const subtitleSize = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 'text-sm'
+    case 'small': return 'text-lg'
+    default: return 'text-xl'
+  }
+})
+
+const formPadding = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 'p-6 space-y-6'
+    case 'small': return 'p-8 space-y-8'
+    default: return 'p-10 space-y-10'
+  }
+})
+
+const footerPadding = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 'p-4'
+    default: return 'p-6'
+  }
+})
+
+const qrSize = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 120
+    case 'small': return 150
+    default: return 180
+  }
+})
+
+const generatedBoxPadding = computed(() => {
+  switch (responsive.screenSize) {
+    case 'xsmall': return 'p-4'
+    default: return 'p-6'
+  }
+})
 
 // Invitation URL for others (redirects to Lobby with joinCode parameter)
 

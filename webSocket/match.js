@@ -93,6 +93,33 @@ class Match {
       .R({ torneoId, gameId })
   }
 
+  /**
+   * Returns players who are currently in the hand (not folded) and were present when it started.
+   * Optionally filters by connection status.
+   */
+  getActivePlayers(onlyConnected = true) {
+    return this.players.filter((p) => {
+      const base = p.isStarted && !p.folded
+      return onlyConnected ? base && p.connected : base
+    })
+  }
+
+  /**
+   * Returns all players who were at the table when the current hand began.
+   */
+  getStartedPlayers(onlyConnected = true) {
+    return this.players.filter((p) => {
+      return onlyConnected ? p.isStarted && p.connected : p.isStarted
+    })
+  }
+
+  /**
+   * Returns all currently connected players.
+   */
+  getConnectedPlayers() {
+    return this.players.filter((p) => p.connected)
+  }
+
   continue(thisSocket, customDelay = null) {
     this.lastActivity = Date.now()
     const delay =
@@ -125,7 +152,7 @@ class Match {
         if (p.connected) p.setStarted(true)
       })
 
-      const connectedPlayers = this.players.filter((p) => p.connected)
+      const connectedPlayers = this.getConnectedPlayers()
       if (connectedPlayers.length < 2) {
         this.communicator.msgBuilder('lobbyError', 'public', null, {
           displayMsg: 'Waiting for at least 2 players to be connected...',
@@ -204,12 +231,17 @@ class Match {
     }
   }
 
+
+
+
   nextRound() {
     if (!this.waitingForNextRound) return
     this.waitingForNextRound = false
-    const playersWithChips = this.players.filter(
-      (p) => p.connected && p.chips > 0,
+    
+    const playersWithChips = this.getConnectedPlayers().filter(
+      (p) => p.chips > 0
     )
+ 
     if (playersWithChips.length < 2) {
       this.log.R({ info: 'Tournament finished. No more rounds.' })
       return

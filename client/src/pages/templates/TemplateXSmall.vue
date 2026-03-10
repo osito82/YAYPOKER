@@ -1,89 +1,62 @@
 <template>
-  <div
-    id="game-container-TemplateXSmall"
-    class="h-screen w-screen bg-neutral-950 overflow-hidden flex flex-col font-sans text-white select-none"
-  >
-    <!-- UNIFIED COMPACT HEADER -->
-    <header
-      id="game-header-bar-TemplateXSmall"
-      class="w-full bg-black/80 backdrop-blur-xl border-b border-white/5 px-2 py-1 flex items-center justify-between z-50 shrink-0"
-    >
-      <!-- LEFT SECTION -->
-      <div id="header-left-content-TemplateXSmall" class="flex items-center gap-1.5">
-        <div
-          id="logo-icon-wrapper-TemplateXSmall"
-          class="w-5 h-5 bg-yellow-500 rounded flex items-center justify-center shadow-[0_0_10px_rgba(234,179,8,0.3)] shrink-0"
-        >
-          <span id="logo-text-icon-TemplateXSmall" class="text-black font-black text-[10px]">O</span>
-        </div>
-        <div id="game-metadata-info-TemplateXSmall" class="flex flex-col justify-center">
-          <span class="text-[8px] font-mono font-bold text-white uppercase leading-none">Blinds $10/$20</span>
-        </div>
-      </div>
+<div id="main-game-layout-TemplateXSmall" class="flex-grow flex flex-col overflow-hidden relative">
+  
+  <!-- TOP AREA -->
+  <div id="primary-game-view-TemplateXSmall" class="flex flex-col min-w-0 relative flex-none">
+    <main id="poker-table-viewport-TemplateXSmall"
+      class="flex-none h-auto overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]">
 
-      <!-- RIGHT SECTION -->
-      <div id="header-right-content-TemplateXSmall" class="flex items-center gap-1.5">
-        <div id="connection-status-panel-TemplateXSmall" class="bg-black/40 px-1.5 py-0.5 rounded-full border border-white/5 flex items-center gap-1 shrink-0">
-          <div class="w-1 h-1 rounded-full shadow-[0_0_8px_currentColor]" :class="isConnected ? 'bg-green-500 text-green-500' : 'bg-red-500 text-red-500'"></div>
-          <span class="text-[7px] font-bold uppercase tracking-widest text-gray-200">{{ isConnected ? 'LIVE' : 'OFF' }}</span>
-        </div>
-        <div id="current-player-badge-TemplateXSmall" class="bg-yellow-500/10 px-1.5 py-0.5 rounded-full border border-yellow-500/20 max-w-[60px] shrink-0">
-          <span class="text-[8px] font-black text-yellow-500 uppercase tracking-widest truncate block">{{ playerName }}</span>
-        </div>
-      </div>
-    </header>
-
-    <WinnerTournamentOverlay v-if="winnerInfo?.isTournamentWinner" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
-    <WinnerOverlay v-else :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
-
-    <div id="main-game-layout-TemplateXSmall" class="flex-grow flex flex-col overflow-hidden relative">
-      <!-- TOP AREA: Table Only -->
-      <div id="primary-game-view-TemplateXSmall" class="flex flex-col min-w-0 relative flex-none">
-        <main id="poker-table-viewport-TemplateXSmall" class="flex-none h-auto overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]">
-          <div id="poker-table-container-TemplateXSmall" class="flex-none relative min-h-0">
-            <PokerTable
-              id="poker-table-component-TemplateXSmall"
-              class="w-full"
-              :pot="pot"
-              :communityCards="communityCards"
-              :players="allPlayers"
-              :activePlayerId="activePlayerId"
-            />
-          </div>
-        </main>
-      </div>
-
-      <!-- MIDDLE AREA: Sidepanel (Terminal first, then Players) -->
-      <PlayerSidepanel
-        id="game-sidepanel-container-TemplateXSmall"
-        class="flex-1 min-h-0"
-        :players="allPlayers"
-        :activePlayerId="activePlayerId"
-        :myPlayerId="myPlayerId"
-        :pot="pot"
-        :logs="logs"
-        :invertLayout="true"
-      />
-
-      <!-- BOTTOM AREA: Action HUD -->
-      <footer id="game-hud-bar-TemplateXSmall" class="shrink-0 z-50">
-        <ActionBar
-          :isMyTurn="isMyTurn"
-          :canBlind="canBlind"
-          :options="options"
-          :balance="myPlayer?.chips || 0"
-          :currentBet="myPlayer?.currentBet || 0"
-          :betAmount="betAmount"
-          :minBet="minBet"
-          :maxBet="maxBet"
-          :playerCards="myPlayer?.cards || []"
-          @action="(a) => $emit('action', a)"
-          @setQuickBet="(m) => $emit('setQuickBet', m)"
-          @update:betAmount="(val) => $emit('update:betAmount', val)"
+      <div id="poker-table-container-TemplateXSmall" class="flex-none relative min-h-0">
+        <PokerTable
+          id="poker-table-component-TemplateXSmall"
+          class="w-full"
+          :pot="pot"
+          :communityCards="communityCards"
+          :players="allPlayers"
+          :activePlayerId="activePlayerId"
         />
-      </footer>
-    </div>
+      </div>
+
+    </main>
   </div>
+
+  <!-- ACTION BAR (now middle) -->
+  <div id="actionbar-wrapper-TemplateXSmall" class="shrink-0 z-50">
+    <ActionBar
+      :isMyTurn="isMyTurn"
+      :canBlind="canBlind"
+      :options="options"
+      :balance="myPlayer?.chips || 0"
+      :currentBet="myPlayer?.currentBet || 0"
+      :betAmount="betAmount"
+      :minBet="minBet"
+      :maxBet="maxBet"
+      :playerCards="myPlayer?.cards || []"
+      @action="(a) => $emit('action', a)"
+      @setQuickBet="(m) => $emit('setQuickBet', m)"
+      @update:betAmount="(val) => $emit('update:betAmount', val)"
+    />
+  </div>
+
+  <!-- PLAYER SIDEPANEL & TERMINAL (now footer) -->
+  <footer
+    id="game-sidepanel-container-TemplateXSmall"
+    class="flex-1 min-h-0 z-50 flex flex-col"
+  >
+    <PlayerSidepanel
+      :players="allPlayers"
+      :activePlayerId="activePlayerId"
+      :myPlayerId="myPlayerId"
+      :pot="pot"
+      :logs="logs"
+      :invertLayout="true"
+    />
+    <div id="game-message-terminal-wrapper-TemplateXSmall" class="h-[150px] border-t border-white/5 bg-black/20 shrink-0">
+      <MessageTerminal :logs="logs" />
+    </div>
+  </footer>
+
+</div>
 </template>
 
 <script setup>
@@ -92,6 +65,7 @@ import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
+import MessageTerminal from '../../components/MessageTerminal.vue'
 
 defineProps({
   gameCode: String,

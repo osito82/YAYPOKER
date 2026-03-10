@@ -5,23 +5,26 @@
   >
     <div
       :id="`lobby-main-card-${templateSuffix}`"
-      class="w-full max-w-lg bg-gray-900 rounded-[2.5rem] shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-hidden border border-white/5 animate-fade-in"
+      class="w-full bg-gray-900 shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-hidden border border-white/5 animate-fade-in"
+      :class="cardClasses"
     >
       <!-- Header Area -->
       <div
         :id="`lobby-card-header-${templateSuffix}`"
-        class="bg-black/40 p-10 flex flex-col items-center border-b border-white/5 relative"
+        class="bg-black/40 flex flex-col items-center border-b border-white/5 relative"
+        :class="headerPadding"
       >
-        <Logo :id="`lobby-brand-logo-${templateSuffix}`" class="mb-8 transform scale-150" />
+        <Logo :id="`lobby-brand-logo-${templateSuffix}`" :class="logoScale" />
         
         <div :id="`game-code-badge-wrapper-${templateSuffix}`" class="relative group">
           <div 
             :id="`game-code-display-badge-${templateSuffix}`"
-            class="bg-yellow-500/10 border border-yellow-500/20 px-6 py-2 rounded-full mb-4 cursor-pointer hover:bg-yellow-500/20 transition-all active:scale-95"
+            class="bg-yellow-500/10 border border-yellow-500/20 rounded-full mb-4 cursor-pointer hover:bg-yellow-500/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+            :class="badgePadding"
             @click="copyCode"
           >
-            <span :id="`game-code-label-${templateSuffix}`" class="text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em] mr-2">Table Code:</span>
-            <span :id="`game-code-value-${templateSuffix}`" class="text-yellow-500 font-mono font-black tracking-widest text-lg">{{ gameCode }}</span>
+            <span :id="`game-code-label-${templateSuffix}`" class="font-black text-yellow-600 uppercase tracking-[0.2em]" :class="badgeLabelSize">Table Code:</span>
+            <span :id="`game-code-value-${templateSuffix}`" class="text-yellow-500 font-mono font-black tracking-widest" :class="badgeValueSize">{{ gameCode }}</span>
           </div>
           <!-- Tooltip -->
           <div 
@@ -35,14 +38,15 @@
 
         <h2
           :id="`lobby-title-text-${templateSuffix}`"
-          class="text-gray-200 text-xl font-black uppercase tracking-[0.4em] italic mt-2"
+          class="text-gray-200 font-black uppercase italic mt-2 text-center"
+          :class="subtitleSize"
         >
           Waiting <span class="text-yellow-500">Room</span>
         </h2>
       </div>
 
       <!-- Player List Area -->
-      <div :id="`players-list-container-${templateSuffix}`" class="p-8 space-y-6">
+      <div :id="`players-list-container-${templateSuffix}`" class="space-y-6" :class="playersListPadding">
         <div :id="`players-header-info-${templateSuffix}`" class="flex justify-between items-center px-2">
           <h3 :id="`players-count-label-${templateSuffix}`" class="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]">
             Players Connected ({{ players.length }}/10)
@@ -53,7 +57,7 @@
           </div>
         </div>
 
-        <div :id="`players-list-scroller-${templateSuffix}`" class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+        <div :id="`players-list-scroller-${templateSuffix}`" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar" :style="{ maxHeight: scrollHeight }">
           <div 
             v-for="player in players" 
             :key="player.id"
@@ -109,7 +113,8 @@
       <!-- Action Area -->
       <div
         :id="`lobby-actions-footer-${templateSuffix}`"
-        class="bg-black/60 p-8 border-t border-white/5"
+        class="bg-black/60 border-t border-white/5"
+        :class="footerPadding"
       >
         <div v-if="isHost" :id="`host-controls-wrapper-${templateSuffix}`" class="space-y-4">
           <p 
@@ -135,7 +140,7 @@
             <div class="w-2 h-2 bg-yellow-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
             <div class="w-2 h-2 bg-yellow-500 rounded-full animate-bounce"></div>
           </div>
-          <p :id="`waiting-host-message-${templateSuffix}`" class="text-gray-400 text-xs font-black uppercase tracking-[0.2em] italic">
+          <p :id="`waiting-host-message-${templateSuffix}`" class="text-gray-400 text-xs font-black uppercase tracking-[0.2em] italic text-center">
             Waiting for Host to Start...
           </p>
         </div>
@@ -151,6 +156,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { useResponsiveStore } from '../store/responsiveStore'
 import Logo from './Logo.vue'
 
 const props = defineProps({
@@ -158,9 +164,10 @@ const props = defineProps({
   hostId: { type: String, default: null },
   myId: { type: String, default: null },
   gameCode: { type: String, required: true },
-  templateSuffix: { type: String, default: 'Lobby' }
+  templateSuffix: { type: String, default: 'TemplateLarge' }
 })
 
+const responsive = useResponsiveStore()
 const isHost = computed(() => props.myId === props.hostId)
 const copyStatus = ref('')
 
@@ -177,6 +184,77 @@ const copyCode = async () => {
 }
 
 defineEmits(['start'])
+
+// Responsive Computeds
+const cardClasses = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'max-w-full rounded-[1.5rem]'
+  if (size === 'small') return 'max-w-[400px] rounded-[2rem]'
+  return 'max-w-lg rounded-[2.5rem]'
+})
+
+const headerPadding = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'p-6'
+  if (size === 'small') return 'p-8'
+  return 'p-10'
+})
+
+const playersListPadding = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'p-4'
+  if (size === 'small') return 'p-6'
+  return 'p-8'
+})
+
+const footerPadding = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'p-4'
+  if (size === 'small') return 'p-6'
+  return 'p-8'
+})
+
+const logoScale = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'mb-4 scale-100'
+  if (size === 'small') return 'mb-6 scale-125'
+  return 'mb-8 scale-150'
+})
+
+const subtitleSize = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'text-sm tracking-[0.2em]'
+  if (size === 'small') return 'text-base tracking-[0.3em]'
+  return 'text-xl tracking-[0.4em]'
+})
+
+const scrollHeight = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return '200px'
+  if (size === 'small') return '250px'
+  return '300px'
+})
+
+const badgePadding = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'px-3 py-1 mb-2'
+  if (size === 'small') return 'px-4 py-1.5 mb-3'
+  return 'px-6 py-2 mb-4'
+})
+
+const badgeLabelSize = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'text-[8px]'
+  if (size === 'small') return 'text-[9px]'
+  return 'text-[10px]'
+})
+
+const badgeValueSize = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 'text-sm'
+  if (size === 'small') return 'text-base'
+  return 'text-lg'
+})
 </script>
 
 <style scoped>

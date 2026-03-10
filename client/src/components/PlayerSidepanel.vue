@@ -182,15 +182,6 @@
       </div>
     </TransitionGroup>
 
-    <!-- Terminal Area (Bottom Integrated) -->
-    <div
-      v-if="!hideTerminal"
-      :id="'game-message-terminal-wrapper-' + templateSuffix"
-      class="h-[180px] lg:h-[220px] border-t border-white/5 bg-black/20 shrink-0"
-    >
-      <MessageTerminal :logs="logs" />
-    </div>
-
     <!-- Sidepanel Footer -->
     <div
       :id="'sidepanel-footer-summary-wrapper-' + templateSuffix"
@@ -214,7 +205,6 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import MessageTerminal from './MessageTerminal.vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 
 const responsive = useResponsiveStore()
@@ -231,7 +221,6 @@ const props = defineProps({
   pot: { type: Number, default: 0 },
   logs: { type: Array, default: () => [] },
   invertLayout: { type: Boolean, default: false },
-  hideTerminal: { type: Boolean, default: false },
 })
 
 const delayedActivePlayerId = ref(props.activePlayerId)
