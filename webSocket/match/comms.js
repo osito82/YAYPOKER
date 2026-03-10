@@ -30,9 +30,7 @@ class MatchComms {
   }
 
   sendOdds(targetPlayer = null) {
-    const activePlayers = this.match.players.filter(
-      (p) => !p.folded && p.connected,
-    )
+    const activePlayers = this.match.getActivePlayers(true) // Only connected and in hand
     if (activePlayers.length < 2) return
 
     const playerHands = activePlayers.map((p) => p.getCards())

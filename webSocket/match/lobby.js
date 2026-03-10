@@ -47,14 +47,10 @@ class MatchLobby {
       if (p.connected) p.setStarted(true)
     })
 
-    const readyPlayers = this.match.players.filter(
-      (p) => p.isStarted && p.connected,
-    )
+    const readyPlayers = this.match.getStartedPlayers(true)
 
     if (readyPlayers.length < 2) {
-      const connectedCount = this.match.players.filter(
-        (p) => p.connected,
-      ).length
+      const connectedCount = this.match.getConnectedPlayers().length
 
       this.match.log
         .Template({
@@ -238,7 +234,7 @@ class MatchLobby {
       this.match.comms.sendOdds(player)
     }
 
-    const connectedPlayers = this.match.players.filter((p) => p.connected)
+    const connectedPlayers = this.match.getConnectedPlayers()
     if (
       connectedPlayers.length >= 2 &&
       !this.match.stepChecker.checkStep('blindsBetting')

@@ -46,6 +46,7 @@ describe('Dealer Class', () => {
       chips: 100,
       connected,
       folded,
+      isStarted: true,
       currentBet: 0,
       cards: [],
       getCurrentBet() {
@@ -105,7 +106,7 @@ describe('Dealer Class', () => {
     expect(dealer.allPlayersCheck()).toBe(true)
   })
 
-  it('should return false if not all players checked', () => {
+  it('T0004 - should return false if not all players checked', () => {
     players[0].currentBet = 100
     players[1].currentBet = 100
 
