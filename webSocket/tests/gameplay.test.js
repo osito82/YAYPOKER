@@ -1105,75 +1105,75 @@ describe('Poker Game Integration Tests', () => {
     expect(nextRoundMsg.message.gameId).not.toBe(firstGameId)
   }, 40000)
 
-
-// it('T0006 - Durante el juego, ignora silenciosamente intentos de reconexión con código incorrecto', async () => {
-//   const gameCode = 'reconnect-during-game-' + Math.random().toString(36).substring(7)
   
-//   // --- FASE 1: LOBBY ---
-//   const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
-//   await new Promise((r) => alice.ws.on('open', r))
-//   alice.send(MOCK_ACTIONS.SIGN_UP(1000))
-//   await alice.waitAction('signUp')
+it('T0006 - Durante el juego, ignora silenciosamente intentos de reconexión con código incorrecto', async () => {
+  const gameCode = 'reconnect-during-game-' + Math.random().toString(36).substring(7)
   
-//   const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
-//   await new Promise((r) => bob.ws.on('open', r))
-//   bob.send(MOCK_ACTIONS.SIGN_UP(1000))
-//   await bob.waitAction('signUp')
+  // --- FASE 1: LOBBY ---
+  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  await new Promise((r) => alice.ws.on('open', r))
+  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
+  await alice.waitAction('signUp')
   
-//   // --- FASE 2: COMIENZA EL JUEGO ---
-//   alice.send(MOCK_ACTIONS.START_GAME)
+  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
+  await new Promise((r) => bob.ws.on('open', r))
+  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
+  await bob.waitAction('signUp')
   
-//   // Avanzar hasta después de las ciegas
-//   await alice.waitAction('askForBlindBets')
-//   alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-//   await bob.waitAction('askForBlindBets')
-//   bob.send(MOCK_ACTIONS.BIG_BLIND(20))
-//   await alice.waitAction('dealtPrivateCards')
+  // --- FASE 2: COMIENZA EL JUEGO ---
+  alice.send(MOCK_ACTIONS.START_GAME)
   
-//   // Alice se desconecta DURANTE la mano
-//   alice.ws.close()
+  // Avanzar hasta después de las ciegas
+  await alice.waitAction('askForBlindBets')
+  alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
+  await bob.waitAction('askForBlindBets')
+  bob.send(MOCK_ACTIONS.BIG_BLIND(20))
+  await alice.waitAction('dealtPrivateCards')
   
-//   // Pequeña pausa para que el servidor procese la desconexión
-//   await new Promise(r => setTimeout(r, 100))
+  // Alice se desconecta DURANTE la mano
+  alice.ws.close()
   
-//   // Alguien intenta reconectarse como Alice con código INCORRECTO
-//   const impostor = createClient(
-//     { name: 'Alice', secretCode: 'wrong123' }, 
-//     gameCode
-//   )
-//   await new Promise((r) => impostor.ws.on('open', r))
+  // Pequeña pausa para que el servidor procese la desconexión
+  await new Promise(r => setTimeout(r, 100))
   
-//   // Guardamos los mensajes que ya tenía
-//   const initialMsgCount = impostor.responses.length
+  // Alguien intenta reconectarse como Alice con código INCORRECTO
+  const impostor = createClient(
+    { name: 'Alice', secretCode: 'wrong123' }, 
+    gameCode
+  )
+  await new Promise((r) => impostor.ws.on('open', r))
   
-//   impostor.send(MOCK_ACTIONS.SIGN_UP(1000))
+  // Guardamos los mensajes que ya tenía
+  const initialMsgCount = impostor.responses.length
   
-//   // Esperamos un poco para ver si recibe alguna respuesta
-//   await new Promise(r => setTimeout(r, 500))
+  impostor.send(MOCK_ACTIONS.SIGN_UP(1000))
   
-//   // Verificamos que NO ha recibido mensajes de signUp
-//   const signUpMessages = impostor.responses.filter(r => 
-//     r.message?.action === 'signUp'
-//   )
-//   expect(signUpMessages.length).toBe(0)
+  // Esperamos un poco para ver si recibe alguna respuesta
+  await new Promise(r => setTimeout(r, 500))
   
-//   // Verificamos que NO ha recibido mensajes de error
-//   const errorMessages = impostor.responses.filter(r => 
-//     r.message?.action === 'error'
-//   )
-//   expect(errorMessages.length).toBe(0)
+  // Verificamos que NO ha recibido mensajes de signUp
+  const signUpMessages = impostor.responses.filter(r => 
+    r.message?.action === 'signUp'
+  )
+  expect(signUpMessages.length).toBe(0)
   
-//   // Verificamos que el impostor NO aparece como jugador
-//   const impostorAsPlayer = impostor.responses.some(r => 
-//     r.message?.players?.some(p => p.name === 'Alice' && p.id === impostor.ws.id)
-//   )
-//   expect(impostorAsPlayer).toBe(false)
+  // Verificamos que NO ha recibido mensajes de error
+  const errorMessages = impostor.responses.filter(r => 
+    r.message?.action === 'error'
+  )
+  expect(errorMessages.length).toBe(0)
   
-//   // El juego debería continuar y eventualmente declarar un ganador (Bob)
-//   // Aumentamos el timeout a 10000ms para dar tiempo al pause de 3s + juego
-//   const winnerMsg = await bob.waitAction('winner', 10000)
-//   expect(winnerMsg.message.data.winners[0].name).toBe('Bob')
-// }, 44000)
+  // Verificamos que el impostor NO aparece como jugador
+  const impostorAsPlayer = impostor.responses.some(r => 
+    r.message?.players?.some(p => p.name === 'Alice' && p.id === impostor.ws.id)
+  )
+  expect(impostorAsPlayer).toBe(false)
+  
+  // El juego debería continuar y eventualmente declarar un ganador (Bob)
+  // Aumentamos el timeout a 10000ms para dar tiempo al pause de 3s + juego
+  const winnerMsg = await bob.waitAction('winnerTournament', 10000)
+  expect(winnerMsg.message.data.winner.name).toBe('Bob')
+}, 44000)
 
   /*
 GEMINI NO BORRAR

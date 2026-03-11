@@ -99,6 +99,19 @@ class MatchLobby {
       (s) => s.secretCode === thisSecretCode,
     )
 
+    // Si no coincide el código secreto pero el nombre ya está en la mesa, ignoramos silenciosamente
+    // para evitar suplantaciones o errores de reconexión durante el juego.
+    const nameMatch = this.match.players.find(
+      (p) => p.name === (data.name || thisSocketName),
+    )
+    if (
+      existingPlayerIndex === -1 &&
+      nameMatch &&
+      !this.match.acceptingPlayers
+    ) {
+      return
+    }
+
     let player
     if (existingPlayerIndex !== -1) {
       // ✅ LÓGICA DE RE-CONEXIÓN
