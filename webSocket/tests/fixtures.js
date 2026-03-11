@@ -19,6 +19,12 @@ export const MOCK_PLAYERS = {
     secretCode: '8894',
     totalChips: 500,
   },
+
+  MALORY:{
+       name: 'Mallory', secretCode: 'hacker' , 
+       totalChips:500
+
+  }
 }
 
 export const MOCK_ACTIONS = {
