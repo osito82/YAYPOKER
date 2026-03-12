@@ -89,9 +89,7 @@ const getEmoji = (log) => {
 
 const scrollToBottom = async () => {
   await nextTick()
-  if (bottomAnchor.value) {
-    bottomAnchor.value.scrollIntoView({ behavior: 'smooth', block: 'end' })
-  } else if (logContainer.value) {
+  if (logContainer.value) {
     logContainer.value.scrollTop = logContainer.value.scrollHeight
   }
 }
