@@ -7,7 +7,7 @@
       class="relative w-full pointer-events-auto bg-black/95 backdrop-blur-3xl border-t border-white/10 p-2 lg:p-4"
       :class="{ 'border-yellow-500/40 shadow-[0_-15px_40px_rgba(0,0,0,0.8)]': isMyTurn }"
     >
-      <div :id="'hud-content-layout-wrapper-' + templateSuffix" class="max-w-[1600px] mx-auto flex gap-3 lg:gap-8 flex-row items-end">
+      <div :id="'hud-content-layout-wrapper-' + templateSuffix" class="max-w-[1600px] mx-auto flex gap-4 lg:gap-10 flex-row items-end">
         <PlayerInfoPanel 
           :templateSuffix="templateSuffix" 
           :screenSize="responsive.screenSize" 
@@ -37,18 +37,19 @@
             :isRaiseActionDisabled="isRaiseActionDisabled"
             @action="(a) => $emit('action', a)"
           />
-
-          <QuickChipsRow 
-            :showChips="showChips" 
-            :templateSuffix="templateSuffix" 
-            :chips="chips" 
-            :chipResponsiveSize="chipResponsiveSize" 
-            :isMyTurn="isMyTurn" 
-            :isSliderDisabled="isSliderDisabled"
-            @addChip="addChip"
-            @clearBet="clearBet"
-          />
         </div>
+
+        <QuickChipsRow 
+          :showChips="showChips" 
+          :templateSuffix="templateSuffix" 
+          :chips="chips" 
+          :chipResponsiveSize="chipResponsiveSize" 
+          :isMyTurn="isMyTurn" 
+          :isSliderDisabled="isSliderDisabled"
+          :isVertical="true"
+          @addChip="addChip"
+          @clearBet="clearBet"
+        />
       </div>
     </div>
   </div>
