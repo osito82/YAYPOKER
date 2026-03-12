@@ -211,12 +211,12 @@ const progress = ref(100)
 let timerInterval = null
 
 const chips = [
-  { color: 'bg-white', text: 'text-gray-900', value: 1, label: '1' },
+  { color: 'bg-slate-50', text: 'text-slate-900', value: 1, label: '1' },
   { color: 'bg-red-600', text: 'text-white', value: 5, label: '5' },
-  { color: 'bg-blue-600', text: 'text-white', value: 10, label: '10' },
-  { color: 'bg-green-600', text: 'text-white', value: 25, label: '25' },
-  { color: 'bg-black', text: 'text-white', value: 100, label: '100', border: 'border-white/40' },
-  { color: 'bg-purple-600', text: 'text-white', value: 500, label: '500' },
+  { color: 'bg-blue-700', text: 'text-white', value: 10, label: '10' },
+  { color: 'bg-emerald-600', text: 'text-white', value: 25, label: '25' },
+  { color: 'bg-slate-500', text: 'text-white', value: 100, label: '100' },
+  { color: 'bg-purple-700', text: 'text-white', value: 500, label: '500' },
 ]
 
 const addChip = (value) => {

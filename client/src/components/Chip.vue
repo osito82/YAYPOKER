@@ -3,13 +3,48 @@
     :id="'poker-chip-' + value + '-' + size"
     :class="[
       chipSize.container,
-      color,
-      textColor || 'text-white',
-      border || 'border-black/20',
-      'rounded-full flex items-center justify-center font-black shadow-lg border-2 border-dashed active:scale-90 transition-all flex-shrink-0 hover:brightness-110 cursor-pointer select-none'
+      'relative rounded-full flex items-center justify-center select-none cursor-pointer transition-all duration-200 active:scale-90 hover:brightness-110 group',
+      'shadow-[0_8px_16px_rgba(0,0,0,0.5),inset_0_-2px_4px_rgba(0,0,0,0.3)]'
     ]"
   >
-    <span :class="chipSize.text">{{ value }}</span>
+    <!-- Outer Rim (Borde exterior con textura de casino) -->
+    <div
+      :class="[
+        color,
+        'absolute inset-0 rounded-full border-[3px] border-white/20 border-dashed opacity-80'
+      ]"
+    ></div>
+
+    <!-- Main Body (Cuerpo principal con gradiente 3D) -->
+    <div
+      :class="[
+        color,
+        'absolute inset-1 rounded-full flex items-center justify-center overflow-hidden',
+        'before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/30 before:to-black/40'
+      ]"
+    >
+      <!-- Decorative Ring -->
+      <div class="absolute inset-1.5 rounded-full border border-white/20"></div>
+
+      <!-- Center White Background (El fondo del anillo interno ahora es blanco) -->
+      <div 
+        class="absolute inset-[22%] bg-white rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] border border-black/5 flex items-center justify-center"
+      >
+        <!-- Value Display (Números Negros sobre fondo blanco) -->
+        <div 
+          :class="[
+            'text-black',
+            chipSize.text,
+            'font-black tracking-tighter leading-none'
+          ]"
+        >
+          {{ value }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Shine Overlay (Efecto de brillo físico) -->
+    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none"></div>
   </div>
 </template>
 
@@ -20,48 +55,37 @@ const props = defineProps({
   value: [Number, String],
   color: {
     type: String,
-    default: 'bg-white'
+    default: 'bg-slate-100'
   },
   textColor: String,
   size: {
     type: String,
     default: 'medium'
-  },
-  border: String
+  }
 })
 
 const chipSize = computed(() => {
   switch (props.size) {
     case 'xsmall':
-      return {
-        container: 'w-6 h-6',
-        text: 'text-[7px]'
-      }
+      return { container: 'w-7 h-7 aspect-square', text: 'text-[10px]' }
     case 'small':
-      return {
-        container: 'w-8 h-8',
-        text: 'text-[9px]'
-      }
+      return { container: 'w-10 h-10 aspect-square', text: 'text-[12px]' }
     case 'medium':
-      return {
-        container: 'w-10 h-10',
-        text: 'text-[11px]'
-      }
+      return { container: 'w-14 h-14 aspect-square', text: 'text-[16px]' }
     case 'large':
-      return {
-        container: 'w-12 h-12',
-        text: 'text-[13px]'
-      }
+      return { container: 'w-16 h-16 aspect-square', text: 'text-[18px]' }
     case 'extraLarge':
-      return {
-        container: 'w-16 h-16',
-        text: 'text-lg'
-      }
+      return { container: 'w-20 h-20 aspect-square', text: 'text-[22px]' }
     default:
-      return {
-        container: 'w-10 h-10',
-        text: 'text-[11px]'
-      }
+      return { container: 'w-14 h-14 aspect-square', text: 'text-[16px]' }
   }
 })
 </script>
+
+<style scoped>
+/* Animación de flotación al pasar el mouse */
+.group:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.6), inset 0 -2px 4px rgba(0,0,0,0.3);
+}
+</style>
