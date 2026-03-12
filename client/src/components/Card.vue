@@ -10,6 +10,7 @@
         sizeOption.width,
         sizeOption.heightClass,
         'bg-white rounded-lg shadow-md border border-gray-300 relative select-none transition-transform hover:-translate-y-1 hover:scale-105',
+        props.highlight ? 'highlight-card' : '',
       ]"
     >
       <div
@@ -94,6 +95,10 @@ import { simbolConverter, whatColor } from '../vutils.js'
 const props = defineProps({
   numSymbol: String,
   size: String,
+  highlight: {
+    type: Boolean,
+    default: false,
+  },
   percentage: {
     type: Number,
     default: 100,
@@ -145,6 +150,16 @@ const sizeOption = computed(() => {
         width: 'w-20',
         heightPx: 112,
       }
+    case 'xsmall':
+      return {
+        cornerText: 'text-[10px]',
+        cornerSymbol: 'text-[8px]',
+        centerSymbol: 'text-xl',
+        cropTextSize: 'text-xl',
+        heightClass: 'h-12',
+        width: 'w-10',
+        heightPx: 48,
+      }
     default:
       return {
         cornerText: 'text-2xl',
@@ -175,5 +190,12 @@ const cropStyle = computed(() => {
 <style scoped>
 #poker-card-crop-container {
   overflow: hidden;
+}
+
+.highlight-card {
+  box-shadow: 0 0 15px 4px rgba(234, 179, 8, 0.6);
+  border-color: rgba(234, 179, 8, 0.8) !important;
+  transform: scale(1.1) translateY(-4px);
+  z-index: 10;
 }
 </style>
