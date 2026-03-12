@@ -45,10 +45,11 @@
     <WinnerTournamentOverlay v-if="winnerInfo?.isTournamentWinner" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
     <WinnerOverlay v-else-if="winnerInfo" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
 
-    <div id="main-game-layout-TemplateMedium" class="flex-grow flex flex-row overflow-hidden relative">
-      <!-- TOP AREA -->
-      <div id="primary-game-view-TemplateMedium" class="flex flex-col min-w-0 relative flex-[4] h-full">
-        <main id="poker-table-viewport-TemplateMedium" class="flex-grow flex flex-col overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]">
+    <div id="main-game-layout-TemplateMedium" class="flex-grow flex flex-col overflow-hidden relative">
+      <!-- MAIN CONTENT AREA (Scrollable vertical stack) -->
+      <div id="primary-game-view-TemplateMedium" class="flex-grow flex flex-col min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar">
+        <!-- Table Area -->
+        <main id="poker-table-viewport-TemplateMedium" class="min-h-[400px] flex flex-col overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]">
           <div id="poker-table-container-TemplateMedium" class="flex-grow relative min-h-0">
             <PokerTable
               id="poker-table-component-TemplateMedium"
@@ -61,22 +62,22 @@
           </div>
         </main>
         
-        <!-- Terminal Area (Bottom of table) -->
+        <!-- Terminal Area -->
         <div id="game-message-terminal-wrapper-TemplateMedium" class="h-[120px] border-t border-white/5 bg-black/40 shrink-0">
           <MessageTerminal :logs="logs" />
         </div>
-      </div>
 
-      <!-- SIDEPANEL -->
-      <PlayerSidepanel
-        id="game-sidepanel-container-TemplateMedium"
-        class="w-[280px] min-h-0 border-l border-white/5"
-        :players="allPlayers"
-        :activePlayerId="activePlayerId"
-        :myPlayerId="myPlayerId"
-        :pot="pot"
-        :logs="logs"
-      />
+        <!-- SIDEPANEL (Now below terminal) -->
+        <PlayerSidepanel
+          id="game-sidepanel-container-TemplateMedium"
+          class="w-full border-t border-white/5 bg-black/20"
+          :players="allPlayers"
+          :activePlayerId="activePlayerId"
+          :myPlayerId="myPlayerId"
+          :pot="pot"
+          :logs="logs"
+        />
+      </div>
     </div>
 
     <footer id="game-hud-bar-TemplateMedium" class="shrink-0 z-50 w-full">

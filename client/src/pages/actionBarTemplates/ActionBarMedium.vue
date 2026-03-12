@@ -4,52 +4,58 @@
 
     <div
       :id="'hud-main-actions-container-' + templateSuffix"
-      class="relative w-full pointer-events-auto bg-black/95 backdrop-blur-3xl border-t border-white/10 p-2 lg:p-4"
+      class="relative w-full pointer-events-auto bg-black/95 backdrop-blur-3xl border-t border-white/10 p-3"
       :class="{ 'border-yellow-500/40 shadow-[0_-15px_40px_rgba(0,0,0,0.8)]': isMyTurn }"
     >
-      <div :id="'hud-content-layout-wrapper-' + templateSuffix" class="max-w-[1600px] mx-auto flex gap-4 lg:gap-10 flex-row items-end">
-        <PlayerInfoPanel 
-          :templateSuffix="templateSuffix" 
-          :screenSize="responsive.screenSize" 
-          :playerCards="playerCards" 
-          :balance="balance" 
-          :currentBet="currentBet" 
-        />
-
-        <div :id="'hud-player-actions-control-area-' + templateSuffix" class="flex flex-col gap-2 flex-1 min-w-0">
-          <BettingSlider 
-            :isMyTurn="isMyTurn" 
-            :options="options" 
-            :betAmount="betAmount" 
-            :minBet="minBet" 
-            :maxBet="maxBet" 
-            :isSliderDisabled="isSliderDisabled" 
-            :templateSuffix="templateSuffix"
-            @update:betAmount="(val) => $emit('update:betAmount', val)"
+      <div :id="'hud-content-layout-wrapper-' + templateSuffix" class="max-w-[1600px] mx-auto flex flex-col gap-3">
+        <!-- TOP ROW: Info + Actions -->
+        <div class="flex flex-row items-end gap-4">
+          <PlayerInfoPanel 
+            :templateSuffix="templateSuffix" 
+            :screenSize="responsive.screenSize" 
+            :playerCards="playerCards" 
+            :balance="balance" 
+            :currentBet="currentBet" 
           />
 
-          <WaitingState :isMyTurn="isMyTurn" :activePlayerName="activePlayerName" />
+          <div :id="'hud-player-actions-control-area-' + templateSuffix" class="flex flex-col gap-2 flex-1 min-w-0">
+            <BettingSlider 
+              :isMyTurn="isMyTurn" 
+              :options="options" 
+              :betAmount="betAmount" 
+              :minBet="minBet" 
+              :maxBet="maxBet" 
+              :isSliderDisabled="isSliderDisabled" 
+              :templateSuffix="templateSuffix"
+              @update:betAmount="(val) => $emit('update:betAmount', val)"
+            />
 
-          <ActionButtonsRow 
-            :isMyTurn="isMyTurn" 
-            :canBlind="canBlind" 
-            :options="options" 
-            :isRaiseActionDisabled="isRaiseActionDisabled"
-            @action="(a) => $emit('action', a)"
-          />
+            <WaitingState :isMyTurn="isMyTurn" :activePlayerName="activePlayerName" />
+
+            <ActionButtonsRow 
+              :isMyTurn="isMyTurn" 
+              :canBlind="canBlind" 
+              :options="options" 
+              :isRaiseActionDisabled="isRaiseActionDisabled"
+              @action="(a) => $emit('action', a)"
+            />
+          </div>
         </div>
 
-        <QuickChipsRow 
-          :showChips="showChips" 
-          :templateSuffix="templateSuffix" 
-          :chips="chips" 
-          :chipResponsiveSize="chipResponsiveSize" 
-          :isMyTurn="isMyTurn" 
-          :isSliderDisabled="isSliderDisabled"
-          :isVertical="true"
-          @addChip="addChip"
-          @clearBet="clearBet"
-        />
+        <!-- BOTTOM ROW: Chips (Full Width) -->
+        <div class="border-t border-white/5 pt-2">
+          <QuickChipsRow 
+            :showChips="showChips" 
+            :templateSuffix="templateSuffix" 
+            :chips="chips" 
+            :chipResponsiveSize="chipResponsiveSize" 
+            :isMyTurn="isMyTurn" 
+            :isSliderDisabled="isSliderDisabled"
+            :isVertical="false"
+            @addChip="addChip"
+            @clearBet="clearBet"
+          />
+        </div>
       </div>
     </div>
   </div>
