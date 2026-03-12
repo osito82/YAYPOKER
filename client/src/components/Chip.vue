@@ -3,11 +3,13 @@
     :id="'poker-chip-' + value + '-' + size"
     :class="[
       chipSize.container,
-      'relative rounded-full flex items-center justify-center select-none cursor-pointer transition-all duration-200 active:scale-90 hover:brightness-110 group',
-      'shadow-[0_8px_16px_rgba(0,0,0,0.5),inset_0_-2px_4px_rgba(0,0,0,0.3)]'
+      'relative rounded-full flex items-center justify-center select-none cursor-pointer transition-all duration-200 group',
+      disabled 
+        ? 'opacity-40 grayscale pointer-events-none shadow-none' 
+        : 'active:scale-90 hover:brightness-110 shadow-[0_8px_16px_rgba(0,0,0,0.5),inset_0_-2px_4px_rgba(0,0,0,0.3)]'
     ]"
   >
-    <!-- Outer Rim (Borde exterior con textura de casino) -->
+    <!-- Outer Rim -->
     <div
       :class="[
         color,
@@ -15,7 +17,7 @@
       ]"
     ></div>
 
-    <!-- Main Body (Cuerpo principal con gradiente 3D) -->
+    <!-- Main Body -->
     <div
       :class="[
         color,
@@ -23,14 +25,12 @@
         'before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/30 before:to-black/40'
       ]"
     >
-      <!-- Decorative Ring -->
       <div class="absolute inset-1.5 rounded-full border border-white/20"></div>
 
-      <!-- Center White Background (El fondo del anillo interno ahora es blanco) -->
+      <!-- Center White Background -->
       <div 
         class="absolute inset-[22%] bg-white rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] border border-black/5 flex items-center justify-center"
       >
-        <!-- Value Display (Números Negros sobre fondo blanco) -->
         <div 
           :class="[
             'text-black',
@@ -43,8 +43,8 @@
       </div>
     </div>
 
-    <!-- Shine Overlay (Efecto de brillo físico) -->
-    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none"></div>
+    <!-- Shine Overlay -->
+    <div v-if="!disabled" class="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none"></div>
   </div>
 </template>
 
@@ -61,7 +61,8 @@ const props = defineProps({
   size: {
     type: String,
     default: 'medium'
-  }
+  },
+  disabled: Boolean
 })
 
 const chipSize = computed(() => {

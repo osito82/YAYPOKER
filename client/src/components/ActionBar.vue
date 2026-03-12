@@ -153,7 +153,7 @@
 
           <!-- Quick Chips Row -->
           <div 
-            v-if="isMyTurn && (options.includes('bet') || options.includes('raise'))"
+            v-if="showChips"
             :id="'hud-quick-chips-row-' + templateSuffix"
             class="flex items-center gap-2 mt-1"
           >
@@ -166,13 +166,15 @@
                 :textColor="chip.text"
                 :border="chip.border"
                 :size="chipResponsiveSize"
+                :disabled="!isMyTurn || isSliderDisabled"
                 @click="addChip(chip.value)"
               />
             </div>
             <button
               @click="clearBet"
+              :disabled="!isMyTurn || isSliderDisabled"
               :id="'hud-clear-bet-button-' + templateSuffix"
-              class="h-8 lg:h-11 px-3 bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 active:scale-95 transition-all"
+              class="h-8 lg:h-11 px-3 bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 active:scale-95 transition-all disabled:opacity-20 disabled:pointer-events-none"
             >
               Clear
             </button>
@@ -228,6 +230,11 @@ const addChip = (value) => {
 const clearBet = () => {
   emit('update:betAmount', props.minBet)
 }
+
+const showChips = computed(() => {
+  // Show if player is active in the hand (has balance or cards)
+  return props.balance > 0 || props.playerCards?.length > 0
+})
 
 const chipResponsiveSize = computed(() => {
   if (responsive.screenSize === 'xsmall' || responsive.screenSize === 'small') {
