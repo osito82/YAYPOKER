@@ -41,9 +41,6 @@ class Socket {
     }
   }
 
-  static getSockets() {
-    return this.torneoSockets
-  }
 
   static getSocketsByTorneo(idTorneo) {
     return this.torneoSockets.get(idTorneo) || null

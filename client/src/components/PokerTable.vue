@@ -42,7 +42,7 @@
           :id="'pot-display-absolute-container-' + templateSuffix"
           class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform transition-all duration-300"
         >
-        {{'0025 -'+ templateSuffix}}
+        
           <PotDisplay
             :id="'pot-display-main-component-' + templateSuffix"
             :amount="pot"

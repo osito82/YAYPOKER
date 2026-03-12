@@ -1330,7 +1330,6 @@ it('Side pot: all-in con 3 jugadores crea side pot', async () => {
 Otros tests importantes que faltan:
 Timeout del jugador: Si no actúa en X segundos, se fold automático
 
-Reconexión con estado de juego cambiado: Si se reconecta después de que pasó su turno
 
 Múltiples all-ins con side pots: Calcular correctamente 3+ botes
 
