@@ -188,34 +188,45 @@
             <div
               v-if="player.lastAction"
               :id="'player-item-action-display-wrapper-' + player.id + '-' + templateSuffix"
-              class="flex flex-col items-end text-right"
+              class="flex flex-col items-end text-right min-w-[80px]"
             >
-              <span
-                :id="'player-item-action-label-text-' + player.id + '-' + templateSuffix"
-                class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1"
-              >
-                Last Action
-              </span>
               <div
                 :id="'player-item-action-badge-wrapper-' + player.id + '-' + templateSuffix"
                 class="flex justify-end"
               >
                 <Transition name="action-highlight" mode="out-in">
-                  <span
+                  <div
                     :key="player.lastAction"
                     :id="'player-item-action-status-badge-' + player.id + '-' + templateSuffix"
-                    class="text-xl font-black uppercase px-4 py-1.5 rounded-lg transition-all duration-500 bg-white/10 border border-white/10 shadow-lg"
+                    class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/5 transition-all duration-500"
                     :class="[
-                      getActionColor(player.lastAction),
+                      getActionBgColor(player.lastAction),
                       player.id === justActedPlayerId
-                        ? 'animate-action-flash'
+                        ? 'animate-action-flash ring-1 ring-emerald-500/50'
                         : '',
                     ]"
                   >
-                    {{ player.lastAction }}
-                  </span>
+                    <!-- Small Status Dot -->
+                    <div 
+                      class="w-1 h-1 rounded-full"
+                      :class="getActionDotColor(player.lastAction)"
+                    ></div>
+                    
+                    <span
+                      class="text-[10px] font-black uppercase tracking-widest"
+                      :class="getActionTextColor(player.lastAction)"
+                    >
+                      {{ player.lastAction }}
+                    </span>
+                  </div>
                 </Transition>
               </div>
+              <span
+                :id="'player-item-action-label-text-' + player.id + '-' + templateSuffix"
+                class="text-[8px] font-bold text-gray-500 uppercase tracking-tighter mt-1 opacity-50"
+              >
+                Last Action
+              </span>
             </div>
           </div>
         </div>
@@ -350,6 +361,36 @@ const sortedPlayers = computed(() => {
   }
   return list
 })
+
+const getActionBgColor = (action) => {
+  const a = action.toLowerCase()
+  if (a.includes('fold')) return 'bg-red-500/10 border-red-500/10'
+  if (a.includes('raise') || a.includes('bet') || a.includes('all-in'))
+    return 'bg-yellow-500/10 border-yellow-500/10'
+  if (a.includes('call')) return 'bg-blue-500/10 border-blue-500/10'
+  if (a.includes('check')) return 'bg-gray-500/10 border-gray-500/10'
+  return 'bg-white/5 border-white/5'
+}
+
+const getActionDotColor = (action) => {
+  const a = action.toLowerCase()
+  if (a.includes('fold')) return 'bg-red-500'
+  if (a.includes('raise') || a.includes('bet') || a.includes('all-in'))
+    return 'bg-yellow-500'
+  if (a.includes('call')) return 'bg-blue-500'
+  if (a.includes('check')) return 'bg-gray-400'
+  return 'bg-white'
+}
+
+const getActionTextColor = (action) => {
+  const a = action.toLowerCase()
+  if (a.includes('fold')) return 'text-red-400'
+  if (a.includes('raise') || a.includes('bet') || a.includes('all-in'))
+    return 'text-yellow-400'
+  if (a.includes('call')) return 'text-blue-400'
+  if (a.includes('check')) return 'text-gray-400'
+  return 'text-white/60'
+}
 
 const getActionColor = (action) => {
   const a = action.toLowerCase()
