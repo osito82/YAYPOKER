@@ -158,16 +158,16 @@
             class="flex items-center gap-2 mt-1"
           >
             <div class="flex flex-1 gap-3 overflow-x-auto no-scrollbar py-1">
-              <button
+              <Chip
                 v-for="chip in chips"
                 :key="chip.value"
+                :value="chip.label"
+                :color="chip.color"
+                :textColor="chip.text"
+                :border="chip.border"
+                :size="chipResponsiveSize"
                 @click="addChip(chip.value)"
-                :id="'hud-chip-' + chip.label + '-' + templateSuffix"
-                :class="[chip.color, chip.text, chip.border || 'border-black/10']"
-                class="w-8 h-8 lg:w-11 lg:h-11 rounded-full flex items-center justify-center text-[10px] lg:text-[11px] font-black shadow-lg border-2 border-dashed active:scale-90 transition-all flex-shrink-0 hover:brightness-110"
-              >
-                {{ chip.label }}
-              </button>
+              />
             </div>
             <button
               @click="clearBet"
@@ -187,6 +187,7 @@
 import { ref, computed, watch } from 'vue'
 import Card from './Card.vue'
 import CardBack from './CardBack.vue'
+import Chip from './Chip.vue'
 import OddsDisplay from './OddsDisplay.vue'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
@@ -227,6 +228,13 @@ const addChip = (value) => {
 const clearBet = () => {
   emit('update:betAmount', props.minBet)
 }
+
+const chipResponsiveSize = computed(() => {
+  if (responsive.screenSize === 'xsmall' || responsive.screenSize === 'small') {
+    return 'small'
+  }
+  return 'medium'
+})
 
 const templateSuffix = computed(() => {
   const size = responsive.screenSize
