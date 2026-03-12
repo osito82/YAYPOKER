@@ -35,7 +35,7 @@
     </header>
 
     <WinnerTournamentOverlay v-if="winnerInfo?.isTournamentWinner" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
-    <WinnerOverlay v-else :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
+    <WinnerOverlay v-else-if="winnerInfo" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
 
     <div id="main-game-layout-TemplateSmall" class="flex-grow flex flex-col overflow-hidden relative">
       <!-- TOP AREA -->
