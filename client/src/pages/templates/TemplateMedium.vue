@@ -45,9 +45,9 @@
     <WinnerTournamentOverlay v-if="winnerInfo?.isTournamentWinner" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
     <WinnerOverlay v-else-if="winnerInfo" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
 
-    <div id="main-game-layout-TemplateMedium" class="flex-grow flex flex-col md:flex-row overflow-hidden relative">
+    <div id="main-game-layout-TemplateMedium" class="flex-grow flex flex-row overflow-hidden relative">
       <!-- TOP AREA -->
-      <div id="primary-game-view-TemplateMedium" class="flex flex-col min-w-0 relative flex-[7] h-full">
+      <div id="primary-game-view-TemplateMedium" class="flex flex-col min-w-0 relative flex-[4] h-full">
         <main id="poker-table-viewport-TemplateMedium" class="flex-grow flex flex-col overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]">
           <div id="poker-table-container-TemplateMedium" class="flex-grow relative min-h-0">
             <PokerTable
@@ -65,29 +65,12 @@
         <div id="game-message-terminal-wrapper-TemplateMedium" class="h-[120px] border-t border-white/5 bg-black/40 shrink-0">
           <MessageTerminal :logs="logs" />
         </div>
-
-        <footer id="game-hud-bar-TemplateMedium" class="shrink-0 z-50">
-          <ActionBar
-            :isMyTurn="isMyTurn"
-            :canBlind="canBlind"
-            :options="options"
-            :balance="myPlayer?.chips || 0"
-            :currentBet="myPlayer?.currentBet || 0"
-            :betAmount="betAmount"
-            :minBet="minBet"
-            :maxBet="maxBet"
-            :playerCards="myPlayer?.cards || []"
-            @action="(a) => $emit('action', a)"
-            @setQuickBet="(m) => $emit('setQuickBet', m)"
-            @update:betAmount="(val) => $emit('update:betAmount', val)"
-          />
-        </footer>
       </div>
 
       <!-- SIDEPANEL -->
       <PlayerSidepanel
         id="game-sidepanel-container-TemplateMedium"
-        class="flex-1 min-h-0"
+        class="w-[280px] min-h-0 border-l border-white/5"
         :players="allPlayers"
         :activePlayerId="activePlayerId"
         :myPlayerId="myPlayerId"
@@ -95,6 +78,23 @@
         :logs="logs"
       />
     </div>
+
+    <footer id="game-hud-bar-TemplateMedium" class="shrink-0 z-50 w-full">
+      <ActionBar
+        :isMyTurn="isMyTurn"
+        :canBlind="canBlind"
+        :options="options"
+        :balance="myPlayer?.chips || 0"
+        :currentBet="myPlayer?.currentBet || 0"
+        :betAmount="betAmount"
+        :minBet="minBet"
+        :maxBet="maxBet"
+        :playerCards="myPlayer?.cards || []"
+        @action="(a) => $emit('action', a)"
+        @setQuickBet="(m) => $emit('setQuickBet', m)"
+        @update:betAmount="(val) => $emit('update:betAmount', val)"
+      />
+    </footer>
   </div>
 </template>
 
