@@ -41,7 +41,8 @@
         <!-- TOP-CENTERED NOTCH (POT) -->
         <div
           :id="'pot-display-absolute-container-' + templateSuffix"
-          class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform transition-all duration-300"
+          class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform transition-all duration-300 origin-top"
+          :class="{ 'scale-[0.6]': ['small', 'xsmall'].includes(responsive.screenSize) }"
         >
         
           <PotDisplay
