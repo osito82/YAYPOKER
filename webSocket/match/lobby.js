@@ -139,12 +139,6 @@ class MatchLobby {
         this.match.pauseTimeouts.delete(player.name)
       }
 
-      const stillPaused = this.match.players.some((p) => !p.connected)
-      if (!stillPaused && this.match.stepChecker.checkStep('pause')) {
-        this.match.stepChecker.revokeStep('pause')
-        this.match.continue(thisSocket)
-      }
-
       this.match.log
         .Template({
           name: 'brakets',
@@ -152,6 +146,50 @@ class MatchLobby {
           date: true,
         })
         .R({ name: player.name, id: player.id, secretCode: player.secretCode })
+
+      // Verificar si el juego estaba pausado por falta de jugadores y continuar si es necesario
+      const stillPaused = this.match.players.some((p) => !p.connected)
+      if (!stillPaused && this.match.stepChecker.checkStep('pause')) {
+        this.match.stepChecker.revokeStep('pause')
+        this.match.continue(thisSocket)
+      }
+
+      // SALIR AQUÍ: No queremos que la reconexión ejecute lógica de "nuevo jugador"
+      this.match.communicator.msgBuilder('signUp', 'private', player, {
+        method: 'signUp',
+        id: thisSocketId,
+        hostId: this.match.hostId,
+        gameId: this.match.gameId
+      })
+
+      Socket.sendToPlayer(
+        this.match.torneoId,
+        player.secretCode,
+        this.match.communicator.getMsg(),
+      )
+
+      // ✅ NOTIFICAR A TODOS: Importante para que el lobby vea que el jugador está "Online" de nuevo
+      this.match.communicator.msgBuilder('signUp', 'public', player, {
+        msg: `${player.name} reconnected.`,
+        hostId: this.match.hostId,
+      })
+      Socket.broadcastToTorneo(
+        this.match.torneoId,
+        this.match.communicator.getMsg(),
+      )
+
+      this.match.comms.sendOdds(player)
+
+      // 🔥 RE-NOTIFICAR TURNO SI ES NECESARIO
+      if (this.match.activePlayerId === player.id) {
+        setTimeout(() => {
+          if (this.match.activePlayerId === player.id) {
+            this.match.actions.sendCurrentPrompt(player)
+          }
+        }, 500)
+      }
+
+      return
     } else {
       // 🆕 LÓGICA DE NUEVO JUGADOR
       if (this.match.players.length >= 10) {
