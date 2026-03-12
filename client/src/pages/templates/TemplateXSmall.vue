@@ -1,6 +1,9 @@
 <template>
 <div id="main-game-layout-TemplateXSmall" class="flex-grow flex flex-col overflow-hidden relative">
   
+  <WinnerTournamentOverlay v-if="winnerInfo?.isTournamentWinner" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
+  <WinnerOverlay v-else-if="winnerInfo" :winnerInfo="winnerInfo" @close="$emit('sendMessage', { action: 'nextRound' })" />
+
   <!-- TOP AREA -->
   <div id="primary-game-view-TemplateXSmall" class="flex flex-col min-w-0 relative flex-none">
     <main id="poker-table-viewport-TemplateXSmall"

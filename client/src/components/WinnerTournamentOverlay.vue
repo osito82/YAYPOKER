@@ -10,7 +10,7 @@
     <div
       v-if="winnerInfo && isVisible"
       :id="'winner-tournament-overlay-viewport-root-' + templateSuffix"
-      class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl overflow-y-auto"
+      class="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-xl"
     >
       <!-- Confetti Cannon Placeholder Effect (CSS only) -->
       <div class="absolute inset-0 pointer-events-none overflow-hidden">
@@ -19,45 +19,46 @@
 
       <div
         :id="'winner-tournament-announcement-modal-container-' + templateSuffix"
-        class="relative w-full max-w-3xl bg-gradient-to-br from-yellow-900/20 via-gray-900 to-black border-4 border-yellow-500 rounded-[3rem] shadow-[0_0_150px_rgba(234,179,8,0.5)] my-auto overflow-hidden animate-glow"
+        class="relative w-full max-w-3xl max-h-[95vh] bg-gradient-to-br from-yellow-900/20 via-gray-900 to-black border-2 sm:border-4 border-yellow-500 rounded-2xl sm:rounded-[3rem] shadow-[0_0_150px_rgba(234,179,8,0.5)] flex flex-col overflow-hidden animate-glow"
       >
         <!-- Decoration -->
         <div
           :id="'winner-tournament-modal-top-accent-line-' + templateSuffix"
-          class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"
+          class="absolute top-0 left-0 w-full h-1 sm:h-2 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"
         ></div>
 
+        <!-- Scrollable Content -->
         <div
-          :id="'winner-tournament-modal-main-content-layout-' + templateSuffix"
-          class="p-8 sm:p-12 flex flex-col items-center text-center"
+          :id="'winner-tournament-modal-scrollable-content-' + templateSuffix"
+          class="p-6 sm:p-12 flex flex-col items-center text-center overflow-y-auto custom-scrollbar"
         >
           <!-- Big Trophy Icon -->
           <div
             :id="'winner-tournament-trophy-icon-wrapper-' + templateSuffix"
-            class="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-b from-yellow-300 to-yellow-600 rounded-full flex items-center justify-center mb-6 sm:mb-8 shadow-[0_0_50px_rgba(234,179,8,0.6)] animate-bounce-slow"
+            class="w-16 h-16 sm:w-32 sm:h-32 bg-gradient-to-b from-yellow-300 to-yellow-600 rounded-full flex items-center justify-center mb-4 sm:mb-8 shadow-[0_0_50px_rgba(234,179,8,0.6)] shrink-0 animate-bounce-slow"
           >
-             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 sm:h-16 sm:w-16 text-black" viewBox="0 0 24 24" fill="currentColor">
+             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 sm:h-16 sm:w-16 text-black" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18 2H6V4H2V9C2 12.866 5.134 16 9 16V18H7V22H17V18H15V16C18.866 16 22 12.866 22 9V4H18V2ZM4 9V6H6V14C4.895 14 4 13.105 4 12V9ZM20 12C20 13.105 19.105 14 18 14V6H20V12Z" />
              </svg>
           </div>
 
           <h1
             :id="'winner-tournament-congratulations-text-' + templateSuffix"
-            class="text-2xl sm:text-3xl font-black text-yellow-500 uppercase tracking-[0.3em] mb-4 animate-pulse"
+            class="text-lg sm:text-3xl font-black text-yellow-500 uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-2 sm:mb-4 animate-pulse shrink-0"
           >
             Tournament Champion
           </h1>
 
           <h2
             :id="'winner-tournament-announcement-title-text-' + templateSuffix"
-            class="text-5xl sm:text-7xl font-black text-white uppercase tracking-tighter mb-4 sm:mb-6"
+            class="text-3xl sm:text-7xl font-black text-white uppercase tracking-tighter mb-2 sm:mb-6 shrink-0"
           >
             {{ winnerName }}
           </h2>
 
           <div
             :id="'winner-tournament-total-prize-amount-display-' + templateSuffix"
-            class="text-6xl sm:text-8xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 mb-8 sm:mb-12 drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)]"
+            class="text-5xl sm:text-8xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 mb-6 sm:mb-12 drop-shadow-[0_5px_15px_rgba(0,0,0,0.5)] shrink-0"
           >
             ${{ totalAmount }}
           </div>
@@ -65,10 +66,10 @@
           <!-- Victory Message -->
           <div
             :id="'winner-tournament-victory-message-box-' + templateSuffix"
-            class="bg-white/5 border border-yellow-500/30 rounded-3xl p-6 sm:p-8 w-full max-w-lg mb-8 relative overflow-hidden backdrop-blur-sm"
+            class="bg-white/5 border border-yellow-500/30 rounded-2xl sm:rounded-3xl p-4 sm:p-8 w-full max-w-lg mb-6 sm:mb-8 relative overflow-hidden backdrop-blur-sm shrink-0"
           >
             <div class="absolute inset-0 bg-yellow-500/5"></div>
-            <p :id="'winner-tournament-victory-subtext-' + templateSuffix" class="text-xl sm:text-2xl font-bold text-gray-200 relative z-10 leading-relaxed">
+            <p :id="'winner-tournament-victory-subtext-' + templateSuffix" class="text-lg sm:text-2xl font-bold text-gray-200 relative z-10 leading-relaxed">
               {{ winnerName }} has conquered the table and claimed the ultimate prize!
             </p>
           </div>
@@ -76,20 +77,20 @@
           <!-- Footer Info & Timer -->
           <div
             :id="'winner-tournament-overlay-footer-action-area-' + templateSuffix"
-            class="w-full flex flex-col items-center gap-4 sm:gap-6"
+            class="w-full flex flex-col items-center gap-3 sm:gap-6 shrink-0"
           >
             <div
               :id="'winner-tournament-overlay-lobby-timer-layout-' + templateSuffix"
-              class="flex flex-col items-center gap-3 text-sm sm:text-base font-black text-gray-400 uppercase tracking-widest"
+              class="flex flex-col items-center gap-1 sm:gap-3 text-xs sm:text-base font-black text-gray-400 uppercase tracking-widest"
             >
                <div :id="'winner-tournament-overlay-next-game-text-' + templateSuffix">Returning to Lobby in</div>
-               <div :id="'winner-tournament-overlay-countdown-timer-value-' + templateSuffix" class="text-3xl text-yellow-500">{{ countdown }}s</div>
+               <div :id="'winner-tournament-overlay-countdown-timer-value-' + templateSuffix" class="text-2xl sm:text-3xl text-yellow-500">{{ countdown }}s</div>
             </div>
 
             <!-- Visual Timer Bar -->
             <div
               :id="'winner-tournament-overlay-countdown-progress-bar-track-' + templateSuffix"
-              class="w-full max-w-md h-2 bg-white/5 rounded-full overflow-hidden border border-white/10"
+              class="w-full max-w-xs sm:max-w-md h-1.5 sm:h-2 bg-white/5 rounded-full overflow-hidden border border-white/10"
             >
               <div
                 :id="'winner-tournament-overlay-countdown-progress-bar-fill-' + templateSuffix"
@@ -101,7 +102,7 @@
             <button
               :id="'winner-tournament-overlay-close-action-button-' + templateSuffix"
               @click="handleClose"
-              class="mt-4 px-10 py-4 bg-yellow-500 hover:bg-yellow-400 text-black rounded-full text-lg font-black uppercase tracking-widest transition-all hover:scale-110 active:scale-95 shadow-[0_10px_30px_rgba(234,179,8,0.3)]"
+              class="mt-2 sm:mt-4 px-8 py-3 sm:px-10 sm:py-4 bg-yellow-500 hover:bg-yellow-400 text-black rounded-full text-base sm:text-lg font-black uppercase tracking-widest transition-all hover:scale-110 active:scale-95 shadow-[0_10px_30px_rgba(234,179,8,0.3)]"
             >
               Back to Lobby
             </button>

@@ -10,22 +10,22 @@
     <div
       v-if="winnerInfo && isVisible"
       :id="'winner-overlay-viewport-root-' + templateSuffix"
-      class="fixed inset-0 z-[100] flex items-start justify-center p-4 sm:items-center bg-black/80 backdrop-blur-md overflow-y-auto"
+      class="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md"
     >
       <div
         :id="'winner-announcement-modal-container-' + templateSuffix"
-        class="relative w-full max-w-2xl bg-gradient-to-br from-gray-900 via-gray-800 to-black border-2 border-yellow-500/50 rounded-[2rem] shadow-[0_0_100px_rgba(234,179,8,0.3)] my-auto overflow-hidden"
+        class="relative w-full max-w-2xl max-h-[95vh] bg-gradient-to-br from-gray-900 via-gray-800 to-black border-2 border-yellow-500/50 rounded-2xl sm:rounded-[2rem] shadow-[0_0_100px_rgba(234,179,8,0.3)] flex flex-col overflow-hidden"
       >
         <!-- Close Button -->
         <button
           :id="'winner-overlay-close-action-button-' + templateSuffix"
           @click="handleClose"
-          class="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 transition-all z-[120] p-2 rounded-full border border-white/10 flex items-center justify-center shadow-lg hover:scale-110 active:scale-90"
+          class="absolute top-3 right-3 sm:top-4 sm:right-4 text-white bg-black/40 hover:bg-black/60 transition-all z-[120] p-1.5 sm:p-2 rounded-full border border-white/10 flex items-center justify-center shadow-lg hover:scale-110 active:scale-90"
           aria-label="Close"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
+            class="h-5 w-5 sm:h-6 sm:w-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -45,18 +45,19 @@
           class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"
         ></div>
 
+        <!-- Scrollable Content -->
         <div
-          :id="'winner-modal-main-content-layout-' + templateSuffix"
-          class="p-6 sm:p-8 flex flex-col items-center text-center"
+          :id="'winner-modal-scrollable-content-' + templateSuffix"
+          class="p-4 sm:p-8 flex flex-col items-center text-center overflow-y-auto custom-scrollbar"
         >
           <!-- Trophy Icon -->
           <div
             :id="'winner-trophy-icon-wrapper-' + templateSuffix"
-            class="w-16 h-16 sm:w-20 sm:h-20 bg-yellow-500 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-[0_0_30px_rgba(234,179,8,0.4)] animate-bounce"
+            class="w-12 h-12 sm:w-20 sm:h-20 bg-yellow-500 rounded-full flex items-center justify-center mb-3 sm:mb-6 shadow-[0_0_30px_rgba(234,179,8,0.4)] shrink-0 animate-bounce"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-8 w-8 sm:h-10 sm:w-10 text-black"
+              class="h-6 w-6 sm:h-10 sm:w-10 text-black"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -70,7 +71,7 @@
 
           <h2
             :id="'winner-announcement-title-text-' + templateSuffix"
-            class="text-4xl sm:text-5xl font-black text-white uppercase tracking-tighter mb-1 sm:mb-2"
+            class="text-2xl sm:text-5xl font-black text-white uppercase tracking-tighter mb-1 shrink-0"
           >
             {{ winnerNames }}
             <span :id="'winner-announcement-title-suffix-' + templateSuffix" class="text-yellow-500">{{
@@ -80,7 +81,7 @@
 
           <div
             :id="'winner-total-prize-amount-display-' + templateSuffix"
-            class="text-5xl sm:text-6xl font-mono font-black text-yellow-400 mb-4 sm:mb-6 drop-shadow-lg"
+            class="text-4xl sm:text-6xl font-mono font-black text-yellow-400 mb-4 sm:mb-6 drop-shadow-lg shrink-0"
           >
             +${{ totalAmount }}
           </div>
@@ -88,13 +89,13 @@
           <!-- Winning Hands -->
           <div
             :id="'winners-hands-list-wrapper-' + templateSuffix"
-            class="w-full flex flex-col items-center"
+            class="w-full flex flex-col items-center gap-3 sm:gap-4 mb-6"
           >
             <div
               v-for="(winner, idx) in winners"
               :id="'winner-hand-item-box-' + idx + '-' + templateSuffix"
               :key="'winner-' + idx"
-              class="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 w-full mb-4 last:mb-6 relative overflow-hidden"
+              class="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 w-full relative overflow-hidden shrink-0"
             >
               <div
                 :id="'winner-hand-item-background-glow-' + idx + '-' + templateSuffix"
@@ -102,13 +103,13 @@
               ></div>
               <span
                 :id="'winner-hand-item-label-text-' + idx + '-' + templateSuffix"
-                class="text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-2 sm:mb-3 relative z-10"
+                class="text-[10px] sm:text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-1 sm:mb-3 relative z-10"
                 >{{
                   winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand'
                 }}</span>
               <div
                 :id="'winner-hand-item-poker-rank-name-' + idx + '-' + templateSuffix"
-                class="text-2xl sm:text-3xl font-bold text-white mb-3 sm:mb-4 relative z-10"
+                class="text-xl sm:text-3xl font-bold text-white mb-2 sm:mb-4 relative z-10"
               >
                 {{ winner.handName }}
               </div>
@@ -116,21 +117,20 @@
               <div
                 v-if="flattenCards(winner.winningCards).length > 0"
                 :id="'winner-hand-item-cards-visual-row-' + idx + '-' + templateSuffix"
-                class="flex justify-center gap-2 sm:gap-3 relative z-10 scale-90 sm:scale-100"
+                class="flex justify-center gap-1 sm:gap-3 relative z-10 scale-75 sm:scale-100"
               >
                 <Card
                   v-for="(card, i) in flattenCards(winner.winningCards)"
                   :id="'winner-hand-item-specific-card-' + idx + '-' + i + '-' + templateSuffix"
                   :key="'card-' + i"
-                  :size="responsive.cardSize"
-                  :percentage="responsive.cardPercentage"
+                  size="small"
                   :numSymbol="card"
                 />
               </div>
               <div
                 v-else
                 :id="'winner-hand-item-empty-cards-message-' + idx + '-' + templateSuffix"
-                class="text-[12px] text-gray-400 italic relative z-10"
+                class="text-[10px] sm:text-[12px] text-gray-400 italic relative z-10"
               >
                 (No cards shown)
               </div>
@@ -138,21 +138,21 @@
           </div>
 
           <!-- Other Players -->
-          <div :id="'showdown-opponents-hands-section-' + templateSuffix" class="w-full text-left">
+          <div :id="'showdown-opponents-hands-section-' + templateSuffix" class="w-full text-left shrink-0">
             <span
               :id="'showdown-opponents-hands-label-' + templateSuffix"
-              class="text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-2 sm:mb-3 border-b border-white/5 pb-2"
+              class="text-[10px] sm:text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-2 sm:mb-3 border-b border-white/5 pb-2"
               >Showdown / Opponents</span
             >
             <div
               :id="'showdown-opponents-hands-scroll-grid-' + templateSuffix"
-              class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-h-40 sm:max-h-48 overflow-y-auto pr-2 custom-scrollbar"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 max-h-32 sm:max-h-48 overflow-y-auto pr-2 custom-scrollbar"
             >
               <div
                 v-for="player in opponentsHands"
                 :id="'opponent-hand-item-box-' + player.playerId + '-' + templateSuffix"
                 :key="player.playerId"
-                class="flex items-center justify-between bg-black/20 p-2 sm:p-3 rounded-xl border border-white/5"
+                class="flex items-center justify-between bg-black/20 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-white/5"
               >
                 <div
                   :id="'opponent-hand-item-info-wrapper-' + player.playerId + '-' + templateSuffix"
@@ -160,13 +160,13 @@
                 >
                   <div
                     :id="'opponent-hand-item-player-name-' + player.playerId + '-' + templateSuffix"
-                    class="text-sm font-bold text-white truncate"
+                    class="text-xs sm:text-sm font-bold text-white truncate"
                   >
                     {{ player.name }}
                   </div>
                   <div
                     :id="'opponent-hand-item-poker-rank-' + player.playerId + '-' + templateSuffix"
-                    class="text-[10px] text-gray-400 italic uppercase tracking-tighter truncate"
+                    class="text-[9px] sm:text-[10px] text-gray-400 italic uppercase tracking-tighter truncate"
                   >
                     {{
                       player.pokerHand || (player.folded ? 'Folded' : 'Active')
@@ -175,7 +175,7 @@
                 </div>
                 <div
                   :id="'opponent-hand-item-cards-visual-wrapper-' + player.playerId + '-' + templateSuffix"
-                  class="flex -space-x-4 sm:-space-x-5 opacity-80 scale-75 sm:scale-90 origin-right"
+                  class="flex -space-x-3 sm:-space-x-5 opacity-80 scale-60 sm:scale-90 origin-right"
                 >
                   <template
                     v-if="player.show && flattenCards(player.show).length > 0"
@@ -216,11 +216,11 @@
           <!-- Footer Info & Timer -->
           <div
             :id="'winner-overlay-footer-action-area-' + templateSuffix"
-            class="mt-6 sm:mt-8 w-full flex flex-col items-center gap-3 sm:gap-4"
+            class="mt-6 sm:mt-8 w-full flex flex-col items-center gap-3 sm:gap-4 shrink-0"
           >
             <div
               :id="'winner-overlay-next-round-timer-layout-' + templateSuffix"
-              class="flex gap-4 sm:gap-6 text-[12px] font-black text-gray-300 uppercase tracking-widest"
+              class="flex gap-4 sm:gap-6 text-[10px] sm:text-[12px] font-black text-gray-300 uppercase tracking-widest"
             >
               <div
                 :id="'winner-overlay-next-round-countdown-wrapper-' + templateSuffix"
@@ -228,7 +228,7 @@
               >
                 <div
                   :id="'winner-overlay-countdown-status-pulse-' + templateSuffix"
-                  class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"
+                  class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-green-500 rounded-full animate-pulse"
                 ></div>
                 Next Round in {{ countdown }}s
               </div>
@@ -238,7 +238,7 @@
             <!-- Visual Timer Bar -->
             <div
               :id="'winner-overlay-countdown-progress-bar-track-' + templateSuffix"
-              class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden"
+              class="w-full h-1 sm:h-1.5 bg-white/5 rounded-full overflow-hidden"
             >
               <div
                 :id="'winner-overlay-countdown-progress-bar-fill-' + templateSuffix"
@@ -251,14 +251,14 @@
               :id="'winner-overlay-continue-playing-action-button-' + templateSuffix"
               @click="handleClose"
               :disabled="isWaiting"
-              class="mt-2 px-6 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 disabled:hover:bg-white/10 border border-white/10 rounded-full text-[12px] sm:text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+              class="mt-1 sm:mt-2 px-5 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 disabled:hover:bg-white/10 border border-white/10 rounded-full text-[10px] sm:text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
             >
               <div
                 v-if="isWaiting"
                 :id="'winner-overlay-waiting-status-loading-spinner-' + templateSuffix"
-                class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                class="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
               ></div>
-              {{ isWaiting ? 'Waiting for others...' : 'Play New Game' }}
+              {{ isWaiting ? 'Waiting for others...' : 'Continue Next Round' }}
             </button>
           </div>
         </div>
