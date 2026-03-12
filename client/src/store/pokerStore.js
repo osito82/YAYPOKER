@@ -29,6 +29,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const lobbyTimer = ref(null)
   const hostId = ref(null)
   const isGameStarted = ref(false)
+  const stepChecker = ref({})
 
   // Getters
   const getSocketMessage = computed(() => socketMessage.value)
@@ -49,6 +50,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getLobbyTimer = computed(() => lobbyTimer.value)
   const getHostId = computed(() => hostId.value)
   const getIsGameStarted = computed(() => isGameStarted.value)
+  const getStepChecker = computed(() => stepChecker.value || {})
 
   const getCurrentHand = computed(() => {
     const me = players.value.find((p) => p.id === myInfo.value.id)
@@ -66,6 +68,11 @@ export const usePokerStore = defineStore('pokerStore', () => {
       if (!gameData) return
 
       console.log('POKER_STORE - Received:', gameData.action, gameData)
+
+      // Update stepChecker
+      if (gameData.stepChecker) {
+        stepChecker.value = gameData.stepChecker
+      }
 
       // Update game started state based on server stepChecker
       if (gameData.stepChecker?.startGame) {
@@ -294,6 +301,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getLobbyTimer,
     getHostId,
     getIsGameStarted,
+    getStepChecker,
 
     // Actions
     setSocketMessage,

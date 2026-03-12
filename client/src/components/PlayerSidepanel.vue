@@ -35,9 +35,42 @@
         :class="[
           player.id === delayedActivePlayerId
             ? 'bg-yellow-500/20 border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.15)] z-10'
+            : isPlayerWinner(player.id)
+            ? 'bg-emerald-500/20 border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.15)] z-10'
             : 'bg-white/[0.03] hover:bg-white/[0.06]',
         ]"
       >
+        <!-- SHOWDOWN HEADER (Badge & Hand Name) -->
+        <div 
+          v-if="isShowDown && player.cards && player.cards.length > 0"
+          class="flex items-center justify-between mb-2 pb-2 border-b border-white/5"
+        >
+          <div class="flex items-center gap-2">
+            <span 
+              v-if="isPlayerWinner(player.id)"
+              class="px-2 py-0.5 rounded bg-emerald-500 text-[10px] font-black text-black uppercase tracking-tighter animate-bounce"
+            >
+              Winner
+            </span>
+            <span class="text-[11px] font-black text-gray-300 uppercase tracking-widest truncate">
+              {{ formatHandName(getPlayerHandName(player)) }}
+            </span>
+          </div>
+          
+          <!-- SHOWDOWN CARDS (Mini view for everyone) -->
+          <div class="flex gap-1">
+            <Card 
+              v-for="(card, idx) in player.cards" 
+              :key="idx"
+              :numSymbol="card"
+              size="small"
+              :highlight="isCardWinning(player.id, card)"
+              :percentage="50"
+              class="scale-90"
+            />
+          </div>
+        </div>
+
         <!-- Player Info -->
         <div
           :id="'player-item-info-wrapper-' + player.id + '-' + templateSuffix"
@@ -55,11 +88,18 @@
                   v-if="player.id === delayedActivePlayerId"
                   class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse shrink-0"
                 ></div>
+                <!-- Winner Indicator Dot -->
+                <div
+                  v-else-if="isPlayerWinner(player.id)"
+                  class="w-2 h-2 bg-emerald-500 rounded-full animate-ping shrink-0"
+                ></div>
+
                 <span
                   :id="'player-item-display-name-' + player.id + '-' + templateSuffix"
                   class="font-black text-xl text-gray-100 truncate uppercase tracking-tight transition-all duration-500"
                   :class="{
                     'text-yellow-400': player.id === delayedActivePlayerId,
+                    'text-emerald-400': isPlayerWinner(player.id),
                   }"
                 >
                   {{ player.name }}
@@ -85,6 +125,12 @@
                   Current Turn
                 </span>
                 <span
+                  v-else-if="isPlayerWinner(player.id)"
+                  class="text-[10px] font-bold uppercase tracking-widest text-emerald-500/90"
+                >
+                  {{ getPlayerHandName(player) || 'Winning Hand' }}
+                </span>
+                <span
                   v-else-if="player.folded"
                   class="text-[10px] font-bold uppercase tracking-widest text-gray-500"
                 >
@@ -94,14 +140,8 @@
                   v-else-if="!player.isConnected"
                   class="text-[10px] font-bold uppercase tracking-widest text-red-500/70"
                 >
-                  Done
+                  Offline
                 </span>
-                <span
-  v-else-if="!player.isConnected"
-  class="text-[10px] font-bold uppercase tracking-widest text-red-500/70"
->
-  Offline
-</span>
               </div>
             </div>
 
@@ -130,7 +170,7 @@
             class="flex items-end justify-between mt-2 pt-2 border-t border-white/5"
           >
             <!-- Current Bet (Bottom Left) -->
-            <div class="flex flex-col">
+            <div class="flex flex-col flex-1">
               <template v-if="player.currentBet > 0">
                 <span
                   class="text-[9px] font-black text-emerald-500/70 uppercase tracking-wider mb-0.5"
@@ -206,8 +246,11 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { usePokerStore } from '../store/pokerStore'
+import Card from './Card.vue'
 
 const responsive = useResponsiveStore()
+const pokerStore = usePokerStore()
 
 const templateSuffix = computed(() => {
   const size = responsive.screenSize
@@ -225,6 +268,54 @@ const props = defineProps({
 
 const delayedActivePlayerId = ref(props.activePlayerId)
 const justActedPlayerId = ref(null)
+
+const isShowDown = computed(() => pokerStore.getStepChecker.showDown || pokerStore.getWinnerInfo !== null)
+
+const winnerInfo = computed(() => pokerStore.getWinnerInfo)
+const winners = computed(() => {
+  if (!winnerInfo.value) return []
+  if (winnerInfo.value.winners) return winnerInfo.value.winners
+  if (winnerInfo.value.winner) return [winnerInfo.value.winner]
+  return []
+})
+const winnerIds = computed(() => winners.value.map(w => w.playerId))
+
+const isPlayerWinner = (playerId) => winnerIds.value.includes(playerId)
+
+const getPlayerHandName = (player) => {
+  // If winnerInfo has winners, find this player there
+  const winner = winners.value.find(w => w.playerId === player.id)
+  if (winner && winner.handName) return winner.handName
+
+  // Try to find in allHands in winnerInfo
+  if (winnerInfo.value?.allHands) {
+    const handData = winnerInfo.value.allHands.find(h => h.playerId === player.id)
+    if (handData?.pokerHand) return handData.pokerHand
+  }
+
+  // Fallback to player object
+  if (player.currentPrize?.pokerHand) return player.currentPrize.pokerHand
+  
+  return ''
+}
+
+const isCardWinning = (playerId, card) => {
+  const winner = winners.value.find(w => w.playerId === playerId)
+  if (!winner || !winner.winningCards) return false
+  
+  // winner.winningCards might be nested or flat, flatten it
+  const winningCards = winner.winningCards.flat()
+  return winningCards.includes(card)
+}
+
+const formatHandName = (name) => {
+  if (!name) return ''
+  // camelCase to spaced UPPERCASE
+  return name
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/^./, (str) => str.toUpperCase())
+    .toUpperCase()
+}
 
 watch(
   () => props.activePlayerId,
