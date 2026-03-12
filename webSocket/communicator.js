@@ -22,7 +22,16 @@ class Communicator {
 
   censoredPlayersInfo(players) {
     if (!players) return []
-    return players.map((p) => p.toJson())
+    const isShowDown = this.stepChecker.checkStep('showDown')
+    const isRunout = this.match.isRunout
+
+    return players.map((p) => {
+      const info = p.toJson()
+      if (isShowDown || isRunout) {
+        info.cards = p.getCards()
+      }
+      return info
+    })
   }
 
   myPrivateInfo(player) {

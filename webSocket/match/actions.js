@@ -744,6 +744,7 @@ class MatchActions {
       const p = canActPlayers[0]
       if (!p || (p.getCurrentBet() >= maxBet && actedPlayers.includes(p.id))) {
         this.match.isRunout = true
+        this.match.stepChecker.grantStep('showDown') // 🔥 Activar showdown para que se vean las cartas
         this.match.log
           .Template({ name: 'brakets', title: 'MATCH - RUNOUT', date: true })
           .R({ gameId: this.match.gameId })
