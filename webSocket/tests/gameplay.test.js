@@ -1175,6 +1175,97 @@ it('T0006 - Durante el juego, ignora silenciosamente intentos de reconexión con
   expect(winnerMsg.message.data.winner.name).toBe('Bob')
 }, 44000)
 
+it('T0007 - Reconexión restaura botones de acción (Check/Bet/Fold y Fold/Call/Raise)', async () => {
+  const gameCode = 'reconnect-buttons-' + Math.random().toString(36).substring(7)
+  
+  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
+  
+  await Promise.all([
+    new Promise(r => alice.ws.on('open', r)),
+    new Promise(r => bob.ws.on('open', r))
+  ])
+
+  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
+  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
+  await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
+  
+  alice.send(MOCK_ACTIONS.START_GAME)
+
+  // --- ESCENARIO 1: Botones de Ciega (Small Blind) ---
+  // Alice debe poner SB
+  await alice.waitAction('askForBlindBets')
+  
+  // Alice refresca ANTES de poner la ciega
+  alice.ws.close()
+  await new Promise(r => setTimeout(r, 100))
+  const aliceReconnect1 = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  await new Promise(r => aliceReconnect1.ws.on('open', r))
+  aliceReconnect1.send(MOCK_ACTIONS.SIGN_UP(1000))
+
+  // Alice debe recibir de nuevo la petición de ciega
+  const blindMsg = await aliceReconnect1.waitAction('askForBlindBets', 8000)
+  expect(blindMsg.message.action).toBe('askForBlindBets')
+  
+  // Ponemos las ciegas para avanzar
+  aliceReconnect1.send(MOCK_ACTIONS.SMALL_BLIND(10))
+  await bob.waitAction('askForBlindBets')
+  bob.send(MOCK_ACTIONS.BIG_BLIND(20))
+  await aliceReconnect1.waitAction('dealtPrivateCards')
+
+  // --- ESCENARIO 2: Botones de Acción (Fold/Call/Raise) ---
+  // Es el turno de Alice (Pre-flop, después de ciegas)
+  // Alice debe tener opciones de Fold/Call/Raise (porque Bob puso 20 y ella 10)
+  const preflopTurn = await aliceReconnect1.waitAction('bettingCore-firstBetting')
+  expect(preflopTurn.message.data.action).toContain('fold')
+  expect(preflopTurn.message.data.action).toContain('call')
+  expect(preflopTurn.message.data.action).toContain('raise')
+
+  // Alice refresca en su turno
+  aliceReconnect1.ws.close()
+  await new Promise(r => setTimeout(r, 100))
+  const aliceReconnect2 = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  await new Promise(r => aliceReconnect2.ws.on('open', r))
+  aliceReconnect2.send(MOCK_ACTIONS.SIGN_UP(1000))
+
+  // Debe recuperar los mismos botones (Fold/Call/Raise)
+  const restoredTurn1 = await aliceReconnect2.waitAction('bettingCore-firstBetting', 8000)
+  expect(restoredTurn1.message.data.action).toContain('fold')
+  expect(restoredTurn1.message.data.action).toContain('call')
+  expect(restoredTurn1.message.data.action).toContain('raise')
+
+  // Alice hace Call para avanzar al Flop
+  aliceReconnect2.send(MOCK_ACTIONS.CALL)
+  await bob.waitAction('bettingCore-firstBetting')
+  bob.send(MOCK_ACTIONS.CHECK)
+
+  // --- ESCENARIO 3: Botones de Acción (Check/Bet/Fold) ---
+  // Flop: Bob es el primero en actuar (SB/BB logic)
+  await aliceReconnect2.waitAction('dealerHand-flop')
+  await bob.waitAction('bettingCore-flopBetting')
+  bob.send(MOCK_ACTIONS.CHECK)
+
+  // Ahora es el turno de Alice, puede hacer Check/Bet/Fold
+  const flopTurn = await aliceReconnect2.waitAction('bettingCore-flopBetting')
+  expect(flopTurn.message.data.action).toContain('check')
+  expect(flopTurn.message.data.action).toContain('bet')
+  expect(flopTurn.message.data.action).toContain('fold')
+
+  // Alice refresca de nuevo
+  aliceReconnect2.ws.close()
+  await new Promise(r => setTimeout(r, 100))
+  const aliceReconnect3 = createClient(MOCK_PLAYERS.ALICE, gameCode)
+  await new Promise(r => aliceReconnect3.ws.on('open', r))
+  aliceReconnect3.send(MOCK_ACTIONS.SIGN_UP(1000))
+
+  // Debe recuperar Check/Bet/Fold
+  const restoredTurn2 = await aliceReconnect3.waitAction('bettingCore-flopBetting', 8000)
+  expect(restoredTurn2.message.data.action).toContain('check')
+  expect(restoredTurn2.message.data.action).toContain('bet')
+  expect(restoredTurn2.message.data.action).toContain('fold')
+
+}, 60000)
+
   /*
 GEMINI NO BORRAR
 

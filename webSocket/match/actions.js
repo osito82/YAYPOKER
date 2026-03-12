@@ -456,7 +456,23 @@ class MatchActions {
     this.setBet(thisSocket, chipsToBet, 'setRise')
   }
 
-  askForBlindBets(thisSocket) {
+  sendCurrentPrompt(player) {
+    if (!player) return
+    const sc = this.match.stepChecker
+    if (!sc.checkStep('blindsBetting')) {
+      this.askForBlindBets(player, true)
+    } else if (!sc.checkStep('firstBetting')) {
+      this.bettingCore(player, 'firstBetting', true)
+    } else if (!sc.checkStep('flop_Bet_Step')) {
+      this.bettingCore(player, 'flopBetting', true)
+    } else if (!sc.checkStep('turn_Bet_Step')) {
+      this.bettingCore(player, 'turnBetting', true)
+    } else if (!sc.checkStep('river_Bet_Step')) {
+      this.bettingCore(player, 'riverBetting', true)
+    }
+  }
+
+  askForBlindBets(thisSocket, isRefresh = false) {
     const activePlayers = this.match.getActivePlayers(true)
 
     if (activePlayers.length < 2) {
@@ -510,7 +526,7 @@ class MatchActions {
       }
 
       if (p) {
-        if (this.match.activePlayerId === p.id) return
+        if (!isRefresh && this.match.activePlayerId === p.id) return
 
         const isSB = p === p1
         this.match.activePlayerId = p.id
@@ -520,7 +536,7 @@ class MatchActions {
         this.match.log
           .Template({
             name: 'brakets',
-            title: 'MATCH - Asking Blinds',
+            title: isRefresh ? 'MATCH - Refreshing Blinds' : 'MATCH - Asking Blinds',
             date: true,
           })
           .R({ player: p.name, type: isSB ? 'SB' : 'BB' })
@@ -699,7 +715,7 @@ class MatchActions {
     )
   }
 
-  bettingCore = (thisSocket, bettingFor) => {
+  bettingCore = (thisSocket, bettingFor, isRefresh = false) => {
     if (this.match.stepChecker.checkStep('winner')) return
 
     const activePlayers = this.match.getActivePlayers(true)
@@ -789,7 +805,8 @@ class MatchActions {
       ) // ✅ Delay for chip movement
     } else {
       const p = playersToAct[0]
-      if (this.match.activePlayerId === p.id) return
+      // Si no es un refresco y ya es el turno del jugador, no hacemos nada
+      if (!isRefresh && this.match.activePlayerId === p.id) return
 
       this.match.activePlayerId = p.id
       if (p.lastAction !== 'Out') p.setLastAction('')
@@ -811,7 +828,7 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Waiting Player Act',
+          title: isRefresh ? 'MATCH - Refreshing Turn' : 'MATCH - Waiting Player Act',
           date: true,
         })
         .R({
