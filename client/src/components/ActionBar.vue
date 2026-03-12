@@ -150,6 +150,33 @@
               </button>
             </template>
           </div>
+
+          <!-- Quick Chips Row -->
+          <div 
+            v-if="isMyTurn && (options.includes('bet') || options.includes('raise'))"
+            :id="'hud-quick-chips-row-' + templateSuffix"
+            class="flex items-center gap-2 mt-1"
+          >
+            <div class="flex flex-1 gap-3 overflow-x-auto no-scrollbar py-1">
+              <button
+                v-for="chip in chips"
+                :key="chip.value"
+                @click="addChip(chip.value)"
+                :id="'hud-chip-' + chip.label + '-' + templateSuffix"
+                :class="[chip.color, chip.text, chip.border || 'border-black/10']"
+                class="w-8 h-8 lg:w-11 lg:h-11 rounded-full flex items-center justify-center text-[10px] lg:text-[11px] font-black shadow-lg border-2 border-dashed active:scale-90 transition-all flex-shrink-0 hover:brightness-110"
+              >
+                {{ chip.label }}
+              </button>
+            </div>
+            <button
+              @click="clearBet"
+              :id="'hud-clear-bet-button-' + templateSuffix"
+              class="h-8 lg:h-11 px-3 bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 active:scale-95 transition-all"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -181,6 +208,25 @@ const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
 const progress = ref(100)
 let timerInterval = null
+
+const chips = [
+  { color: 'bg-white', text: 'text-gray-900', value: 1, label: '1' },
+  { color: 'bg-red-600', text: 'text-white', value: 5, label: '5' },
+  { color: 'bg-blue-600', text: 'text-white', value: 10, label: '10' },
+  { color: 'bg-green-600', text: 'text-white', value: 25, label: '25' },
+  { color: 'bg-black', text: 'text-white', value: 100, label: '100', border: 'border-white/40' },
+  { color: 'bg-purple-600', text: 'text-white', value: 500, label: '500' },
+]
+
+const addChip = (value) => {
+  const current = props.betAmount || props.minBet
+  const newAmount = Math.min(props.maxBet, current + value)
+  emit('update:betAmount', newAmount)
+}
+
+const clearBet = () => {
+  emit('update:betAmount', props.minBet)
+}
 
 const templateSuffix = computed(() => {
   const size = responsive.screenSize
