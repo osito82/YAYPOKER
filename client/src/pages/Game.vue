@@ -172,8 +172,8 @@ const sendAction = (action) => {
         [action === 'bet' ? 'chipsToBet' : 'chipsToRiseBet']: betAmount.value,
       }); break
     case 'blind':
-      const isS = pokerStore.getDisplayMsg?.toLowerCase().includes('small')
-      sendMessage({ action: 'setBet', chipsToBet: isS ? 10 : 20 }); break
+      const blindAmount = pokerStore.myInfo.requiredBlind || (pokerStore.getDisplayMsg?.toLowerCase().includes('small') ? 10 : 20)
+      sendMessage({ action: 'setBet', chipsToBet: blindAmount }); break
   }
 }
 

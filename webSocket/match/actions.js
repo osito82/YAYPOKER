@@ -589,6 +589,7 @@ class MatchActions {
         if (!isRefresh && this.match.activePlayerId === p.id) return
 
         const isSB = p === p1
+        const blindAmount = isSB ? 10 : 20
         this.match.activePlayerId = p.id
         this.match.turnStartedAt = Date.now()
 
@@ -608,9 +609,11 @@ class MatchActions {
             playerSecret: p.secretCode,
             dealerCards: this.match.cardsDealer,
             type: isSB ? 'SB' : 'BB',
+            amount: blindAmount,
           })
         this.match.communicator.msgBuilder(`askForBlindBets`, 'public', p, {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
+          blindAmount,
         })
         Socket.broadcastToTorneo(
           this.match.torneoId,
@@ -619,6 +622,7 @@ class MatchActions {
         this.match.communicator.msgBuilder(`askForBlindBets`, 'private', p, {
           id: p.id,
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
+          blindAmount,
         })
         Socket.sendToPlayer(
           this.match.torneoId,
@@ -693,13 +697,17 @@ class MatchActions {
 
       if (potWinners.length > 0) {
         const splitAmount = Math.floor(pot.amount / potWinners.length)
-        potWinners.forEach((pw) => {
+        const remainder = pot.amount % potWinners.length
+
+        potWinners.forEach((pw, pwIndex) => {
           const playerId = pw.playerId || pw.id
           const player = this.match.players.find((p) => p.id === playerId)
 
           if (player) {
-            player.chips += splitAmount
-            totalPotDistributed += splitAmount
+            const amountToGive =
+              pwIndex === 0 ? splitAmount + remainder : splitAmount
+            player.chips += amountToGive
+            totalPotDistributed += amountToGive
 
             if (!winnersAggregation[playerId]) {
               const winningHand = isFold
@@ -715,7 +723,7 @@ class MatchActions {
                 winningCards: isFold ? [] : winningHand?.show || [],
               }
             }
-            winnersAggregation[playerId].amount += splitAmount
+            winnersAggregation[playerId].amount += amountToGive
 
             this.match.log
               .Template({
@@ -728,7 +736,7 @@ class MatchActions {
                 handId: this.match.currentHandId,
                 winner: player.name,
                 potIndex: index,
-                amount: splitAmount,
+                amount: amountToGive,
                 isFold,
               })
           }

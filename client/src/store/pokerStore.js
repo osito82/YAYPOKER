@@ -180,6 +180,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
       } else if (gameData.action === 'askForBlindBets') {
         activePlayerId.value = gameData.data.id
         bettingOptions.value = ['blind']
+        displayMsg.value = gameData.data.displayMsg || ''
+        if (gameData.data.blindAmount) {
+          myInfo.value.requiredBlind = gameData.data.blindAmount
+        }
         autofoldStartTime.value = Date.now()
         autofoldDuration.value = gameData.autofoldDuration || 600
       } else if (gameData.action?.startsWith('bettingCore')) {

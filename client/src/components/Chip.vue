@@ -1,6 +1,6 @@
 <template>
   <div
-    :id="'poker-chip-' + value + '-' + size"
+    :id="'poker-chip-' + value + '-' + size + '-' + responsive.templateSuffix"
     :class="[
       chipSize.container,
       'relative rounded-full flex items-center justify-center select-none cursor-pointer transition-all duration-200 group',
@@ -50,6 +50,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useResponsiveStore } from '../store/responsiveStore'
+
+const responsive = useResponsiveStore()
 
 const props = defineProps({
   value: [Number, String],
