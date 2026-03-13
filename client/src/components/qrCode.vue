@@ -2,8 +2,8 @@
   <div>
     <QRCodeVue3
       v-if="renderComponent"
-      :width="300"
-      :height="300"
+      :width="width"
+      :height="height"
       :value="computedGameCode"
       :qrOptions="{ typeNumber: 0, mode: 'Byte', errorCorrectionLevel: 'H' }"
       :imageOptions="{ hideBackgroundDots: true, imageSize: 0.4, margin: 0 }"
@@ -31,10 +31,13 @@
 <script setup>
 import QRCodeVue3 from 'qrcode-vue3'
 import { computed, ref, nextTick } from 'vue'
-import { usePokerStore } from '../store/pokerStore'
 import { urlsFactory } from '../vutils'
 
-const pokerStore = usePokerStore()
+const props = defineProps({
+  width: { type: Number, default: 300 },
+  height: { type: Number, default: 300 },
+  gameCode: { type: String, required: true }
+})
 
 const renderComponent = ref(true)
 
@@ -47,6 +50,6 @@ const forceRender = async () => {
 const computedGameCode = computed(() => {
   forceRender()
   const urls = urlsFactory()
-  return `${urls.url}/?game=${pokerStore.getGameCredentials.gameCode}`
+  return `${urls.url}/join/${props.gameCode}`
 })
 </script>

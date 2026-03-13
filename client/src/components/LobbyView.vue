@@ -16,23 +16,32 @@
       >
         <Logo :id="`lobby-brand-logo-${templateSuffix}`" :class="logoScale" />
         
-        <div :id="`game-code-badge-wrapper-${templateSuffix}`" class="relative group">
-          <div 
-            :id="`game-code-display-badge-${templateSuffix}`"
-            class="bg-yellow-500/10 border border-yellow-500/20 rounded-full mb-4 cursor-pointer hover:bg-yellow-500/20 transition-all active:scale-95 flex items-center justify-center gap-2"
-            :class="badgePadding"
-            @click="copyCode"
-          >
-            <span :id="`game-code-label-${templateSuffix}`" class="font-black text-yellow-600 uppercase tracking-[0.2em]" :class="badgeLabelSize">Table Code:</span>
-            <span :id="`game-code-value-${templateSuffix}`" class="text-yellow-500 font-mono font-black tracking-widest" :class="badgeValueSize">{{ gameCode }}</span>
+        <div :id="`generated-table-code-display-box-${templateSuffix}`" class="flex flex-col items-center gap-4 mb-4">
+          <div :id="`qr-code-container-${templateSuffix}`" class="bg-white p-3 rounded-2xl shadow-2xl border-4 border-yellow-500/20 group hover:border-yellow-500/40 transition-all duration-500">
+             <qrCode :width="qrSize" :height="qrSize" :gameCode="gameCode" />
           </div>
-          <!-- Tooltip -->
-          <div 
-            v-if="copyStatus === 'Copied!'"
-            :id="`copy-status-tooltip-${templateSuffix}`"
-            class="absolute -top-10 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black px-3 py-1 rounded uppercase tracking-widest shadow-xl animate-bounce"
-          >
-            Copied!
+          
+          <div :id="`game-code-copy-wrapper-${templateSuffix}`" class="relative">
+            <div 
+              :id="`game-code-copy-button-${templateSuffix}`"
+              class="bg-yellow-500/10 border border-yellow-500/20 rounded-full cursor-pointer hover:bg-yellow-500/20 transition-all active:scale-95 flex items-center justify-center gap-3 group"
+              :class="badgePadding"
+              @click="copyToClipboard"
+            >
+              <span :id="`game-code-label-${templateSuffix}`" class="font-black text-yellow-600 uppercase tracking-[0.2em]" :class="badgeLabelSize">Table Code:</span>
+              <span :id="`game-code-value-${templateSuffix}`" class="text-yellow-500 font-mono font-black tracking-widest" :class="badgeValueSize">{{ gameCode }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-500/50 group-hover:text-yellow-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <!-- Tooltip -->
+            <div 
+              v-if="copyStatus === 'Copied!'"
+              :id="`copy-status-tooltip-${templateSuffix}`"
+              class="absolute -top-12 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest shadow-2xl animate-bounce z-10 whitespace-nowrap"
+            >
+              Copied!
+            </div>
           </div>
         </div>
 
@@ -157,7 +166,9 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { urlsFactory, copyToClipboard as copyToClipboardUtil } from '../vutils'
 import Logo from './Logo.vue'
+import qrCode from './qrCode.vue'
 
 const props = defineProps({
   players: { type: Array, required: true },
@@ -171,15 +182,25 @@ const responsive = useResponsiveStore()
 const isHost = computed(() => props.myId === props.hostId)
 const copyStatus = ref('')
 
-const copyCode = async () => {
-  try {
-    await navigator.clipboard.writeText(props.gameCode)
+const qrSize = computed(() => {
+  const size = responsive.screenSize
+  if (size === 'xsmall') return 120
+  if (size === 'small') return 160
+  return 200
+})
+
+const shareUrl = computed(() => {
+  const urls = urlsFactory()
+  return `${urls.url}/join/${props.gameCode}`
+})
+
+const copyToClipboard = async () => {
+  const success = await copyToClipboardUtil(shareUrl.value)
+  if (success) {
     copyStatus.value = 'Copied!'
     setTimeout(() => {
       copyStatus.value = ''
     }, 2000)
-  } catch (err) {
-    // Fallback or error handling
   }
 }
 
