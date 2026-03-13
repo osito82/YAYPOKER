@@ -44,8 +44,8 @@ class Dealer {
 
   setFinalHands = () => {
     this.log
-      .Template({ name: 'brakets', title: 'DEALER - Final Hands', date: true })
-      .R({ gameId: this.gameId })
+      .Template({ name: 'brakets', title: 'DEALER:FINAL_HANDS', date: true })
+      .R({ gameId: this.gameId, dealerCards: this.cardsDealer })
     this.finalHands = []
     this.players.forEach((player) => {
       const prize = player.getCurrentPrize() || {}
@@ -117,10 +117,10 @@ class Dealer {
     this.log
       .Template({
         name: 'brakets',
-        title: 'DEALER - Collecting Chips',
+        title: 'DEALER:COLLECTING_CHIPS',
         date: true,
       })
-      .R({ currentPot: this.pot })
+      .R({ currentPot: this.pot, dealerCards: this.cardsDealer })
     this.players.forEach((player) => player.giveChipsToDealer())
   }
 
@@ -128,10 +128,10 @@ class Dealer {
     this.log
       .Template({
         name: 'brakets',
-        title: 'DEALER - Dealing Players',
+        title: 'DEALER:DEALING_PLAYERS',
         date: true,
       })
-      .R({ count: numberOfCards, deckLeft: this.deck.length })
+      .R({ count: numberOfCards, deckLeft: this.deck.length, dealerCards: this.cardsDealer })
 
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
@@ -147,10 +147,10 @@ class Dealer {
     this.log
       .Template({
         name: 'brakets',
-        title: 'DEALER - Dealing Table',
+        title: 'DEALER:DEALING_TABLE',
         date: true,
       })
-      .R({ count: numberOfCards, deckLeft: this.deck.length })
+      .R({ count: numberOfCards, deckLeft: this.deck.length, dealerCards: this.cardsDealer })
     for (let i = 0; i < numberOfCards; i++) {
       const cardToDeal = this.deck.shift()
       if (cardToDeal) {

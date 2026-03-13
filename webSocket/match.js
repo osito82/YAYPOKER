@@ -34,6 +34,8 @@ class Match {
   constructor(torneoId, gameId) {
     this.torneoId = torneoId
     this.gameId = gameId
+    this.handCount = 0
+    this.currentHandId = null
 
     this.players = []
     this.acceptingPlayers = true
@@ -50,6 +52,12 @@ class Match {
 
     this.hostId = null
 
+    this.initHand()
+  }
+
+  initHand() {
+    this.handCount++
+    this.currentHandId = `${this.gameId}-H${this.handCount}`
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.shuffledDeck = initialDeck
 
@@ -57,7 +65,7 @@ class Match {
       this.gameId,
       this.players,
       initialDeck,
-      torneoId,
+      this.torneoId,
       this.pot,
       [], // Start with empty array for dealer cards
     )
@@ -87,10 +95,15 @@ class Match {
     this.log
       .Template({
         name: 'brakets',
-        title: 'MATCH - New Game Created',
+        title: 'MATCH:NEW_HAND',
         date: true,
       })
-      .R({ torneoId, gameId })
+      .R({ 
+        torneoId: this.torneoId, 
+        gameId: this.gameId, 
+        handId: this.currentHandId,
+        dealerCards: this.cardsDealer
+      })
   }
 
   /**
@@ -207,8 +220,12 @@ class Match {
     }
     if (!this.stepChecker.checkStep('showDown')) {
       this.log
-        .Template({ name: 'brakets', title: 'MATCH - Showdown', date: true })
-        .R(this.dealer.getFinalHands())
+        .Template({ name: 'brakets', title: 'MATCH:SHOWDOWN', date: true })
+        .R({
+          handId: this.currentHandId,
+          finalHands: this.dealer.getFinalHands(),
+          dealerCards: this.cardsDealer
+        })
       this.communicator.msgBuilder('showDown', 'public', null, {
         method: 'showDown',
         showDown: this.dealer.getFinalHands(),
@@ -253,10 +270,17 @@ class Match {
     this.acceptingPlayers = false
     const oldGameId = this.gameId
     this.gameId = generateUniqueId()
+    this.handCount++
+    this.currentHandId = `${this.gameId}-H${this.handCount}`
 
     this.log
-      .Template({ name: 'brakets', title: 'MATCH - Restarting', date: true })
-      .R({ oldGameId, newGameId: this.gameId })
+      .Template({ name: 'brakets', title: 'MATCH:RESTARTING', date: true })
+      .R({ 
+        oldGameId, 
+        newGameId: this.gameId,
+        handId: this.currentHandId,
+        dealerCards: this.cardsDealer
+      })
 
     this.pot = 0
     this.playersFold = []

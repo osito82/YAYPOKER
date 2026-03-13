@@ -15,17 +15,20 @@ class MatchComms {
       )
     } else {
       this.match.log
-        .Template({ name: 'brakets', title: 'MATCH - Chat Error', date: true })
+        .Template({ name: 'brakets', title: 'ERROR:CHAT_ERROR', date: true })
         .R({ msg: 'Target not found', targetPlayerId })
     }
   }
 
   stats(socketId) {
     this.match.log
-      .Template({ name: 'brakets', title: 'MATCH - Stats', date: true })
+      .Template({ name: 'brakets', title: 'MATCH:STATS', date: true })
       .R({
+        handId: this.match.currentHandId,
         pot: this.match.dealer.getPot(),
-        players: this.match.players.length,
+        playerCount: this.match.players.length,
+        players: this.match.players.map(p => ({ name: p.name, connected: p.connected, chips: p.chips })),
+        dealerCards: this.match.cardsDealer,
       })
   }
 

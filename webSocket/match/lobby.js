@@ -14,10 +14,16 @@ class MatchLobby {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Player Ready',
+          title: 'LOBBY:PLAYER_READY',
           date: true,
         })
-        .R({ player: foundPlayer.name })
+        .R({ 
+          handId: this.match.currentHandId,
+          player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer
+        })
 
       this.match.communicator.msgBuilder('playerReady', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} is ready!`,
@@ -55,13 +61,15 @@ class MatchLobby {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Start Failed',
+          title: 'ERROR:START_FAILED',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           reason: 'Not enough ready players',
           readyCount: readyPlayers.length,
           connectedCount,
+          dealerCards: this.match.cardsDealer
         })
 
       this.match.communicator.msgBuilder('lobbyError', 'public', null, {
@@ -78,8 +86,12 @@ class MatchLobby {
     }
 
     this.match.log
-      .Template({ name: 'brakets', title: 'MATCH - Game Starting', date: true })
-      .R({ readyPlayers: readyPlayers.map((p) => p.name) })
+      .Template({ name: 'brakets', title: 'LOBBY:GAME_STARTING', date: true })
+      .R({
+        handId: this.match.currentHandId,
+        readyPlayers: readyPlayers.map((p) => p.name),
+        dealerCards: this.match.cardsDealer
+      })
 
     this.noMorePlayers()
     this.match.stepChecker.grantStep('signUp')
@@ -142,10 +154,18 @@ class MatchLobby {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Player Reconnected',
+          title: 'LOBBY:PLAYER_RECONNECTED',
           date: true,
         })
-        .R({ name: player.name, id: player.id, secretCode: player.secretCode })
+        .R({
+          handId: this.match.currentHandId,
+          name: player.name,
+          id: player.id,
+          playerCards: player.cards,
+          playerSecret: player.secretCode,
+          dealerCards: this.match.cardsDealer,
+          chips: player.chips
+        })
 
       // Verificar si el juego estaba pausado por falta de jugadores y continuar si es necesario
       const stillPaused = this.match.players.some((p) => !p.connected)
@@ -248,14 +268,16 @@ class MatchLobby {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - New Player Joined',
+          title: 'LOBBY:PLAYER_JOIN',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           name: player.name,
+          playerSecret: player.secretCode,
+          dealerCards: this.match.cardsDealer,
           chips: player.chips,
           num: playerNumber,
-          secretCode: player.secretCode,
           isHost: this.match.hostId === thisSocketId,
         })
     }
@@ -303,10 +325,10 @@ class MatchLobby {
     this.match.log
       .Template({
         name: 'brakets',
-        title: 'MATCH - Registration Closed',
+        title: 'LOBBY:REGISTRATION_CLOSED',
         date: true,
       })
-      .R({ gameId: this.match.gameId })
+      .R({ handId: this.match.currentHandId, gameId: this.match.gameId, dealerCards: this.match.cardsDealer })
 
     this.match.communicator.msgBuilder('noMorePlayers', 'public', null, {
       displayMsg: 'Registration closed. Game in progress.',
@@ -327,8 +349,15 @@ class MatchLobby {
       this.match.actions.clearAutofold()
       this.match.stepChecker.grantStep('pause')
       this.match.log
-        .Template({ name: 'brakets', title: 'MATCH - PAUSE', date: true })
-        .R({ player: foundPlayer.name, reason: 'Disconnected' })
+        .Template({ name: 'brakets', title: 'LOBBY:PLAYER_PAUSED', date: true })
+        .R({ 
+          handId: this.match.currentHandId, 
+          player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer,
+          reason: 'Disconnected' 
+        })
 
       this.match.communicator.msgBuilder('pause', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} disconnected. Waiting ${time / 1000} seconds for reconnection...`,
@@ -371,10 +400,16 @@ class MatchLobby {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Player Leaving',
+          title: 'LOBBY:PLAYER_LEAVE',
           date: true,
         })
-        .R({ player: playerLeaving.name })
+        .R({ 
+          handId: this.match.currentHandId,
+          player: playerLeaving.name,
+          playerCards: playerLeaving.cards,
+          playerSecret: playerLeaving.secretCode,
+          dealerCards: this.match.cardsDealer
+        })
       if (this.match.activePlayerId === playerLeaving.id) {
         this.match.activePlayerId = null
         this.match.actions.clearAutofold()

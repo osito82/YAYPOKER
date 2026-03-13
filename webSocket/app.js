@@ -23,7 +23,7 @@ process.on('uncaughtException', (error) => {
   log
     .Template({
       name: 'brakets',
-      title: 'SERVER - Uncaught Exception',
+      title: 'SERVER:UNCAUGHT_EXCEPTION',
       date: true,
     })
     .R({ error: error.message, stack: error.stack })
@@ -33,7 +33,7 @@ process.on('unhandledRejection', (reason, promise) => {
   log
     .Template({
       name: 'brakets',
-      title: 'SERVER - Unhandled Rejection',
+      title: 'SERVER:UNHANDLED_REJECTION',
       date: true,
     })
     .R({ reason: reason?.message || reason, stack: reason?.stack })
@@ -45,7 +45,7 @@ setInterval(() => {
   const removedCount = Torneo.removeInactiveMatches(3600000) // 1 hour idle
   if (removedCount > 0) {
     log
-      .Template({ name: 'brakets', title: 'SERVER - GC', date: true })
+      .Template({ name: 'brakets', title: 'SERVER:GC', date: true })
       .R({ msg: 'Cleaned up inactive matches', count: removedCount })
   }
 }, 600000)
@@ -128,7 +128,7 @@ wss.on('connection', (ws, req) => {
   }
 
   log
-    .Template({ name: 'brakets', title: 'SERVER - New Connection', date: true })
+    .Template({ name: 'brakets', title: 'SERVER:NEW_CONNECTION', date: true })
     .R({ playerName, id: thisSocket.id, torneo: torneoId, secretCode })
 
   Socket.addSocket(thisSocket, torneoId)
@@ -142,7 +142,7 @@ wss.on('connection', (ws, req) => {
     log
       .Template({
         name: 'brakets',
-        title: 'SERVER - Match Created',
+        title: 'SERVER:MATCH_CREATED',
         date: true,
       })
       .R({ newGameId, torneoId })
@@ -156,7 +156,7 @@ wss.on('connection', (ws, req) => {
         log
           .Template({
             name: 'brakets',
-            title: `INCOMING - ${jsonData.action}`,
+            title: `INCOMING:${jsonData.action?.toUpperCase()}`,
             date: true,
           })
           .R({ from: playerName })
@@ -164,7 +164,7 @@ wss.on('connection', (ws, req) => {
         log
           .Template({
             name: 'brakets',
-            title: 'SERVER - JSON Parse Error',
+            title: 'SERVER:JSON_PARSE_ERROR',
             date: true,
           })
           .R({ error: error.message, data: data.toString() })
@@ -180,7 +180,7 @@ wss.on('connection', (ws, req) => {
         log
           .Template({
             name: 'brakets',
-            title: 'SERVER - Validation Error',
+            title: 'SERVER:VALIDATION_ERROR',
             date: true,
           })
           .R({
@@ -200,7 +200,7 @@ wss.on('connection', (ws, req) => {
           log
             .Template({
               name: 'brakets',
-              title: 'SERVER - Handler Error',
+              title: 'SERVER:HANDLER_ERROR',
               date: true,
             })
             .R({ action: jsonData.action, error: error.message })
@@ -212,7 +212,7 @@ wss.on('connection', (ws, req) => {
         log
           .Template({
             name: 'brakets',
-            title: 'SERVER - Unknown Action',
+            title: 'SERVER:UNKNOWN_ACTION',
             date: true,
           })
           .R({ action: jsonData.action })
@@ -224,7 +224,7 @@ wss.on('connection', (ws, req) => {
     log
       .Template({
         name: 'brakets',
-        title: 'SERVER - Disconnection',
+        title: 'SERVER:DISCONNECTION',
         date: true,
       })
       .R({ playerName })
@@ -236,7 +236,7 @@ wss.on('connection', (ws, req) => {
       log
         .Template({
           name: 'brakets',
-          title: 'SERVER - Disconnection Error',
+          title: 'SERVER:DISCONNECTION_ERROR',
           date: true,
         })
         .R({ error: error.message, playerName })
@@ -248,7 +248,7 @@ wss.on('connection', (ws, req) => {
     log
       .Template({
         name: 'brakets',
-        title: 'SERVER - WebSocket Error',
+        title: 'SERVER:WEBSOCKET_ERROR',
         date: true,
       })
       .R({ playerName, error: error.message })
@@ -304,7 +304,7 @@ const BASE = process.env.VITE_WS_URL || 'localhost'
 if (require.main === module) {
   server.listen(PORT, () => {
     log
-      .Template({ name: 'brakets', title: 'SERVER - Listening', date: true })
+      .Template({ name: 'brakets', title: 'SERVER:LISTENING', date: true })
       .R({
         port: PORT,
         url: `${PROTOCOL}://${BASE}:${PORT}`,

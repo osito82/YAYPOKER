@@ -11,8 +11,15 @@ class MatchActions {
     )
     if (foundPlayer) {
       this.match.log
-        .Template({ name: 'brakets', title: 'MATCH - AUTOFOLD', date: true })
-        .R({ player: foundPlayer.name })
+        .Template({ name: 'brakets', title: 'ACTION:AUTOFOLD', date: true })
+        .R({
+          handId: this.match.currentHandId,
+          player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer,
+          reason: 'Timeout',
+        })
       this.fold({ id: foundPlayer.id })
     }
   }
@@ -52,8 +59,15 @@ class MatchActions {
       this.match.dealer.setPlayerActed(foundPlayer.id)
 
       this.match.log
-        .Template({ name: 'brakets', title: 'MATCH - FOLD', date: true })
-        .R({ player: foundPlayer.name })
+        .Template({ name: 'brakets', title: 'ACTION:FOLD', date: true })
+        .R({
+          handId: this.match.currentHandId,
+          player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer,
+          pot: this.match.dealer.getPot(),
+        })
 
       this.match.communicator.msgBuilder('fold', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} folded.`,
@@ -87,10 +101,17 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - CHECK',
+          title: 'ACTION:CHECK',
           date: true,
         })
-        .R({ player: foundPlayer.name })
+        .R({
+          handId: this.match.currentHandId,
+          player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer,
+          pot: this.match.dealer.getPot(),
+        })
       this.match.communicator.msgBuilder('setCheck', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} checks`,
       })
@@ -103,11 +124,15 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Invalid Check',
+          title: 'ERROR:INVALID_CHECK',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer,
           currentBet: foundPlayer.getCurrentBet(),
           maxBet: this.match.dealer.getCurrentHighestBet(),
         })
@@ -139,10 +164,11 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Action Rejected',
+          title: 'ERROR:ACTION_REJECTED',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           player: thisSocket.name,
           reason: 'Not your turn',
           action: 'Check',
@@ -167,10 +193,11 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Action Rejected',
+          title: 'ERROR:ACTION_REJECTED',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           player: thisSocket.name,
           reason: 'Not your turn',
           action: 'Call',
@@ -194,14 +221,6 @@ class MatchActions {
 
     // Si no hay nada que igualar, se trata como un Check
     if (diff <= 0) {
-      this.match.log
-        .Template({
-          name: 'brakets',
-          title: 'MATCH - CALL AS CHECK',
-          date: true,
-        })
-        .R({ player: foundPlayer.name, diff })
-
       const checkSuccess = this.performCheck(foundPlayer)
       if (checkSuccess) {
         this.match.continue(thisSocket, this.match.constructor.timeouts.fast)
@@ -232,11 +251,15 @@ class MatchActions {
     this.match.log
       .Template({
         name: 'brakets',
-        title: `MATCH - ${actionType.toUpperCase()}`,
+        title: `ACTION:${actionType.toUpperCase()}`,
         date: true,
       })
       .R({
+        handId: this.match.currentHandId,
         player: foundPlayer.name,
+        playerCards: foundPlayer.cards,
+        playerSecret: foundPlayer.secretCode,
+        dealerCards: this.match.cardsDealer,
         added: amountAdded,
         totalBet: foundPlayer.getCurrentBet(),
         remainingChips: foundPlayer.chips,
@@ -264,10 +287,11 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Action Rejected',
+          title: 'ERROR:ACTION_REJECTED',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           player: thisSocket.name,
           reason: 'Not your turn or no active player',
           expected: this.match.activePlayerId,
@@ -290,11 +314,15 @@ class MatchActions {
         this.match.log
           .Template({
             name: 'brakets',
-            title: 'MATCH - Raise Rejected',
+            title: 'ERROR:RAISE_REJECTED',
             date: true,
           })
           .R({
+            handId: this.match.currentHandId,
             player: foundPlayer.name,
+            playerCards: foundPlayer.cards,
+            playerSecret: foundPlayer.secretCode,
+            dealerCards: this.match.cardsDealer,
             amount,
             currentMax: currentMaxBet,
             myRaise: myRaiseAmount,
@@ -325,11 +353,15 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Raise Rejected',
+          title: 'ERROR:RAISE_REJECTED',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer,
           amount,
           currentMax: currentMaxBet,
           reason: 'Raise must be higher than current highest bet',
@@ -391,11 +423,15 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: `MATCH - ${actionType.toUpperCase()}`,
+          title: `ACTION:${actionType.toUpperCase()}`,
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer,
           added: addedChips,
           totalBet: currentBetAfter,
           newPot: this.match.dealer.getPot(),
@@ -425,11 +461,15 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Bet Failed',
+          title: 'ERROR:BET_FAILED',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           player: foundPlayer.name,
+          playerCards: foundPlayer.cards,
+          playerSecret: foundPlayer.secretCode,
+          dealerCards: this.match.cardsDealer,
           amount,
           chips: foundPlayer.chips,
           reason: 'Insufficient chips or invalid amount',
@@ -479,10 +519,11 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Not Enough Active Players',
+          title: 'MATCH:NOT_ENOUGH_PLAYERS',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           activeCount: activePlayers.length,
           totalCount: this.match.players.length,
           players: this.match.players.map((p) => ({
@@ -510,10 +551,14 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: 'MATCH - Blinds Completed',
+          title: 'MATCH:BLINDS_COMPLETED',
           date: true,
         })
-        .R({ pot: this.match.dealer.getPot() })
+        .R({
+          handId: this.match.currentHandId,
+          pot: this.match.dealer.getPot(),
+          dealerCards: this.match.cardsDealer
+        })
       this.match.activePlayerId = null
       this.match.stepChecker.grantStep('blindsBetting')
       this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
@@ -530,16 +575,24 @@ class MatchActions {
 
         const isSB = p === p1
         this.match.activePlayerId = p.id
+        this.match.turnStartedAt = Date.now()
 
         if (p.lastAction !== 'Out') p.setLastAction('')
 
         this.match.log
           .Template({
             name: 'brakets',
-            title: isRefresh ? 'MATCH - Refreshing Blinds' : 'MATCH - Asking Blinds',
+            title: isRefresh ? 'MATCH:REFRESH_BLINDS' : 'MATCH:ASK_BLINDS',
             date: true,
           })
-          .R({ player: p.name, type: isSB ? 'SB' : 'BB' })
+          .R({
+            handId: this.match.currentHandId,
+            player: p.name,
+            playerCards: p.cards,
+            playerSecret: p.secretCode,
+            dealerCards: this.match.cardsDealer,
+            type: isSB ? 'SB' : 'BB'
+          })
         this.match.communicator.msgBuilder(`askForBlindBets`, 'public', p, {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
         })
@@ -603,11 +656,15 @@ class MatchActions {
         this.match.log
           .Template({
             name: 'brakets',
-            title: 'MATCH - HAND WINNER',
+            title: 'MATCH:HAND_WINNER',
             date: true,
           })
           .R({
+            handId: this.match.currentHandId,
             winner: player.name,
+            playerCards: player.cards,
+            playerSecret: player.secretCode,
+            dealerCards: this.match.cardsDealer,
             amount: splitPot,
             isFold,
           })
@@ -663,13 +720,15 @@ class MatchActions {
     this.match.log
       .Template({
         name: 'brakets',
-        title: 'MATCH - HAND RESULT',
+        title: 'MATCH:HAND_RESULT',
         date: true,
       })
       .R({
+        handId: this.match.currentHandId,
         winners: winnersInfo.map((w) => w.name),
         pot,
         isFold,
+        dealerCards: this.match.cardsDealer,
       })
 
     this.match.communicator.msgBuilder('winner', 'public', null, {
@@ -693,12 +752,15 @@ class MatchActions {
     this.match.log
       .Template({
         name: 'brakets',
-        title: 'MATCH - TOURNAMENT WINNER',
+        title: 'MATCH:TOURNAMENT_WINNER',
         date: true,
       })
       .R({
+        handId: this.match.currentHandId,
         winner: winner.name,
         playerId: winner.playerId,
+        playerSecret: winner.secretCode, // Fixed to use winner object if provided, otherwise correct path
+        dealerCards: this.match.cardsDealer,
         chipsWon: winner.amount,
       })
 
@@ -746,8 +808,12 @@ class MatchActions {
         this.match.isRunout = true
         this.match.stepChecker.grantStep('showDown') // 🔥 Activar showdown para que se vean las cartas
         this.match.log
-          .Template({ name: 'brakets', title: 'MATCH - RUNOUT', date: true })
-          .R({ gameId: this.match.gameId })
+          .Template({ name: 'brakets', title: 'MATCH:RUNOUT', date: true })
+          .R({
+            handId: this.match.currentHandId,
+            gameId: this.match.gameId,
+            dealerCards: this.match.cardsDealer
+          })
 
         this.match.communicator.msgBuilder('runout', 'public', null, {
           displayMsg: 'All-in runout! Dealing remaining cards...',
@@ -789,10 +855,14 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: `MATCH - Betting Round ${bettingFor} Finished`,
+          title: 'MATCH:BETTING_FINISHED',
           date: true,
         })
-        .R({ pot: this.match.dealer.getPot() })
+        .R({
+          handId: this.match.currentHandId,
+          pot: this.match.dealer.getPot(),
+          dealerCards: this.match.cardsDealer
+        })
       this.match.activePlayerId = null
       this.match.dealer.clearActedPlayers()
       this.match.dealer.setCurrentHighestBet(0)
@@ -810,6 +880,8 @@ class MatchActions {
       if (!isRefresh && this.match.activePlayerId === p.id) return
 
       this.match.activePlayerId = p.id
+      this.match.turnStartedAt = Date.now()
+
       if (p.lastAction !== 'Out') p.setLastAction('')
 
       let opts = []
@@ -829,11 +901,15 @@ class MatchActions {
       this.match.log
         .Template({
           name: 'brakets',
-          title: isRefresh ? 'MATCH - Refreshing Turn' : 'MATCH - Waiting Player Act',
+          title: isRefresh ? 'MATCH:REFRESH_TURN' : 'MATCH:WAITING_PLAYER',
           date: true,
         })
         .R({
+          handId: this.match.currentHandId,
           player: p.name,
+          playerCards: p.cards,
+          playerSecret: p.secretCode,
+          dealerCards: this.match.cardsDealer,
           options: opts,
           maxBet,
           playerBet: p.getCurrentBet(),
@@ -877,13 +953,6 @@ class MatchActions {
   }
 
   dealerHand = (thisSocket, whatHand) => {
-    this.match.log
-      .Template({
-        name: 'brakets',
-        title: `MATCH - Dealer Hand: ${whatHand.toUpperCase()}`,
-        date: true,
-      })
-      .R({ gameId: this.match.gameId })
     this.match.dealer.dealCardsDealer(whatHand === 'flop' ? 3 : 1)
     const steps = {
       flop: 'flop_Dealer_Hand',
@@ -891,12 +960,27 @@ class MatchActions {
       river: 'river_Dealer_Hand',
     }
     this.match.stepChecker.grantStep(steps[whatHand])
+
+    this.match.log
+      .Template({
+        name: 'brakets',
+        title: 'DEALER:STREET',
+        date: true,
+      })
+      .R({
+        handId: this.match.currentHandId,
+        street: whatHand.toUpperCase(),
+        dealerCards: this.match.cardsDealer,
+        pot: this.match.dealer.getPot()
+      })
+
     this.match.communicator.msgBuilder(
       `dealerHand-${whatHand}`,
       'public',
       null,
       {
         displayMsg: `Dealer deals the ${whatHand}`,
+        pot: this.match.dealer.getPot()
       },
     )
     Socket.broadcastToTorneo(
@@ -909,13 +993,6 @@ class MatchActions {
 
   checkPrizes(thisSocket) {
     const cards = this.match.dealer.getDealerCards()
-    this.match.log
-      .Template({
-        name: 'brakets',
-        title: 'MATCH - Checking Prizes',
-        date: true,
-      })
-      .R({ cardsCount: cards.length })
     if (cards.length >= 3) {
       this.match.players.forEach((p) => {
         if (p && !p.folded) p.setCurrentPrize(p.checkPrize(cards))
@@ -927,6 +1004,19 @@ class MatchActions {
       }
       this.match.stepChecker.grantStep(steps[cards.length])
     }
+
+    this.match.log
+      .Template({
+        name: 'brakets',
+        title: 'DEALER:CHECK_PRIZES',
+        date: true,
+      })
+      .R({
+        handId: this.match.currentHandId,
+        cardsCount: cards.length,
+        dealerCards: cards
+      })
+
     this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
   }
 
@@ -936,6 +1026,22 @@ class MatchActions {
       this.match.stepChecker.grantStep('dealtPrivateCards')
       this.match.dealer.clearActedPlayers()
 
+      this.match.log
+        .Template({
+          name: 'brakets',
+          title: 'DEALER:PRIVATE_CARDS',
+          date: true,
+        })
+        .R({
+          handId: this.match.currentHandId,
+          players: this.match.players.map(p => ({
+            name: p.name,
+            playerCards: p.cards,
+            playerSecret: p.secretCode
+          })),
+          dealerCards: this.match.cardsDealer
+        })
+
       this.match.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
         displayMsg: 'Cards dealt!',
       })
@@ -943,14 +1049,6 @@ class MatchActions {
         this.match.torneoId,
         this.match.communicator.getMsg(),
       )
-
-      this.match.log
-        .Template({
-          name: 'brakets',
-          title: 'MATCH - Private Cards Dealt',
-          date: true,
-        })
-        .R(this.match.communicator.getFullInfo())
 
       for (const player of this.match.players) {
         this.match.communicator.msgBuilder(
@@ -974,4 +1072,3 @@ class MatchActions {
 }
 
 module.exports = MatchActions
-
