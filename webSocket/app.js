@@ -5,7 +5,12 @@ const osolog = require('osolog')
 const http = require('http')
 const WebSocket = require('ws')
 
-const { generateUniqueId, randomName, generateSecretCode, socketId } = require('./utils')
+const {
+  generateUniqueId,
+  randomName,
+  generateSecretCode,
+  socketId,
+} = require('./utils')
 
 const app = express()
 const server = http.createServer(app)
@@ -106,14 +111,11 @@ const actionHandlers = {
 wss.on('connection', (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1))
 
-  const torneoId = 
-    urlParams.get('gameCode') ?? generateUniqueId()
-  
+  const torneoId = urlParams.get('gameCode') ?? generateUniqueId()
+
   const playerName = urlParams.get('playerName') ?? randomName()
- 
-  const secretCode = 
-    urlParams.get('secretCode') ?? generateSecretCode()
-      
+
+  const secretCode = urlParams.get('secretCode') ?? generateSecretCode()
 
   const thisSocket = {
     id: socketId(),
@@ -298,13 +300,11 @@ const BASE = process.env.VITE_WS_URL || 'localhost'
 
 if (require.main === module) {
   server.listen(PORT, () => {
-    log
-      .Template({ name: 'brakets', title: 'SERVER:LISTENING', date: true })
-      .R({
-        port: PORT,
-        url: `${PROTOCOL}://${BASE}:${PORT}`,
-        env: process.env.NODE_ENV || 'development',
-      })
+    log.Template({ name: 'brakets', title: 'SERVER:LISTENING', date: true }).R({
+      port: PORT,
+      url: `${PROTOCOL}://${BASE}:${PORT}`,
+      env: process.env.NODE_ENV || 'development',
+    })
   })
 }
 

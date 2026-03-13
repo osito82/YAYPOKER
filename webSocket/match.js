@@ -98,11 +98,11 @@ class Match {
         title: 'MATCH:NEW_HAND',
         date: true,
       })
-      .R({ 
-        torneoId: this.torneoId, 
-        gameId: this.gameId, 
+      .R({
+        torneoId: this.torneoId,
+        gameId: this.gameId,
         handId: this.currentHandId,
-        dealerCards: this.cardsDealer
+        dealerCards: this.cardsDealer,
       })
   }
 
@@ -225,7 +225,7 @@ class Match {
           torneoId: this.torneoId,
           handId: this.currentHandId,
           finalHands: this.dealer.getFinalHands(),
-          dealerCards: this.cardsDealer
+          dealerCards: this.cardsDealer,
         })
       this.communicator.msgBuilder('showDown', 'public', null, {
         method: 'showDown',
@@ -249,17 +249,14 @@ class Match {
     }
   }
 
-
-
-
   nextRound() {
     if (!this.waitingForNextRound) return
     this.waitingForNextRound = false
-    
+
     const playersWithChips = this.getConnectedPlayers().filter(
-      (p) => p.chips > 0
+      (p) => p.chips > 0,
     )
- 
+
     if (playersWithChips.length < 2) {
       this.log.R({ info: 'Tournament finished. No more rounds.' })
       return
@@ -276,12 +273,12 @@ class Match {
 
     this.log
       .Template({ name: 'brakets', title: 'MATCH:RESTARTING', date: true })
-      .R({ 
+      .R({
         torneoId: this.torneoId,
-        oldGameId, 
+        oldGameId,
         newGameId: this.gameId,
         handId: this.currentHandId,
-        dealerCards: this.cardsDealer
+        dealerCards: this.cardsDealer,
       })
 
     this.pot = 0

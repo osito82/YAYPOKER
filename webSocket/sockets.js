@@ -21,7 +21,11 @@ class Socket {
     } else {
       torneoSockets.set(secretCode, socket)
       this.log
-        .Template({ name: 'brakets', title: 'SERVER:NEW_CONNECTION', date: true })
+        .Template({
+          name: 'brakets',
+          title: 'SERVER:NEW_CONNECTION',
+          date: true,
+        })
         .R({ playerName: name, id, torneo: idTorneo, secretCode })
     }
   }
@@ -31,8 +35,17 @@ class Socket {
     if (torneoSockets?.has(socket.secretCode)) {
       torneoSockets.delete(socket.secretCode)
       this.log
-        .Template({ name: 'brakets', title: 'SERVER:DISCONNECTION', date: true })
-        .R({ playerName: socket.name, id: socket.id, torneo: idTorneo, secretCode: socket.secretCode })
+        .Template({
+          name: 'brakets',
+          title: 'SERVER:DISCONNECTION',
+          date: true,
+        })
+        .R({
+          playerName: socket.name,
+          id: socket.id,
+          torneo: idTorneo,
+          secretCode: socket.secretCode,
+        })
     }
   }
 
@@ -91,10 +104,7 @@ class Socket {
 
     for (const socketWrapper of torneoSockets.values()) {
       if (socketWrapper.id === socketId) {
-        if (
-          socketWrapper.socket &&
-          socketWrapper.socket.readyState === 1
-        ) {
+        if (socketWrapper.socket && socketWrapper.socket.readyState === 1) {
           socketWrapper.socket.send(JSON.stringify({ message: data }))
         }
         break

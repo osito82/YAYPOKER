@@ -131,7 +131,11 @@ class Dealer {
         title: 'DEALER:DEALING_PLAYERS',
         date: true,
       })
-      .R({ count: numberOfCards, deckLeft: this.deck.length, dealerCards: this.cardsDealer })
+      .R({
+        count: numberOfCards,
+        deckLeft: this.deck.length,
+        dealerCards: this.cardsDealer,
+      })
 
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
@@ -150,7 +154,11 @@ class Dealer {
         title: 'DEALER:DEALING_TABLE',
         date: true,
       })
-      .R({ count: numberOfCards, deckLeft: this.deck.length, dealerCards: this.cardsDealer })
+      .R({
+        count: numberOfCards,
+        deckLeft: this.deck.length,
+        dealerCards: this.cardsDealer,
+      })
     for (let i = 0; i < numberOfCards; i++) {
       const cardToDeal = this.deck.shift()
       if (cardToDeal) {

@@ -571,7 +571,7 @@ class MatchActions {
           torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           pot: this.match.dealer.getPot(),
-          dealerCards: this.match.cardsDealer
+          dealerCards: this.match.cardsDealer,
         })
       this.match.activePlayerId = null
       this.match.stepChecker.grantStep('blindsBetting')
@@ -606,7 +606,7 @@ class MatchActions {
             playerCards: p.cards,
             playerSecret: p.secretCode,
             dealerCards: this.match.cardsDealer,
-            type: isSB ? 'SB' : 'BB'
+            type: isSB ? 'SB' : 'BB',
           })
         this.match.communicator.msgBuilder(`askForBlindBets`, 'public', p, {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
@@ -831,7 +831,7 @@ class MatchActions {
             torneoId: this.match.torneoId,
             handId: this.match.currentHandId,
             gameId: this.match.gameId,
-            dealerCards: this.match.cardsDealer
+            dealerCards: this.match.cardsDealer,
           })
 
         this.match.communicator.msgBuilder('runout', 'public', null, {
@@ -881,7 +881,7 @@ class MatchActions {
           torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           pot: this.match.dealer.getPot(),
-          dealerCards: this.match.cardsDealer
+          dealerCards: this.match.cardsDealer,
         })
       this.match.activePlayerId = null
       this.match.dealer.clearActedPlayers()
@@ -993,7 +993,7 @@ class MatchActions {
         handId: this.match.currentHandId,
         street: whatHand.toUpperCase(),
         dealerCards: this.match.cardsDealer,
-        pot: this.match.dealer.getPot()
+        pot: this.match.dealer.getPot(),
       })
 
     this.match.communicator.msgBuilder(
@@ -1002,7 +1002,7 @@ class MatchActions {
       null,
       {
         displayMsg: `Dealer deals the ${whatHand}`,
-        pot: this.match.dealer.getPot()
+        pot: this.match.dealer.getPot(),
       },
     )
     Socket.broadcastToTorneo(
@@ -1037,7 +1037,7 @@ class MatchActions {
         torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         cardsCount: cards.length,
-        dealerCards: cards
+        dealerCards: cards,
       })
 
     this.match.continue(thisSocket, this.match.constructor.timeouts.fast) // ✅ Fast transition
@@ -1058,12 +1058,12 @@ class MatchActions {
         .R({
           torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
-          players: this.match.players.map(p => ({
+          players: this.match.players.map((p) => ({
             name: p.name,
             playerCards: p.cards,
-            playerSecret: p.secretCode
+            playerSecret: p.secretCode,
           })),
-          dealerCards: this.match.cardsDealer
+          dealerCards: this.match.cardsDealer,
         })
 
       this.match.communicator.msgBuilder('dealtPrivateCards', 'public', null, {

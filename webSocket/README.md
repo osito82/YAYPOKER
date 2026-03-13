@@ -34,11 +34,13 @@ webSocket/
 ## 🛠️ Instalación y Uso
 
 1.  **Instalar dependencias**:
+
     ```bash
     npm install
     ```
 
 2.  **Iniciar el servidor (con nodemon)**:
+
     ```bash
     npm start
     ```
@@ -51,10 +53,12 @@ webSocket/
 ## 🔌 API de Comunicación
 
 El servidor escucha acciones JSON como:
+
 - `signUp`: Entrada al lobby.
 - `setBet` / `setRise` / `setCall`: Acciones de apuesta.
 - `fold`: Retirada de la mano.
 - `startGame`: Inicio manual por el host.
 
 ---
+
 El motor de Poker detrás de cada mano. ♠️♥️♣️♦️

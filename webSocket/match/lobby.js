@@ -17,13 +17,13 @@ class MatchLobby {
           title: 'LOBBY:PLAYER_READY',
           date: true,
         })
-        .R({ 
-          torneoId: this.match.torneoId, 
+        .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
           playerSecret: foundPlayer.secretCode,
-          dealerCards: this.match.cardsDealer
+          dealerCards: this.match.cardsDealer,
         })
 
       this.match.communicator.msgBuilder('playerReady', 'public', foundPlayer, {
@@ -71,7 +71,7 @@ class MatchLobby {
           reason: 'Not enough ready players',
           readyCount: readyPlayers.length,
           connectedCount,
-          dealerCards: this.match.cardsDealer
+          dealerCards: this.match.cardsDealer,
         })
 
       this.match.communicator.msgBuilder('lobbyError', 'public', null, {
@@ -93,7 +93,7 @@ class MatchLobby {
         torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         readyPlayers: readyPlayers.map((p) => p.name),
-        dealerCards: this.match.cardsDealer
+        dealerCards: this.match.cardsDealer,
       })
 
     this.noMorePlayers()
@@ -168,7 +168,7 @@ class MatchLobby {
           playerCards: player.cards,
           playerSecret: player.secretCode,
           dealerCards: this.match.cardsDealer,
-          chips: player.chips
+          chips: player.chips,
         })
 
       // Verificar si el juego estaba pausado por falta de jugadores y continuar si es necesario
@@ -183,7 +183,7 @@ class MatchLobby {
         method: 'signUp',
         id: thisSocketId,
         hostId: this.match.hostId,
-        gameId: this.match.gameId
+        gameId: this.match.gameId,
       })
 
       Socket.sendToPlayer(
@@ -333,7 +333,12 @@ class MatchLobby {
         title: 'LOBBY:REGISTRATION_CLOSED',
         date: true,
       })
-      .R({ torneoId: this.match.torneoId, handId: this.match.currentHandId, gameId: this.match.gameId, dealerCards: this.match.cardsDealer })
+      .R({
+        torneoId: this.match.torneoId,
+        handId: this.match.currentHandId,
+        gameId: this.match.gameId,
+        dealerCards: this.match.cardsDealer,
+      })
 
     this.match.communicator.msgBuilder('noMorePlayers', 'public', null, {
       displayMsg: 'Registration closed. Game in progress.',
@@ -355,14 +360,14 @@ class MatchLobby {
       this.match.stepChecker.grantStep('pause')
       this.match.log
         .Template({ name: 'brakets', title: 'LOBBY:PLAYER_PAUSED', date: true })
-        .R({ 
-          torneoId: this.match.torneoId, 
-          handId: this.match.currentHandId, 
+        .R({
+          torneoId: this.match.torneoId,
+          handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
           playerSecret: foundPlayer.secretCode,
           dealerCards: this.match.cardsDealer,
-          reason: 'Disconnected' 
+          reason: 'Disconnected',
         })
 
       this.match.communicator.msgBuilder('pause', 'public', foundPlayer, {
@@ -409,13 +414,13 @@ class MatchLobby {
           title: 'LOBBY:PLAYER_LEAVE',
           date: true,
         })
-        .R({ 
-          torneoId: this.match.torneoId, 
+        .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: playerLeaving.name,
           playerCards: playerLeaving.cards,
           playerSecret: playerLeaving.secretCode,
-          dealerCards: this.match.cardsDealer
+          dealerCards: this.match.cardsDealer,
         })
       if (this.match.activePlayerId === playerLeaving.id) {
         this.match.activePlayerId = null
