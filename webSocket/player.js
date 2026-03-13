@@ -15,9 +15,18 @@ class Player {
     this.isStarted = false
     this.playerNumber = playerNumber
     this.currentBet = 0
+    this.handContribution = 0
   }
 
   currentPrize = {}
+
+  getHandContribution = () => {
+    return this.handContribution
+  }
+
+  setHandContribution = (amount) => {
+    this.handContribution = Number(amount) || 0
+  }
 
   setStarted = (status) => {
     this.isStarted = !!status
@@ -95,6 +104,7 @@ class Player {
     } else {
       this.chips -= amount
       this.currentBet += amount
+      this.handContribution += amount
       if (this.chips === 0) this.isAllIn = true
       return true
     }
@@ -109,6 +119,7 @@ class Player {
 
     // Poker Rule: If you don't have enough, you go All-In for the rest
     if (diff > this.chips) {
+      this.handContribution += this.chips
       this.currentBet += this.chips
       this.chips = 0
       this.isAllIn = true
@@ -117,6 +128,7 @@ class Player {
 
     this.chips -= diff
     this.currentBet = amount
+    this.handContribution += diff
     if (this.chips === 0) this.isAllIn = true
     return true
   }

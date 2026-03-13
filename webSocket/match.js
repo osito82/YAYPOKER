@@ -290,6 +290,7 @@ class Match {
       p.gameId = this.gameId
       p.cards = []
       p.currentBet = 0
+      p.handContribution = 0
       p.folded = p.chips <= 0
       p.lastAction = p.chips <= 0 ? 'Out' : ''
       p.isAllIn = false

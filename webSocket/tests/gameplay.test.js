@@ -1281,77 +1281,8 @@ describe('Poker Game Integration Tests', () => {
     expect(restoredTurn2.message.data.action).toContain('fold')
   }, 60000)
 
-  /*
-GEMINI NO BORRAR
-
-it('Side pot: all-in con 3 jugadores crea side pot', async () => {
-  const gameCode = 'sidepot-3p-' + Math.random().toString(36).substring(7)
-  const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
   
-  const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
-  const shorty = createClient({ name: 'Shorty', secretCode: 'shorty123' }, gameCode)
-
-  await Promise.all([
-    new Promise(r => alice.ws.on('open', r)),
-    new Promise(r => bob.ws.on('open', r)),
-    new Promise(r => shorty.ws.on('open', r))
-  ])
-
-  alice.send(MOCK_ACTIONS.SIGN_UP(1000))
-  bob.send(MOCK_ACTIONS.SIGN_UP(1000))
-  shorty.send(MOCK_ACTIONS.SIGN_UP(40))
-
-  await Promise.all([
-    alice.waitAction('signUp'),
-    bob.waitAction('signUp'),
-    shorty.waitAction('signUp')
-  ])
-
-  alice.send(MOCK_ACTIONS.START_GAME)
-  bob.send(MOCK_ACTIONS.START_GAME)
-  shorty.send(MOCK_ACTIONS.START_GAME)
-
-  await alice.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-  alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-
-  await shorty.waitAction('askForBlindBets', 5000, r => r.message.data?.displayMsg?.includes('Shorty'))
-  shorty.send(MOCK_ACTIONS.BIG_BLIND(20))
-
-  await alice.waitAction('dealtPrivateCards')
-
-  // Alice (SB) sube fuerte
-  await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Alice'))
-  alice.send(MOCK_ACTIONS.BET(200))
-
-  // Shorty all-in (solo tiene ~20 después de blind)
-  await shorty.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Shorty'))
-  shorty.send(MOCK_ACTIONS.CALL)  // → all-in
-
-  const allInMsg = await alice.waitAction('setCall', 5000)
-  expect(allInMsg.message.players.find(p => p.name === 'Shorty').isAllIn).toBe(true)
-
-  // Bob puede seguir apostando (side pot)
-  await bob.waitAction('bettingCore-firstBetting', 5000, r => r.message.data?.displayMsg?.includes('Bob'))
-  bob.send(MOCK_ACTIONS.CALL)  // call 200
-
-  // Debería avanzar al flop (ya que Shorty está all-in)
-  const flopMsg = await alice.waitAction('dealerHand-flop', 10000)
-  expect(flopMsg).toBeDefined()
-}, 45000)
 
 
 
-
-Otros tests importantes que faltan:
-Timeout del jugador: Si no actúa en X segundos, se fold automático
-
-
-Múltiples all-ins con side pots: Calcular correctamente 3+ botes
-
-Chips insuficientes para call: El jugador va all-in automáticamente
-
-Validación de que la baraja no tiene cartas repetidas
-
-
-*/
 })
