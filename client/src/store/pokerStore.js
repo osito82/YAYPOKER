@@ -13,11 +13,13 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const players = ref([])
   const communityCards = ref([])
   const pot = ref(0)
+  const pots = ref([])
   const displayMsg = ref(null)
   const dealerLog = ref([])
   const activePlayerId = ref(null)
   const bettingOptions = ref([])
   const currentHighestBet = ref(0)
+  const lastRaiseAmount = ref(0)
   const myInfo = ref({
     id: null,
     cards: [],
@@ -38,6 +40,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getPLayers = getPlayers // Alias for backward compatibility
   const getCommunityCards = computed(() => communityCards.value || [])
   const getPot = computed(() => pot.value || 0)
+  const getPots = computed(() => pots.value || [])
   const getDisplayMsg = computed(() => displayMsg.value)
   const getDealerLog = computed(() => dealerLog.value)
   const getActivePlayerId = computed(() => activePlayerId.value)
@@ -155,9 +158,13 @@ export const usePokerStore = defineStore('pokerStore', () => {
 
       // Update Table State
       if (gameData.pot !== undefined) pot.value = gameData.pot
+      if (gameData.pots !== undefined) pots.value = gameData.pots
       if (gameData.dealerCards) communityCards.value = gameData.dealerCards
       if (gameData.currentHighestBet !== undefined) {
         currentHighestBet.value = gameData.currentHighestBet
+      }
+      if (gameData.lastRaiseAmount !== undefined) {
+        lastRaiseAmount.value = gameData.lastRaiseAmount
       }
 
       // Handle Actions and Turns
@@ -177,6 +184,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
       } else if (gameData.action === 'askForBlindBets') {
         activePlayerId.value = gameData.data.id
         bettingOptions.value = ['blind']
+        displayMsg.value = gameData.data.displayMsg || ''
+        if (gameData.data.blindAmount) {
+          myInfo.value.requiredBlind = gameData.data.blindAmount
+        }
         autofoldStartTime.value = Date.now()
         autofoldDuration.value = gameData.autofoldDuration || 600
       } else if (gameData.action?.startsWith('bettingCore')) {
@@ -237,6 +248,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
         // Clear board and pot for new hand
         communityCards.value = []
         pot.value = 0
+        pots.value = []
         currentHighestBet.value = 0
         // winnerInfo.value = null // Removed to prevent premature closing for all players
       }
@@ -267,6 +279,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     players,
     communityCards,
     pot,
+    pots,
     displayMsg,
     dealerLog,
     activePlayerId,
@@ -277,6 +290,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     odds,
     autofoldStartTime,
     autofoldDuration,
+    lastRaiseAmount,
     lobbyTimer,
     hostId,
     isGameStarted,
@@ -289,6 +303,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getPLayers,
     getCommunityCards,
     getPot,
+    getPots,
     getDisplayMsg,
     getDealerLog,
     getActivePlayerId,

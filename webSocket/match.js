@@ -290,6 +290,7 @@ class Match {
       p.gameId = this.gameId
       p.cards = []
       p.currentBet = 0
+      p.handContribution = 0
       p.folded = p.chips <= 0
       p.lastAction = p.chips <= 0 ? 'Out' : ''
       p.isAllIn = false
@@ -306,6 +307,7 @@ class Match {
     this.dealer.pot = 0
     this.dealer.clearActedPlayers()
     this.dealer.setCurrentHighestBet(0)
+    this.dealer.setLastRaiseAmount(0)
     this.dealer.setLastRaiser(null)
 
     this.communicator.gameId = this.gameId

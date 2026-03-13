@@ -1,24 +1,30 @@
 <template>
   <div
-    id="card-back-crop-container"
+    :id="'card-back-crop-container-' + responsive.templateSuffix"
     class="relative overflow-hidden transition-all duration-300"
     :style="cropStyle"
   >
     <div
-      id="card-back-outer"
+      :id="'card-back-outer-' + responsive.templateSuffix"
       :class="[
         sizeOption.width,
         sizeOption.heightClass,
         'bg-white rounded-lg shadow-md border border-gray-300 relative select-none flex justify-center items-center overflow-hidden',
       ]"
     >
-      <div id="card-back-pattern" class="rayas"></div>
+      <div
+        :id="'card-back-pattern-' + responsive.templateSuffix"
+        class="rayas"
+      ></div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { useResponsiveStore } from '../store/responsiveStore'
+
+const responsive = useResponsiveStore()
 
 const props = defineProps({
   size: String,

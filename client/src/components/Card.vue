@@ -1,11 +1,11 @@
 <template>
   <div
-    id="poker-card-crop-container"
+    :id="'poker-card-crop-container-' + responsive.templateSuffix"
     class="relative overflow-hidden transition-all duration-300"
     :style="cropStyle"
   >
     <div
-      id="poker-card-outer"
+      :id="'poker-card-outer-' + responsive.templateSuffix"
       :class="[
         sizeOption.width,
         sizeOption.heightClass,
@@ -15,7 +15,7 @@
     >
       <div
         v-if="props.percentage > 55"
-        id="card-corner-top-left"
+        :id="'card-corner-top-left-' + responsive.templateSuffix"
         class="absolute top-1 left-1 flex flex-col items-center leading-none"
         :class="colorClass"
       >
@@ -38,7 +38,7 @@
       </div>
 
       <div
-        id="card-center-symbol-container"
+        :id="'card-center-symbol-container-' + responsive.templateSuffix"
         class="absolute inset-0 flex justify-center"
         :class="[colorClass, isCropped ? 'items-start pt-0' : 'items-center']"
       >
@@ -63,7 +63,7 @@
 
       <div
         v-if="props.percentage > 55"
-        id="card-corner-bottom-right"
+        :id="'card-corner-bottom-right-' + responsive.templateSuffix"
         class="absolute bottom-1 right-1 flex flex-col items-center leading-none transform rotate-180"
         :class="colorClass"
       >
@@ -91,6 +91,9 @@
 <script setup>
 import { computed } from 'vue'
 import { simbolConverter, whatColor } from '../vutils.js'
+import { useResponsiveStore } from '../store/responsiveStore'
+
+const responsive = useResponsiveStore()
 
 const props = defineProps({
   numSymbol: String,

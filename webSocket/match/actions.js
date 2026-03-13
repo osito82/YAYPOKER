@@ -1,4 +1,5 @@
 const Socket = require('../sockets')
+const { WinnerCore } = require('../winnerCore')
 
 class MatchActions {
   constructor(match) {
@@ -588,6 +589,7 @@ class MatchActions {
         if (!isRefresh && this.match.activePlayerId === p.id) return
 
         const isSB = p === p1
+        const blindAmount = isSB ? 10 : 20
         this.match.activePlayerId = p.id
         this.match.turnStartedAt = Date.now()
 
@@ -607,9 +609,11 @@ class MatchActions {
             playerSecret: p.secretCode,
             dealerCards: this.match.cardsDealer,
             type: isSB ? 'SB' : 'BB',
+            amount: blindAmount,
           })
         this.match.communicator.msgBuilder(`askForBlindBets`, 'public', p, {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
+          blindAmount,
         })
         Socket.broadcastToTorneo(
           this.match.torneoId,
@@ -618,6 +622,7 @@ class MatchActions {
         this.match.communicator.msgBuilder(`askForBlindBets`, 'private', p, {
           id: p.id,
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
+          blindAmount,
         })
         Socket.sendToPlayer(
           this.match.torneoId,
@@ -652,57 +657,95 @@ class MatchActions {
     this.clearAutofold()
 
     this.match.dealer.setFinalHands()
-
-    const winnerPlayers = Array.isArray(winnerData) ? winnerData : [winnerData]
-
-    const pot = this.match.dealer.getPot()
-    const splitPot = Math.floor(pot / winnerPlayers.length)
     const finalHands = this.match.dealer.getFinalHands()
+    const pots = this.match.dealer.calculatePots()
 
-    // repartir dinero
-    winnerPlayers.forEach((wp) => {
-      const player = this.match.players.find(
-        (p) => p.id === (wp.playerId || wp.id),
-      )
+    const winnersAggregation = {}
+    let totalPotDistributed = 0
 
+    if (pots.length === 0 && isFold) {
+      const winnerPlayerId = winnerData.playerId || winnerData.id
+      const player = this.match.players.find((p) => p.id === winnerPlayerId)
       if (player) {
-        player.chips += splitPot
+        winnersAggregation[player.id] = {
+          name: player.name,
+          playerId: player.id,
+          amount: 0,
+          handName: 'Fold Victory',
+          winningCards: [],
+        }
+      }
+    }
 
-        this.match.log
-          .Template({
-            name: 'brakets',
-            title: 'MATCH:HAND_WINNER',
-            date: true,
-          })
-          .R({
-            torneoId: this.match.torneoId,
-            handId: this.match.currentHandId,
-            winner: player.name,
-            playerCards: player.cards,
-            playerSecret: player.secretCode,
-            dealerCards: this.match.cardsDealer,
-            amount: splitPot,
-            isFold,
-          })
+    pots.forEach((pot, index) => {
+      let potWinners = []
+
+      if (isFold) {
+        // En caso de fold, el único jugador activo se lleva todos los pots
+        const winnerPlayerId = winnerData.playerId || winnerData.id
+        potWinners = [this.match.players.find((p) => p.id === winnerPlayerId)]
+      } else {
+        // Filtrar manos finales elegibles para este pot (jugadores que contribuyeron y no foldearon)
+        const eligibleHands = finalHands.filter(
+          (h) => pot.eligiblePlayerIds.includes(h.playerId) && !h.folded,
+        )
+
+        if (eligibleHands.length > 0) {
+          potWinners = WinnerCore.Winner(eligibleHands)
+        }
+      }
+
+      if (potWinners.length > 0) {
+        const splitAmount = Math.floor(pot.amount / potWinners.length)
+        const remainder = pot.amount % potWinners.length
+
+        potWinners.forEach((pw, pwIndex) => {
+          const playerId = pw.playerId || pw.id
+          const player = this.match.players.find((p) => p.id === playerId)
+
+          if (player) {
+            const amountToGive =
+              pwIndex === 0 ? splitAmount + remainder : splitAmount
+            player.chips += amountToGive
+            totalPotDistributed += amountToGive
+
+            if (!winnersAggregation[playerId]) {
+              const winningHand = isFold
+                ? null
+                : finalHands.find((h) => h.playerId === playerId)
+              winnersAggregation[playerId] = {
+                name: player.name,
+                playerId: player.id,
+                amount: 0,
+                handName: isFold
+                  ? 'Fold Victory'
+                  : winningHand?.pokerHand || 'High Card',
+                winningCards: isFold ? [] : winningHand?.show || [],
+              }
+            }
+            winnersAggregation[playerId].amount += amountToGive
+
+            this.match.log
+              .Template({
+                name: 'brakets',
+                title: `MATCH:POT_${index}_WINNER`,
+                date: true,
+              })
+              .R({
+                torneoId: this.match.torneoId,
+                handId: this.match.currentHandId,
+                winner: player.name,
+                potIndex: index,
+                amount: amountToGive,
+                isFold,
+              })
+          }
+        })
       }
     })
 
-    const winnersInfo = winnerPlayers.map((wp) => {
-      const player = this.match.players.find(
-        (p) => p.id === (wp.playerId || wp.id),
-      )
-      const winningHand = finalHands.find((h) => h.playerId === player?.id)
-
-      return {
-        name: player?.name || 'Unknown',
-        playerId: player?.id,
-        amount: splitPot,
-        handName: isFold
-          ? 'Fold Victory'
-          : winningHand?.pokerHand || 'High Card',
-        winningCards: isFold ? [] : winningHand?.show || [],
-      }
-    })
+    const winnersInfo = Object.values(winnersAggregation)
+    const pot = this.match.dealer.getPot()
 
     // verificar si ya hay ganador del torneo
     const playersWithChips = this.match.players.filter(
@@ -728,6 +771,11 @@ class MatchActions {
   }
 
   winnerHand(winnersInfo, isFold, pot, finalHands) {
+    if (!winnersInfo || winnersInfo.length === 0) {
+      this.match.log.R({ info: 'No winners to announce' })
+      return
+    }
+
     const displayMsg =
       winnersInfo.length > 1
         ? `Tie! ${winnersInfo.map((w) => w.name).join(' and ')} split $${pot}!`

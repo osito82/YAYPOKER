@@ -38,6 +38,27 @@
       </div>
     </div>
 
+    <!-- Multiple Pots Display -->
+    <div v-else-if="pots && pots.length > 1" class="flex flex-col items-center py-1">
+      <div class="flex items-center gap-2 mb-1">
+        <span class="text-xs font-black uppercase tracking-widest text-yellow-500/60">Total Pot</span>
+        <span class="text-xl font-mono font-black text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">
+          ${{ amount }}
+        </span>
+      </div>
+      <div class="flex gap-4 overflow-x-auto max-w-xs md:max-w-md no-scrollbar pb-1">
+        <div v-for="(p, index) in pots" :key="index" class="flex flex-col items-center px-2 border-l border-white/10 first:border-0">
+          <span class="text-[9px] font-bold uppercase text-white/40 tracking-tighter whitespace-nowrap">
+            {{ index === 0 ? 'Main' : 'Side ' + index }}
+          </span>
+          <span class="text-sm font-mono font-bold text-yellow-500/90 tracking-tighter">
+            ${{ p.amount }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Single Pot Display (Default) -->
     <div v-else class="flex items-center gap-2">
       <span
         class="text-2xl md:text-3xl font-mono font-black text-white
@@ -77,6 +98,7 @@ const props = defineProps({
 
 const store = usePokerStore()
 const lobbyTimer = computed(() => store.getLobbyTimer)
+const pots = computed(() => store.getPots)
 
 const localTime = ref(0)
 let interval = null
@@ -125,3 +147,13 @@ onUnmounted(() => {
   stopCountdown()
 })
 </script>
+
+<style scoped>
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
