@@ -282,6 +282,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const pokerStore = usePokerStore()
+const templateSuffix = computed(() => responsive.templateSuffix)
 const countdown = ref(15)
 const isVisible = ref(true)
 const isWaiting = ref(false)

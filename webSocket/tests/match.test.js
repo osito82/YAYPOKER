@@ -13,6 +13,7 @@ vi.mock('../player', () => {
         cards: [],
         connected: true,
         currentBet: 0,
+        handContribution: 0,
         isStarted: false,
         isAllIn: false,
         setStarted: vi.fn(function (status) {
@@ -29,6 +30,12 @@ vi.mock('../player', () => {
         setTotalBet: vi.fn(function (amount) {
           this.currentBet = amount
           return true
+        }),
+        getHandContribution: vi.fn(function () {
+          return this.handContribution
+        }),
+        setHandContribution: vi.fn(function (amount) {
+          this.handContribution = amount
         }),
         getPlayerName: vi.fn(() => name),
         getPlayerId: vi.fn(() => id),
@@ -190,6 +197,8 @@ describe('Match Class', () => {
         setFolded: vi.fn(),
         setConnected: vi.fn(),
         setStarted: vi.fn(),
+        getHandContribution: vi.fn(() => 0),
+        setHandContribution: vi.fn(),
         toJson: vi.fn(() => ({ name: 'Alice', id: 'S1' })),
         getCards: vi.fn(() => []),
       }
