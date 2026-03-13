@@ -5,7 +5,7 @@ const osolog = require('osolog')
 const http = require('http')
 const WebSocket = require('ws')
 
-const { generateUniqueId, randomName } = require('./utils')
+const { generateUniqueId, randomName, generateSecretCode, socketId } = require('./utils')
 
 const app = express()
 const server = http.createServer(app)
@@ -49,9 +49,6 @@ setInterval(() => {
       .R({ msg: 'Cleaned up inactive matches', count: removedCount })
   }
 }, 600000)
-
-// Constantes para mejorar mantenibilidad
-const MAX_ID_LENGTH = 25
 
 // Validación de datos de entrada
 const validateAction = (action, data) => {
@@ -109,19 +106,17 @@ const actionHandlers = {
 wss.on('connection', (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1))
 
-  const torneoId = (
-    urlParams.get('gameCode') ?? generateUniqueId(MAX_ID_LENGTH)
-  ).slice(0, MAX_ID_LENGTH)
-  const playerName = (urlParams.get('playerName') ?? randomName()).slice(
-    0,
-    MAX_ID_LENGTH,
-  )
-  const secretCode = (
-    urlParams.get('secretCode') ?? generateUniqueId(MAX_ID_LENGTH)
-  ).slice(0, MAX_ID_LENGTH)
+  const torneoId = 
+    urlParams.get('gameCode') ?? generateUniqueId()
+  
+  const playerName = urlParams.get('playerName') ?? randomName()
+ 
+  const secretCode = 
+    urlParams.get('secretCode') ?? generateSecretCode()
+      
 
   const thisSocket = {
-    id: generateUniqueId(MAX_ID_LENGTH),
+    id: socketId(),
     name: playerName,
     secretCode,
     socket: ws,
@@ -136,8 +131,8 @@ wss.on('connection', (ws, req) => {
   // Intentar obtener el match existente o crear uno nuevo
   let match = Torneo.getMatch(torneoId)
   if (!match) {
-    const newGameId = generateUniqueId()
-    match = new Match(torneoId, newGameId)
+    const newSocketId = socketId()
+    match = new Match(torneoId, newSocketId)
     Torneo.addMatch(match, torneoId)
     log
       .Template({
@@ -145,7 +140,7 @@ wss.on('connection', (ws, req) => {
         title: 'SERVER:MATCH_CREATED',
         date: true,
       })
-      .R({ newGameId, torneoId })
+      .R({ newSocketId, torneoId })
   }
 
   ws.on('message', (data) => {

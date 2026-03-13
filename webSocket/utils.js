@@ -23,6 +23,9 @@ function generateUniqueId() {
   return `${randomStr()}-${randomStr()}`
 }
 
+function socketId() { 
+  return uuidv4()}
+
 function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 }
@@ -213,6 +216,7 @@ module.exports = {
   compareArraysNoOrder,
   highestCardNumberFromArray,
   generateUniqueId,
+  socketId,
   generateSecretCode,
   randomName,
   flatToGetNUmbersArray,
