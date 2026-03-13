@@ -28,39 +28,43 @@
       <div :id="`lobby-form-container-${templateSuffix}`" class="space-y-10" :class="formPadding">
         <!-- MODE: Selection (Home /) -->
         <template v-if="!isCreating">
-          <!-- Create Game Section -->
-          <div v-if="!joinCode" :id="`create-game-action-section-${templateSuffix}`" class="space-y-6">
-            <button
-              :id="`create-game-submit-button-${templateSuffix}`"
-              @click="goToCreate"
-              :disabled="joinCode.length > 0"
-              class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 px-6 rounded-xl focus:outline-none transition-all transform hover:-translate-y-1 shadow-xl uppercase tracking-[0.2em] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed text-base"
-            >
-              Create New Table
-            </button>
-            <p
-              v-if="joinCode.length > 0"
-              :id="`create-game-disabled-message-${templateSuffix}`"
-              class="text-gray-400 text-[12px] text-center uppercase tracking-widest italic font-bold"
-            >
-              Clear join code to create new table
-            </p>
-          </div>
-
           <!-- Join Game Section -->
           <form
             :id="`join-game-form-section-${templateSuffix}`"
             @submit.prevent="joinGame"
             class="space-y-6"
-            :class="{ 'pt-8 border-t border-white/5': !joinCode }"
           >
+
+                    <div :id="`join-game-title-wrapper-${templateSuffix}`" class="text-center">
+            <h1 :id="`new-game-main-title-${templateSuffix}`" class="text-3xl font-black text-white uppercase tracking-[0.4em] italic">
+          
+          
+                <span v-if="joinCode">
+  Join <span class="text-yellow-500">Table</span>
+</span>
+<span v-else>
+  Join Existing <span class="text-yellow-500">Table</span>
+</span>
+         
+            </h1>
+          </div>
+
+
             <label
-              v-if="!joinCode"
               :id="`join-game-input-label-${templateSuffix}`"
               class="block text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
             >
-              Or Join Existing Table
+               Your info
             </label>
+
+
+
+
+
+
+
+
+
 
             <div :id="`join-game-inputs-wrapper-${templateSuffix}`" class="space-y-4">
               <input
@@ -131,6 +135,23 @@
               </div>
             </div>
           </form>
+
+          <!-- Create Game Section -->
+          <div :id="`create-game-action-section-${templateSuffix}`" class="pt-8 border-t border-white/5 space-y-6">
+            <label
+              :id="`create-game-input-label-${templateSuffix}`"
+              class="block text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
+            >
+              Or you can 
+            </label>
+            <button
+              :id="`create-game-submit-button-${templateSuffix}`"
+              @click="goToCreate"
+              class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 px-6 rounded-xl focus:outline-none transition-all transform hover:-translate-y-1 shadow-xl uppercase tracking-[0.2em] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed text-base"
+            >
+              Create New Table
+            </button>
+          </div>
         </template>
 
         <!-- MODE: New Game Created (/newgame) -->
@@ -139,6 +160,12 @@
           :id="`create-game-success-view-${templateSuffix}`"
           class="space-y-8 animate-fade-in"
         >
+          <div :id="`new-game-title-wrapper-${templateSuffix}`" class="text-center">
+            <h1 :id="`new-game-main-title-${templateSuffix}`" class="text-3xl font-black text-white uppercase tracking-[0.4em] italic">
+              New <span class="text-yellow-500">Game</span>
+            </h1>
+          </div>
+
           <!-- Game Code Display -->
           <div
             :id="`generated-table-code-display-box-${templateSuffix}`"
@@ -153,42 +180,10 @@
             </p>
             <p
               :id="`table-code-text-display-${templateSuffix}`"
-              class="text-3xl font-mono font-black text-yellow-500 tracking-[0.2em] mb-6"
+              class="text-3xl font-mono font-black text-yellow-500 tracking-[0.2em]"
             >
               {{ generatedCode }}
             </p>
-
-            <!-- QR Code Section -->
-            <div
-              :id="`invite-qr-code-container-${templateSuffix}`"
-              class="mt-4 flex flex-col items-center bg-white p-4 rounded-2xl mx-auto w-fit shadow-2xl animate-fade-in"
-            >
-              <QRCodeVue3
-                :id="`invite-qr-code-component-${templateSuffix}`"
-                :key="shareUrl"
-                :width="qrSize"
-                :height="qrSize"
-                :value="shareUrl"
-                :qrOptions="{
-                  typeNumber: 0,
-                  mode: 'Byte',
-                  errorCorrectionLevel: 'H',
-                }"
-                :dotsOptions="{ type: 'rounded', color: '#000000' }"
-                :backgroundOptions="{ color: '#ffffff' }"
-                :cornersSquareOptions="{
-                  type: 'extra-rounded',
-                  color: '#000000',
-                }"
-                :download="false"
-              />
-              <p
-                :id="`qr-code-instruction-text-${templateSuffix}`"
-                class="text-[11px] font-black text-gray-400 mt-4 uppercase tracking-tighter"
-              >
-                Share to invite players
-              </p>
-            </div>
           </div>
 
           <!-- Name Input for Creator -->
@@ -219,15 +214,7 @@
               />
             </div>
 
-            <div :id="`creator-actions-button-grid-${templateSuffix}`" class="grid grid-cols-2 gap-4 mt-8">
-              <button
-                :id="`copy-invite-link-button-${templateSuffix}`"
-                type="button"
-                @click="copyToClipboard"
-                class="flex items-center justify-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black py-4 px-4 rounded-xl transition-all uppercase tracking-widest text-xs"
-              >
-                <span :id="`copy-link-status-message-${templateSuffix}`">{{ copyStatus }}</span>
-              </button>
+            <div :id="`creator-actions-button-grid-${templateSuffix}`" class="mt-8">
               <button
                 :id="`start-game-submit-button-${templateSuffix}`"
                 type="submit"
@@ -235,7 +222,7 @@
                   !playerName.trim() ||
                   (secretCode.length > 0 && secretCode.length !== 4)
                 "
-                class="bg-green-600 hover:bg-green-500 text-white font-black py-4 px-4 rounded-xl shadow-xl transition-all transform hover:scale-105 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-xs"
+                class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-5 px-4 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-base"
               >
                 Start Playing
               </button>
@@ -271,7 +258,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useResponsiveStore } from '../store/responsiveStore'
 import QRCodeVue3 from 'qrcode-vue3'
 import Logo from '../components/Logo.vue'
-import { generateUniqueId, generateSecretCode, urlsFactory } from '../vutils'
+import { generateUniqueId, generateSecretCode, urlsFactory, copyToClipboard as copyToClipboardUtil } from '../vutils'
 
 const responsive = useResponsiveStore()
 const router = useRouter()
@@ -448,25 +435,13 @@ const cancelCreate = () => {
 }
 
 const copyToClipboard = async () => {
-  try {
-    if (navigator.clipboard) {
-      await navigator.clipboard.writeText(shareUrl.value)
-    } else {
-      const textarea = document.createElement('textarea')
-      textarea.value = shareUrl.value
-      textarea.style.position = 'fixed'
-      textarea.style.opacity = '0'
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-    }
-
+  const success = await copyToClipboardUtil(shareUrl.value)
+  if (success) {
     copyStatus.value = 'Copied!'
     setTimeout(() => {
       copyStatus.value = 'Copy Code'
     }, 2000)
-  } catch (err) {
+  } else {
     copyStatus.value = 'Error'
   }
 }

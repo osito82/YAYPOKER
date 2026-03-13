@@ -180,6 +180,7 @@ const sendAction = (action) => {
 const router = useRouter()
 
 onMounted(() => {
+  pokerStore.setGameCredentials(gameCode, secretCode, playerName.value)
   if (!isConnected.value) connectSocket()
   
   timeInterval = setInterval(() => {
