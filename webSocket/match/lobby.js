@@ -18,6 +18,7 @@ class MatchLobby {
           date: true,
         })
         .R({ 
+          torneoId: this.match.torneoId, 
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -65,6 +66,7 @@ class MatchLobby {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           reason: 'Not enough ready players',
           readyCount: readyPlayers.length,
@@ -88,6 +90,7 @@ class MatchLobby {
     this.match.log
       .Template({ name: 'brakets', title: 'LOBBY:GAME_STARTING', date: true })
       .R({
+        torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         readyPlayers: readyPlayers.map((p) => p.name),
         dealerCards: this.match.cardsDealer
@@ -158,6 +161,7 @@ class MatchLobby {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           name: player.name,
           id: player.id,
@@ -272,6 +276,7 @@ class MatchLobby {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           name: player.name,
           playerSecret: player.secretCode,
@@ -328,7 +333,7 @@ class MatchLobby {
         title: 'LOBBY:REGISTRATION_CLOSED',
         date: true,
       })
-      .R({ handId: this.match.currentHandId, gameId: this.match.gameId, dealerCards: this.match.cardsDealer })
+      .R({ torneoId: this.match.torneoId, handId: this.match.currentHandId, gameId: this.match.gameId, dealerCards: this.match.cardsDealer })
 
     this.match.communicator.msgBuilder('noMorePlayers', 'public', null, {
       displayMsg: 'Registration closed. Game in progress.',
@@ -351,6 +356,7 @@ class MatchLobby {
       this.match.log
         .Template({ name: 'brakets', title: 'LOBBY:PLAYER_PAUSED', date: true })
         .R({ 
+          torneoId: this.match.torneoId, 
           handId: this.match.currentHandId, 
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -404,6 +410,7 @@ class MatchLobby {
           date: true,
         })
         .R({ 
+          torneoId: this.match.torneoId, 
           handId: this.match.currentHandId,
           player: playerLeaving.name,
           playerCards: playerLeaving.cards,

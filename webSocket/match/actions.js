@@ -13,6 +13,7 @@ class MatchActions {
       this.match.log
         .Template({ name: 'brakets', title: 'ACTION:AUTOFOLD', date: true })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -61,6 +62,7 @@ class MatchActions {
       this.match.log
         .Template({ name: 'brakets', title: 'ACTION:FOLD', date: true })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -105,6 +107,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -128,6 +131,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -168,6 +172,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: thisSocket.name,
           reason: 'Not your turn',
@@ -197,6 +202,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: thisSocket.name,
           reason: 'Not your turn',
@@ -255,6 +261,7 @@ class MatchActions {
         date: true,
       })
       .R({
+        torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         player: foundPlayer.name,
         playerCards: foundPlayer.cards,
@@ -291,6 +298,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: thisSocket.name,
           reason: 'Not your turn or no active player',
@@ -318,6 +326,7 @@ class MatchActions {
             date: true,
           })
           .R({
+            torneoId: this.match.torneoId,
             handId: this.match.currentHandId,
             player: foundPlayer.name,
             playerCards: foundPlayer.cards,
@@ -357,6 +366,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -427,6 +437,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -465,6 +476,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
@@ -523,6 +535,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           activeCount: activePlayers.length,
           totalCount: this.match.players.length,
@@ -555,6 +568,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           pot: this.match.dealer.getPot(),
           dealerCards: this.match.cardsDealer
@@ -586,6 +600,7 @@ class MatchActions {
             date: true,
           })
           .R({
+            torneoId: this.match.torneoId,
             handId: this.match.currentHandId,
             player: p.name,
             playerCards: p.cards,
@@ -660,6 +675,7 @@ class MatchActions {
             date: true,
           })
           .R({
+            torneoId: this.match.torneoId,
             handId: this.match.currentHandId,
             winner: player.name,
             playerCards: player.cards,
@@ -724,6 +740,7 @@ class MatchActions {
         date: true,
       })
       .R({
+        torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         winners: winnersInfo.map((w) => w.name),
         pot,
@@ -756,6 +773,7 @@ class MatchActions {
         date: true,
       })
       .R({
+        torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         winner: winner.name,
         playerId: winner.playerId,
@@ -810,6 +828,7 @@ class MatchActions {
         this.match.log
           .Template({ name: 'brakets', title: 'MATCH:RUNOUT', date: true })
           .R({
+            torneoId: this.match.torneoId,
             handId: this.match.currentHandId,
             gameId: this.match.gameId,
             dealerCards: this.match.cardsDealer
@@ -859,6 +878,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           pot: this.match.dealer.getPot(),
           dealerCards: this.match.cardsDealer
@@ -905,6 +925,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           player: p.name,
           playerCards: p.cards,
@@ -968,6 +989,7 @@ class MatchActions {
         date: true,
       })
       .R({
+        torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         street: whatHand.toUpperCase(),
         dealerCards: this.match.cardsDealer,
@@ -1012,6 +1034,7 @@ class MatchActions {
         date: true,
       })
       .R({
+        torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         cardsCount: cards.length,
         dealerCards: cards
@@ -1033,6 +1056,7 @@ class MatchActions {
           date: true,
         })
         .R({
+          torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
           players: this.match.players.map(p => ({
             name: p.name,

@@ -24,6 +24,7 @@ class MatchComms {
     this.match.log
       .Template({ name: 'brakets', title: 'MATCH:STATS', date: true })
       .R({
+        torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
         pot: this.match.dealer.getPot(),
         playerCount: this.match.players.length,

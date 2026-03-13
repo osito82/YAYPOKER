@@ -57,7 +57,7 @@ class Match {
 
   initHand() {
     this.handCount++
-    this.currentHandId = `${this.gameId}-H${this.handCount}`
+    this.currentHandId = `h${this.handCount}`
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.shuffledDeck = initialDeck
 
@@ -222,6 +222,7 @@ class Match {
       this.log
         .Template({ name: 'brakets', title: 'MATCH:SHOWDOWN', date: true })
         .R({
+          torneoId: this.torneoId,
           handId: this.currentHandId,
           finalHands: this.dealer.getFinalHands(),
           dealerCards: this.cardsDealer
@@ -271,11 +272,12 @@ class Match {
     const oldGameId = this.gameId
     this.gameId = generateUniqueId()
     this.handCount++
-    this.currentHandId = `${this.gameId}-H${this.handCount}`
+    this.currentHandId = `h${this.handCount}`
 
     this.log
       .Template({ name: 'brakets', title: 'MATCH:RESTARTING', date: true })
       .R({ 
+        torneoId: this.torneoId,
         oldGameId, 
         newGameId: this.gameId,
         handId: this.currentHandId,
