@@ -54,6 +54,7 @@ class Communicator {
       type,
       gameId: this.gameId,
       pot: this.dealer.getPot(),
+      sidePots: this.dealer.calculatePots(),
       currentHighestBet: this.dealer.getCurrentHighestBet(),
       myPlayerInfo,
       data,

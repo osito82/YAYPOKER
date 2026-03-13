@@ -113,6 +113,58 @@ class Dealer {
     return this.pot
   }
 
+  calculatePots() {
+    // 1. Get all players who contributed something
+    const contributors = this.players.filter((p) => p.getHandContribution() > 0)
+
+    // 2. Sort contributors by contribution amount
+    const sortedContributions = [
+      ...new Set(contributors.map((p) => p.getHandContribution())),
+    ].sort((a, b) => a - b)
+
+    const pots = []
+    let prevContribution = 0
+
+    for (const currentContribution of sortedContributions) {
+      const contributionLayer = currentContribution - prevContribution
+
+      // Who contributed AT LEAST this much?
+      const whoContributed = contributors.filter(
+        (p) => p.getHandContribution() >= currentContribution,
+      )
+
+      // Who is ELIGIBLE to win this layer? (Must have contributed AND not folded)
+      const eligiblePlayers = whoContributed
+        .filter((p) => !p.folded)
+        .map((p) => p.id)
+
+      const potAmount = contributionLayer * whoContributed.length
+
+      if (potAmount > 0) {
+        pots.push({
+          amount: potAmount,
+          eligiblePlayerIds: eligiblePlayers,
+        })
+      }
+
+      prevContribution = currentContribution
+    }
+
+    // If no pots were created but there is money in the pot (shouldn't happen with contributors),
+    // but just in case, or if everyone folded.
+    if (pots.length === 0 && this.pot > 0) {
+      const activePlayers = this.players
+        .filter((p) => !p.folded)
+        .map((p) => p.id)
+      pots.push({
+        amount: this.pot,
+        eligiblePlayerIds: activePlayers,
+      })
+    }
+
+    return pots
+  }
+
   getChipsFromPlayers = () => {
     this.log
       .Template({

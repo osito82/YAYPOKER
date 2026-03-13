@@ -192,6 +192,7 @@ describe('Match Class', () => {
         setStarted: vi.fn(),
         toJson: vi.fn(() => ({ name: 'Alice', id: 'S1' })),
         getCards: vi.fn(() => []),
+        getHandContribution: vi.fn(() => 0),
       }
       match.players.push(player)
       match.activePlayerId = 'S1'

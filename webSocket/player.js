@@ -15,6 +15,7 @@ class Player {
     this.isStarted = false
     this.playerNumber = playerNumber
     this.currentBet = 0
+    this.handContribution = 0
   }
 
   currentPrize = {}
@@ -63,6 +64,10 @@ class Player {
     return this.currentBet
   }
 
+  getHandContribution = () => {
+    return this.handContribution
+  }
+
   setLastAction = (action) => {
     this.lastAction = action
   }
@@ -77,6 +82,13 @@ class Player {
   }
 
   giveChipsToDealer = () => {
+    this.currentBet = 0
+  }
+
+  resetHandContribution = () => {
+    this.handContribution = 0
+    this.isAllIn = false
+    this.folded = false
     this.currentBet = 0
   }
 
@@ -95,6 +107,7 @@ class Player {
     } else {
       this.chips -= amount
       this.currentBet += amount
+      this.handContribution += amount
       if (this.chips === 0) this.isAllIn = true
       return true
     }
@@ -109,7 +122,9 @@ class Player {
 
     // Poker Rule: If you don't have enough, you go All-In for the rest
     if (diff > this.chips) {
-      this.currentBet += this.chips
+      const actualAdded = this.chips
+      this.currentBet += actualAdded
+      this.handContribution += actualAdded
       this.chips = 0
       this.isAllIn = true
       return true
@@ -117,6 +132,7 @@ class Player {
 
     this.chips -= diff
     this.currentBet = amount
+    this.handContribution += diff
     if (this.chips === 0) this.isAllIn = true
     return true
   }
@@ -127,6 +143,7 @@ class Player {
       name: this.name,
       chips: this.chips,
       currentBet: this.currentBet,
+      handContribution: this.handContribution,
       folded: this.folded,
       isAllIn: this.isAllIn,
       isStarted: this.isStarted,

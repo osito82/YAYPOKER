@@ -174,10 +174,24 @@ class MatchActions {
         .R({
           torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
-          player: thisSocket.name,
+          player: thisSocket.name || 'Unknown',
           reason: 'Not your turn',
           action: 'Check',
         })
+
+      this.match.communicator.msgBuilder(
+        'actionRejected',
+        'private',
+        { id: thisSocket.id },
+        {
+          reason: 'not your turn',
+          displayMsg: 'It is not your turn to act.',
+        },
+      )
+      this.match.dealer.talkToSocketById(
+        thisSocket.id,
+        this.match.communicator.getMsg(),
+      )
       return
     }
 
@@ -652,56 +666,61 @@ class MatchActions {
     this.clearAutofold()
 
     this.match.dealer.setFinalHands()
+    const allFinalHands = this.match.dealer.getFinalHands()
+    const pots = this.match.dealer.calculatePots()
+    const totalPot = this.match.dealer.getPot()
 
-    const winnerPlayers = Array.isArray(winnerData) ? winnerData : [winnerData]
+    const allWinnersInfo = []
+    const { WinnerCore } = require('../winnerCore')
 
-    const pot = this.match.dealer.getPot()
-    const splitPot = Math.floor(pot / winnerPlayers.length)
-    const finalHands = this.match.dealer.getFinalHands()
-
-    // repartir dinero
-    winnerPlayers.forEach((wp) => {
-      const player = this.match.players.find(
-        (p) => p.id === (wp.playerId || wp.id),
+    pots.forEach((pot, index) => {
+      // Filtrar manos finales solo de los elegibles para este pot
+      const eligibleHands = allFinalHands.filter((h) =>
+        pot.eligiblePlayerIds.includes(h.playerId),
       )
 
-      if (player) {
-        player.chips += splitPot
+      if (eligibleHands.length === 0) return
 
-        this.match.log
-          .Template({
-            name: 'brakets',
-            title: 'MATCH:HAND_WINNER',
-            date: true,
-          })
-          .R({
-            torneoId: this.match.torneoId,
-            handId: this.match.currentHandId,
-            winner: player.name,
-            playerCards: player.cards,
-            playerSecret: player.secretCode,
-            dealerCards: this.match.cardsDealer,
+      let potWinners = []
+      if (eligibleHands.length === 1) {
+        potWinners = [eligibleHands[0]]
+      } else {
+        potWinners = WinnerCore.Winner(eligibleHands)
+      }
+
+      const splitPot = Math.floor(pot.amount / potWinners.length)
+
+      potWinners.forEach((pw) => {
+        const player = this.match.players.find((p) => p.id === pw.playerId)
+        if (player) {
+          player.chips += splitPot
+
+          this.match.log
+            .Template({
+              name: 'brakets',
+              title: `MATCH:POT_${index}_WINNER`,
+              date: true,
+            })
+            .R({
+              torneoId: this.match.torneoId,
+              handId: this.match.currentHandId,
+              winner: player.name,
+              amount: splitPot,
+              potIndex: index,
+              isFold,
+            })
+
+          const winnerInfo = {
+            name: player.name,
+            playerId: player.id,
             amount: splitPot,
-            isFold,
-          })
-      }
-    })
-
-    const winnersInfo = winnerPlayers.map((wp) => {
-      const player = this.match.players.find(
-        (p) => p.id === (wp.playerId || wp.id),
-      )
-      const winningHand = finalHands.find((h) => h.playerId === player?.id)
-
-      return {
-        name: player?.name || 'Unknown',
-        playerId: player?.id,
-        amount: splitPot,
-        handName: isFold
-          ? 'Fold Victory'
-          : winningHand?.pokerHand || 'High Card',
-        winningCards: isFold ? [] : winningHand?.show || [],
-      }
+            handName: isFold ? 'Fold Victory' : pw.pokerHand || 'High Card',
+            winningCards: isFold ? [] : pw.show || [],
+            potIndex: index,
+          }
+          allWinnersInfo.push(winnerInfo)
+        }
+      })
     })
 
     // verificar si ya hay ganador del torneo
@@ -712,9 +731,9 @@ class MatchActions {
     const isTournamentWinner = playersWithChips.length === 1
 
     if (isTournamentWinner) {
-      this.winnerTournament(winnersInfo)
+      this.winnerTournament(allWinnersInfo)
     } else {
-      this.winnerHand(winnersInfo, isFold, pot, finalHands)
+      this.winnerHand(allWinnersInfo, isFold, totalPot, allFinalHands)
     }
 
     this.match.waitingForNextRound = true
@@ -728,10 +747,17 @@ class MatchActions {
   }
 
   winnerHand(winnersInfo, isFold, pot, finalHands) {
-    const displayMsg =
-      winnersInfo.length > 1
-        ? `Tie! ${winnersInfo.map((w) => w.name).join(' and ')} split $${pot}!`
-        : `${winnersInfo[0].name} wins $${pot}${isFold ? ' (Fold)' : ''}!`
+    // Agrupar ganadores por nombre para el mensaje de display si hay múltiples pots
+    const summary = {}
+    winnersInfo.forEach((w) => {
+      summary[w.name] = (summary[w.name] || 0) + w.amount
+    })
+
+    const displayMsg = isFold
+      ? `${winnersInfo[0].name} wins $${pot} (Fold)!`
+      : Object.entries(summary)
+          .map(([name, amount]) => `${name} wins $${amount}`)
+          .join(' | ')
 
     this.match.log
       .Template({
@@ -742,8 +768,8 @@ class MatchActions {
       .R({
         torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
-        winners: winnersInfo.map((w) => w.name),
-        pot,
+        winners: Object.keys(summary),
+        totalPot: pot,
         isFold,
         dealerCards: this.match.cardsDealer,
       })

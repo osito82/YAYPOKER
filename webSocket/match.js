@@ -61,6 +61,8 @@ class Match {
     const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
     this.shuffledDeck = initialDeck
 
+    this.players.forEach((p) => p.resetHandContribution())
+
     this.dealer = new Dealer(
       this.gameId,
       this.players,

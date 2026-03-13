@@ -13,6 +13,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const players = ref([])
   const communityCards = ref([])
   const pot = ref(0)
+  const sidePots = ref([])
   const displayMsg = ref(null)
   const dealerLog = ref([])
   const activePlayerId = ref(null)
