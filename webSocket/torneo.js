@@ -75,12 +75,10 @@ class Torneo {
     }
 
     if (removedCount > 0) {
-      log
-        .Template({ name: 'brakets', title: 'TORNEO - Cleanup', date: true })
-        .R({
-          removedMatches: removedCount,
-          remainingTorneos: this.torneos.size,
-        })
+      log.Template({ name: 'brakets', title: 'TORNEO:CLEANUP', date: true }).R({
+        removedMatches: removedCount,
+        remainingTorneos: this.torneos.size,
+      })
     }
 
     return removedCount

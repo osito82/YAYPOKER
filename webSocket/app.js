@@ -5,7 +5,12 @@ const osolog = require('osolog')
 const http = require('http')
 const WebSocket = require('ws')
 
-const { generateUniqueId, randomName } = require('./utils')
+const {
+  generateUniqueId,
+  randomName,
+  generateSecretCode,
+  socketId,
+} = require('./utils')
 
 const app = express()
 const server = http.createServer(app)
@@ -23,7 +28,7 @@ process.on('uncaughtException', (error) => {
   log
     .Template({
       name: 'brakets',
-      title: 'SERVER - Uncaught Exception',
+      title: 'SERVER:UNCAUGHT_EXCEPTION',
       date: true,
     })
     .R({ error: error.message, stack: error.stack })
@@ -33,7 +38,7 @@ process.on('unhandledRejection', (reason, promise) => {
   log
     .Template({
       name: 'brakets',
-      title: 'SERVER - Unhandled Rejection',
+      title: 'SERVER:UNHANDLED_REJECTION',
       date: true,
     })
     .R({ reason: reason?.message || reason, stack: reason?.stack })
@@ -45,13 +50,10 @@ setInterval(() => {
   const removedCount = Torneo.removeInactiveMatches(3600000) // 1 hour idle
   if (removedCount > 0) {
     log
-      .Template({ name: 'brakets', title: 'SERVER - GC', date: true })
+      .Template({ name: 'brakets', title: 'SERVER:GC', date: true })
       .R({ msg: 'Cleaned up inactive matches', count: removedCount })
   }
 }, 600000)
-
-// Constantes para mejorar mantenibilidad
-const MAX_ID_LENGTH = 25
 
 // Validación de datos de entrada
 const validateAction = (action, data) => {
@@ -109,26 +111,21 @@ const actionHandlers = {
 wss.on('connection', (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1))
 
-  const torneoId = (
-    urlParams.get('gameCode') ?? generateUniqueId(MAX_ID_LENGTH)
-  ).slice(0, MAX_ID_LENGTH)
-  const playerName = (urlParams.get('playerName') ?? randomName()).slice(
-    0,
-    MAX_ID_LENGTH,
-  )
-  const secretCode = (
-    urlParams.get('secretCode') ?? generateUniqueId(MAX_ID_LENGTH)
-  ).slice(0, MAX_ID_LENGTH)
+  const torneoId = urlParams.get('gameCode') ?? generateUniqueId()
+
+  const playerName = urlParams.get('playerName') ?? randomName()
+
+  const secretCode = urlParams.get('secretCode') ?? generateSecretCode()
 
   const thisSocket = {
-    id: generateUniqueId(MAX_ID_LENGTH),
+    id: socketId(),
     name: playerName,
     secretCode,
     socket: ws,
   }
 
   log
-    .Template({ name: 'brakets', title: 'SERVER - New Connection', date: true })
+    .Template({ name: 'brakets', title: 'SERVER:NEW_CONNECTION', date: true })
     .R({ playerName, id: thisSocket.id, torneo: torneoId, secretCode })
 
   Socket.addSocket(thisSocket, torneoId)
@@ -136,16 +133,16 @@ wss.on('connection', (ws, req) => {
   // Intentar obtener el match existente o crear uno nuevo
   let match = Torneo.getMatch(torneoId)
   if (!match) {
-    const newGameId = generateUniqueId()
-    match = new Match(torneoId, newGameId)
+    const newSocketId = socketId()
+    match = new Match(torneoId, newSocketId)
     Torneo.addMatch(match, torneoId)
     log
       .Template({
         name: 'brakets',
-        title: 'SERVER - Match Created',
+        title: 'SERVER:MATCH_CREATED',
         date: true,
       })
-      .R({ newGameId, torneoId })
+      .R({ newSocketId, torneoId })
   }
 
   ws.on('message', (data) => {
@@ -156,7 +153,7 @@ wss.on('connection', (ws, req) => {
         log
           .Template({
             name: 'brakets',
-            title: `INCOMING - ${jsonData.action}`,
+            title: `INCOMING:${jsonData.action?.toUpperCase()}`,
             date: true,
           })
           .R({ from: playerName })
@@ -164,7 +161,7 @@ wss.on('connection', (ws, req) => {
         log
           .Template({
             name: 'brakets',
-            title: 'SERVER - JSON Parse Error',
+            title: 'SERVER:JSON_PARSE_ERROR',
             date: true,
           })
           .R({ error: error.message, data: data.toString() })
@@ -180,7 +177,7 @@ wss.on('connection', (ws, req) => {
         log
           .Template({
             name: 'brakets',
-            title: 'SERVER - Validation Error',
+            title: 'SERVER:VALIDATION_ERROR',
             date: true,
           })
           .R({
@@ -200,7 +197,7 @@ wss.on('connection', (ws, req) => {
           log
             .Template({
               name: 'brakets',
-              title: 'SERVER - Handler Error',
+              title: 'SERVER:HANDLER_ERROR',
               date: true,
             })
             .R({ action: jsonData.action, error: error.message })
@@ -212,7 +209,7 @@ wss.on('connection', (ws, req) => {
         log
           .Template({
             name: 'brakets',
-            title: 'SERVER - Unknown Action',
+            title: 'SERVER:UNKNOWN_ACTION',
             date: true,
           })
           .R({ action: jsonData.action })
@@ -224,7 +221,7 @@ wss.on('connection', (ws, req) => {
     log
       .Template({
         name: 'brakets',
-        title: 'SERVER - Disconnection',
+        title: 'SERVER:DISCONNECTION',
         date: true,
       })
       .R({ playerName })
@@ -236,7 +233,7 @@ wss.on('connection', (ws, req) => {
       log
         .Template({
           name: 'brakets',
-          title: 'SERVER - Disconnection Error',
+          title: 'SERVER:DISCONNECTION_ERROR',
           date: true,
         })
         .R({ error: error.message, playerName })
@@ -248,7 +245,7 @@ wss.on('connection', (ws, req) => {
     log
       .Template({
         name: 'brakets',
-        title: 'SERVER - WebSocket Error',
+        title: 'SERVER:WEBSOCKET_ERROR',
         date: true,
       })
       .R({ playerName, error: error.message })
@@ -303,13 +300,11 @@ const BASE = process.env.VITE_WS_URL || 'localhost'
 
 if (require.main === module) {
   server.listen(PORT, () => {
-    log
-      .Template({ name: 'brakets', title: 'SERVER - Listening', date: true })
-      .R({
-        port: PORT,
-        url: `${PROTOCOL}://${BASE}:${PORT}`,
-        env: process.env.NODE_ENV || 'development',
-      })
+    log.Template({ name: 'brakets', title: 'SERVER:LISTENING', date: true }).R({
+      port: PORT,
+      url: `${PROTOCOL}://${BASE}:${PORT}`,
+      env: process.env.NODE_ENV || 'development',
+    })
   })
 }
 

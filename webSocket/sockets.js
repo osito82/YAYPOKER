@@ -1,5 +1,8 @@
+const osolog = require('osolog')
+
 class Socket {
   static torneoSockets = new Map() // Map<idTorneo, Map<secretCode, socket>>
+  static log = new osolog()
 
   static addSocket(socket, idTorneo) {
     const { id, name, secretCode } = socket
@@ -12,14 +15,18 @@ class Socket {
 
     if (torneoSockets.has(secretCode)) {
       torneoSockets.set(secretCode, socket)
-      console.log(
-        `Socket - addSocket - Reconnected - ${name} (${secretCode}) - ${id}`,
-      )
+      this.log
+        .Template({ name: 'brakets', title: 'SERVER:RECONNECTED', date: true })
+        .R({ playerName: name, id, torneo: idTorneo, secretCode })
     } else {
       torneoSockets.set(secretCode, socket)
-      console.log(
-        `Socket - addSocket - Connected - ${name} (${secretCode}) - ${id}.`,
-      )
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'SERVER:NEW_CONNECTION',
+          date: true,
+        })
+        .R({ playerName: name, id, torneo: idTorneo, secretCode })
     }
   }
 
@@ -27,20 +34,20 @@ class Socket {
     const torneoSockets = this.torneoSockets.get(idTorneo)
     if (torneoSockets?.has(socket.secretCode)) {
       torneoSockets.delete(socket.secretCode)
-      console.log(
-        `Socket - removeSocket - Removed - ${socket.name} (${socket.secretCode}) - ${socket.id}.`,
-      )
-    } else if (torneoSockets) {
-      console.log(
-        `Socket - removeSocket - Not Found in Torneo - ${socket.name} (${socket.secretCode}) - ${socket.id}.`,
-      )
-    } else {
-      console.log(
-        `Socket - removeSocket - Not Found - ${socket.name} (${socket.secretCode}) - ${socket.id}.`,
-      )
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'SERVER:DISCONNECTION',
+          date: true,
+        })
+        .R({
+          playerName: socket.name,
+          id: socket.id,
+          torneo: idTorneo,
+          secretCode: socket.secretCode,
+        })
     }
   }
-
 
   static getSocketsByTorneo(idTorneo) {
     return this.torneoSockets.get(idTorneo) || null
@@ -88,8 +95,20 @@ class Socket {
       playerSocketWrapper.socket.readyState === 1
     ) {
       playerSocketWrapper.socket.send(JSON.stringify({ message: data }))
-    } else {
-      console.log(`Socket not found or invalid for secretCode: ${secretCode}`)
+    }
+  }
+
+  static sendToSocketId(idTorneo, socketId, data) {
+    const torneoSockets = this.getSocketsByTorneo(idTorneo)
+    if (!torneoSockets) return
+
+    for (const socketWrapper of torneoSockets.values()) {
+      if (socketWrapper.id === socketId) {
+        if (socketWrapper.socket && socketWrapper.socket.readyState === 1) {
+          socketWrapper.socket.send(JSON.stringify({ message: data }))
+        }
+        break
+      }
     }
   }
 
