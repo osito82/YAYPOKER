@@ -1291,77 +1291,58 @@ describe('Poker Game Integration Tests', () => {
       new Promise((r) => bob.ws.on('open', r)),
     ])
 
-    // Total inicial: 1000 + 1000 = 2000
     const TOTAL_CHIPS = 2000
-
     alice.send(MOCK_ACTIONS.SIGN_UP(1000))
     bob.send(MOCK_ACTIONS.SIGN_UP(1000))
 
-    await alice.waitAction('signUp')
-    await bob.waitAction('signUp')
-
-    // Alice es host, inicia el juego
+    await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
     alice.send(MOCK_ACTIONS.START_GAME)
 
-    // Fase de ciegas (SB: 10, BB: 20)
-    await alice.waitAction('askForBlindBets')
+    // --- CIEGAS ---
+    await alice.waitAction('askForBlindBets', 5000, r => r.message.data.displayMsg.includes('Alice'))
     alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets')
+    await bob.waitAction('askForBlindBets', 5000, r => r.message.data.displayMsg.includes('Bob'))
     bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     await alice.waitAction('dealtPrivateCards')
 
-    // Pre-flop: Alice hace Call (pone 10 más) -> Bote: 40
-    await alice.waitAction('bettingCore-firstBetting')
+    // --- PRE-FLOP ---
+    await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data.displayMsg.includes('Alice'))
     alice.send(MOCK_ACTIONS.CALL)
-    await bob.waitAction('bettingCore-firstBetting')
-    // Bob hace check para ir al flop
+    await bob.waitAction('bettingCore-firstBetting', 5000, r => r.message.data.displayMsg.includes('Bob'))
     bob.send(MOCK_ACTIONS.CHECK)
 
+    // --- FLOP ---
     await alice.waitAction('dealerHand-flop')
-    await bob.waitAction('bettingCore-flopBetting')
-
-    // Flop: Bob apuesta 20 -> Bote: 60
+    await bob.waitAction('bettingCore-flopBetting', 5000, r => r.message.data.displayMsg.includes('Bob'))
     bob.send(MOCK_ACTIONS.BET(20))
-    await alice.waitAction('bettingCore-flopBetting')
-    // Alice paga 20 -> Bote: 80
+    await alice.waitAction('bettingCore-flopBetting', 5000, r => r.message.data.displayMsg.includes('Alice'))
     alice.send(MOCK_ACTIONS.CALL)
 
+    // --- TURN ---
     await alice.waitAction('dealerHand-turn')
-    await bob.waitAction('bettingCore-turnBetting')
-
-    // Turn: Bob apuesta 40 -> Bote: 120
+    await bob.waitAction('bettingCore-turnBetting', 5000, r => r.message.data.displayMsg.includes('Bob'))
     bob.send(MOCK_ACTIONS.BET(40))
-    await alice.waitAction('bettingCore-turnBetting')
-    // Alice paga 40 -> Bote: 160
+    await alice.waitAction('bettingCore-turnBetting', 5000, r => r.message.data.displayMsg.includes('Alice'))
     alice.send(MOCK_ACTIONS.CALL)
 
+    // --- RIVER ---
     await alice.waitAction('dealerHand-river')
-    await bob.waitAction('bettingCore-riverBetting')
-
-    // River: Bob apuesta 15 -> Bote: 175 (IMPAR)
+    await bob.waitAction('bettingCore-riverBetting', 5000, r => r.message.data.displayMsg.includes('Bob'))
     bob.send(MOCK_ACTIONS.BET(15))
-    await alice.waitAction('bettingCore-riverBetting')
-    // Alice paga 15 -> Bote: 190 (Bueno, mejor que el premio a repartir sea impar)
-    // Para que un split pot tenga resto, el BOTE TOTAL a repartir debe ser impar.
-    // Si Alice foldea ahora, Bob se lleva 175. No hay split.
-    // Si Alice paga, el bote es 190. Si empatan, 95 cada uno. No hay resto.
-    // Para forzar un resto: Bote total 191.
-    // Esto es difícil sin all-ins. Pero lo importante es que el TOTAL de fichas en la mesa sea 2000.
+    await alice.waitAction('bettingCore-riverBetting', 5000, r => r.message.data.displayMsg.includes('Alice'))
     alice.send(MOCK_ACTIONS.CALL)
 
-    // Esperamos al ganador
-    await alice.waitAction('winner')
+    // --- RESULTADO ---
+    await alice.waitAction('winner', 10000)
     
     // Verificamos saldos en la siguiente mano
-    // Al iniciar la siguiente mano, el servidor envía de nuevo askForBlindBets
     const nextHandMsg = await alice.waitAction('askForBlindBets', 15000)
     
     const players = nextHandMsg.message.players
     const totalCurrentChips = players.reduce((sum, p) => sum + p.chips, 0)
 
     expect(totalCurrentChips).toBe(TOTAL_CHIPS)
-    
     console.log(`[TEST:INTEGRITY] Total chips after hand: ${totalCurrentChips} (Expected: ${TOTAL_CHIPS})`)
   }, 60000)
 
