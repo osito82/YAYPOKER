@@ -56,6 +56,7 @@ class Communicator {
       pot: this.dealer.getPot(),
       pots: this.dealer.calculatePots(),
       currentHighestBet: this.dealer.getCurrentHighestBet(),
+      lastRaiseAmount: this.dealer.getLastRaiseAmount(),
       myPlayerInfo,
       data,
       autofoldDuration: Math.floor(this.match.autofoldDuration / 1000), // Use match duration in seconds
@@ -73,6 +74,7 @@ class Communicator {
       pot: this.dealer.getPot(),
       pots: this.dealer.calculatePots(),
       currentHighestBet: this.dealer.getCurrentHighestBet(),
+      lastRaiseAmount: this.dealer.getLastRaiseAmount(),
       data,
       stepChecker: this.stepChecker.getChecker(),
       players: players.map((p) => {

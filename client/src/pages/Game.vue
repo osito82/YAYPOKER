@@ -107,6 +107,7 @@ const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
 // COMPUTEDS
 const isConnected = computed(() => pokerStore.getConnected)
 const currentMaxBetOnTable = computed(() => pokerStore.getCurrentHighestBet || 0)
+const lastRaiseAmount = computed(() => pokerStore.lastRaiseAmount || 20) // Default to BB if no raise
 const allPlayers = computed(() => pokerStore.getPlayers || [])
 const myPlayer = computed(() => allPlayers.value.find(p => p.id === pokerStore.myInfo.id || p.name === playerName.value))
 const isMyTurn = computed(() => !props.isGuest && pokerStore.getActivePlayerId === myPlayer.value?.id)
@@ -114,7 +115,11 @@ const options = computed(() => props.isGuest ? [] : (pokerStore.getBettingOption
 const canBlind = computed(() => !props.isGuest && isMyTurn.value && options.value.includes('blind'))
 
 const minBet = computed(() => {
-  const baseMin = currentMaxBetOnTable.value > 0 ? currentMaxBetOnTable.value + 20 : 20
+  const isRaiseAction = options.value.includes('raise')
+  const baseMin = isRaiseAction 
+    ? currentMaxBetOnTable.value + lastRaiseAmount.value 
+    : (currentMaxBetOnTable.value > 0 ? currentMaxBetOnTable.value + 20 : 20)
+  
   return Math.min(baseMin, maxBet.value)
 })
 

@@ -19,6 +19,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const activePlayerId = ref(null)
   const bettingOptions = ref([])
   const currentHighestBet = ref(0)
+  const lastRaiseAmount = ref(0)
   const myInfo = ref({
     id: null,
     cards: [],
@@ -162,6 +163,9 @@ export const usePokerStore = defineStore('pokerStore', () => {
       if (gameData.currentHighestBet !== undefined) {
         currentHighestBet.value = gameData.currentHighestBet
       }
+      if (gameData.lastRaiseAmount !== undefined) {
+        lastRaiseAmount.value = gameData.lastRaiseAmount
+      }
 
       // Handle Actions and Turns
       if (gameData.action === 'lobbyTimer') {
@@ -286,6 +290,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     odds,
     autofoldStartTime,
     autofoldDuration,
+    lastRaiseAmount,
     lobbyTimer,
     hostId,
     isGameStarted,

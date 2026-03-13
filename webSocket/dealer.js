@@ -117,20 +117,29 @@ class Dealer {
     // 1. Get all players who contributed something
     const contributors = this.players.filter((p) => p.getHandContribution() > 0)
 
-    // 2. Sort contributors by contribution amount
-    const sortedContributions = [
-      ...new Set(contributors.map((p) => p.getHandContribution())),
+    if (contributors.length === 0) return []
+
+    // 2. Identify relevant contribution boundaries: All-In amounts and the maximum contribution
+    const allInContributions = contributors
+      .filter((p) => p.isAllIn)
+      .map((p) => p.getHandContribution())
+    
+    const maxContribution = Math.max(...contributors.map((p) => p.getHandContribution()))
+    
+    // Sort boundaries and remove duplicates
+    const boundaries = [
+      ...new Set([...allInContributions, maxContribution]),
     ].sort((a, b) => a - b)
 
     const pots = []
-    let prevContribution = 0
+    let prevBoundary = 0
 
-    for (const currentContribution of sortedContributions) {
-      const contributionLayer = currentContribution - prevContribution
+    for (const currentBoundary of boundaries) {
+      const boundaryLayer = currentBoundary - prevBoundary
 
       // Who contributed AT LEAST this much?
       const whoContributed = contributors.filter(
-        (p) => p.getHandContribution() >= currentContribution,
+        (p) => p.getHandContribution() >= currentBoundary,
       )
 
       // Who is ELIGIBLE to win this layer? (Must have contributed AND not folded)
@@ -138,20 +147,32 @@ class Dealer {
         .filter((p) => !p.folded)
         .map((p) => p.id)
 
-      const potAmount = contributionLayer * whoContributed.length
+      const potAmount = boundaryLayer * whoContributed.length
+      
+      // Add any "excess" from players who contributed more than prevBoundary but less than currentBoundary
+      // (This handles players who went All-In at different levels)
+      const partialContributors = contributors.filter(
+        (p) => p.getHandContribution() > prevBoundary && p.getHandContribution() < currentBoundary
+      )
+      
+      let extraAmount = 0
+      for (const p of partialContributors) {
+        extraAmount += (p.getHandContribution() - prevBoundary)
+      }
 
-      if (potAmount > 0) {
+      const totalLayerAmount = potAmount + extraAmount
+
+      if (totalLayerAmount > 0) {
         pots.push({
-          amount: potAmount,
+          amount: totalLayerAmount,
           eligiblePlayerIds: eligiblePlayers,
         })
       }
 
-      prevContribution = currentContribution
+      prevBoundary = currentBoundary
     }
 
-    // If no pots were created but there is money in the pot (shouldn't happen with contributors),
-    // but just in case, or if everyone folded.
+    // If no pots were created but there is money in the pot
     if (pots.length === 0 && this.pot > 0) {
       const activePlayers = this.players
         .filter((p) => !p.folded)

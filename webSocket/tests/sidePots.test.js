@@ -13,6 +13,7 @@ describe('T0008 Dealer Side Pot Calculation', () => {
     // Simulating contributions
     // Alice is all-in with 100
     players[0].setHandContribution(100)
+    players[0].isAllIn = true
     // Bob and Charlie both put 300 total
     players[1].setHandContribution(300)
     players[2].setHandContribution(300)
@@ -43,7 +44,9 @@ describe('T0008 Dealer Side Pot Calculation', () => {
     ]
 
     players[0].setHandContribution(50) // All-in short
+    players[0].isAllIn = true
     players[1].setHandContribution(100) // All-in medium
+    players[1].isAllIn = true
     players[2].setHandContribution(200) // Higher bet
     players[3].setHandContribution(200) // Calling higher bet
 
@@ -76,6 +79,7 @@ describe('T0008 Dealer Side Pot Calculation', () => {
 
     players[0].setHandContribution(200)
     players[1].setHandContribution(50)
+    players[1].isAllIn = true
     players[2].setHandContribution(200)
     players[2].setFolded(true) // Folded but contributed 200
 

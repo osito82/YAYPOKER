@@ -307,6 +307,7 @@ class Match {
     this.dealer.pot = 0
     this.dealer.clearActedPlayers()
     this.dealer.setCurrentHighestBet(0)
+    this.dealer.setLastRaiseAmount(0)
     this.dealer.setLastRaiser(null)
 
     this.communicator.gameId = this.gameId
