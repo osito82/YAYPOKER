@@ -11,6 +11,7 @@ const {
   generateSecretCode,
   socketId,
 } = require('./utils')
+const { ACTIONS, SERVER_CONFIG, GAME_RULES, CLEANUP_CONFIG } = require('./constants')
 
 const app = express()
 const server = http.createServer(app)
@@ -47,38 +48,38 @@ process.on('unhandledRejection', (reason, promise) => {
 // Periodic garbage collector for inactive/abandoned matches
 // Runs every 10 minutes
 setInterval(() => {
-  const removedCount = Torneo.removeInactiveMatches(3600000) // 1 hour idle
+  const removedCount = Torneo.removeInactiveMatches(CLEANUP_CONFIG.MATCH_MAX_IDLE)
   if (removedCount > 0) {
     log
       .Template({ name: 'brakets', title: 'SERVER:GC', date: true })
       .R({ msg: 'Cleaned up inactive matches', count: removedCount })
   }
-}, 600000)
+}, CLEANUP_CONFIG.GC_INTERVAL)
 
 // Validación de datos de entrada
 const validateAction = (action, data) => {
   if (!action) return 'Action is required'
 
   const rules = {
-    signUp: () => {
+    [ACTIONS.SIGN_UP]: () => {
       const chips = Number(data.totalChips)
-      if (isNaN(chips) || chips < 0) return 'Invalid chips amount'
+      if (isNaN(chips) || chips < GAME_RULES.CHIPS_VALIDATION.MIN) return 'Invalid chips amount'
       data.totalChips = chips // Sanitizar
       return null
     },
-    setBet: () => {
+    [ACTIONS.SET_BET]: () => {
       const bet = Number(data.chipsToBet)
       if (isNaN(bet) || bet < 0) return 'Invalid bet amount'
       data.chipsToBet = bet // Sanitizar
       return null
     },
-    setRise: () => {
+    [ACTIONS.RAISE]: () => {
       const rise = Number(data.chipsToRiseBet)
       if (isNaN(rise) || rise < 0) return 'Invalid rise amount'
       data.chipsToRiseBet = rise // Sanitizar
       return null
     },
-    sendMessage: () => {
+    [ACTIONS.SEND_MESSAGE]: () => {
       if (!data.targetPlayerId || typeof data.targetMessage !== 'string')
         return 'Invalid message data'
       return null
@@ -91,21 +92,21 @@ const validateAction = (action, data) => {
 // Mapeo de acciones a manejadores para mejor organización
 // Option 3: Acceso Explícito por Espacio de Nombres
 const actionHandlers = {
-  signUp: (match, socket, data) => match.lobby.signUp(data, socket),
-  sendMessage: (match, socket, data) => match.comms.sendMessage(data),
-  fold: (match, socket) => match.actions.fold(socket),
-  close: (match, socket) => match.lobby.close(socket),
-  setBet: (match, socket, data) =>
+  [ACTIONS.SIGN_UP]: (match, socket, data) => match.lobby.signUp(data, socket),
+  [ACTIONS.SEND_MESSAGE]: (match, socket, data) => match.comms.sendMessage(data),
+  [ACTIONS.FOLD]: (match, socket) => match.actions.fold(socket),
+  [ACTIONS.CLOSE]: (match, socket) => match.lobby.close(socket),
+  [ACTIONS.SET_BET]: (match, socket, data) =>
     match.actions.setBet(socket, data.chipsToBet),
-  setRise: (match, socket, data) =>
+  [ACTIONS.RAISE]: (match, socket, data) =>
     match.actions.setRise(socket, data.chipsToRiseBet),
-  setCall: (match, socket) => match.actions.setCall(socket),
-  setCheck: (match, socket) => match.actions.setCheck(socket),
-  dealtPrivateCards: (match, socket) => match.actions.dealtPrivateCards(socket),
-  stats: (match, socket) => match.comms.stats(socket.id),
-  nextRound: (match) => match.nextRound(),
-  startGame: (match, socket) => match.startGame(socket),
-  playerReady: (match, socket) => match.lobby.playerReady(socket),
+  [ACTIONS.CALL]: (match, socket) => match.actions.setCall(socket),
+  [ACTIONS.CHECK]: (match, socket) => match.actions.setCheck(socket),
+  [ACTIONS.DEALT_PRIVATE_CARDS]: (match, socket) => match.actions.dealtPrivateCards(socket),
+  [ACTIONS.STATS]: (match, socket) => match.comms.stats(socket.id),
+  [ACTIONS.NEXT_ROUND]: (match) => match.nextRound(),
+  [ACTIONS.START_GAME]: (match, socket) => match.startGame(socket),
+  [ACTIONS.PLAYER_READY]: (match, socket) => match.lobby.playerReady(socket),
 }
 
 wss.on('connection', (ws, req) => {
@@ -294,9 +295,9 @@ app.get('/*splat', (req, res) => {
 })
 
 // Inicialización del servidor
-const PORT = process.env.VITE_WS_PORT || '8888'
-const PROTOCOL = 'http'
-const BASE = process.env.VITE_WS_URL || 'localhost'
+const PORT = SERVER_CONFIG.PORT
+const PROTOCOL = SERVER_CONFIG.PROTOCOL
+const BASE = SERVER_CONFIG.BASE_URL
 
 if (require.main === module) {
   server.listen(PORT, () => {

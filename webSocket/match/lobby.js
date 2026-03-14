@@ -1,5 +1,6 @@
 const Socket = require('../sockets')
 const Player = require('../player')
+const { GAME_RULES, TIMEOUTS } = require('../constants')
 
 class MatchLobby {
   constructor(match) {
@@ -56,7 +57,7 @@ class MatchLobby {
 
     const readyPlayers = this.match.getStartedPlayers(true)
 
-    if (readyPlayers.length < 2) {
+    if (readyPlayers.length < GAME_RULES.MIN_PLAYERS) {
       const connectedCount = this.match.getConnectedPlayers().length
 
       this.match.log
@@ -76,7 +77,7 @@ class MatchLobby {
 
       this.match.communicator.msgBuilder('lobbyError', 'public', null, {
         displayMsg:
-          'Waiting for at least 2 players to be connected to start...',
+          `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected to start...`,
         readyPlayers: readyPlayers.length,
         connectedPlayers: connectedCount,
       })
@@ -91,9 +92,9 @@ class MatchLobby {
       .Template({ name: 'brakets', title: 'LOBBY:GAME_STARTING', date: true })
       .R({
         torneoId: this.match.torneoId,
-        handId: this.match.currentHandId,
+        handId: this.currentHandId,
         readyPlayers: readyPlayers.map((p) => p.name),
-        dealerCards: this.match.cardsDealer,
+        dealerCards: this.cardsDealer,
       })
 
     this.noMorePlayers()
@@ -216,9 +217,9 @@ class MatchLobby {
       return
     } else {
       // 🆕 LÓGICA DE NUEVO JUGADOR
-      if (this.match.players.length >= 10) {
+      if (this.match.players.length >= GAME_RULES.MAX_PLAYERS) {
         this.match.communicator.msgBuilder('signUp', 'private', null, {
-          displayMsg: 'Table is full (max 10 players).',
+          displayMsg: `Table is full (max ${GAME_RULES.MAX_PLAYERS} players).`,
         })
         this.match.dealer.talkToSocketById(
           thisSocket.id,
@@ -265,7 +266,7 @@ class MatchLobby {
         this.match.hostId = thisSocketId
       }
 
-      if (this.match.players.length >= 10) {
+      if (this.match.players.length >= GAME_RULES.MAX_PLAYERS) {
         this.noMorePlayers()
       }
 
@@ -314,7 +315,7 @@ class MatchLobby {
 
     const connectedPlayers = this.match.getConnectedPlayers()
     if (
-      connectedPlayers.length >= 2 &&
+      connectedPlayers.length >= GAME_RULES.MIN_PLAYERS &&
       !this.match.stepChecker.checkStep('blindsBetting')
     ) {
       this.match.stepChecker.grantStep('signUp')
@@ -351,7 +352,7 @@ class MatchLobby {
   }
 
   pause(thisSocket) {
-    const time = this.match.constructor.timeouts.pause
+    const time = TIMEOUTS.pause
     const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
     const foundPlayer = this.match.players.find((p) => p.id === socketId)
     if (foundPlayer) {
