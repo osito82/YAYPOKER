@@ -101,12 +101,22 @@
                 :id="'winner-hand-item-background-glow-' + idx + '-' + templateSuffix"
                 class="absolute inset-0 bg-yellow-500/5 pointer-events-none"
               ></div>
-              <span
-                :id="'winner-hand-item-label-text-' + idx + '-' + templateSuffix"
-                class="text-[10px] sm:text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-1 sm:mb-3 relative z-10"
-                >{{
-                  winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand'
-                }}</span>
+              
+              <div class="flex justify-between items-start mb-3 relative z-10">
+                <span
+                  :id="'winner-hand-item-label-text-' + idx + '-' + templateSuffix"
+                  class="text-[10px] sm:text-[12px] font-black text-gray-300 uppercase tracking-widest block"
+                  >{{
+                    winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand'
+                  }}</span>
+                <span 
+                  v-if="winners.length > 1"
+                  class="text-sm sm:text-xl font-mono font-black text-yellow-500"
+                >
+                  +${{ winner.amount }}
+                </span>
+              </div>
+
               <div
                 :id="'winner-hand-item-poker-rank-name-' + idx + '-' + templateSuffix"
                 class="text-xl sm:text-3xl font-bold text-white mb-2 sm:mb-4 relative z-10"
@@ -114,21 +124,46 @@
                 {{ winner.handName }}
               </div>
 
-              <div
-                v-if="flattenCards(winner.winningCards).length > 0"
-                :id="'winner-hand-item-cards-visual-row-' + idx + '-' + templateSuffix"
-                class="flex justify-center gap-1 sm:gap-3 relative z-10 scale-75 sm:scale-100"
-              >
-                <Card
-                  v-for="(card, i) in flattenCards(winner.winningCards)"
-                  :id="'winner-hand-item-specific-card-' + idx + '-' + i + '-' + templateSuffix"
-                  :key="'card-' + i"
-                  size="small"
-                  :numSymbol="card"
-                />
+              <!-- Hole Cards + Combo -->
+              <div class="flex flex-col gap-4 items-center relative z-10">
+                <!-- Hole Cards -->
+                <div class="flex flex-col items-center gap-1">
+                  <span class="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black">Hole Cards</span>
+                  <div
+                    v-if="flattenCards(winner.playerCards).length > 0"
+                    class="flex justify-center gap-1 sm:gap-2 scale-75 sm:scale-90"
+                  >
+                    <Card
+                      v-for="(card, i) in flattenCards(winner.playerCards)"
+                      :key="'hole-' + i"
+                      size="small"
+                      :numSymbol="card"
+                    />
+                  </div>
+                </div>
+
+                <!-- Winning Combination -->
+                <div v-if="!winnerInfo.isFold" class="flex flex-col items-center gap-1">
+                  <span class="text-[8px] sm:text-[10px] text-yellow-500/70 uppercase font-black">Best 5-Card Hand</span>
+                  <div
+                    v-if="flattenCards(winner.winningCards).length > 0"
+                    :id="'winner-hand-item-cards-visual-row-' + idx + '-' + templateSuffix"
+                    class="flex justify-center gap-1 sm:gap-2 scale-90 sm:scale-110"
+                  >
+                    <Card
+                      v-for="(card, i) in flattenCards(winner.winningCards)"
+                      :id="'winner-hand-item-specific-card-' + idx + '-' + i + '-' + templateSuffix"
+                      :key="'card-' + i"
+                      size="small"
+                      :numSymbol="card"
+                      :class="{ 'ring-2 ring-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]': true }"
+                    />
+                  </div>
+                </div>
               </div>
+
               <div
-                v-else
+                v-if="flattenCards(winner.playerCards || winner.winningCards).length === 0"
                 :id="'winner-hand-item-empty-cards-message-' + idx + '-' + templateSuffix"
                 class="text-[10px] sm:text-[12px] text-gray-400 italic relative z-10"
               >
@@ -178,10 +213,10 @@
                   class="flex -space-x-3 sm:-space-x-5 opacity-80 scale-60 sm:scale-90 origin-right"
                 >
                   <template
-                    v-if="player.show && flattenCards(player.show).length > 0"
+                    v-if="flattenCards(player.playerCards || player.show).length > 0"
                   >
                     <Card
-                      v-for="(c, idx) in flattenCards(player.show).slice(0, 2)"
+                      v-for="(c, idx) in flattenCards(player.playerCards || player.show).slice(0, 2)"
                       :id="'opponent-hand-item-specific-card-' + player.playerId + '-' + idx + '-' + templateSuffix"
                       :key="idx"
                       size="small"

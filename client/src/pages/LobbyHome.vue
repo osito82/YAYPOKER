@@ -135,23 +135,6 @@
               </div>
             </div>
           </form>
-
-          <!-- Create Game Section -->
-          <div :id="`create-game-action-section-${templateSuffix}`" class="pt-8 border-t border-white/5 space-y-6">
-            <label
-              :id="`create-game-input-label-${templateSuffix}`"
-              class="block text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
-            >
-              Or you can 
-            </label>
-            <button
-              :id="`create-game-submit-button-${templateSuffix}`"
-              @click="goToCreate"
-              class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 px-6 rounded-xl focus:outline-none transition-all transform hover:-translate-y-1 shadow-xl uppercase tracking-[0.2em] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed text-base"
-            >
-              Create New Table
-            </button>
-          </div>
         </template>
 
         <!-- MODE: New Game Created (/newgame) -->

@@ -48,13 +48,14 @@ class Dealer {
       .R({ gameId: this.gameId, dealerCards: this.cardsDealer })
     this.finalHands = []
     this.players.forEach((player) => {
-      const prize = player.getCurrentPrize() || {}
+      const prize = (player.getCurrentPrize && player.getCurrentPrize()) || {}
       this.finalHands.push({
         ...prize,
         name: player.name,
         playerId: player.id,
         gameId: player.gameId,
         chips: player.chips,
+        playerCards: player.getCards ? player.getCards() : [],
         folded: player.folded,
         connected: player.connected,
         lastAction: player.lastAction,

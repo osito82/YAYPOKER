@@ -721,6 +721,7 @@ class MatchActions {
                   ? 'Fold Victory'
                   : winningHand?.pokerHand || 'High Card',
                 winningCards: isFold ? [] : winningHand?.show || [],
+                playerCards: player.getCards(),
               }
             }
             winnersAggregation[playerId].amount += amountToGive

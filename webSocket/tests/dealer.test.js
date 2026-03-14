@@ -53,6 +53,9 @@ describe('Dealer Class', () => {
         return this.currentBet
       },
       getCurrentPrize: vi.fn(() => ({ hand: 'pair' })),
+      getCards() {
+        return this.cards
+      },
       giveChipsToDealer: vi.fn(),
       countCards() {
         return this.cards.length
@@ -138,10 +141,9 @@ describe('Dealer Class', () => {
   // 🟢 FINAL HANDS
   // ================================
 
-  it('should build final hands', () => {
+  it('T0011 should build final hands', () => {
     dealer.setFinalHands()
     const finalHands = dealer.getFinalHands()
-
     expect(finalHands.length).toBe(2)
     expect(finalHands[0]).toHaveProperty('name', 'p1')
     expect(finalHands[0]).toHaveProperty('chips', 100)
