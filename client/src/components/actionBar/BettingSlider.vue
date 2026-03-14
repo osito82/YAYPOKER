@@ -12,7 +12,10 @@
       :disabled="isSliderDisabled"
       class="flex-1 h-1 accent-yellow-500 bg-gray-800 rounded-full appearance-none cursor-pointer"
     />
-    <span class="text-xs font-mono font-black text-yellow-500 min-w-[50px] text-right">${{ betAmount }}</span>
+    <span
+      class="text-xs font-mono font-black text-yellow-500 min-w-[50px] text-right"
+      >${{ betAmount }}</span
+    >
   </div>
 </template>
 
@@ -26,7 +29,7 @@ const props = defineProps({
   minBet: Number,
   maxBet: Number,
   isSliderDisabled: Boolean,
-  templateSuffix: String
+  templateSuffix: String,
 })
 
 const emit = defineEmits(['update:betAmount'])

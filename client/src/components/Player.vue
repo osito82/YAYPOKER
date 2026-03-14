@@ -31,7 +31,14 @@
       <template v-if="showCards && playerCards && playerCards.length > 0">
         <Card
           v-for="(card, index) in playerCards"
-          :id="'player-card-' + playerName + '-hand-' + index + '-' + responsive.templateSuffix"
+          :id="
+            'player-card-' +
+            playerName +
+            '-hand-' +
+            index +
+            '-' +
+            responsive.templateSuffix
+          "
           :key="index"
           :size="responsive.cardSize"
           :percentage="responsive.cardPercentage"
@@ -42,12 +49,16 @@
       <template v-else>
         <!-- Show Backs -->
         <CardBack
-          :id="'player-card-' + playerName + '-back-1-' + responsive.templateSuffix"
+          :id="
+            'player-card-' + playerName + '-back-1-' + responsive.templateSuffix
+          "
           :size="responsive.cardSize"
           :percentage="responsive.cardPercentage"
         />
         <CardBack
-          :id="'player-card-' + playerName + '-back-2-' + responsive.templateSuffix"
+          :id="
+            'player-card-' + playerName + '-back-2-' + responsive.templateSuffix
+          "
           :size="responsive.cardSize"
           :percentage="responsive.cardPercentage"
           class="-ml-4"

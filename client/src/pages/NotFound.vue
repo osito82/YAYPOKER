@@ -8,12 +8,15 @@
       class="text-center space-y-8 animate-fade-in"
     >
       <!-- Visual Element: Dead Hand -->
-      <div :id="`dead-hand-visual-${templateSuffix}`" class="flex justify-center -space-x-8 mb-4">
+      <div
+        :id="`dead-hand-visual-${templateSuffix}`"
+        class="flex justify-center -space-x-8 mb-4"
+      >
         <div class="transform -rotate-12 translate-y-4">
-           <Card size="medium" numSymbol="As" id="dead-card-1" />
+          <Card size="medium" numSymbol="As" id="dead-card-1" />
         </div>
         <div class="transform rotate-12 -translate-y-2">
-           <Card size="medium" numSymbol="8s" id="dead-card-2" />
+          <Card size="medium" numSymbol="8s" id="dead-card-2" />
         </div>
       </div>
 
@@ -24,30 +27,32 @@
         >
           404
         </h1>
-        
+
         <h2
           :id="`not-found-headline-${templateSuffix}`"
           class="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter"
         >
           Mano <span class="text-red-600">Muerta</span>
         </h2>
-        
-        <div 
+
+        <div
           :id="`funny-message-badge-${templateSuffix}`"
           class="inline-block px-4 py-1 bg-red-600/10 border border-red-600/20 rounded-full"
         >
-          <p class="text-red-500 font-mono text-[10px] md:text-xs font-black uppercase tracking-[0.2em]">
+          <p
+            class="text-red-500 font-mono text-[10px] md:text-xs font-black uppercase tracking-[0.2em]"
+          >
             Hiciste All-In en una página que no existe
           </p>
         </div>
       </div>
 
-      <p 
+      <p
         :id="`not-found-description-text-${templateSuffix}`"
         class="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-widest max-w-sm mx-auto leading-relaxed"
       >
-        Parece que intentaste un bluff pero el servidor no cayó. 
-        Esta ruta está más vacía que el stack de un principiante.
+        Parece que intentaste un bluff pero el servidor no cayó. Esta ruta está
+        más vacía que el stack de un principiante.
       </p>
 
       <div :id="`not-found-actions-container-${templateSuffix}`" class="pt-8">
@@ -62,7 +67,9 @@
     </div>
 
     <!-- Footer decoration -->
-    <div class="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600/30 to-transparent"></div>
+    <div
+      class="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600/30 to-transparent"
+    ></div>
   </div>
 </template>
 
@@ -75,10 +82,14 @@ const responsive = useResponsiveStore()
 
 const templateSuffix = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'TemplateXSmall'
-    case 'small': return 'TemplateSmall'
-    case 'medium': return 'TemplateMedium'
-    default: return 'TemplateLarge'
+    case 'xsmall':
+      return 'TemplateXSmall'
+    case 'small':
+      return 'TemplateSmall'
+    case 'medium':
+      return 'TemplateMedium'
+    default:
+      return 'TemplateLarge'
   }
 })
 </script>

@@ -28,20 +28,20 @@ const routes = [
     component: LobbyHome,
     props: true,
   },
-{
-  name: 'game.play',
-  path: '/play/:gameCode([A-Za-z0-9]{5}-[A-Za-z0-9]{5})/:secretCode(\\d{4})',
-  component: Game,
-  props: route => ({
-    gameCode: route.params.gameCode,
-    secretCode: route.params.secretCode,
-  }),
-},
+  {
+    name: 'game.play',
+    path: '/play/:gameCode([A-Za-z0-9]{5}-[A-Za-z0-9]{5})/:secretCode(\\d{4})',
+    component: Game,
+    props: (route) => ({
+      gameCode: route.params.gameCode,
+      secretCode: route.params.secretCode,
+    }),
+  },
   {
     name: 'game.spectate',
     path: '/watch/:gameCode',
     component: Game,
-    props: { isGuest: true }
+    props: { isGuest: true },
   },
   { name: 'about', path: '/about', component: About },
   // Catch-all 404

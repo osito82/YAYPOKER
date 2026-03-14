@@ -32,7 +32,10 @@ export function useActionBar(props, emit) {
   })
 
   const chipResponsiveSize = computed(() => {
-    if (responsive.screenSize === 'xsmall' || responsive.screenSize === 'small') {
+    if (
+      responsive.screenSize === 'xsmall' ||
+      responsive.screenSize === 'small'
+    ) {
       return 'small'
     }
     return 'medium'
@@ -50,7 +53,8 @@ export function useActionBar(props, emit) {
 
   const isRaiseActionDisabled = computed(() => {
     if (!props.isMyTurn) return true
-    const hasActionOption = props.options.includes('bet') || props.options.includes('raise')
+    const hasActionOption =
+      props.options.includes('bet') || props.options.includes('raise')
     if (!hasActionOption) return true
     if (isSliderDisabled.value) return true
     return props.betAmount <= props.minBet && props.betAmount < props.maxBet
@@ -74,15 +78,19 @@ export function useActionBar(props, emit) {
     if (remaining <= 0) clearInterval(timerInterval)
   }
 
-  watch(() => props.isMyTurn, (newVal) => {
-    if (newVal) {
-      if (timerInterval) clearInterval(timerInterval)
-      timerInterval = setInterval(updateProgress, 100)
-    } else {
-      clearInterval(timerInterval)
-      progress.value = 0
-    }
-  }, { immediate: true })
+  watch(
+    () => props.isMyTurn,
+    (newVal) => {
+      if (newVal) {
+        if (timerInterval) clearInterval(timerInterval)
+        timerInterval = setInterval(updateProgress, 100)
+      } else {
+        clearInterval(timerInterval)
+        progress.value = 0
+      }
+    },
+    { immediate: true },
+  )
 
   onBeforeUnmount(() => {
     if (timerInterval) clearInterval(timerInterval)
@@ -99,6 +107,6 @@ export function useActionBar(props, emit) {
     isSliderDisabled,
     isRaiseActionDisabled,
     activePlayerName,
-    responsive
+    responsive,
   }
 }

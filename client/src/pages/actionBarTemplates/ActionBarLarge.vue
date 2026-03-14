@@ -1,50 +1,68 @@
 <template>
-  <div :id="'poker-action-hud-root-container-' + templateSuffix" class="w-full z-50 shrink-0">
-    <TurnTimer :isMyTurn="isMyTurn" :progress="progress" :templateSuffix="templateSuffix" />
+  <div
+    :id="'poker-action-hud-root-container-' + templateSuffix"
+    class="w-full z-50 shrink-0"
+  >
+    <TurnTimer
+      :isMyTurn="isMyTurn"
+      :progress="progress"
+      :templateSuffix="templateSuffix"
+    />
 
     <div
       :id="'hud-main-actions-container-' + templateSuffix"
       class="relative w-full pointer-events-auto bg-black/95 backdrop-blur-3xl border-t border-white/10 p-2 lg:p-4"
-      :class="{ 'border-yellow-500/40 shadow-[0_-15px_40px_rgba(0,0,0,0.8)]': isMyTurn }"
+      :class="{
+        'border-yellow-500/40 shadow-[0_-15px_40px_rgba(0,0,0,0.8)]': isMyTurn,
+      }"
     >
-      <div :id="'hud-content-layout-wrapper-' + templateSuffix" class="max-w-[1600px] mx-auto flex gap-4 lg:gap-10 flex-row items-end">
-        <PlayerInfoPanel 
-          :templateSuffix="templateSuffix" 
-          :screenSize="responsive.screenSize" 
-          :playerCards="playerCards" 
-          :balance="balance" 
-          :currentBet="currentBet" 
+      <div
+        :id="'hud-content-layout-wrapper-' + templateSuffix"
+        class="max-w-[1600px] mx-auto flex gap-4 lg:gap-10 flex-row items-end"
+      >
+        <PlayerInfoPanel
+          :templateSuffix="templateSuffix"
+          :screenSize="responsive.screenSize"
+          :playerCards="playerCards"
+          :balance="balance"
+          :currentBet="currentBet"
         />
 
-        <div :id="'hud-player-actions-control-area-' + templateSuffix" class="flex flex-col gap-2 flex-1 min-w-0">
-          <BettingSlider 
-            :isMyTurn="isMyTurn" 
-            :options="options" 
-            :betAmount="betAmount" 
-            :minBet="minBet" 
-            :maxBet="maxBet" 
-            :isSliderDisabled="isSliderDisabled" 
+        <div
+          :id="'hud-player-actions-control-area-' + templateSuffix"
+          class="flex flex-col gap-2 flex-1 min-w-0"
+        >
+          <BettingSlider
+            :isMyTurn="isMyTurn"
+            :options="options"
+            :betAmount="betAmount"
+            :minBet="minBet"
+            :maxBet="maxBet"
+            :isSliderDisabled="isSliderDisabled"
             :templateSuffix="templateSuffix"
             @update:betAmount="(val) => $emit('update:betAmount', val)"
           />
 
-          <WaitingState :isMyTurn="isMyTurn" :activePlayerName="activePlayerName" />
+          <WaitingState
+            :isMyTurn="isMyTurn"
+            :activePlayerName="activePlayerName"
+          />
 
-          <ActionButtonsRow 
-            :isMyTurn="isMyTurn" 
-            :canBlind="canBlind" 
-            :options="options" 
+          <ActionButtonsRow
+            :isMyTurn="isMyTurn"
+            :canBlind="canBlind"
+            :options="options"
             :isRaiseActionDisabled="isRaiseActionDisabled"
             @action="(a) => $emit('action', a)"
           />
         </div>
 
-        <QuickChipsRow 
-          :showChips="showChips" 
-          :templateSuffix="templateSuffix" 
-          :chips="chips" 
-          :chipResponsiveSize="chipResponsiveSize" 
-          :isMyTurn="isMyTurn" 
+        <QuickChipsRow
+          :showChips="showChips"
+          :templateSuffix="templateSuffix"
+          :chips="chips"
+          :chipResponsiveSize="chipResponsiveSize"
+          :isMyTurn="isMyTurn"
           :isSliderDisabled="isSliderDisabled"
           :isVertical="true"
           @addChip="addChip"
@@ -73,7 +91,7 @@ const props = defineProps({
   betAmount: Number,
   minBet: Number,
   maxBet: Number,
-  playerCards: Array
+  playerCards: Array,
 })
 
 const emit = defineEmits(['action', 'update:betAmount'])
@@ -89,6 +107,6 @@ const {
   isSliderDisabled,
   isRaiseActionDisabled,
   activePlayerName,
-  responsive
+  responsive,
 } = useActionBar(props, emit)
 </script>

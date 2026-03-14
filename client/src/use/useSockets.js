@@ -15,7 +15,11 @@ export default function useWebSocket(url, options) {
   const pokerStore = usePokerStore()
 
   const connectSocket = () => {
-    if (socket.value && (socket.value.readyState === WebSocket.OPEN || socket.value.readyState === WebSocket.CONNECTING)) {
+    if (
+      socket.value &&
+      (socket.value.readyState === WebSocket.OPEN ||
+        socket.value.readyState === WebSocket.CONNECTING)
+    ) {
       return
     }
 
@@ -43,7 +47,7 @@ export default function useWebSocket(url, options) {
     socket.value.addEventListener('close', () => {
       console.log('Conexión cerrada')
       pokerStore.setConnected(false)
-      
+
       if (!isManuallyClosed.value) {
         attemptReconnect()
       }
@@ -58,7 +62,7 @@ export default function useWebSocket(url, options) {
 
   const attemptReconnect = () => {
     if (reconnectTimeout.value) return
-    
+
     console.log('Intentando reconectar en 3 segundos...')
     reconnectTimeout.value = setTimeout(() => {
       reconnectTimeout.value = null

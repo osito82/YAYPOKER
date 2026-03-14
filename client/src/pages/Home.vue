@@ -7,35 +7,46 @@
       :id="`landing-main-content-${templateSuffix}`"
       class="text-center space-y-8 animate-fade-in"
     >
-      <Logo :id="`landing-brand-logo-${templateSuffix}`" class="mb-6 scale-150 mx-auto" />
-      
+      <Logo
+        :id="`landing-brand-logo-${templateSuffix}`"
+        class="mb-6 scale-150 mx-auto"
+      />
+
       <div :id="`landing-text-wrapper-${templateSuffix}`" class="space-y-2">
         <h1
           :id="`landing-title-text-${templateSuffix}`"
           class="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter italic"
         >
-          OsoPoker <span class="text-yellow-500 text-3xl md:text-5xl block md:inline">Texas Hold'em</span>
+          OsoPoker
+          <span class="text-yellow-500 text-3xl md:text-5xl block md:inline"
+            >Texas Hold'em</span
+          >
         </h1>
-        
-        <div 
+
+        <div
           :id="`construction-badge-${templateSuffix}`"
           class="inline-block px-4 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full"
         >
-          <p class="text-yellow-500 font-mono text-[10px] md:text-xs font-black uppercase tracking-[0.4em] animate-pulse">
+          <p
+            class="text-yellow-500 font-mono text-[10px] md:text-xs font-black uppercase tracking-[0.4em] animate-pulse"
+          >
             [ Under Construction / En Construcción ]
           </p>
         </div>
       </div>
 
-      <p 
+      <p
         :id="`landing-description-text-${templateSuffix}`"
         class="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-widest max-w-md mx-auto leading-relaxed"
       >
-        Estamos preparando la mejor experiencia de póker online. 
-        Vuelve pronto para jugar con tus amigos.
+        Estamos preparando la mejor experiencia de póker online. Vuelve pronto
+        para jugar con tus amigos.
       </p>
 
-      <div :id="`landing-actions-container-${templateSuffix}`" class="pt-8 flex flex-col sm:flex-row gap-4 justify-center">
+      <div
+        :id="`landing-actions-container-${templateSuffix}`"
+        class="pt-8 flex flex-col sm:flex-row gap-4 justify-center"
+      >
         <router-link
           :id="`landing-join-table-button-${templateSuffix}`"
           to="/lobby"
@@ -54,7 +65,10 @@
     </div>
 
     <!-- Footer -->
-    <p :id="`landing-copyright-footer-${templateSuffix}`" class="fixed bottom-8 text-gray-700 text-[10px] font-black uppercase tracking-[0.5em]">
+    <p
+      :id="`landing-copyright-footer-${templateSuffix}`"
+      class="fixed bottom-8 text-gray-700 text-[10px] font-black uppercase tracking-[0.5em]"
+    >
       &copy; 2026 OsoPoker Engineering
     </p>
   </div>
@@ -69,10 +83,14 @@ const responsive = useResponsiveStore()
 
 const templateSuffix = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'TemplateXSmall'
-    case 'small': return 'TemplateSmall'
-    case 'medium': return 'TemplateMedium'
-    default: return 'TemplateLarge'
+    case 'xsmall':
+      return 'TemplateXSmall'
+    case 'small':
+      return 'TemplateSmall'
+    case 'medium':
+      return 'TemplateMedium'
+    default:
+      return 'TemplateLarge'
   }
 })
 </script>

@@ -74,9 +74,11 @@
             class="text-2xl sm:text-5xl font-black text-white uppercase tracking-tighter mb-1 shrink-0"
           >
             {{ winnerNames }}
-            <span :id="'winner-announcement-title-suffix-' + templateSuffix" class="text-yellow-500">{{
-              winners.length > 1 ? ' Split the Pot!' : ' Wins!'
-            }}</span>
+            <span
+              :id="'winner-announcement-title-suffix-' + templateSuffix"
+              class="text-yellow-500"
+              >{{ winners.length > 1 ? ' Split the Pot!' : ' Wins!' }}</span
+            >
           </h2>
 
           <div
@@ -98,18 +100,28 @@
               class="bg-white/5 border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-6 w-full relative overflow-hidden shrink-0"
             >
               <div
-                :id="'winner-hand-item-background-glow-' + idx + '-' + templateSuffix"
+                :id="
+                  'winner-hand-item-background-glow-' +
+                  idx +
+                  '-' +
+                  templateSuffix
+                "
                 class="absolute inset-0 bg-yellow-500/5 pointer-events-none"
               ></div>
-              
+
               <div class="flex justify-between items-start mb-3 relative z-10">
                 <span
-                  :id="'winner-hand-item-label-text-' + idx + '-' + templateSuffix"
+                  :id="
+                    'winner-hand-item-label-text-' + idx + '-' + templateSuffix
+                  "
                   class="text-[10px] sm:text-[12px] font-black text-gray-300 uppercase tracking-widest block"
                   >{{
-                    winners.length > 1 ? winner.name + "'s Hand" : 'Winning Hand'
-                  }}</span>
-                <span 
+                    winners.length > 1
+                      ? winner.name + "'s Hand"
+                      : 'Winning Hand'
+                  }}</span
+                >
+                <span
                   v-if="winners.length > 1"
                   class="text-sm sm:text-xl font-mono font-black text-yellow-500"
                 >
@@ -118,7 +130,12 @@
               </div>
 
               <div
-                :id="'winner-hand-item-poker-rank-name-' + idx + '-' + templateSuffix"
+                :id="
+                  'winner-hand-item-poker-rank-name-' +
+                  idx +
+                  '-' +
+                  templateSuffix
+                "
                 class="text-xl sm:text-3xl font-bold text-white mb-2 sm:mb-4 relative z-10"
               >
                 {{ winner.handName }}
@@ -128,7 +145,10 @@
               <div class="flex flex-col gap-4 items-center relative z-10">
                 <!-- Hole Cards -->
                 <div class="flex flex-col items-center gap-1">
-                  <span class="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black">Hole Cards</span>
+                  <span
+                    class="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black"
+                    >Hole Cards</span
+                  >
                   <div
                     v-if="flattenCards(winner.playerCards).length > 0"
                     class="flex justify-center gap-1 sm:gap-2 scale-75 sm:scale-90"
@@ -143,28 +163,56 @@
                 </div>
 
                 <!-- Winning Combination -->
-                <div v-if="!winnerInfo.isFold" class="flex flex-col items-center gap-1">
-                  <span class="text-[8px] sm:text-[10px] text-yellow-500/70 uppercase font-black">Best 5-Card Hand</span>
+                <div
+                  v-if="!winnerInfo.isFold"
+                  class="flex flex-col items-center gap-1"
+                >
+                  <span
+                    class="text-[8px] sm:text-[10px] text-yellow-500/70 uppercase font-black"
+                    >Best 5-Card Hand</span
+                  >
                   <div
                     v-if="flattenCards(winner.winningCards).length > 0"
-                    :id="'winner-hand-item-cards-visual-row-' + idx + '-' + templateSuffix"
+                    :id="
+                      'winner-hand-item-cards-visual-row-' +
+                      idx +
+                      '-' +
+                      templateSuffix
+                    "
                     class="flex justify-center gap-1 sm:gap-2 scale-90 sm:scale-110"
                   >
                     <Card
                       v-for="(card, i) in flattenCards(winner.winningCards)"
-                      :id="'winner-hand-item-specific-card-' + idx + '-' + i + '-' + templateSuffix"
+                      :id="
+                        'winner-hand-item-specific-card-' +
+                        idx +
+                        '-' +
+                        i +
+                        '-' +
+                        templateSuffix
+                      "
                       :key="'card-' + i"
                       size="small"
                       :numSymbol="card"
-                      :class="{ 'ring-2 ring-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]': true }"
+                      :class="{
+                        'ring-2 ring-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]': true,
+                      }"
                     />
                   </div>
                 </div>
               </div>
 
               <div
-                v-if="flattenCards(winner.playerCards || winner.winningCards).length === 0"
-                :id="'winner-hand-item-empty-cards-message-' + idx + '-' + templateSuffix"
+                v-if="
+                  flattenCards(winner.playerCards || winner.winningCards)
+                    .length === 0
+                "
+                :id="
+                  'winner-hand-item-empty-cards-message-' +
+                  idx +
+                  '-' +
+                  templateSuffix
+                "
                 class="text-[10px] sm:text-[12px] text-gray-400 italic relative z-10"
               >
                 (No cards shown)
@@ -173,7 +221,10 @@
           </div>
 
           <!-- Other Players -->
-          <div :id="'showdown-opponents-hands-section-' + templateSuffix" class="w-full text-left shrink-0">
+          <div
+            :id="'showdown-opponents-hands-section-' + templateSuffix"
+            class="w-full text-left shrink-0"
+          >
             <span
               :id="'showdown-opponents-hands-label-' + templateSuffix"
               class="text-[10px] sm:text-[12px] font-black text-gray-300 uppercase tracking-widest block mb-2 sm:mb-3 border-b border-white/5 pb-2"
@@ -185,22 +236,42 @@
             >
               <div
                 v-for="player in opponentsHands"
-                :id="'opponent-hand-item-box-' + player.playerId + '-' + templateSuffix"
+                :id="
+                  'opponent-hand-item-box-' +
+                  player.playerId +
+                  '-' +
+                  templateSuffix
+                "
                 :key="player.playerId"
                 class="flex items-center justify-between bg-black/20 p-2 sm:p-3 rounded-lg sm:rounded-xl border border-white/5"
               >
                 <div
-                  :id="'opponent-hand-item-info-wrapper-' + player.playerId + '-' + templateSuffix"
+                  :id="
+                    'opponent-hand-item-info-wrapper-' +
+                    player.playerId +
+                    '-' +
+                    templateSuffix
+                  "
                   class="flex-1 min-w-0"
                 >
                   <div
-                    :id="'opponent-hand-item-player-name-' + player.playerId + '-' + templateSuffix"
+                    :id="
+                      'opponent-hand-item-player-name-' +
+                      player.playerId +
+                      '-' +
+                      templateSuffix
+                    "
                     class="text-xs sm:text-sm font-bold text-white truncate"
                   >
                     {{ player.name }}
                   </div>
                   <div
-                    :id="'opponent-hand-item-poker-rank-' + player.playerId + '-' + templateSuffix"
+                    :id="
+                      'opponent-hand-item-poker-rank-' +
+                      player.playerId +
+                      '-' +
+                      templateSuffix
+                    "
                     class="text-[9px] sm:text-[10px] text-gray-400 italic uppercase tracking-tighter truncate"
                   >
                     {{
@@ -209,15 +280,31 @@
                   </div>
                 </div>
                 <div
-                  :id="'opponent-hand-item-cards-visual-wrapper-' + player.playerId + '-' + templateSuffix"
+                  :id="
+                    'opponent-hand-item-cards-visual-wrapper-' +
+                    player.playerId +
+                    '-' +
+                    templateSuffix
+                  "
                   class="flex -space-x-3 sm:-space-x-5 opacity-80 scale-60 sm:scale-90 origin-right"
                 >
                   <template
-                    v-if="flattenCards(player.playerCards || player.show).length > 0"
+                    v-if="
+                      flattenCards(player.playerCards || player.show).length > 0
+                    "
                   >
                     <Card
-                      v-for="(c, idx) in flattenCards(player.playerCards || player.show).slice(0, 2)"
-                      :id="'opponent-hand-item-specific-card-' + player.playerId + '-' + idx + '-' + templateSuffix"
+                      v-for="(c, idx) in flattenCards(
+                        player.playerCards || player.show,
+                      ).slice(0, 2)"
+                      :id="
+                        'opponent-hand-item-specific-card-' +
+                        player.playerId +
+                        '-' +
+                        idx +
+                        '-' +
+                        templateSuffix
+                      "
                       :key="idx"
                       size="small"
                       :numSymbol="c"
@@ -225,20 +312,40 @@
                   </template>
                   <template v-else>
                     <div
-                      :id="'opponent-hand-item-card-placeholder-1-' + player.playerId + '-' + templateSuffix"
+                      :id="
+                        'opponent-hand-item-card-placeholder-1-' +
+                        player.playerId +
+                        '-' +
+                        templateSuffix
+                      "
                       class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
                       <div
-                        :id="'opponent-hand-item-card-back-pattern-1-' + player.playerId + '-' + templateSuffix"
+                        :id="
+                          'opponent-hand-item-card-back-pattern-1-' +
+                          player.playerId +
+                          '-' +
+                          templateSuffix
+                        "
                         class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"
                       ></div>
                     </div>
                     <div
-                      :id="'opponent-hand-item-card-placeholder-2-' + player.playerId + '-' + templateSuffix"
+                      :id="
+                        'opponent-hand-item-card-placeholder-2-' +
+                        player.playerId +
+                        '-' +
+                        templateSuffix
+                      "
                       class="w-8 h-12 sm:w-10 sm:h-14 bg-gray-800 rounded-md border border-white/10 flex items-center justify-center opacity-30"
                     >
                       <div
-                        :id="'opponent-hand-item-card-back-pattern-2-' + player.playerId + '-' + templateSuffix"
+                        :id="
+                          'opponent-hand-item-card-back-pattern-2-' +
+                          player.playerId +
+                          '-' +
+                          templateSuffix
+                        "
                         class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"
                       ></div>
                     </div>
@@ -258,39 +365,58 @@
               class="flex gap-4 sm:gap-6 text-[10px] sm:text-[12px] font-black text-gray-300 uppercase tracking-widest"
             >
               <div
-                :id="'winner-overlay-next-round-countdown-wrapper-' + templateSuffix"
+                :id="
+                  'winner-overlay-next-round-countdown-wrapper-' +
+                  templateSuffix
+                "
                 class="flex items-center gap-2"
               >
                 <div
-                  :id="'winner-overlay-countdown-status-pulse-' + templateSuffix"
+                  :id="
+                    'winner-overlay-countdown-status-pulse-' + templateSuffix
+                  "
                   class="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-green-500 rounded-full animate-pulse"
                 ></div>
                 Next Round in {{ countdown }}s
               </div>
-              <div :id="'winner-overlay-pot-status-info-text-' + templateSuffix">Pot Cleared</div>
+              <div
+                :id="'winner-overlay-pot-status-info-text-' + templateSuffix"
+              >
+                Pot Cleared
+              </div>
             </div>
 
             <!-- Visual Timer Bar -->
             <div
-              :id="'winner-overlay-countdown-progress-bar-track-' + templateSuffix"
+              :id="
+                'winner-overlay-countdown-progress-bar-track-' + templateSuffix
+              "
               class="w-full h-1 sm:h-1.5 bg-white/5 rounded-full overflow-hidden"
             >
               <div
-                :id="'winner-overlay-countdown-progress-bar-fill-' + templateSuffix"
+                :id="
+                  'winner-overlay-countdown-progress-bar-fill-' + templateSuffix
+                "
                 class="h-full bg-yellow-500 transition-all duration-50 ease-linear"
                 :style="{ width: `${(countdown / 15) * 100}%` }"
               ></div>
             </div>
 
             <button
-              :id="'winner-overlay-continue-playing-action-button-' + templateSuffix"
+              :id="
+                'winner-overlay-continue-playing-action-button-' +
+                templateSuffix
+              "
               @click="handleClose"
               :disabled="isWaiting"
               class="mt-1 sm:mt-2 px-5 sm:px-8 py-2 sm:py-3 bg-white/10 hover:bg-white/20 disabled:hover:bg-white/10 border border-white/10 rounded-full text-[10px] sm:text-sm font-black uppercase tracking-widest text-white transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
             >
               <div
                 v-if="isWaiting"
-                :id="'winner-overlay-waiting-status-loading-spinner-' + templateSuffix"
+                :id="
+                  'winner-overlay-waiting-status-loading-spinner-' +
+                  templateSuffix
+                "
                 class="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
               ></div>
               {{ isWaiting ? 'Waiting for others...' : 'Continue Next Round' }}

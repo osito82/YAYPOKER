@@ -1,8 +1,5 @@
 <template>
-  <div
-    id="message-terminal"
-    class="w-full h-full"
-  >
+  <div id="message-terminal" class="w-full h-full">
     <div
       id="terminal-container"
       class="bg-black/60 backdrop-blur-md w-full h-full flex flex-col shadow-inner"
@@ -22,13 +19,20 @@
             :key="log.id"
             class="flex gap-2 items-start leading-tight py-0.5 border-b border-white/[0.02] last:border-0"
           >
-            <span class="text-yellow-500/50 font-bold shrink-0 text-[10px] mt-0.5">[{{ formatTime(log.id) }}]</span>
+            <span
+              class="text-yellow-500/50 font-bold shrink-0 text-[10px] mt-0.5"
+              >[{{ formatTime(log.id) }}]</span
+            >
             <span class="text-yellow-400 font-black shrink-0">»</span>
             <div class="flex flex-wrap gap-1 items-center">
-              <span class="text-lg leading-none shrink-0">{{ getEmoji(log) }}</span>
-              <span 
+              <span class="text-lg leading-none shrink-0">{{
+                getEmoji(log)
+              }}</span>
+              <span
                 class="font-bold tracking-tight break-words"
-                :class="[log.type === 'private' ? 'text-cyan-400' : 'text-gray-100']"
+                :class="[
+                  log.type === 'private' ? 'text-cyan-400' : 'text-gray-100',
+                ]"
               >
                 {{ log.text }}
               </span>
@@ -37,10 +41,14 @@
         </TransitionGroup>
 
         <!-- Empty State -->
-        <div v-if="logs.length === 0" class="text-gray-600 font-bold italic animate-pulse flex items-center gap-2">
-          <span class="text-yellow-400">»</span> SYSTEM_READY: Waiting for game events... 📡
+        <div
+          v-if="logs.length === 0"
+          class="text-gray-600 font-bold italic animate-pulse flex items-center gap-2"
+        >
+          <span class="text-yellow-400">»</span> SYSTEM_READY: Waiting for game
+          events... 📡
         </div>
-        
+
         <!-- Bottom anchor for auto-scroll -->
         <div ref="bottomAnchor" class="h-px w-full"></div>
       </div>
@@ -54,8 +62,8 @@ import { ref, watch, nextTick, onMounted } from 'vue'
 const props = defineProps({
   logs: {
     type: Array,
-    default: () => []
-  }
+    default: () => [],
+  },
 })
 
 const logContainer = ref(null)
@@ -63,14 +71,20 @@ const bottomAnchor = ref(null)
 
 const formatTime = (timestamp) => {
   const date = new Date(timestamp)
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+  return date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
 }
 
 const getEmoji = (log) => {
   const text = log.text.toLowerCase()
   const action = (log.action || '').toLowerCase()
 
-  if (action === 'winnertournament' || text.includes('wins the tournament')) return '🏆'
+  if (action === 'winnertournament' || text.includes('wins the tournament'))
+    return '🏆'
   if (action === 'winner' || text.includes('wins $')) return '💰'
   if (action === 'fold' || text.includes('folded')) return '🏳️'
   if (action === 'setbet' || text.includes('bets')) return '💵'
@@ -83,7 +97,7 @@ const getEmoji = (log) => {
   if (text.includes('disconnected')) return '🔌'
   if (text.includes('reconnected')) return '♻️'
   if (text.includes('all-in')) return '🚀'
-  
+
   return '💬'
 }
 

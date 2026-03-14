@@ -16,13 +16,13 @@
 </template>
 
 <script setup>
-import { computed, defineAsyncComponent } from 'vue'
+import { computed } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 
-const ActionBarXSmall = defineAsyncComponent(() => import('../pages/actionBarTemplates/ActionBarXSmall.vue'))
-const ActionBarSmall = defineAsyncComponent(() => import('../pages/actionBarTemplates/ActionBarSmall.vue'))
-const ActionBarMedium = defineAsyncComponent(() => import('../pages/actionBarTemplates/ActionBarMedium.vue'))
-const ActionBarLarge = defineAsyncComponent(() => import('../pages/actionBarTemplates/ActionBarLarge.vue'))
+import ActionBarXSmall from '../pages/actionBarTemplates/ActionBarXSmall.vue'
+import ActionBarSmall from '../pages/actionBarTemplates/ActionBarSmall.vue'
+import ActionBarMedium from '../pages/actionBarTemplates/ActionBarMedium.vue'
+import ActionBarLarge from '../pages/actionBarTemplates/ActionBarLarge.vue'
 
 defineProps({
   isMyTurn: Boolean,
@@ -42,10 +42,14 @@ const responsive = useResponsiveStore()
 
 const activeTemplate = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return ActionBarXSmall
-    case 'small': return ActionBarSmall
-    case 'medium': return ActionBarMedium
-    default: return ActionBarLarge
+    case 'xsmall':
+      return ActionBarXSmall
+    case 'small':
+      return ActionBarSmall
+    case 'medium':
+      return ActionBarMedium
+    default:
+      return ActionBarLarge
   }
 })
 </script>
