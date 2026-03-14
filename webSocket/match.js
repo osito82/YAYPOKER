@@ -6,6 +6,7 @@ const Socket = require('./sockets')
 const Communicator = require('./communicator')
 
 const { generateUniqueId } = require('./utils')
+const { TIMEOUTS, GAME_RULES, DECK_CONSTANTS } = require('./constants')
 
 const osolog = require('osolog')
 const PokerOddsCalculator = require('./pokerOdds')
@@ -15,21 +16,9 @@ const MatchComms = require('./match/comms')
 const MatchActions = require('./match/actions')
 const MatchLobby = require('./match/lobby')
 
-const isTest = process.env.NODE_ENV === 'test'
-
-const timeouts = {
-  autofold: isTest ? 1000 : 600000, // 1s in test, else 10 minutes
-  fast: isTest ? 10 : 100, // 10ms in test, else 100ms
-  standard: isTest ? 50 : 500, // 50ms in test, else 500ms
-  runout: isTest ? 100 : 2000, // 100ms in test, else 2 seconds
-  pause: isTest ? 3000 : 60000, // 3s in test, else 1 minute
-  nextRound: isTest ? 500 : 5000, // 500ms in test, else 5 seconds
-  collectChips: isTest ? 100 : 1500, // 100ms in test, else 1.5 seconds
-}
-
 class Match {
   log = new osolog()
-  static timeouts = timeouts
+  static timeouts = TIMEOUTS
 
   constructor(torneoId, gameId) {
     this.torneoId = torneoId
@@ -41,7 +30,7 @@ class Match {
     this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
     this.autofoldTimer = null
-    this.autofoldDuration = timeouts.autofold
+    this.autofoldDuration = TIMEOUTS.autofold
 
     this.playersFold = []
     this.pot = 0
@@ -57,8 +46,8 @@ class Match {
 
   initHand() {
     this.handCount++
-    this.currentHandId = `h${this.handCount}`
-    const initialDeck = Deck.shuffleDeck(Deck.cards, 101)
+    this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}${this.handCount}`
+    const initialDeck = Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
     this.shuffledDeck = initialDeck
 
     this.dealer = new Dealer(
@@ -139,8 +128,8 @@ class Match {
       customDelay !== null
         ? customDelay
         : this.isRunout
-          ? timeouts.runout
-          : timeouts.standard
+          ? TIMEOUTS.runout
+          : TIMEOUTS.standard
     setTimeout(() => {
       this.startGame(thisSocket)
     }, delay)
@@ -166,9 +155,9 @@ class Match {
       })
 
       const connectedPlayers = this.getConnectedPlayers()
-      if (connectedPlayers.length < 2) {
+      if (connectedPlayers.length < GAME_RULES.MIN_PLAYERS) {
         this.communicator.msgBuilder('lobbyError', 'public', null, {
-          displayMsg: 'Waiting for at least 2 players to be connected...',
+          displayMsg: `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected...`,
         })
         Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
         return
@@ -257,7 +246,7 @@ class Match {
       (p) => p.chips > 0,
     )
 
-    if (playersWithChips.length < 2) {
+    if (playersWithChips.length < GAME_RULES.MIN_PLAYERS) {
       this.log.R({ info: 'Tournament finished. No more rounds.' })
       return
     }
@@ -269,7 +258,7 @@ class Match {
     const oldGameId = this.gameId
     this.gameId = generateUniqueId()
     this.handCount++
-    this.currentHandId = `h${this.handCount}`
+    this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}${this.handCount}`
 
     this.log
       .Template({ name: 'brakets', title: 'MATCH:RESTARTING', date: true })
@@ -299,7 +288,7 @@ class Match {
     })
 
     const Deck = require('./deck')
-    this.shuffledDeck = customDeck || Deck.shuffleDeck(Deck.cards, 101)
+    this.shuffledDeck = customDeck || Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
     this.dealer.gameId = this.gameId
     this.dealer.deck = this.shuffledDeck
     this.dealer.cardsDealer = []
@@ -328,7 +317,7 @@ class Match {
     setTimeout(() => {
       this.stepChecker.grantStep('startGame')
       this.startGame()
-    }, timeouts.nextRound)
+    }, TIMEOUTS.nextRound)
   }
 }
 

@@ -1,5 +1,6 @@
 const Socket = require('../sockets')
 const { WinnerCore } = require('../winnerCore')
+const { GAME_RULES, TIMEOUTS } = require('../constants')
 
 class MatchActions {
   constructor(match) {
@@ -314,7 +315,7 @@ class MatchActions {
 
     const amount = Number(chipsToBet)
     const currentMaxBet = this.match.dealer.getCurrentHighestBet()
-    const lastRaise = this.match.dealer.getLastRaiseAmount() || 20 // Default to Big Blind if no raise yet
+    const lastRaise = this.match.dealer.getLastRaiseAmount() || GAME_RULES.DEFAULT_BIG_BLIND // Default to Big Blind if no raise yet
 
     // REGLA DE MIN-RAISE: El aumento debe ser al menos igual al aumento anterior
     if (type === 'setRise') {
@@ -365,6 +366,7 @@ class MatchActions {
           name: 'brakets',
           title: 'ERROR:RAISE_REJECTED',
           date: true,
+          displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
         })
         .R({
           torneoId: this.match.torneoId,
@@ -528,7 +530,7 @@ class MatchActions {
   askForBlindBets(thisSocket, isRefresh = false) {
     const activePlayers = this.match.getActivePlayers(true)
 
-    if (activePlayers.length < 2) {
+    if (activePlayers.length < GAME_RULES.MIN_PLAYERS) {
       this.match.log
         .Template({
           name: 'brakets',
@@ -589,7 +591,7 @@ class MatchActions {
         if (!isRefresh && this.match.activePlayerId === p.id) return
 
         const isSB = p === p1
-        const blindAmount = isSB ? 10 : 20
+        const blindAmount = isSB ? GAME_RULES.DEFAULT_SMALL_BLIND : GAME_RULES.DEFAULT_BIG_BLIND
         this.match.activePlayerId = p.id
         this.match.turnStartedAt = Date.now()
 
@@ -1094,7 +1096,7 @@ class MatchActions {
 
   dealtPrivateCards(thisSocket) {
     try {
-      this.match.dealer.dealCardsEachPlayer(2)
+      this.match.dealer.dealCardsEachPlayer(GAME_RULES.INITIAL_CARDS_PER_PLAYER)
       this.match.stepChecker.grantStep('dealtPrivateCards')
       this.match.dealer.clearActedPlayers()
 
