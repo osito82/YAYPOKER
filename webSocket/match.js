@@ -1,3 +1,4 @@
+const EventEmitter = require('node:events')
 const Player = require('./player')
 const Dealer = require('./dealer')
 const Deck = require('./deck')
@@ -16,11 +17,12 @@ const MatchComms = require('./match/comms')
 const MatchActions = require('./match/actions')
 const MatchLobby = require('./match/lobby')
 
-class Match {
+class Match extends EventEmitter {
   log = new osolog()
   static timeouts = TIMEOUTS
 
   constructor(torneoId, gameId) {
+    super()
     this.torneoId = torneoId
     this.gameId = gameId
     this.handCount = 0
@@ -42,12 +44,24 @@ class Match {
     this.hostId = null
 
     this.initHand()
+    this.setupEventListeners()
+  }
+
+  setupEventListeners() {
+    // Escuchar eventos de los submódulos para orquestar el flujo
+    this.on('START_GAME', (socket) => this.startGame(socket))
+    this.on('CONTINUE', (socket, delay) => this.continue(socket, delay))
+    this.on('NEXT_ROUND', () => this.nextRound())
+    this.on('RESTART_MATCH', (customDeck) => this.restartMatch(customDeck))
   }
 
   initHand() {
     this.handCount++
     this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}${this.handCount}`
-    const initialDeck = Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
+    const initialDeck = Deck.shuffleDeck(
+      Deck.cards,
+      DECK_CONSTANTS.SHUFFLE_TIMES,
+    )
     this.shuffledDeck = initialDeck
 
     this.dealer = new Dealer(
@@ -69,15 +83,25 @@ class Match {
       this.stepChecker,
       this.players,
       this.dealer,
-      this, // Pass match instance to access timeouts
+      this, // Still used for some timeouts, but could be refactored further
     )
 
     this.oddsCalculator = new PokerOddsCalculator()
 
-    // Instanciar submódulos
-    this.comms = new MatchComms(this)
-    this.actions = new MatchActions(this)
-    this.lobby = new MatchLobby(this)
+    // Contexto compartido para submódulos (inyectamos solo lo necesario)
+    const context = {
+      match: this, // Still passing this for state access, but interaction will be via events
+      emitter: this,
+      log: this.log,
+      communicator: this.communicator,
+      dealer: this.dealer,
+      stepChecker: this.stepChecker,
+    }
+
+    // Instanciar submódulos con el nuevo enfoque
+    this.comms = new MatchComms(context)
+    this.actions = new MatchActions(context)
+    this.lobby = new MatchLobby(context)
 
     this.lastActivity = Date.now()
 

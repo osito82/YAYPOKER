@@ -1,8 +1,10 @@
 const Socket = require('../sockets')
 
 class MatchComms {
-  constructor(match) {
-    this.match = match
+  constructor(context) {
+    this.match = context.match
+    this.log = context.log
+    this.communicator = context.communicator
   }
 
   sendMessage(data) {
@@ -14,14 +16,14 @@ class MatchComms {
         JSON.stringify({ message: { displayMsg: targetMessage } }),
       )
     } else {
-      this.match.log
+      this.log
         .Template({ name: 'brakets', title: 'ERROR:CHAT_ERROR', date: true })
         .R({ msg: 'Target not found', targetPlayerId })
     }
   }
 
   stats(socketId) {
-    this.match.log
+    this.log
       .Template({ name: 'brakets', title: 'MATCH:STATS', date: true })
       .R({
         torneoId: this.match.torneoId,
@@ -57,13 +59,13 @@ class MatchComms {
         win: results.winProbabilities[idx],
         tie: results.tieProbability,
       }
-      this.match.communicator.msgBuilder('oddsUpdate', 'private', p, {
+      this.communicator.msgBuilder('oddsUpdate', 'private', p, {
         odds: playerOdds,
       })
       Socket.sendToPlayer(
         this.match.torneoId,
         p.secretCode,
-        this.match.communicator.getMsg(),
+        this.communicator.getMsg(),
       )
     })
   }
