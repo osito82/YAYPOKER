@@ -154,7 +154,12 @@ socket.on("message", async (data) => {
 
     // 5. Manejar CIEGAS (Small/Big Blind)
     if (msg.action === "askForBlindBets") {
-      const targetId = msg.playerId || msg.id || msg.messageForId;
+      const targetId =
+        msg.myPlayerInfo?.playerId ||
+        msg.data?.id ||
+        msg.playerId ||
+        msg.id ||
+        msg.messageForId;
 
       if (msg.type === "private" && targetId === myId) {
         handleBlind(msg);
@@ -174,7 +179,12 @@ socket.on("message", async (data) => {
 
     // 6. Manejar TURNO de apuesta
     if (msg.action?.startsWith("bettingCore")) {
-      const targetId = msg.messageForId || msg.playerId || msg.id;
+      const targetId =
+        msg.myPlayerInfo?.playerId ||
+        msg.data?.id ||
+        msg.messageForId ||
+        msg.playerId ||
+        msg.id;
       if (msg.type === "private" && targetId === myId) {
         await handleAIDecision(msg);
       }
