@@ -4,14 +4,52 @@ const { Ollama } = require("ollama");
 const osolog = require("osolog");
 const PokerOddsCalculator = require("../webSocket/pokerOdds");
 const { ACTIONS, SERVER_CONFIG } = require("../webSocket/constants");
+const winston = require("winston");
+require("winston-daily-rotate-file");
+const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 
+// CONFIGURACIÓN DE LOGS PERSISTENTES
+const logDir = path.join(__dirname, "..", "Logs");
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
+const transport = new winston.transports.DailyRotateFile({
+  filename: path.join(logDir, "Bot-%DATE%.log"),
+  datePattern: "YYYY-MM-DD",
+  zippedArchive: true,
+  maxSize: "20m",
+  maxFiles: "14d",
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `${timestamp} [${level.toUpperCase()}]: ${typeof message === "object" ? JSON.stringify(message) : message}`;
+    })
+  ),
+});
+
+const fileLogger = winston.createLogger({
+  transports: [transport],
+});
+
 const log = new osolog();
+
+// Wrapper para que OsoLog también guarde en archivo
+const originalR = log.R;
+log.R = function (data) {
+  fileLogger.info({
+    title: this.config?.title || "LOG",
+    ...data,
+  });
+  return originalR.apply(this, arguments);
+};
 
 // Inicializar Cliente de Ollama
 let ollamaClient;
 try {
-  ollamaClient = new Ollama({
+...
     host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
   });
   log

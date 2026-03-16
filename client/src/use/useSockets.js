@@ -1,5 +1,6 @@
 import { ref, onBeforeUnmount } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
+import { initFrontendLogger } from '../logger'
 
 export default function useWebSocket(url, options) {
   const socketUrl = new URL(url)
@@ -29,6 +30,10 @@ export default function useWebSocket(url, options) {
     socket.value.addEventListener('open', () => {
       console.log('Conexión establecida')
       pokerStore.setConnected(true)
+      
+      // Inicializar el envío de logs al servidor
+      initFrontendLogger(sendMessage)
+
       if (reconnectTimeout.value) {
         clearTimeout(reconnectTimeout.value)
         reconnectTimeout.value = null
@@ -39,6 +44,7 @@ export default function useWebSocket(url, options) {
         totalChips: 1000,
       })
     })
+...
 
     socket.value.addEventListener('message', (event) => {
       pokerStore.setSocketMessage(event.data)

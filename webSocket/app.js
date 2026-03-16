@@ -1,6 +1,10 @@
 const express = require('express')
 const R = require('radash')
 const osolog = require('osolog')
+const winston = require('winston')
+require('winston-daily-rotate-file')
+const path = require('path')
+const fs = require('fs')
 
 const http = require('http')
 const WebSocket = require('ws')
@@ -13,6 +17,40 @@ const {
 } = require('./utils')
 const { ACTIONS, SERVER_CONFIG, GAME_RULES, CLEANUP_CONFIG } = require('./constants')
 
+// CONFIGURACIÓN DE LOGS PERSISTENTES
+const logDir = path.join(__dirname, '..', 'Logs')
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true })
+}
+
+// Logger para el WebSocket (WS)
+const wsTransport = new winston.transports.DailyRotateFile({
+  filename: path.join(logDir, 'WS-%DATE%.log'),
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '14d',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json(),
+  ),
+})
+const wsFileLogger = winston.createLogger({ transports: [wsTransport] })
+
+// Logger para el Frontend (FE)
+const feTransport = new winston.transports.DailyRotateFile({
+  filename: path.join(logDir, 'FE-%DATE%.log'),
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '14d',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json(),
+  ),
+})
+const feFileLogger = winston.createLogger({ transports: [feTransport] })
+
 const app = express()
 const server = http.createServer(app)
 const wss = new WebSocket.Server({ server })
@@ -23,6 +61,16 @@ const Torneo = require('./torneo')
 
 const startTime = new Date()
 const log = new osolog()
+
+// Interceptar logs de OsoLog para WS
+const originalR = log.R
+log.R = function (data) {
+  wsFileLogger.info({
+    title: this.config?.title || 'LOG',
+    ...data,
+  })
+  return originalR.apply(this, arguments)
+}
 
 // Global error handlers to prevent server crashes
 process.on('uncaughtException', (error) => {
@@ -115,9 +163,18 @@ const actionHandlers = {
   [ACTIONS.NEXT_ROUND]: (match) => match.nextRound(),
   [ACTIONS.START_GAME]: (match, socket) => match.startGame(socket),
   [ACTIONS.PLAYER_READY]: (match, socket) => match.lobby.playerReady(socket),
+  // NUEVO: Manejador para logs del Frontend
+  feLog: (match, socket, data) => {
+    feFileLogger.info({
+      socketId: socket.id,
+      playerName: socket.name,
+      ...data.logData,
+    })
+  },
 }
 
 wss.on('connection', (ws, req) => {
+...
   const urlParams = new URLSearchParams(req.url.substring(1))
 
   const torneoId = urlParams.get('gameCode') ?? generateUniqueId()
