@@ -110,13 +110,13 @@ socket.on("message", async (data) => {
       .R({ type: msg.type, from: playerName, raw: rawData.substring(0, 200) });
 
     // Actualizar estado global del juego
-    if (msg.pot !== undefined) gameState.pot = msg.pot;
+    if (msg.pot !== undefined) gameState.pot = Number(msg.pot);
     if (msg.currentHighestBet !== undefined)
-      gameState.currentHighestBet = msg.currentHighestBet;
+      gameState.currentHighestBet = Number(msg.currentHighestBet);
 
     // 1. Registro y obtención de ID
     if (msg.action === "signUp" && msg.type === "private") {
-      myId = msg.myPlayerInfo?.playerId || msg.id || msg.playerId;
+      myId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.id || msg.playerId;
       if (myId) {
         log
           .Template({ name: "brakets", title: "BOT:REGISTERED", date: true })
@@ -127,9 +127,9 @@ socket.on("message", async (data) => {
 
     // 2. Recibir cartas
     if (msg.action === "dealtPrivateCards") {
-      const targetId = msg.playerId || msg.id;
+      const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.playerId || msg.id;
       if (targetId === myId) {
-        myCards = msg.cards || [];
+        myCards = msg.myPlayerInfo?.privateCards || msg.cards || [];
         log
           .Template({ name: "brakets", title: "BOT:HAND", date: true })
           .R({ cards: myCards });
@@ -146,7 +146,7 @@ socket.on("message", async (data) => {
 
     // 4. Probabilidades
     if (msg.action === "oddsUpdate") {
-      myOdds = msg.odds || { win: 0 };
+      myOdds = msg.data?.odds || msg.odds || { win: 0 };
       log
         .Template({ name: "brakets", title: "BOT:ODDS", date: true })
         .R({ win: myOdds.win });
@@ -197,7 +197,7 @@ socket.on("message", async (data) => {
 });
 
 function handleBlind(msg) {
-  const amount = msg.blindAmount || msg.amount || 10;
+  const amount = Number(msg.blindAmount || msg.data?.blindAmount || msg.amount || 10);
   log
     .Template({ name: "brakets", title: "BOT:BLIND_ACTION", date: true })
     .R({ amount });
@@ -205,21 +205,24 @@ function handleBlind(msg) {
 }
 
 async function handleAIDecision(msg) {
-  const options = msg.possibleActions ||
-    msg.data?.actions || ["fold", "call", "check", "raise"];
+  // Extraer opciones válidas de forma robusta
+  const options = msg.data?.actions || msg.possibleActions || ["fold", "call", "check", "raise"];
+  
+  // Calcular cuánto falta por igualar
+  const callAmount = Number(msg.data?.chipsToCall || gameState.currentHighestBet || 0);
 
   log.Template({ name: "brakets", title: "BOT:THINKING", date: true }).R({
     provider,
     odds: myOdds.win,
     pot: gameState.pot,
-    call: gameState.currentHighestBet,
+    call: callAmount,
     options,
   });
 
   const prompt = `
     You are a professional Poker AI.
     HAND: ${myCards.join(", ")} | BOARD: ${communityCards.join(", ") || "None"}
-    WIN ODDS: ${myOdds.win}% | POT: $${gameState.pot} | CALL: $${gameState.currentHighestBet}
+    WIN ODDS: ${myOdds.win}% | POT: $${gameState.pot} | CALL: $${callAmount}
     OPTIONS: ${options.join(", ")}
     
     Respond ONLY with JSON: {"action": "choice", "amount": number, "thought": "reason"}
@@ -266,24 +269,78 @@ async function handleAIDecision(msg) {
     setTimeout(() => {
       const actionMsg = { action: finalAction };
       if (finalAction === ACTIONS.RAISE)
-        actionMsg.chipsToRiseBet = decision.amount ||
-          gameState.currentHighestBet * 2;
+        actionMsg.chipsToRiseBet = Number(decision.amount || callAmount * 2);
       if (finalAction === ACTIONS.CALL)
-        actionMsg.chipsToCall = gameState.currentHighestBet;
+        actionMsg.chipsToCall = callAmount;
 
       sendAction(actionMsg);
     }, 1000);
   } catch (error) {
+    const isModelMissing = error.message.includes("not found");
+    
     log
       .Template({ name: "brakets", title: "ERROR:IA_DECISION", date: true })
-      .R({ error: error.message });
-    const fallback = options.includes("check") ? ACTIONS.CHECK : ACTIONS.FOLD;
+      .R({ error: error.message, isModelMissing });
+    
+    if (isModelMissing) {
+      log
+        .Template({ name: "brakets", title: "BOT:HINT", date: true })
+        .R({ msg: `Model "${modelName}" not found in Ollama. Try "ollama pull ${modelName}" or check your spelling.` });
+    }
+
+    // FALLBACK INTELIGENTE
+    const winChance = parseFloat(myOdds.win) || 0;
+    let fallback;
+    if (options.includes("check") && callAmount === 0) {
+      fallback = ACTIONS.CHECK;
+    } else if (options.includes("call") && winChance > 30) {
+      fallback = ACTIONS.CALL;
+    } else if (options.includes("call") && callAmount < 50 && winChance > 15) {
+      // Si la apuesta es pequeña, podemos ser más arriesgados
+      fallback = ACTIONS.CALL;
+    } else {
+      fallback = ACTIONS.FOLD;
+    }
+
     log
       .Template({ name: "brakets", title: "BOT:FALLBACK", date: true })
-      .R({ action: fallback });
-    sendAction({ action: fallback });
+      .R({ action: fallback, reason: isModelMissing ? "Model missing" : "AI Error", winChance });
+      
+    const actionMsg = { action: fallback };
+    if (fallback === ACTIONS.CALL) actionMsg.chipsToCall = callAmount;
+    
+    sendAction(actionMsg);
   }
 }
+
+function mapAction(action) {
+  switch (action?.toLowerCase()) {
+    case "fold":
+      return ACTIONS.FOLD;
+    case "call":
+      return ACTIONS.CALL;
+    case "check":
+      return ACTIONS.CHECK;
+    case "raise":
+    case "bet":
+      return ACTIONS.RAISE;
+    default:
+      return ACTIONS.CHECK;
+  }
+}
+
+socket.on("close", (code, reason) => {
+  log
+    .Template({ name: "brakets", title: "BOT:DISCONNECTED", date: true })
+    .R({ code, reason: reason?.toString() || "No reason" });
+  process.exit(0);
+});
+
+socket.on("error", (err) => {
+  log
+    .Template({ name: "brakets", title: "ERROR:SOCKET", date: true })
+    .R({ error: err.message });
+});
 
 function mapAction(action) {
   switch (action?.toLowerCase()) {
