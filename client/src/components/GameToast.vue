@@ -16,7 +16,10 @@
         id="game-toast-content"
         class="bg-black/60 backdrop-blur-md border border-white/10 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex items-center gap-3"
       >
-        <div id="toast-pulse" class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"></div>
+        <div
+          id="toast-pulse"
+          class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"
+        ></div>
         <span
           id="toast-message"
           class="text-xs lg:text-sm font-black text-gray-100 uppercase tracking-[0.15em] italic"

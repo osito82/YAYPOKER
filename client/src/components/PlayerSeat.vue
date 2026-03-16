@@ -23,7 +23,14 @@
       <template v-if="showCards && playerCards?.length > 0">
         <Card
           v-for="(c, i) in playerCards"
-          :id="'seat-card-' + playerName + '-' + i + '-' + responsive.templateSuffix"
+          :id="
+            'seat-card-' +
+            playerName +
+            '-' +
+            i +
+            '-' +
+            responsive.templateSuffix
+          "
           :key="i"
           :size="responsive.cardSize"
           :percentage="responsive.cardPercentage"
@@ -35,7 +42,14 @@
       <template v-else>
         <CardBack
           v-for="i in 2"
-          :id="'seat-card-back-' + playerName + '-' + i + '-' + responsive.templateSuffix"
+          :id="
+            'seat-card-back-' +
+            playerName +
+            '-' +
+            i +
+            '-' +
+            responsive.templateSuffix
+          "
           :key="i"
           :size="responsive.cardSize"
           :percentage="responsive.cardPercentage"
@@ -60,7 +74,12 @@
           >{{ playerName }}</span
         >
         <div
-          :id="'seat-stack-container-' + playerName + '-' + responsive.templateSuffix"
+          :id="
+            'seat-stack-container-' +
+            playerName +
+            '-' +
+            responsive.templateSuffix
+          "
           class="flex flex-col items-end shrink-0 ml-2"
         >
           <span
@@ -69,7 +88,9 @@
             >Stack</span
           >
           <span
-            :id="'display-stack-' + playerName + '-' + responsive.templateSuffix"
+            :id="
+              'display-stack-' + playerName + '-' + responsive.templateSuffix
+            "
             class="text-sm font-mono font-black text-yellow-500 leading-none"
             >${{ playerChips }}</span
           >
@@ -81,7 +102,12 @@
         class="mt-1 flex justify-between items-end h-7"
       >
         <div
-          :id="'seat-action-container-' + playerName + '-' + responsive.templateSuffix"
+          :id="
+            'seat-action-container-' +
+            playerName +
+            '-' +
+            responsive.templateSuffix
+          "
           class="flex flex-col"
         >
           <span
@@ -97,7 +123,9 @@
           >
             <div
               v-if="playerAction"
-              :id="'display-action-' + playerName + '-' + responsive.templateSuffix"
+              :id="
+                'display-action-' + playerName + '-' + responsive.templateSuffix
+              "
               :key="playerAction"
               class="text-[12px] font-black text-blue-300 uppercase tracking-widest leading-none"
             >
@@ -105,7 +133,12 @@
             </div>
             <div
               v-else
-              :id="'display-action-none-' + playerName + '-' + responsive.templateSuffix"
+              :id="
+                'display-action-none-' +
+                playerName +
+                '-' +
+                responsive.templateSuffix
+              "
               class="text-[12px] font-black text-gray-400 uppercase tracking-widest leading-none italic"
             >
               ...
@@ -115,7 +148,9 @@
 
         <div
           v-if="playerBet > 0"
-          :id="'seat-bet-container-' + playerName + '-' + responsive.templateSuffix"
+          :id="
+            'seat-bet-container-' + playerName + '-' + responsive.templateSuffix
+          "
           class="flex flex-col items-end shrink-0 ml-2"
         >
           <span

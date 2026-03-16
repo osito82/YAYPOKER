@@ -33,16 +33,19 @@ src/
 ## 🛠️ Instalación y Desarrollo
 
 1.  **Instalar dependencias**:
+
     ```bash
     npm install
     ```
 
 2.  **Iniciar entorno de desarrollo**:
+
     ```bash
     npm run dev
     ```
 
 3.  **Construir para producción**:
+
     ```bash
     npm run build
     ```
@@ -59,4 +62,5 @@ Este proyecto sigue estrictas reglas de nombrado de IDs para elementos de la int
 Ejemplo: `poker-table-viewport-TemplateLarge`
 
 ---
+
 Desarrollado con ❤️ para amantes del Poker.

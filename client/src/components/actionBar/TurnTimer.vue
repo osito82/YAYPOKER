@@ -16,6 +16,6 @@
 defineProps({
   isMyTurn: Boolean,
   progress: Number,
-  templateSuffix: String
+  templateSuffix: String,
 })
 </script>

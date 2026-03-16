@@ -25,9 +25,9 @@ describe('Poker Store', () => {
         currentHighestBet: 20,
         data: {
           messageForId: 'player-1',
-          action: ['call', 'raise', 'fold']
-        }
-      }
+          action: ['call', 'raise', 'fold'],
+        },
+      },
     })
 
     store.setSocketMessage(message)
@@ -40,29 +40,33 @@ describe('Poker Store', () => {
 
   it('preserves turn when receiving non-action messages (like oddsUpdate)', () => {
     const store = usePokerStore()
-    
+
     // Set initial turn
-    store.setSocketMessage(JSON.stringify({
-      message: {
-        action: 'bettingCore-firstBetting',
-        data: {
-          messageForId: 'my-id',
-          action: ['check', 'bet']
-        }
-      }
-    }))
-    
+    store.setSocketMessage(
+      JSON.stringify({
+        message: {
+          action: 'bettingCore-firstBetting',
+          data: {
+            messageForId: 'my-id',
+            action: ['check', 'bet'],
+          },
+        },
+      }),
+    )
+
     expect(store.activePlayerId).toBe('my-id')
 
     // Receive oddsUpdate which is NOT in the clearing list
-    store.setSocketMessage(JSON.stringify({
-      message: {
-        action: 'oddsUpdate',
-        data: {
-          odds: { win: 0.5, tie: 0.1 }
-        }
-      }
-    }))
+    store.setSocketMessage(
+      JSON.stringify({
+        message: {
+          action: 'oddsUpdate',
+          data: {
+            odds: { win: 0.5, tie: 0.1 },
+          },
+        },
+      }),
+    )
 
     // Should still be my turn
     expect(store.activePlayerId).toBe('my-id')
@@ -71,24 +75,28 @@ describe('Poker Store', () => {
 
   it('clears turn when receiving public action confirmations without next turn info', () => {
     const store = usePokerStore()
-    
-    store.setSocketMessage(JSON.stringify({
-      message: {
-        action: 'bettingCore-firstBetting',
-        data: {
-          messageForId: 'my-id',
-          action: ['check', 'bet']
-        }
-      }
-    }))
+
+    store.setSocketMessage(
+      JSON.stringify({
+        message: {
+          action: 'bettingCore-firstBetting',
+          data: {
+            messageForId: 'my-id',
+            action: ['check', 'bet'],
+          },
+        },
+      }),
+    )
 
     // Receive a public setBet message (no messageForId)
-    store.setSocketMessage(JSON.stringify({
-      message: {
-        action: 'setBet',
-        data: { displayMsg: 'Someone bet' }
-      }
-    }))
+    store.setSocketMessage(
+      JSON.stringify({
+        message: {
+          action: 'setBet',
+          data: { displayMsg: 'Someone bet' },
+        },
+      }),
+    )
 
     // It SHOULD clear because an action happened and we don't know who is next yet
     expect(store.activePlayerId).toBe(null)
@@ -98,17 +106,19 @@ describe('Poker Store', () => {
   it('updates winner info and clears turn', () => {
     const store = usePokerStore()
     store.activePlayerId = 'player-1'
-    
+
     const winnerData = {
-      winners: [{ name: 'Mimoso', amount: 500 }]
+      winners: [{ name: 'Mimoso', amount: 500 }],
     }
 
-    store.setSocketMessage(JSON.stringify({
-      message: {
-        action: 'winner',
-        data: winnerData
-      }
-    }))
+    store.setSocketMessage(
+      JSON.stringify({
+        message: {
+          action: 'winner',
+          data: winnerData,
+        },
+      }),
+    )
 
     expect(store.winnerInfo).toEqual(winnerData)
     expect(store.activePlayerId).toBe(null)
@@ -121,12 +131,14 @@ describe('Poker Store', () => {
     store.communityCards = ['Ah', 'Kh']
     store.currentHighestBet = 100
 
-    store.setSocketMessage(JSON.stringify({
-      message: {
-        action: 'gameRestarted',
-        data: { newGameId: 'new-id' }
-      }
-    }))
+    store.setSocketMessage(
+      JSON.stringify({
+        message: {
+          action: 'gameRestarted',
+          data: { newGameId: 'new-id' },
+        },
+      }),
+    )
 
     expect(store.pot).toBe(0)
     expect(store.communityCards).toEqual([])

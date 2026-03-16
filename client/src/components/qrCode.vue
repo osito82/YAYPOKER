@@ -36,7 +36,7 @@ import { urlsFactory } from '../vutils'
 const props = defineProps({
   width: { type: Number, default: 300 },
   height: { type: Number, default: 300 },
-  gameCode: { type: String, required: true }
+  gameCode: { type: String, required: true },
 })
 
 const renderComponent = ref(true)

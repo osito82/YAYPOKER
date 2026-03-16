@@ -25,7 +25,11 @@
       </div>
 
       <!-- Form -->
-      <div :id="`lobby-form-container-${templateSuffix}`" class="space-y-10" :class="formPadding">
+      <div
+        :id="`lobby-form-container-${templateSuffix}`"
+        class="space-y-10"
+        :class="formPadding"
+      >
         <!-- MODE: Selection (Home /) -->
         <template v-if="!isCreating">
           <!-- Join Game Section -->
@@ -34,39 +38,34 @@
             @submit.prevent="joinGame"
             class="space-y-6"
           >
-
-                    <div :id="`join-game-title-wrapper-${templateSuffix}`" class="text-center">
-            <h1 :id="`new-game-main-title-${templateSuffix}`" class="text-3xl font-black text-white uppercase tracking-[0.4em] italic">
-          
-          
+            <div
+              :id="`join-game-title-wrapper-${templateSuffix}`"
+              class="text-center"
+            >
+              <h1
+                :id="`new-game-main-title-${templateSuffix}`"
+                class="text-3xl font-black text-white uppercase tracking-[0.4em] italic"
+              >
                 <span v-if="joinCode">
-  Join <span class="text-yellow-500">Table</span>
-</span>
-<span v-else>
-  Join Existing <span class="text-yellow-500">Table</span>
-</span>
-         
-            </h1>
-          </div>
-
+                  Join <span class="text-yellow-500">Table</span>
+                </span>
+                <span v-else>
+                  Join Existing <span class="text-yellow-500">Table</span>
+                </span>
+              </h1>
+            </div>
 
             <label
               :id="`join-game-input-label-${templateSuffix}`"
               class="block text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
             >
-               Your info
+              Your info
             </label>
 
-
-
-
-
-
-
-
-
-
-            <div :id="`join-game-inputs-wrapper-${templateSuffix}`" class="space-y-4">
+            <div
+              :id="`join-game-inputs-wrapper-${templateSuffix}`"
+              class="space-y-4"
+            >
               <input
                 :id="`player-name-input-field-${templateSuffix}`"
                 v-model="playerName"
@@ -103,7 +102,10 @@
                   ></div>
                 </div>
 
-                <div :id="`join-controls-action-layout-${templateSuffix}`" class="flex space-x-3">
+                <div
+                  :id="`join-controls-action-layout-${templateSuffix}`"
+                  class="flex space-x-3"
+                >
                   <input
                     :id="`game-table-join-code-input-${templateSuffix}`"
                     v-model="joinCode"
@@ -143,8 +145,14 @@
           :id="`create-game-success-view-${templateSuffix}`"
           class="space-y-8 animate-fade-in"
         >
-          <div :id="`new-game-title-wrapper-${templateSuffix}`" class="text-center">
-            <h1 :id="`new-game-main-title-${templateSuffix}`" class="text-3xl font-black text-white uppercase tracking-[0.4em] italic">
+          <div
+            :id="`new-game-title-wrapper-${templateSuffix}`"
+            class="text-center"
+          >
+            <h1
+              :id="`new-game-main-title-${templateSuffix}`"
+              class="text-3xl font-black text-white uppercase tracking-[0.4em] italic"
+            >
               New <span class="text-yellow-500">Game</span>
             </h1>
           </div>
@@ -170,14 +178,21 @@
           </div>
 
           <!-- Name Input for Creator -->
-          <form :id="`creator-info-setup-section-${templateSuffix}`" @submit.prevent="startGame" class="space-y-3">
+          <form
+            :id="`creator-info-setup-section-${templateSuffix}`"
+            @submit.prevent="startGame"
+            class="space-y-3"
+          >
             <label
               :id="`creator-name-setup-label-${templateSuffix}`"
               class="block text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2"
             >
               Set Your Display Name & Pin
             </label>
-            <div :id="`creator-info-inputs-wrapper-${templateSuffix}`" class="space-y-4">
+            <div
+              :id="`creator-info-inputs-wrapper-${templateSuffix}`"
+              class="space-y-4"
+            >
               <input
                 :id="`creator-name-input-field-${templateSuffix}`"
                 v-model="playerName"
@@ -197,7 +212,10 @@
               />
             </div>
 
-            <div :id="`creator-actions-button-grid-${templateSuffix}`" class="mt-8">
+            <div
+              :id="`creator-actions-button-grid-${templateSuffix}`"
+              class="mt-8"
+            >
               <button
                 :id="`start-game-submit-button-${templateSuffix}`"
                 type="submit"
@@ -241,7 +259,12 @@ import { useRouter, useRoute } from 'vue-router'
 import { useResponsiveStore } from '../store/responsiveStore'
 import QRCodeVue3 from 'qrcode-vue3'
 import Logo from '../components/Logo.vue'
-import { generateUniqueId, generateSecretCode, urlsFactory, copyToClipboard as copyToClipboardUtil } from '../vutils'
+import {
+  generateUniqueId,
+  generateSecretCode,
+  urlsFactory,
+  copyToClipboard as copyToClipboardUtil,
+} from '../vutils'
 
 const responsive = useResponsiveStore()
 const router = useRouter()
@@ -249,7 +272,7 @@ const route = useRoute()
 
 // Focus directive
 const vFocus = {
-  mounted: (el) => el.focus()
+  mounted: (el) => el.focus(),
 }
 
 // State
@@ -263,73 +286,99 @@ const copyStatus = ref('Copy Code')
 
 const templateSuffix = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'TemplateXSmall'
-    case 'small': return 'TemplateSmall'
-    case 'medium': return 'TemplateMedium'
-    default: return 'TemplateLarge'
+    case 'xsmall':
+      return 'TemplateXSmall'
+    case 'small':
+      return 'TemplateSmall'
+    case 'medium':
+      return 'TemplateMedium'
+    default:
+      return 'TemplateLarge'
   }
 })
 
 // Responsive UI Computeds
 const cardClasses = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'max-w-full rounded-[1.5rem]'
-    case 'small': return 'max-w-[400px] rounded-[2rem]'
-    default: return 'max-w-lg rounded-[2rem]'
+    case 'xsmall':
+      return 'max-w-full rounded-[1.5rem]'
+    case 'small':
+      return 'max-w-[400px] rounded-[2rem]'
+    default:
+      return 'max-w-lg rounded-[2rem]'
   }
 })
 
 const headerPadding = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'p-4'
-    case 'small': return 'p-6'
-    default: return 'p-8'
+    case 'xsmall':
+      return 'p-4'
+    case 'small':
+      return 'p-6'
+    default:
+      return 'p-8'
   }
 })
 
 const logoScale = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'mb-3 scale-100'
-    case 'small': return 'mb-4 scale-125'
-    default: return 'mb-6 scale-150'
+    case 'xsmall':
+      return 'mb-3 scale-100'
+    case 'small':
+      return 'mb-4 scale-125'
+    default:
+      return 'mb-6 scale-150'
   }
 })
 
 const subtitleSize = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'text-sm'
-    case 'small': return 'text-lg'
-    default: return 'text-xl'
+    case 'xsmall':
+      return 'text-sm'
+    case 'small':
+      return 'text-lg'
+    default:
+      return 'text-xl'
   }
 })
 
 const formPadding = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'p-6 space-y-6'
-    case 'small': return 'p-8 space-y-8'
-    default: return 'p-10 space-y-10'
+    case 'xsmall':
+      return 'p-6 space-y-6'
+    case 'small':
+      return 'p-8 space-y-8'
+    default:
+      return 'p-10 space-y-10'
   }
 })
 
 const footerPadding = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'p-4'
-    default: return 'p-6'
+    case 'xsmall':
+      return 'p-4'
+    default:
+      return 'p-6'
   }
 })
 
 const qrSize = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 120
-    case 'small': return 150
-    default: return 180
+    case 'xsmall':
+      return 120
+    case 'small':
+      return 150
+    default:
+      return 180
   }
 })
 
 const generatedBoxPadding = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall': return 'p-4'
-    default: return 'p-6'
+    case 'xsmall':
+      return 'p-4'
+    default:
+      return 'p-6'
   }
 })
 
@@ -347,7 +396,11 @@ const checkRouteState = () => {
     secretCode.value = ''
   } else if (route.name === 'game.join' || route.query.joinCode) {
     isCreating.value = false
-    joinCode.value = (route.params.gameCode || route.query.joinCode || '').toUpperCase()
+    joinCode.value = (
+      route.params.gameCode ||
+      route.query.joinCode ||
+      ''
+    ).toUpperCase()
     playerName.value = ''
     // Pre-fill secret if provided in path
     secretCode.value = route.params.secretCode || ''
@@ -366,10 +419,15 @@ onMounted(() => {
 })
 
 watch(
-  () => [route.name, route.params.gameCode, route.params.secretCode, route.query.joinCode],
+  () => [
+    route.name,
+    route.params.gameCode,
+    route.params.secretCode,
+    route.query.joinCode,
+  ],
   () => {
     checkRouteState()
-  }
+  },
 )
 
 // Invitation URL for others (redirects to /join/:gameCode)
@@ -399,11 +457,11 @@ const joinGame = () => {
   if (isValidJoin.value) {
     router.push({
       name: 'game.play',
-      params: { 
+      params: {
         gameCode: joinCode.value.toUpperCase(),
-        secretCode: secretCode.value
+        secretCode: secretCode.value,
       },
-      query: { playerName: playerName.value }
+      query: { playerName: playerName.value },
     })
   }
 }
@@ -435,11 +493,11 @@ const startGame = () => {
   if (playerName.value.trim() && finalSecret) {
     router.push({
       name: 'game.play',
-      params: { 
+      params: {
         gameCode: generatedCode.value,
-        secretCode: finalSecret
+        secretCode: finalSecret,
       },
-      query: { playerName: playerName.value }
+      query: { playerName: playerName.value },
     })
   }
 }
