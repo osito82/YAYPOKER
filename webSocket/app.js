@@ -79,6 +79,12 @@ const validateAction = (action, data) => {
       data.chipsToRiseBet = rise // Sanitizar
       return null
     },
+    [ACTIONS.BLIND]: () => {
+      const blind = Number(data.blindAmount)
+      if (isNaN(blind) || blind < 0) return 'Invalid blind amount'
+      data.blindAmount = blind // Sanitizar
+      return null
+    },
     [ACTIONS.SEND_MESSAGE]: () => {
       if (!data.targetPlayerId || typeof data.targetMessage !== 'string')
         return 'Invalid message data'
@@ -100,6 +106,8 @@ const actionHandlers = {
     match.actions.setBet(socket, data.chipsToBet),
   [ACTIONS.RAISE]: (match, socket, data) =>
     match.actions.setRise(socket, data.chipsToRiseBet),
+  [ACTIONS.BLIND]: (match, socket, data) =>
+    match.actions.setBet(socket, data.blindAmount),
   [ACTIONS.CALL]: (match, socket) => match.actions.setCall(socket),
   [ACTIONS.CHECK]: (match, socket) => match.actions.setCheck(socket),
   [ACTIONS.DEALT_PRIVATE_CARDS]: (match, socket) => match.actions.dealtPrivateCards(socket),
