@@ -44,7 +44,7 @@ export default function useWebSocket(url, options) {
         totalChips: 1000,
       })
     })
-...
+
 
     socket.value.addEventListener('message', (event) => {
       pokerStore.setSocketMessage(event.data)

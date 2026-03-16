@@ -49,12 +49,14 @@ log.R = function (data) {
 // Inicializar Cliente de Ollama
 let ollamaClient;
 try {
-...
+  ollamaClient = new Ollama({
     host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
   });
+
   log
     .Template({ name: "brakets", title: "IA:OLLAMA_INIT", date: true })
     .R({ msg: "Ollama client initialized" });
+
 } catch (error) {
   log
     .Template({ name: "brakets", title: "ERROR:OLLAMA_INIT", date: true })

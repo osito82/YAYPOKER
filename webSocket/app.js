@@ -174,7 +174,7 @@ const actionHandlers = {
 }
 
 wss.on('connection', (ws, req) => {
-...
+
   const urlParams = new URLSearchParams(req.url.substring(1))
 
   const torneoId = urlParams.get('gameCode') ?? generateUniqueId()
