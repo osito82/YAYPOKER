@@ -9,10 +9,11 @@
     "llama": "node bot.js --gameCode=LOBBY --name=Llama_Bot --provider=openllama"
   },
   "dependencies": {
-    "ws": "^8.19.0",
-    "radash": "^12.1.1",
     "@google/generative-ai": "^0.21.0",
+    "dotenv": "^16.4.5",
     "ollama": "^0.5.12",
-    "dotenv": "^16.4.5"
+    "osolog": "^1.0.6",
+    "radash": "^12.1.1",
+    "ws": "^8.19.0"
   }
 }
