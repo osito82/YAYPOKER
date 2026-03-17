@@ -28,6 +28,12 @@ class Match extends EventEmitter {
     this.handCount = 0
     this.currentHandId = null
 
+    // Blinds management
+    this.blindLevel = 1
+    this.smallBlind = GAME_RULES.DEFAULT_SMALL_BLIND
+    this.bigBlind = GAME_RULES.DEFAULT_BIG_BLIND
+    this.ante = GAME_RULES.DEFAULT_ANTE
+
     this.players = []
     this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
@@ -53,6 +59,44 @@ class Match extends EventEmitter {
     this.on('CONTINUE', (socket, delay) => this.continue(socket, delay))
     this.on('NEXT_ROUND', () => this.nextRound())
     this.on('RESTART_MATCH', (customDeck) => this.restartMatch(customDeck))
+  }
+
+  increaseBlinds() {
+    this.blindLevel++
+    this.smallBlind = Math.ceil(
+      this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
+    )
+    this.bigBlind = Math.ceil(
+      this.bigBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
+    )
+    if (this.ante > 0) {
+      this.ante = Math.ceil(this.ante * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
+    }
+
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'MATCH:BLINDS_INCREASED',
+        date: true,
+      })
+      .R({
+        torneoId: this.torneoId,
+        level: this.blindLevel,
+        smallBlind: this.smallBlind,
+        bigBlind: this.bigBlind,
+        ante: this.ante,
+        handsPlayed: this.handCount,
+      })
+
+    this.communicator.msgBuilder('blindsIncreased', 'public', null, {
+      level: this.blindLevel,
+      smallBlind: this.smallBlind,
+      bigBlind: this.bigBlind,
+      ante: this.ante,
+      handsPlayed: this.handCount,
+      displayMsg: `Blinds increased to level ${this.blindLevel}: SB $${this.smallBlind} / BB $${this.bigBlind}`,
+    })
+    Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
   }
 
   initHand() {
@@ -312,7 +356,8 @@ class Match extends EventEmitter {
     })
 
     const Deck = require('./deck')
-    this.shuffledDeck = customDeck || Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
+    this.shuffledDeck =
+      customDeck || Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
     this.dealer.gameId = this.gameId
     this.dealer.deck = this.shuffledDeck
     this.dealer.cardsDealer = []

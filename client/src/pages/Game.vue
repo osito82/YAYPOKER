@@ -19,6 +19,7 @@
     :myPlayer="myPlayer"
     :isMyTurn="isMyTurn"
     :canBlind="canBlind"
+    :blindInfo="blindInfo"
     :options="options"
     :betAmount="betAmount"
     :minBet="minBet"
@@ -149,6 +150,17 @@ const canBlind = computed(
   () => !props.isGuest && isMyTurn.value && options.value.includes('blind'),
 )
 
+const blindInfo = computed(() => {
+  if (!canBlind.value) return null
+  const amount =
+    pokerStore.myInfo.requiredBlind ||
+    (pokerStore.getDisplayMsg?.toLowerCase().includes('small') ? pokerStore.smallBlind : pokerStore.bigBlind)
+  const type = pokerStore.getDisplayMsg?.toLowerCase().includes('small')
+    ? 'Small'
+    : 'Big'
+  return { amount, type }
+})
+
 const minBet = computed(() => {
   const isRaiseAction = options.value.includes('raise')
   const baseMin = isRaiseAction
@@ -229,7 +241,7 @@ const sendAction = (action) => {
     case 'blind':
       const blindAmount =
         pokerStore.myInfo.requiredBlind ||
-        (pokerStore.getDisplayMsg?.toLowerCase().includes('small') ? 10 : 20)
+        (pokerStore.getDisplayMsg?.toLowerCase().includes('small') ? pokerStore.smallBlind : pokerStore.bigBlind)
       sendMessage({ action: 'setBet', chipsToBet: blindAmount })
       break
   }

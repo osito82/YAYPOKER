@@ -35,10 +35,7 @@ class MatchLobby {
       this.communicator.msgBuilder('playerReady', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} is ready!`,
       })
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
     }
   }
 
@@ -48,10 +45,7 @@ class MatchLobby {
       this.communicator.msgBuilder('lobbyError', 'private', null, {
         displayMsg: 'Only the host can start the game.',
       })
-      this.dealer.talkToSocketById(
-        thisSocket.id,
-        this.communicator.getMsg(),
-      )
+      this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
       return
     }
 
@@ -81,15 +75,11 @@ class MatchLobby {
         })
 
       this.communicator.msgBuilder('lobbyError', 'public', null, {
-        displayMsg:
-          `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected to start...`,
+        displayMsg: `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected to start...`,
         readyPlayers: readyPlayers.length,
         connectedPlayers: connectedCount,
       })
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
       return
     }
 
@@ -203,10 +193,7 @@ class MatchLobby {
         msg: `${player.name} reconnected.`,
         hostId: this.match.hostId,
       })
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
       this.match.comms.sendOdds(player)
 
@@ -226,10 +213,7 @@ class MatchLobby {
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: `Table is full (max ${GAME_RULES.MAX_PLAYERS} players).`,
         })
-        this.dealer.talkToSocketById(
-          thisSocket.id,
-          this.communicator.getMsg(),
-        )
+        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
       }
 
@@ -237,10 +221,7 @@ class MatchLobby {
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Game in progress. Please wait for next round.',
         })
-        this.dealer.talkToSocketById(
-          thisSocket.id,
-          this.communicator.getMsg(),
-        )
+        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
       }
 
@@ -297,10 +278,7 @@ class MatchLobby {
       msg: `Welcome ${player.name}!`,
       hostId: this.match.hostId,
     })
-    Socket.broadcastToTorneo(
-      this.match.torneoId,
-      this.communicator.getMsg(),
-    )
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
     this.communicator.msgBuilder('signUp', 'private', player, {
       method: 'signUp',
@@ -350,10 +328,7 @@ class MatchLobby {
       displayMsg: 'Registration closed. Game in progress.',
     })
 
-    Socket.broadcastToTorneo(
-      this.match.torneoId,
-      this.communicator.getMsg(),
-    )
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
   }
 
   pause(thisSocket) {
@@ -380,10 +355,7 @@ class MatchLobby {
         displayMsg: `${foundPlayer.name} disconnected. Waiting ${time / 1000} seconds for reconnection...`,
         timeout: time / 1000,
       })
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
       const timeout = setTimeout(() => {
         this.playerLeave(thisSocket)
@@ -402,18 +374,10 @@ class MatchLobby {
     const index = this.match.players.findIndex((p) => p.id === socketId)
     if (index !== -1) {
       const playerLeaving = this.match.players[index]
-      this.communicator.msgBuilder(
-        'playerLeave',
-        'public',
-        playerLeaving,
-        {
-          displayMsg: `${playerLeaving.name} has left the game.`,
-        },
-      )
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      this.communicator.msgBuilder('playerLeave', 'public', playerLeaving, {
+        displayMsg: `${playerLeaving.name} has left the game.`,
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
       this.log
         .Template({
           name: 'brakets',

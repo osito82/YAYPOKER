@@ -23,20 +23,18 @@ class MatchComms {
   }
 
   stats(socketId) {
-    this.log
-      .Template({ name: 'brakets', title: 'MATCH:STATS', date: true })
-      .R({
-        torneoId: this.match.torneoId,
-        handId: this.match.currentHandId,
-        pot: this.match.dealer.getPot(),
-        playerCount: this.match.players.length,
-        players: this.match.players.map((p) => ({
-          name: p.name,
-          connected: p.connected,
-          chips: p.chips,
-        })),
-        dealerCards: this.match.cardsDealer,
-      })
+    this.log.Template({ name: 'brakets', title: 'MATCH:STATS', date: true }).R({
+      torneoId: this.match.torneoId,
+      handId: this.match.currentHandId,
+      pot: this.match.dealer.getPot(),
+      playerCount: this.match.players.length,
+      players: this.match.players.map((p) => ({
+        name: p.name,
+        connected: p.connected,
+        chips: p.chips,
+      })),
+      dealerCards: this.match.cardsDealer,
+    })
   }
 
   sendOdds(targetPlayer = null) {

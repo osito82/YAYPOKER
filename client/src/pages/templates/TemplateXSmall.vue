@@ -43,7 +43,7 @@
     <div id="actionbar-wrapper-TemplateXSmall" class="shrink-0 z-50">
       <ActionBar
         :isMyTurn="isMyTurn"
-        :canBlind="canBlind"
+        :canBlind="canBlind" :blindInfo="blindInfo"
         :options="options"
         :balance="myPlayer?.chips || 0"
         :currentBet="myPlayer?.currentBet || 0"
@@ -87,6 +87,9 @@ import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 import MessageTerminal from '../../components/MessageTerminal.vue'
+import { usePokerStore } from '../../store/pokerStore'
+
+const pokerStore = usePokerStore()
 
 defineProps({
   gameCode: String,
@@ -96,6 +99,7 @@ defineProps({
   myPlayer: Object,
   isMyTurn: Boolean,
   canBlind: Boolean,
+  blindInfo: Object,
   options: Array,
   betAmount: Number,
   minBet: Number,

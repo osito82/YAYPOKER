@@ -81,10 +81,7 @@ class MatchActions {
       this.communicator.msgBuilder('fold', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} folded.`,
       })
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
       this.match.comms.sendOdds()
 
       // Check if only one player remains after folding
@@ -99,9 +96,7 @@ class MatchActions {
   }
 
   performCheck(foundPlayer) {
-    if (
-      foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()
-    ) {
+    if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
       this.clearAutofold()
       this.match.activePlayerId = null // ✅ CLEAR TURN IMMEDIATELY
       this.dealer.setPlayerActed(foundPlayer.id)
@@ -125,10 +120,7 @@ class MatchActions {
       this.communicator.msgBuilder('setCheck', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} checks`,
       })
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
       return true
     } else {
       this.log
@@ -148,15 +140,10 @@ class MatchActions {
           maxBet: this.dealer.getCurrentHighestBet(),
         })
 
-      this.communicator.msgBuilder(
-        'actionRejected',
-        'private',
-        foundPlayer,
-        {
-          reason: 'check',
-          displayMsg: 'Check invalid: there is an active bet.',
-        },
-      )
+      this.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+        reason: 'check',
+        displayMsg: 'Check invalid: there is an active bet.',
+      })
       Socket.sendToPlayer(
         this.match.torneoId,
         foundPlayer.secretCode,
@@ -286,10 +273,7 @@ class MatchActions {
       bet: foundPlayer.getCurrentBet(),
     })
 
-    Socket.broadcastToTorneo(
-      this.match.torneoId,
-      this.communicator.getMsg(),
-    )
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
     this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast) // ✅ Fast transition via events
   }
 
@@ -320,7 +304,7 @@ class MatchActions {
 
     const amount = Number(chipsToBet)
     const currentMaxBet = this.dealer.getCurrentHighestBet()
-    const lastRaise = this.dealer.getLastRaiseAmount() || GAME_RULES.DEFAULT_BIG_BLIND // Default to Big Blind if no raise yet
+    const lastRaise = this.dealer.getLastRaiseAmount() || this.match.bigBlind // Default to Big Blind if no raise yet
 
     // REGLA DE MIN-RAISE: El aumento debe ser al menos igual al aumento anterior
     if (type === 'setRise') {
@@ -346,15 +330,10 @@ class MatchActions {
             reason: 'Raise must be at least the size of the previous raise',
           })
 
-        this.communicator.msgBuilder(
-          'actionRejected',
-          'private',
-          foundPlayer,
-          {
-            reason: 'minimum raise',
-            displayMsg: `Raise invalid: minimum raise is ${currentMaxBet + lastRaise}.`,
-          },
-        )
+        this.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+          reason: 'minimum raise',
+          displayMsg: `Raise invalid: minimum raise is ${currentMaxBet + lastRaise}.`,
+        })
         Socket.sendToPlayer(
           this.match.torneoId,
           foundPlayer.secretCode,
@@ -385,15 +364,10 @@ class MatchActions {
           reason: 'Raise must be higher than current highest bet',
         })
 
-      this.communicator.msgBuilder(
-        'actionRejected',
-        'private',
-        foundPlayer,
-        {
-          reason: 'minimum raise',
-          displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
-        },
-      )
+      this.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+        reason: 'minimum raise',
+        displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
+      })
       Socket.sendToPlayer(
         this.match.torneoId,
         foundPlayer.secretCode,
@@ -456,20 +430,12 @@ class MatchActions {
           newPot: this.dealer.getPot(),
         })
 
-      this.communicator.msgBuilder(
-        broadcastAction,
-        'public',
-        foundPlayer,
-        {
-          displayMsg: `${foundPlayer.name} ${actionType === 'All-In' ? 'goes all-in' : type === 'setBet' ? 'bets' : 'raises to'} ${currentBetAfter}`,
-          name: foundPlayer.name,
-          bet: currentBetAfter,
-        },
-      )
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      this.communicator.msgBuilder(broadcastAction, 'public', foundPlayer, {
+        displayMsg: `${foundPlayer.name} ${actionType === 'All-In' ? 'goes all-in' : type === 'setBet' ? 'bets' : 'raises to'} ${currentBetAfter}`,
+        name: foundPlayer.name,
+        bet: currentBetAfter,
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
       // If we are in blinds phase, use shorter delay to avoid test timeouts/race conditions
       const delay = !this.stepChecker.checkStep('blindsBetting')
@@ -495,15 +461,10 @@ class MatchActions {
           reason: 'Insufficient chips or invalid amount',
         })
 
-      this.communicator.msgBuilder(
-        'actionRejected',
-        'private',
-        foundPlayer,
-        {
-          reason: 'insufficient chips',
-          displayMsg: 'Bet failed: insufficient chips.',
-        },
-      )
+      this.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+        reason: 'insufficient chips',
+        displayMsg: 'Bet failed: insufficient chips.',
+      })
       Socket.sendToPlayer(
         this.match.torneoId,
         foundPlayer.secretCode,
@@ -596,7 +557,7 @@ class MatchActions {
         if (!isRefresh && this.match.activePlayerId === p.id) return
 
         const isSB = p === p1
-        const blindAmount = isSB ? GAME_RULES.DEFAULT_SMALL_BLIND : GAME_RULES.DEFAULT_BIG_BLIND
+        const blindAmount = isSB ? this.match.smallBlind : this.match.bigBlind
         this.match.activePlayerId = p.id
         this.match.turnStartedAt = Date.now()
 
@@ -770,6 +731,11 @@ class MatchActions {
 
     this.match.waitingForNextRound = true
 
+    // Blind increase check
+    if (this.match.handCount % GAME_RULES.BLIND_INCREASE_INTERVAL === 0) {
+      this.match.increaseBlinds()
+    }
+
     // Si es victoria por FOLD, auto-iniciar la siguiente ronda tras el delay estándar
     if (isFold && !isTournamentWinner) {
       setTimeout(() => {
@@ -813,10 +779,7 @@ class MatchActions {
       isTournamentWinner: false,
     })
 
-    Socket.broadcastToTorneo(
-      this.match.torneoId,
-      this.communicator.getMsg(),
-    )
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
   }
 
   winnerTournament(winnersInfo) {
@@ -845,10 +808,7 @@ class MatchActions {
       isTournamentWinner: true,
     })
 
-    Socket.broadcastToTorneo(
-      this.match.torneoId,
-      this.communicator.getMsg(),
-    )
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
   }
 
   bettingCore = (thisSocket, bettingFor, isRefresh = false) => {
@@ -993,35 +953,22 @@ class MatchActions {
           ),
         })
 
-      this.communicator.msgBuilder(
-        `bettingCore-${bettingFor}`,
-        'private',
-        p,
-        {
-          messageForId: p.id,
-          action: opts,
-          displayMsg: 'Your turn',
-        },
-      )
+      this.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'private', p, {
+        messageForId: p.id,
+        action: opts,
+        displayMsg: 'Your turn',
+      })
       Socket.sendToPlayer(
         this.match.torneoId,
         p.secretCode,
         this.communicator.getMsg(),
       )
-      this.communicator.msgBuilder(
-        `bettingCore-${bettingFor}`,
-        'public',
-        p,
-        {
-          messageForId: p.id,
-          action: opts,
-          displayMsg: `Waiting for ${p.name}`,
-        },
-      )
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      this.communicator.msgBuilder(`bettingCore-${bettingFor}`, 'public', p, {
+        messageForId: p.id,
+        action: opts,
+        displayMsg: `Waiting for ${p.name}`,
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
       this.startAutofold()
     }
   }
@@ -1049,19 +996,11 @@ class MatchActions {
         pot: this.dealer.getPot(),
       })
 
-    this.communicator.msgBuilder(
-      `dealerHand-${whatHand}`,
-      'public',
-      null,
-      {
-        displayMsg: `Dealer deals the ${whatHand}`,
-        pot: this.dealer.getPot(),
-      },
-    )
-    Socket.broadcastToTorneo(
-      this.match.torneoId,
-      this.communicator.getMsg(),
-    )
+    this.communicator.msgBuilder(`dealerHand-${whatHand}`, 'public', null, {
+      displayMsg: `Dealer deals the ${whatHand}`,
+      pot: this.dealer.getPot(),
+    })
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
     this.match.comms.sendOdds()
     this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.standard) // ✅ Standard transition for dealing
   }
@@ -1122,18 +1061,10 @@ class MatchActions {
       this.communicator.msgBuilder('dealtPrivateCards', 'public', null, {
         displayMsg: 'Cards dealt!',
       })
-      Socket.broadcastToTorneo(
-        this.match.torneoId,
-        this.communicator.getMsg(),
-      )
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
       for (const player of this.match.players) {
-        this.communicator.msgBuilder(
-          'dealtPrivateCards',
-          'private',
-          player,
-          {},
-        )
+        this.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
         Socket.sendToPlayer(
           this.match.torneoId,
           player.secretCode,

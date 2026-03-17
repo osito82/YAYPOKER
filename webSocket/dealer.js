@@ -114,7 +114,7 @@ class Dealer {
     return this.pot
   }
 
-   calculatePots() {
+  calculatePots() {
     // 1. Get all players who contributed something
     const contributors = this.players.filter((p) => p.getHandContribution() > 0)
 
@@ -124,9 +124,11 @@ class Dealer {
     const allInContributions = contributors
       .filter((p) => p.isAllIn)
       .map((p) => p.getHandContribution())
-    
-    const maxContribution = Math.max(...contributors.map((p) => p.getHandContribution()))
-    
+
+    const maxContribution = Math.max(
+      ...contributors.map((p) => p.getHandContribution()),
+    )
+
     // Sort boundaries and remove duplicates
     const boundaries = [
       ...new Set([...allInContributions, maxContribution]),
@@ -149,16 +151,18 @@ class Dealer {
         .map((p) => p.id)
 
       const potAmount = boundaryLayer * whoContributed.length
-      
+
       // Add any "excess" from players who contributed more than prevBoundary but less than currentBoundary
       // (This handles players who went All-In at different levels)
       const partialContributors = contributors.filter(
-        (p) => p.getHandContribution() > prevBoundary && p.getHandContribution() < currentBoundary
+        (p) =>
+          p.getHandContribution() > prevBoundary &&
+          p.getHandContribution() < currentBoundary,
       )
-      
+
       let extraAmount = 0
       for (const p of partialContributors) {
-        extraAmount += (p.getHandContribution() - prevBoundary)
+        extraAmount += p.getHandContribution() - prevBoundary
       }
 
       const totalLayerAmount = potAmount + extraAmount
@@ -186,7 +190,7 @@ class Dealer {
 
     return pots
   }
-  
+
   getChipsFromPlayers = () => {
     this.log
       .Template({

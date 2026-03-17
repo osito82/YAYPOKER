@@ -11,7 +11,12 @@ const {
   generateSecretCode,
   socketId,
 } = require('./utils')
-const { ACTIONS, SERVER_CONFIG, GAME_RULES, CLEANUP_CONFIG } = require('./constants')
+const {
+  ACTIONS,
+  SERVER_CONFIG,
+  GAME_RULES,
+  CLEANUP_CONFIG,
+} = require('./constants')
 
 const app = express()
 const server = http.createServer(app)
@@ -47,7 +52,9 @@ process.on('unhandledRejection', (reason, promise) => {
 // Periodic garbage collector for inactive/abandoned matches
 // Runs every 10 minutes
 setInterval(() => {
-  const removedCount = Torneo.removeInactiveMatches(CLEANUP_CONFIG.MATCH_MAX_IDLE)
+  const removedCount = Torneo.removeInactiveMatches(
+    CLEANUP_CONFIG.MATCH_MAX_IDLE,
+  )
   if (removedCount > 0) {
     log
       .Template({ name: 'brakets', title: 'SERVER:GC', date: true })
@@ -62,7 +69,8 @@ const validateAction = (action, data) => {
   const rules = {
     [ACTIONS.SIGN_UP]: () => {
       const chips = Number(data.totalChips)
-      if (isNaN(chips) || chips < GAME_RULES.CHIPS_VALIDATION.MIN) return 'Invalid chips amount'
+      if (isNaN(chips) || chips < GAME_RULES.CHIPS_VALIDATION.MIN)
+        return 'Invalid chips amount'
       data.totalChips = chips // Sanitizar
       return null
     },
@@ -98,7 +106,8 @@ const validateAction = (action, data) => {
 // Option 3: Acceso Explícito por Espacio de Nombres
 const actionHandlers = {
   [ACTIONS.SIGN_UP]: (match, socket, data) => match.lobby.signUp(data, socket),
-  [ACTIONS.SEND_MESSAGE]: (match, socket, data) => match.comms.sendMessage(data),
+  [ACTIONS.SEND_MESSAGE]: (match, socket, data) =>
+    match.comms.sendMessage(data),
   [ACTIONS.FOLD]: (match, socket) => match.actions.fold(socket),
   [ACTIONS.CLOSE]: (match, socket) => match.lobby.close(socket),
   [ACTIONS.SET_BET]: (match, socket, data) =>
@@ -109,7 +118,8 @@ const actionHandlers = {
     match.actions.setBet(socket, data.blindAmount),
   [ACTIONS.CALL]: (match, socket) => match.actions.setCall(socket),
   [ACTIONS.CHECK]: (match, socket) => match.actions.setCheck(socket),
-  [ACTIONS.DEALT_PRIVATE_CARDS]: (match, socket) => match.actions.dealtPrivateCards(socket),
+  [ACTIONS.DEALT_PRIVATE_CARDS]: (match, socket) =>
+    match.actions.dealtPrivateCards(socket),
   [ACTIONS.STATS]: (match, socket) => match.comms.stats(socket.id),
   [ACTIONS.NEXT_ROUND]: (match) => match.nextRound(),
   [ACTIONS.START_GAME]: (match, socket) => match.startGame(socket),

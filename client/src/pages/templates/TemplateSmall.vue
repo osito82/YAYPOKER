@@ -29,7 +29,7 @@
         >
           <span
             class="text-[9px] font-mono font-bold text-white uppercase tracking-wider leading-none"
-            >Blinds $10/$20</span
+            >Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}</span
           >
           <h1
             class="text-[8px] font-black text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80 leading-none"
@@ -114,7 +114,7 @@
         <footer id="game-hud-bar-TemplateSmall" class="shrink-0 z-50">
           <ActionBar
             :isMyTurn="isMyTurn"
-            :canBlind="canBlind"
+            :canBlind="canBlind" :blindInfo="blindInfo"
             :options="options"
             :balance="myPlayer?.chips || 0"
             :currentBet="myPlayer?.currentBet || 0"
@@ -161,6 +161,9 @@ import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 import MessageTerminal from '../../components/MessageTerminal.vue'
+import { usePokerStore } from '../../store/pokerStore'
+
+const pokerStore = usePokerStore()
 
 defineProps({
   gameCode: String,
@@ -170,6 +173,7 @@ defineProps({
   myPlayer: Object,
   isMyTurn: Boolean,
   canBlind: Boolean,
+  blindInfo: Object,
   options: Array,
   betAmount: Number,
   minBet: Number,
