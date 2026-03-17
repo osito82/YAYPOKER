@@ -154,7 +154,7 @@ const blindInfo = computed(() => {
   if (!canBlind.value) return null
   const amount =
     pokerStore.myInfo.requiredBlind ||
-    (pokerStore.getDisplayMsg?.toLowerCase().includes('small') ? 10 : 20)
+    (pokerStore.getDisplayMsg?.toLowerCase().includes('small') ? pokerStore.smallBlind : pokerStore.bigBlind)
   const type = pokerStore.getDisplayMsg?.toLowerCase().includes('small')
     ? 'Small'
     : 'Big'
@@ -241,7 +241,7 @@ const sendAction = (action) => {
     case 'blind':
       const blindAmount =
         pokerStore.myInfo.requiredBlind ||
-        (pokerStore.getDisplayMsg?.toLowerCase().includes('small') ? 10 : 20)
+        (pokerStore.getDisplayMsg?.toLowerCase().includes('small') ? pokerStore.smallBlind : pokerStore.bigBlind)
       sendMessage({ action: 'setBet', chipsToBet: blindAmount })
       break
   }

@@ -33,6 +33,13 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const isGameStarted = ref(false)
   const stepChecker = ref({})
 
+  // Blinds state
+  const smallBlind = ref(10)
+  const bigBlind = ref(20)
+  const ante = ref(0)
+  const blindLevel = ref(1)
+  const blindsIncreasedFlag = ref(false)
+
   // Getters
   const getSocketMessage = computed(() => socketMessage.value)
   const getConnected = computed(() => connected.value)
@@ -228,6 +235,15 @@ export const usePokerStore = defineStore('pokerStore', () => {
             winnerInfo.value = null
           }
         }, timeoutDuration)
+      } else if (gameData.action === 'blindsIncreased') {
+        smallBlind.value = gameData.data.smallBlind
+        bigBlind.value = gameData.data.bigBlind
+        ante.value = gameData.data.ante
+        blindLevel.value = gameData.data.level
+        blindsIncreasedFlag.value = true
+        setTimeout(() => {
+          blindsIncreasedFlag.value = false
+        }, 3000) // Reset after 3 seconds
       } else if (
         ['setBet', 'setRise', 'setCall', 'setCheck', 'fold'].includes(
           gameData.action,
@@ -294,6 +310,11 @@ export const usePokerStore = defineStore('pokerStore', () => {
     lobbyTimer,
     hostId,
     isGameStarted,
+    smallBlind,
+    bigBlind,
+    ante,
+    blindLevel,
+    blindsIncreasedFlag,
 
     // Getters (computeds)
     getOdds,

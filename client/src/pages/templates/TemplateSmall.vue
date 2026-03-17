@@ -29,7 +29,7 @@
         >
           <span
             class="text-[9px] font-mono font-bold text-white uppercase tracking-wider leading-none"
-            >Blinds $10/$20</span
+            >Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}</span
           >
           <h1
             class="text-[8px] font-black text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80 leading-none"
@@ -70,6 +70,12 @@
             >{{ playerName }}</span
           >
         </div>
+      </div>
+      <!-- Toast for Blinds Increased -->
+      <div class="absolute left-1/2 -translate-x-1/2 top-16 z-[100]">
+        <GameToast 
+          :message="pokerStore.blindsIncreasedFlag ? `¡Ciegas subieron a SB ${pokerStore.smallBlind} / BB ${pokerStore.bigBlind}!` : ''" 
+        />
       </div>
     </header>
 
@@ -161,6 +167,8 @@ import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 import MessageTerminal from '../../components/MessageTerminal.vue'
+import GameToast from '../../components/GameToast.vue'
+import { usePokerStore } from '../../store/pokerStore'
 
 defineProps({
   gameCode: String,

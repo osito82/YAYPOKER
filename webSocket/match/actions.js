@@ -596,7 +596,7 @@ class MatchActions {
         if (!isRefresh && this.match.activePlayerId === p.id) return
 
         const isSB = p === p1
-        const blindAmount = isSB ? GAME_RULES.DEFAULT_SMALL_BLIND : GAME_RULES.DEFAULT_BIG_BLIND
+        const blindAmount = isSB ? this.match.smallBlind : this.match.bigBlind
         this.match.activePlayerId = p.id
         this.match.turnStartedAt = Date.now()
 
@@ -769,6 +769,11 @@ class MatchActions {
     }
 
     this.match.waitingForNextRound = true
+
+    // Blind increase check
+    if (this.match.handCount % GAME_RULES.BLIND_INCREASE_INTERVAL === 0) {
+      this.match.increaseBlinds()
+    }
 
     // Si es victoria por FOLD, auto-iniciar la siguiente ronda tras el delay estándar
     if (isFold && !isTournamentWinner) {

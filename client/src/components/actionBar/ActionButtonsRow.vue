@@ -42,7 +42,12 @@
       <button
         @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
         :disabled="isRaiseActionDisabled"
-        class="flex-[1.5] bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed text-[10px] lg:text-sm active:scale-95 transition-all"
+        class="flex-[1.5] font-black uppercase rounded-lg shadow-lg disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed text-[10px] lg:text-sm active:scale-95 transition-all"
+        :class="[
+          pokerStore.blindsIncreasedFlag
+            ? 'bg-yellow-400 text-black shadow-[0_0_20px_rgba(250,204,21,0.8)] animate-pulse scale-105 z-10'
+            : 'bg-yellow-500 text-black'
+        ]"
       >
         {{ options.includes('bet') ? 'Bet' : 'Raise' }}
       </button>
@@ -51,6 +56,8 @@
 </template>
 
 <script setup>
+import { usePokerStore } from '../../store/pokerStore'
+
 defineProps({
   isMyTurn: Boolean,
   canBlind: Boolean,
@@ -58,6 +65,8 @@ defineProps({
   options: Array,
   isRaiseActionDisabled: Boolean,
 })
+
+const pokerStore = usePokerStore()
 
 defineEmits(['action'])
 </script>
