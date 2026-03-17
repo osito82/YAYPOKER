@@ -1,12 +1,10 @@
 const WebSocket = require("ws");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { Ollama } = require("ollama");
-const osolog = require("osolog");
+const log = require("./logger");
 const PokerOddsCalculator = require("../webSocket/pokerOdds");
 const { ACTIONS, SERVER_CONFIG } = require("../webSocket/constants");
 require("dotenv").config();
-
-const log = new osolog();
 
 // Inicializar Cliente de Ollama
 let ollamaClient;

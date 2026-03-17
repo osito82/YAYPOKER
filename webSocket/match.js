@@ -9,8 +9,8 @@ const Communicator = require('./communicator')
 const { generateUniqueId } = require('./utils')
 const { TIMEOUTS, GAME_RULES, DECK_CONSTANTS } = require('./constants')
 
-const osolog = require('osolog')
 const PokerOddsCalculator = require('./pokerOdds')
+const log = require('./logger')
 
 // Sub-módulos
 const MatchComms = require('./match/comms')
@@ -18,7 +18,7 @@ const MatchActions = require('./match/actions')
 const MatchLobby = require('./match/lobby')
 
 class Match extends EventEmitter {
-  log = new osolog()
+  log = log
   static timeouts = TIMEOUTS
 
   constructor(torneoId, gameId) {

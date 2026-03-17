@@ -1,5 +1,6 @@
 import { ref, onBeforeUnmount } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
+import log from '../logger'
 
 export default function useWebSocket(url, options) {
   const socketUrl = new URL(url)
@@ -27,7 +28,7 @@ export default function useWebSocket(url, options) {
     socket.value = new WebSocket(socketUrl)
 
     socket.value.addEventListener('open', () => {
-      console.log('Conexión establecida')
+      log.Template({ title: 'SOCKET:OPEN', date: true }).R({ msg: 'Conexión establecida' })
       pokerStore.setConnected(true)
       if (reconnectTimeout.value) {
         clearTimeout(reconnectTimeout.value)
@@ -45,7 +46,7 @@ export default function useWebSocket(url, options) {
     })
 
     socket.value.addEventListener('close', () => {
-      console.log('Conexión cerrada')
+      log.Template({ title: 'SOCKET:CLOSE', date: true }).R({ msg: 'Conexión cerrada' })
       pokerStore.setConnected(false)
 
       if (!isManuallyClosed.value) {
@@ -54,7 +55,7 @@ export default function useWebSocket(url, options) {
     })
 
     socket.value.addEventListener('error', (error) => {
-      console.error('Error en la conexión del socket:', error)
+      log.Template({ title: 'SOCKET:ERROR', date: true }).R({ error: error.message || 'Error desconocido' })
       pokerStore.setConnected(false)
       // The close event will follow and trigger reconnection if needed
     })
@@ -63,7 +64,7 @@ export default function useWebSocket(url, options) {
   const attemptReconnect = () => {
     if (reconnectTimeout.value) return
 
-    console.log('Intentando reconectar en 3 segundos...')
+    log.Template({ title: 'SOCKET:RECONNECT', date: true }).R({ msg: 'Intentando reconectar en 3 segundos...' })
     reconnectTimeout.value = setTimeout(() => {
       reconnectTimeout.value = null
       connectSocket()
@@ -86,7 +87,7 @@ export default function useWebSocket(url, options) {
     if (socket.value && socket.value.readyState === WebSocket.OPEN) {
       socket.value.send(JSON.stringify(message))
     } else {
-      console.error('Error: Socket no está abierto.')
+      log.Template({ title: 'SOCKET:SEND_ERROR', date: true }).R({ msg: 'Error: Socket no está abierto.' })
     }
   }
 
