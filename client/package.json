@@ -12,14 +12,11 @@
     "test": "vitest"
   },
   "dependencies": {
-    "osolog": "^1.0.6",
     "pinia": "^3.0.4",
     "qrcode-vue3": "^1.7.1",
     "uuid": "^13.0.0",
     "vue": "^3.5.29",
     "vue-router": "^5.0.3",
-    "winston": "^3.19.0",
-    "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.19.0"
   },
   "devDependencies": {

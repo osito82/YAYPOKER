@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import log from '../logger'
 
 export const usePokerStore = defineStore('pokerStore', () => {
   // State
@@ -71,7 +70,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
       const gameData = msgObj.message
       if (!gameData) return
 
-      log.Template({ title: 'STORE:RECEIVED', date: true }).R({ action: gameData.action, data: gameData })
+      console.log('POKER_STORE - Received:', gameData.action, gameData)
 
       // Update stepChecker
       if (gameData.stepChecker) {
