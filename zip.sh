@@ -10,6 +10,7 @@ echo "📦 Comprimiendo el proyecto en $OUTPUT_FILE..."
 # -x: excluir patrones
 zip -r "$OUTPUT_FILE" . -x \
     "*/node_modules/*" \
+    "*/Logs/*" \
     "node_modules/*" \
     "*/dist/*" \
     "dist/*" \

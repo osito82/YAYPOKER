@@ -134,13 +134,17 @@ describe('ActionBar.vue', () => {
     expect(wrapper.emitted().action[0]).toEqual(['fold'])
   })
 
-  it('shows Post Blind button exclusively when canBlind is true', async () => {
+  it('shows Post Blind button with type and amount when canBlind is true', async () => {
     const wrapper = mount(ActionBar, {
-      props: { ...defaultProps, canBlind: true },
+      props: {
+        ...defaultProps,
+        canBlind: true,
+        blindInfo: { type: 'Small', amount: 10 },
+      },
     })
     await flushPromises()
 
-    expect(wrapper.text()).toContain('Post Blind')
+    expect(wrapper.text()).toContain('Post Small Blind 10')
     expect(wrapper.text()).not.toContain('Fold')
     expect(wrapper.text()).not.toContain('Raise')
   })

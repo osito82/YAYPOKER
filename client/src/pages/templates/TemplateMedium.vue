@@ -156,7 +156,7 @@
     <footer id="game-hud-bar-TemplateMedium" class="shrink-0 z-50 w-full">
       <ActionBar
         :isMyTurn="isMyTurn"
-        :canBlind="canBlind"
+        :canBlind="canBlind" :blindInfo="blindInfo"
         :options="options"
         :balance="myPlayer?.chips || 0"
         :currentBet="myPlayer?.currentBet || 0"
@@ -189,6 +189,7 @@ defineProps({
   myPlayer: Object,
   isMyTurn: Boolean,
   canBlind: Boolean,
+  blindInfo: Object,
   options: Array,
   betAmount: Number,
   minBet: Number,

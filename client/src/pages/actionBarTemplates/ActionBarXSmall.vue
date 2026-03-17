@@ -50,7 +50,7 @@
 
           <ActionButtonsRow
             :isMyTurn="isMyTurn"
-            :canBlind="canBlind"
+            :canBlind="canBlind" :blindInfo="blindInfo"
             :options="options"
             :isRaiseActionDisabled="isRaiseActionDisabled"
             @action="(a) => $emit('action', a)"
@@ -84,6 +84,7 @@ import { useActionBar } from '../../components/actionBar/useActionBar'
 const props = defineProps({
   isMyTurn: Boolean,
   canBlind: Boolean,
+  blindInfo: Object,
   options: Array,
   balance: Number,
   currentBet: Number,

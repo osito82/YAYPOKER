@@ -3,9 +3,14 @@
     <template v-if="canBlind">
       <button
         @click="$emit('action', 'blind')"
-        class="flex-1 bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg active:scale-95 text-[10px] lg:text-sm"
+        class="flex-1 bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg active:scale-95 text-[10px] lg:text-sm px-2"
       >
-        Post Blind
+        <template v-if="blindInfo">
+          Post {{ blindInfo.type }} Blind ${{ blindInfo.amount }}
+        </template>
+        <template v-else>
+          Post Blind
+        </template>
       </button>
     </template>
 
@@ -49,6 +54,7 @@
 defineProps({
   isMyTurn: Boolean,
   canBlind: Boolean,
+  blindInfo: Object,
   options: Array,
   isRaiseActionDisabled: Boolean,
 })
