@@ -1,10 +1,10 @@
-const winston = require('winston');
-const DailyRotateFile = require('winston-daily-rotate-file');
-const osolog = require('osolog');
-const path = require('path');
-const { PassThrough } = require('stream');
+const winston = require('winston')
+const DailyRotateFile = require('winston-daily-rotate-file')
+const osolog = require('osolog')
+const path = require('path')
+const { PassThrough } = require('stream')
 
-const logDir = path.join(__dirname, '../Logs');
+const logDir = path.join(__dirname, '../Logs')
 
 // Winston para WebSocket
 const transportWS = new DailyRotateFile({
@@ -12,16 +12,16 @@ const transportWS = new DailyRotateFile({
   datePattern: 'YYYY-MM-DD',
   zippedArchive: true,
   maxSize: '20m',
-  maxFiles: '14d'
-});
+  maxFiles: '14d',
+})
 
 const winstonLogger = winston.createLogger({
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.printf(({ message }) => message)
+    winston.format.printf(({ message }) => message),
   ),
-  transports: [transportWS]
-});
+  transports: [transportWS],
+})
 
 // Winston para Client (Logs enviados vía WS)
 const transportClient = new DailyRotateFile({
@@ -29,58 +29,58 @@ const transportClient = new DailyRotateFile({
   datePattern: 'YYYY-MM-DD',
   zippedArchive: true,
   maxSize: '20m',
-  maxFiles: '14d'
-});
+  maxFiles: '14d',
+})
 
 const clientWinstonLogger = winston.createLogger({
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.printf(({ message }) => message)
+    winston.format.printf(({ message }) => message),
   ),
-  transports: [transportClient]
-});
+  transports: [transportClient],
+})
 
 // Configurar osolog
-const log = new osolog();
+const log = new osolog()
 
 // Función para guardar logs del cliente (Bracketed)
 log.logClient = (message) => {
-  clientWinstonLogger.info(message);
-};
+  clientWinstonLogger.info(message)
+}
 
 // Crear un stream personalizado para capturar la salida
-const logStream = new PassThrough();
+const logStream = new PassThrough()
 
 logStream.on('data', (chunk) => {
-  const message = chunk.toString().trim();
+  const message = chunk.toString().trim()
   if (message) {
     // Limpiar ANSI colors para el archivo de winston
-    const cleanMsg = message.replace(/\x1b\[[0-9;]*m/g, '');
-    winstonLogger.info(cleanMsg);
+    const cleanMsg = message.replace(/\x1b\[[0-9;]*m/g, '')
+    winstonLogger.info(cleanMsg)
   }
-});
+})
 
 // Redirigir la salida de osolog de forma robusta interceptando stdout.write
-const originalR = log.R.bind(log);
-log.R = function(...args) {
+const originalR = log.R.bind(log)
+log.R = function (...args) {
   // Guardar la función original de escritura
-  const originalStdoutWrite = process.stdout.write;
-  
+  const originalStdoutWrite = process.stdout.write
+
   // Redirigir stdout temporalmente durante la ejecución de R
   process.stdout.write = (chunk, encoding, callback) => {
     // Enviar al stream para Winston
-    logStream.write(chunk);
+    logStream.write(chunk)
     // Mantener la salida por consola original
-    return originalStdoutWrite.call(process.stdout, chunk, encoding, callback);
-  };
-  
-  // Ejecutar el método original de osolog
-  originalR(...args);
-  
-  // Restaurar stdout.write inmediatamente
-  process.stdout.write = originalStdoutWrite;
-  
-  return this;
-};
+    return originalStdoutWrite.call(process.stdout, chunk, encoding, callback)
+  }
 
-module.exports = log;
+  // Ejecutar el método original de osolog
+  originalR(...args)
+
+  // Restaurar stdout.write inmediatamente
+  process.stdout.write = originalStdoutWrite
+
+  return this
+}
+
+module.exports = log

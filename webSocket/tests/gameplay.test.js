@@ -1299,55 +1299,72 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
 
     // --- CIEGAS ---
-    await alice.waitAction('askForBlindBets', 5000, r => r.message.data.displayMsg.includes('Alice'))
+    await alice.waitAction('askForBlindBets', 5000, (r) =>
+      r.message.data.displayMsg.includes('Alice'),
+    )
     alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, r => r.message.data.displayMsg.includes('Bob'))
+    await bob.waitAction('askForBlindBets', 5000, (r) =>
+      r.message.data.displayMsg.includes('Bob'),
+    )
     bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     await alice.waitAction('dealtPrivateCards')
 
     // --- PRE-FLOP ---
-    await alice.waitAction('bettingCore-firstBetting', 5000, r => r.message.data.displayMsg.includes('Alice'))
+    await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Alice'),
+    )
     alice.send(MOCK_ACTIONS.CALL)
-    await bob.waitAction('bettingCore-firstBetting', 5000, r => r.message.data.displayMsg.includes('Bob'))
+    await bob.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Bob'),
+    )
     bob.send(MOCK_ACTIONS.CHECK)
 
     // --- FLOP ---
     await alice.waitAction('dealerHand-flop')
-    await bob.waitAction('bettingCore-flopBetting', 5000, r => r.message.data.displayMsg.includes('Bob'))
+    await bob.waitAction('bettingCore-flopBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Bob'),
+    )
     bob.send(MOCK_ACTIONS.BET(20))
-    await alice.waitAction('bettingCore-flopBetting', 5000, r => r.message.data.displayMsg.includes('Alice'))
+    await alice.waitAction('bettingCore-flopBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Alice'),
+    )
     alice.send(MOCK_ACTIONS.CALL)
 
     // --- TURN ---
     await alice.waitAction('dealerHand-turn')
-    await bob.waitAction('bettingCore-turnBetting', 5000, r => r.message.data.displayMsg.includes('Bob'))
+    await bob.waitAction('bettingCore-turnBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Bob'),
+    )
     bob.send(MOCK_ACTIONS.BET(40))
-    await alice.waitAction('bettingCore-turnBetting', 5000, r => r.message.data.displayMsg.includes('Alice'))
+    await alice.waitAction('bettingCore-turnBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Alice'),
+    )
     alice.send(MOCK_ACTIONS.CALL)
 
     // --- RIVER ---
     await alice.waitAction('dealerHand-river')
-    await bob.waitAction('bettingCore-riverBetting', 5000, r => r.message.data.displayMsg.includes('Bob'))
+    await bob.waitAction('bettingCore-riverBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Bob'),
+    )
     bob.send(MOCK_ACTIONS.BET(15))
-    await alice.waitAction('bettingCore-riverBetting', 5000, r => r.message.data.displayMsg.includes('Alice'))
+    await alice.waitAction('bettingCore-riverBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Alice'),
+    )
     alice.send(MOCK_ACTIONS.CALL)
 
     // --- RESULTADO ---
     await alice.waitAction('winner', 10000)
-    
+
     // Verificamos saldos en la siguiente mano
     const nextHandMsg = await alice.waitAction('askForBlindBets', 15000)
-    
+
     const players = nextHandMsg.message.players
     const totalCurrentChips = players.reduce((sum, p) => sum + p.chips, 0)
 
     expect(totalCurrentChips).toBe(TOTAL_CHIPS)
-    console.log(`[TEST:INTEGRITY] Total chips after hand: ${totalCurrentChips} (Expected: ${TOTAL_CHIPS})`)
+    console.log(
+      `[TEST:INTEGRITY] Total chips after hand: ${totalCurrentChips} (Expected: ${TOTAL_CHIPS})`,
+    )
   }, 60000)
-
-  
-
-
-
 })

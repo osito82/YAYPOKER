@@ -63,14 +63,22 @@ class Match extends EventEmitter {
 
   increaseBlinds() {
     this.blindLevel++
-    this.smallBlind = Math.ceil(this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
-    this.bigBlind = Math.ceil(this.bigBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
+    this.smallBlind = Math.ceil(
+      this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
+    )
+    this.bigBlind = Math.ceil(
+      this.bigBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
+    )
     if (this.ante > 0) {
       this.ante = Math.ceil(this.ante * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
     }
 
     this.log
-      .Template({ name: 'brakets', title: 'MATCH:BLINDS_INCREASED', date: true })
+      .Template({
+        name: 'brakets',
+        title: 'MATCH:BLINDS_INCREASED',
+        date: true,
+      })
       .R({
         torneoId: this.torneoId,
         level: this.blindLevel,
@@ -348,7 +356,8 @@ class Match extends EventEmitter {
     })
 
     const Deck = require('./deck')
-    this.shuffledDeck = customDeck || Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
+    this.shuffledDeck =
+      customDeck || Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
     this.dealer.gameId = this.gameId
     this.dealer.deck = this.shuffledDeck
     this.dealer.cardsDealer = []
