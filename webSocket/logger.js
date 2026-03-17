@@ -6,8 +6,8 @@ const { PassThrough } = require('stream');
 
 const logDir = path.join(__dirname, '../Logs');
 
-// Configurar Winston
-const transport = new DailyRotateFile({
+// Winston para WebSocket
+const transportWS = new DailyRotateFile({
   filename: path.join(logDir, 'webSocket-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
   zippedArchive: true,
@@ -18,16 +18,38 @@ const transport = new DailyRotateFile({
 const winstonLogger = winston.createLogger({
   format: winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    winston.format.printf(({ timestamp, level, message }) => message)
+    winston.format.printf(({ message }) => message)
   ),
-  transports: [transport]
+  transports: [transportWS]
+});
+
+// Winston para Client (Logs enviados vía WS)
+const transportClient = new DailyRotateFile({
+  filename: path.join(logDir, 'client-%DATE%.log'),
+  datePattern: 'YYYY-MM-DD',
+  zippedArchive: true,
+  maxSize: '20m',
+  maxFiles: '14d'
+});
+
+const clientWinstonLogger = winston.createLogger({
+  format: winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.printf(({ message }) => message)
+  ),
+  transports: [transportClient]
 });
 
 // Configurar osolog
 const log = new osolog();
 
-// Crear un stream personalizado para capturar la salida
-const logStream = new PassThrough();
+// Función para guardar logs del cliente (Bracketed)
+log.logClient = (message) => {
+  clientWinstonLogger.info(message);
+};
+
+// ... resto del código de intercepción de stdout ...
+
 logStream.on('data', (chunk) => {
   const message = chunk.toString().trim();
   if (message) {
