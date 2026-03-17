@@ -86,6 +86,7 @@ class Match extends EventEmitter {
       bigBlind: this.bigBlind,
       ante: this.ante,
       handsPlayed: this.handCount,
+      displayMsg: `Blinds increased to level ${this.blindLevel}: SB $${this.smallBlind} / BB $${this.bigBlind}`,
     })
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
   }

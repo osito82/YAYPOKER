@@ -87,8 +87,9 @@ import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 import MessageTerminal from '../../components/MessageTerminal.vue'
-import GameToast from '../../components/GameToast.vue'
 import { usePokerStore } from '../../store/pokerStore'
+
+const pokerStore = usePokerStore()
 
 defineProps({
   gameCode: String,

@@ -71,12 +71,6 @@
           >
         </div>
       </div>
-      <!-- Toast for Blinds Increased -->
-      <div class="absolute left-1/2 -translate-x-1/2 top-16 z-[100]">
-        <GameToast 
-          :message="pokerStore.blindsIncreasedFlag ? `¡Ciegas subieron a SB ${pokerStore.smallBlind} / BB ${pokerStore.bigBlind}!` : ''" 
-        />
-      </div>
     </header>
 
     <WinnerTournamentOverlay
@@ -167,8 +161,9 @@ import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 import MessageTerminal from '../../components/MessageTerminal.vue'
-import GameToast from '../../components/GameToast.vue'
 import { usePokerStore } from '../../store/pokerStore'
+
+const pokerStore = usePokerStore()
 
 defineProps({
   gameCode: String,

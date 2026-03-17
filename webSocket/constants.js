@@ -26,7 +26,7 @@ const GAME_RULES = {
 }
 
 const DECK_CONSTANTS = {
-  SHUFFLE_TIMES: 101,
+  SHUFFLE_TIMES: 506,
 }
 
 const ACTIONS = {

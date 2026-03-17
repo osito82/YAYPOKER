@@ -241,10 +241,17 @@ export const usePokerStore = defineStore('pokerStore', () => {
         ante.value = gameData.data.ante
         blindLevel.value = gameData.data.level
         blindsIncreasedFlag.value = true
+
+        // Explicitly log the increase if displayMsg is present (it should be handled by the general logger but let's be sure)
+        if (gameData.data.displayMsg) {
+          displayMsg.value = gameData.data.displayMsg
+        }
+
         setTimeout(() => {
           blindsIncreasedFlag.value = false
         }, 3000) // Reset after 3 seconds
-      } else if (
+      }
+ else if (
         ['setBet', 'setRise', 'setCall', 'setCheck', 'fold'].includes(
           gameData.action,
         )
