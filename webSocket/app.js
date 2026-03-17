@@ -1,6 +1,6 @@
 const express = require('express')
 const R = require('radash')
-const osolog = require('osolog')
+const log = require('./logger')
 
 const http = require('http')
 const WebSocket = require('ws')
@@ -22,7 +22,6 @@ const Socket = require('./sockets')
 const Torneo = require('./torneo')
 
 const startTime = new Date()
-const log = new osolog()
 
 // Global error handlers to prevent server crashes
 process.on('uncaughtException', (error) => {

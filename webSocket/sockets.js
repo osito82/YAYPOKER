@@ -1,8 +1,8 @@
-const osolog = require('osolog')
+const log = require('./logger')
 
 class Socket {
   static torneoSockets = new Map() // Map<idTorneo, Map<secretCode, socket>>
-  static log = new osolog()
+  static log = log
 
   static addSocket(socket, idTorneo) {
     const { id, name, secretCode } = socket

@@ -1,5 +1,4 @@
-const osolog = require('osolog')
-const log = new osolog()
+const log = require('./logger')
 
 class Torneo {
   static torneos = new Map()

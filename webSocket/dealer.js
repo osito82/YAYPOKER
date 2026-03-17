@@ -1,8 +1,8 @@
 const Socket = require('./sockets')
-const osolog = require('osolog')
+const log = require('./logger')
 
 class Dealer {
-  log = new osolog()
+  log = log
 
   constructor(gameId, players, deck, torneoId, pot, cardsDealer) {
     this.gameId = gameId
