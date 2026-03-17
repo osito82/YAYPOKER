@@ -320,7 +320,7 @@ class MatchActions {
 
     const amount = Number(chipsToBet)
     const currentMaxBet = this.dealer.getCurrentHighestBet()
-    const lastRaise = this.dealer.getLastRaiseAmount() || GAME_RULES.DEFAULT_BIG_BLIND // Default to Big Blind if no raise yet
+    const lastRaise = this.dealer.getLastRaiseAmount() || this.match.bigBlind // Default to Big Blind if no raise yet
 
     // REGLA DE MIN-RAISE: El aumento debe ser al menos igual al aumento anterior
     if (type === 'setRise') {
