@@ -48,7 +48,8 @@ log.logClient = (message) => {
   clientWinstonLogger.info(message);
 };
 
-// ... resto del código de intercepción de stdout ...
+// Crear un stream personalizado para capturar la salida
+const logStream = new PassThrough();
 
 logStream.on('data', (chunk) => {
   const message = chunk.toString().trim();
