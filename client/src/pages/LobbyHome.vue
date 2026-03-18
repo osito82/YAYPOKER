@@ -246,7 +246,7 @@
         class="bg-black/60 text-center text-gray-400 text-[11px] font-bold uppercase tracking-[0.2em] border-t border-white/5"
         :class="footerPadding"
       >
-        &copy; 2026 <span class="text-yellow-500">OsoPoker</span>. All chips are
+        &copy; 2026 <span class="text-yellow-500">YayPoker</span>. All chips are
         virtual.
       </div>
     </div>

@@ -17,7 +17,7 @@
           :id="`landing-title-text-${templateSuffix}`"
           class="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter italic"
         >
-          OsoPoker
+          YayPoker
           <span class="text-yellow-500 text-3xl md:text-5xl block md:inline"
             >Texas Hold'em</span
           >
@@ -69,7 +69,7 @@
       :id="`landing-copyright-footer-${templateSuffix}`"
       class="fixed bottom-8 text-gray-700 text-[10px] font-black uppercase tracking-[0.5em]"
     >
-      &copy; 2026 OsoPoker Engineering
+      &copy; 2026 YayPoker Engineering
     </p>
   </div>
 </template>

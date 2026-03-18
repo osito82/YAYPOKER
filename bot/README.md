@@ -49,7 +49,7 @@ node bot.js --name=Llama_Bot --provider=openllama --model=openllama --gameCode=N
 - `--key`: API Key (solo para Gemini).
 
 ---
-&copy; 2026 OsoPoker Engineering
+&copy; 2026 YayPoker Engineering
 
 
 
