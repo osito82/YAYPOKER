@@ -256,7 +256,7 @@
       :id="`lobby-copyright-footer-${templateSuffix}`"
       class="mt-10 text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]"
     >
-      &copy; 2026 <span class="text-yellow-500/50">OsoPoker</span> Engineering
+      &copy; 2026 <span class="text-yellow-500/50">YayPoker</span> Engineering
     </p>
   </div>
 </template>

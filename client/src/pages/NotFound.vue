@@ -32,15 +32,15 @@
           :id="`not-found-headline-${templateSuffix}`"
           class="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter"
         >
-          Mano <span class="text-red-600">Muerta</span>
+          ¡Yay! <span class="text-yellow-500">404</span>
         </h2>
 
         <div
           :id="`funny-message-badge-${templateSuffix}`"
-          class="inline-block px-4 py-1 bg-red-600/10 border border-red-600/20 rounded-full"
+          class="inline-block px-4 py-1 bg-yellow-500/10 border border-yellow-500/20 rounded-full"
         >
           <p
-            class="text-red-500 font-mono text-[10px] md:text-xs font-black uppercase tracking-[0.2em]"
+            class="text-yellow-500 font-mono text-[10px] md:text-xs font-black uppercase tracking-[0.2em]"
           >
             Hiciste All-In en una página que no existe
           </p>
@@ -51,8 +51,8 @@
         :id="`not-found-description-text-${templateSuffix}`"
         class="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-widest max-w-sm mx-auto leading-relaxed"
       >
-        Parece que intentaste un bluff pero el servidor no cayó. Esta ruta está
-        más vacía que el stack de un principiante.
+        ¡Oops! Parece que este link es un bluff. Pero Yay, ¡siempre puedes
+        volver a la mesa principal!
       </p>
 
       <div :id="`not-found-actions-container-${templateSuffix}`" class="pt-8">
@@ -68,7 +68,7 @@
 
     <!-- Footer decoration -->
     <div
-      class="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600/30 to-transparent"
+      class="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-600/30 to-transparent"
     ></div>
   </div>
 </template>
