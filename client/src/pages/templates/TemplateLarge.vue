@@ -6,97 +6,47 @@
     <!-- UNIFIED COMPACT HEADER -->
     <header
       id="game-header-bar-TemplateLarge"
-      class="w-full bg-black/80 backdrop-blur-xl border-b border-white/5 px-6 py-2 flex items-center justify-between z-50 shrink-0"
+      class="w-full backdrop-blur-xl border-b border-white/[0.06] px-6 py-0 flex items-stretch z-50 shrink-0 header-bar"
     >
       <!-- LEFT SECTION -->
-      <div
-        id="header-left-content-TemplateLarge"
-        class="flex items-center gap-4"
-      >
-        <div
-          id="logo-icon-wrapper-TemplateLarge"
-          class="w-7 h-7 bg-yellow-500 rounded flex items-center justify-center shadow-[0_0_10px_rgba(234,179,8,0.3)] shrink-0"
-        >
-          <span
-            id="logo-text-icon-TemplateLarge"
-            class="text-black font-black text-lg"
-            >O</span
-          >
+      <div id="header-left-content-TemplateLarge" class="flex items-center gap-4 py-2.5">
+        <div id="header-logo-wrapper-TemplateLarge" class="header-logo-wrap shrink-0">
+          <span id="header-logo-text-TemplateLarge" class="text-black font-black text-sm">Y</span>
         </div>
-        <div class="h-6 w-px bg-white/10"></div>
-        <div
-          id="game-metadata-info-TemplateLarge"
-          class="flex flex-col justify-center"
-        >
-          <div class="flex items-center gap-2 leading-none">
-            <span
-              class="text-xs font-mono font-bold text-white uppercase tracking-wider"
-              >Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}</span
-            >
-            <span
-              class="text-[9px] font-mono text-gray-500 border-l border-white/10 pl-2"
-              >ID: {{ gameCode }}</span
-            >
+        <div id="header-divider-TemplateLarge" class="h-5 w-px bg-white/8"></div>
+        <div id="game-metadata-info-TemplateLarge" class="flex flex-col justify-center">
+          <div id="blinds-info-wrapper-TemplateLarge" class="flex items-center gap-2 leading-none">
+            <span id="blinds-text-TemplateLarge" class="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider">
+              Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}
+            </span>
+            <span id="game-id-text-TemplateLarge" class="text-[9px] font-mono text-white/25 border-l border-white/10 pl-2">
+              ID: {{ gameCode }}
+            </span>
           </div>
-          <h1
-            class="text-[10px] font-black text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80"
-          >
+          <h1 id="game-type-title-TemplateLarge" class="text-[9px] font-black text-amber-500/70 uppercase tracking-widest mt-0.5">
             No Limit Hold'em
           </h1>
         </div>
       </div>
 
-
       <!-- RIGHT SECTION -->
-      <div
-        id="header-right-content-TemplateLarge"
-        class="flex items-center gap-4"
-      >
-        <div
-          id="players-online-counter-TemplateLarge"
-          class="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded border border-white/5"
-        >
-          <div
-            class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
-          ></div>
-          <span
-            class="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-tighter"
-            >{{ allPlayers.length }} Online</span
-          >
+      <div id="header-right-content-TemplateLarge" class="flex items-center gap-3 ml-auto py-2.5">
+        <div id="players-online-pill-TemplateLarge" class="flex items-center gap-1.5 px-2 py-1 rounded-md header-pill">
+          <div id="online-indicator-dot-TemplateLarge" class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_4px_rgba(74,222,128,0.8)]"></div>
+          <span id="online-count-text-TemplateLarge" class="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-tighter">{{ allPlayers.length }} Online</span>
         </div>
-        <div
-          id="connection-status-panel-TemplateLarge"
-          class="bg-black/40 px-3 py-1 rounded-full border border-white/5 flex items-center gap-2 shrink-0"
-        >
-          <div
-            class="w-2 h-2 rounded-full shadow-[0_0_8px_currentColor]"
-            :class="
-              isConnected
-                ? 'bg-green-500 text-green-500'
-                : 'bg-red-500 text-red-500'
-            "
-          ></div>
-          <span
-            class="text-[10px] font-bold uppercase tracking-widest text-gray-200"
-            >{{ isConnected ? 'LIVE' : 'OFFLINE' }}</span
-          >
+
+        <div id="connection-status-badge-TemplateLarge" class="header-conn-badge px-3 py-1 rounded-full flex items-center gap-1.5 shrink-0">
+          <div id="conn-indicator-dot-TemplateLarge" class="w-1.5 h-1.5 rounded-full" :class="isConnected ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.8)]' : 'bg-red-500'"></div>
+          <span id="conn-status-text-TemplateLarge" class="text-[9px] font-bold uppercase tracking-widest" :class="isConnected ? 'text-green-400' : 'text-red-400'">{{ isConnected ? 'Live' : 'Offline' }}</span>
         </div>
-        <div
-          id="current-player-badge-TemplateLarge"
-          class="bg-yellow-500/10 px-4 py-1 rounded-full border border-yellow-500/20 shrink-0"
-        >
-          <span
-            class="text-[12px] font-black text-yellow-500 uppercase tracking-widest"
-            >{{ playerName }}</span
-          >
+
+        <div id="player-profile-badge-TemplateLarge" class="header-player-badge px-4 py-1 rounded-full shrink-0">
+          <span id="current-player-name-TemplateLarge" class="text-[11px] font-black text-amber-400 uppercase tracking-widest">{{ playerName }}</span>
         </div>
-        <div
-          id="server-time-display-TemplateLarge"
-          class="flex flex-col items-end leading-none border-l border-white/10 pl-4"
-        >
-          <span class="text-[11px] font-mono font-bold text-gray-400">{{
-            serverTime
-          }}</span>
+
+        <div id="server-time-wrapper-TemplateLarge" class="flex flex-col items-end leading-none border-l border-white/8 pl-3">
+          <span id="server-time-text-TemplateLarge" class="text-[11px] font-mono font-bold text-gray-400">{{ serverTime }}</span>
         </div>
       </div>
     </header>
@@ -145,7 +95,7 @@
           id="game-message-terminal-wrapper-TemplateLarge"
           class="h-[150px] border-t border-white/5 bg-black/40 shrink-0"
         >
-          <MessageTerminal :logs="logs" />
+          <MessageTerminal id="terminal-component-TemplateLarge" :logs="logs" />
         </div>
       </div>
 
@@ -163,6 +113,7 @@
 
     <footer id="game-hud-bar-TemplateLarge" class="shrink-0 z-50 w-full">
       <ActionBar
+        id="action-bar-component-TemplateLarge"
         :isMyTurn="isMyTurn"
         :canBlind="canBlind" :blindInfo="blindInfo"
         :options="options"
@@ -215,3 +166,38 @@ defineProps({
 
 defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
 </script>
+
+<style scoped>
+.header-bar {
+  background: linear-gradient(180deg, rgba(5,5,5,0.97) 0%, rgba(10,10,10,0.92) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.header-logo-wrap {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #d4a017 0%, #b8860b 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(212,160,23,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+
+.header-pill {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.header-conn-badge {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.header-player-badge {
+  background: rgba(212,160,23,0.08);
+  border: 1px solid rgba(212,160,23,0.2);
+}
+</style>

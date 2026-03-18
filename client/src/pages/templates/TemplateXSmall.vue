@@ -5,11 +5,13 @@
   >
     <WinnerTournamentOverlay
       v-if="winnerInfo?.isTournamentWinner"
+      id="winner-tournament-overlay-TemplateXSmall"
       :winnerInfo="winnerInfo"
       @close="$emit('sendMessage', { action: 'nextRound' })"
     />
     <WinnerOverlay
       v-else-if="winnerInfo"
+      id="winner-standard-overlay-TemplateXSmall"
       :winnerInfo="winnerInfo"
       @close="$emit('sendMessage', { action: 'nextRound' })"
     />
@@ -40,8 +42,9 @@
     </div>
 
     <!-- ACTION BAR (now middle) -->
-    <div id="actionbar-wrapper-TemplateXSmall" class="shrink-0 z-50">
+    <div id="action-bar-wrapper-TemplateXSmall" class="shrink-0 z-50">
       <ActionBar
+        id="action-bar-component-TemplateXSmall"
         :isMyTurn="isMyTurn"
         :canBlind="canBlind" :blindInfo="blindInfo"
         :options="options"
@@ -59,10 +62,12 @@
 
     <!-- PLAYER SIDEPANEL & TERMINAL (now footer) -->
     <footer
-      id="game-sidepanel-container-TemplateXSmall"
+      id="game-footer-container-TemplateXSmall"
       class="flex-1 min-h-0 z-50 flex flex-col"
     >
       <PlayerSidepanel
+        id="game-sidepanel-component-TemplateXSmall"
+        class="flex-1 min-h-0"
         :players="allPlayers"
         :activePlayerId="activePlayerId"
         :myPlayerId="myPlayerId"
@@ -74,7 +79,7 @@
         id="game-message-terminal-wrapper-TemplateXSmall"
         class="h-[150px] border-t border-white/5 bg-black/20 shrink-0"
       >
-        <MessageTerminal :logs="logs" />
+        <MessageTerminal id="terminal-component-TemplateXSmall" :logs="logs" />
       </div>
     </footer>
   </div>

@@ -1,16 +1,20 @@
 <template>
   <div
     :id="'poker-table-viewport-' + templateSuffix"
-    class="w-full h-full relative overflow-hidden bg-neutral-950 flex items-center justify-center"
+    class="w-full h-full relative overflow-hidden flex items-center justify-center"
+    style="background: #050505;"
   >
-    <!-- Table Surface Area -->
+    <!-- Ambient room glow -->
+    <div :id="'ambient-room-glow-' + templateSuffix" class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(15,40,15,0.6) 0%, transparent 70%)"></div>
+
+    <!-- TABLE SURFACE -->
     <div
       :id="'poker-table-surface-wrapper-' + templateSuffix"
       class="w-full h-full relative flex items-center justify-center"
     >
       <div
         :id="'poker-table-main-felt-' + templateSuffix"
-        class="w-full h-full bg-gradient-to-br from-green-900 via-emerald-950 to-green-950 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col items-center border-b-[6px] border-neutral-900/60 transition-all duration-500"
+        class="w-full h-full relative overflow-hidden flex flex-col items-center table-felt transition-all duration-500"
         :class="[
           responsive.screenSize === 'large'
             ? 'pt-16 justify-center pb-12'
@@ -19,49 +23,40 @@
               : 'pt-12 justify-center pb-4',
         ]"
       >
-        <!-- Modern Grid Pattern -->
+        <!-- Felt texture overlay -->
+        <div :id="'felt-texture-overlay-' + templateSuffix" class="absolute inset-0 pointer-events-none felt-texture"></div>
+
+        <!-- Oval table rail shadow (inner edge shadow for depth) -->
+        <div :id="'table-inner-shadow-' + templateSuffix" class="absolute inset-0 pointer-events-none" style="box-shadow: inset 0 0 120px rgba(0,0,0,0.75), inset 0 0 40px rgba(0,0,0,0.5);"></div>
+
+        <!-- Subtle diamond grid -->
         <div
-          :id="'table-surface-grid-overlay-' + templateSuffix"
-          class="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style="
-            background-image:
-              linear-gradient(#fff 1px, transparent 1px),
-              linear-gradient(90deg, #fff 1px, transparent 1px);
-            background-size: 50px 50px;
-          "
+          :id="'table-diamond-grid-' + templateSuffix"
+          class="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style="background-image: repeating-linear-gradient(45deg, rgba(255,255,255,1) 0px, rgba(255,255,255,1) 1px, transparent 1px, transparent 40px), repeating-linear-gradient(-45deg, rgba(255,255,255,1) 0px, rgba(255,255,255,1) 1px, transparent 1px, transparent 40px);"
         ></div>
 
-        <!-- Enhanced Inner Glow & Felt Texture -->
-        <div
-          :id="'table-felt-inner-glow-' + templateSuffix"
-          class="absolute inset-0 shadow-[inset_0_0_180px_rgba(0,0,0,0.8)] pointer-events-none"
-        ></div>
-        <div
-          :id="'table-felt-texture-overlay-' + templateSuffix"
-          class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/felt.png')] opacity-20 pointer-events-none"
-        ></div>
+        <!-- Center logo watermark -->
+        <div :id="'table-logo-watermark-wrapper-' + templateSuffix" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04]">
+          <span :id="'table-logo-watermark-text-' + templateSuffix" style="font-size: 180px; color: white; font-weight: 900; letter-spacing: -0.05em; user-select: none;">Y</span>
+        </div>
 
-        <!-- TOP-CENTERED NOTCH (POT) -->
+        <!-- POT DISPLAY - TOP NOTCH -->
         <div
           :id="'pot-display-absolute-container-' + templateSuffix"
           class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform transition-all duration-300 origin-top"
-          :class="{
-            'scale-[0.6]': ['small', 'xsmall'].includes(responsive.screenSize),
-          }"
+          :class="{ 'scale-[0.6]': ['small', 'xsmall'].includes(responsive.screenSize) }"
         >
-          <PotDisplay
-            :id="'pot-display-main-component-' + templateSuffix"
-            :amount="pot"
-          />
+          <PotDisplay :id="'pot-display-main-component-' + templateSuffix" :amount="pot" />
         </div>
 
-        <!-- CONTENT ZONE -->
+        <!-- COMMUNITY CARDS AREA -->
         <div
           :id="'community-elements-layout-stack-' + templateSuffix"
           class="relative z-10 flex flex-col items-center w-full transition-all duration-500"
           :class="[responsive.screenSize === 'large' ? 'gap-10' : 'gap-4']"
         >
-          <!-- Community Cards -->
+          <!-- Community Cards Row -->
           <div
             :id="'community-cards-horizontal-row-' + templateSuffix"
             class="flex items-end justify-center px-4 w-full overflow-hidden transition-all duration-300"
@@ -76,41 +71,24 @@
                 :id="'community-card-wrapper-' + i + '-' + templateSuffix"
                 class="shrink-0 flex items-end justify-center transition-all duration-300"
                 :class="{
-                  '-ml-5 first:ml-0': ['xsmall', 'small'].includes(
-                    responsive.screenSize,
-                  ),
+                  '-ml-5 first:ml-0': ['xsmall', 'small'].includes(responsive.screenSize),
                 }"
               >
                 <template v-if="communityCards[i - 1]">
                   <Card
-                    :id="
-                      'community-card-item-' + (i - 1) + '-' + templateSuffix
-                    "
+                    :id="'community-card-item-' + (i - 1) + '-' + templateSuffix"
                     :numSymbol="communityCards[i - 1]"
-                    :percentage="
-                      responsive.screenSize === 'medium'
-                        ? 100
-                        : responsive.cardPercentage
-                    "
+                    :percentage="responsive.screenSize === 'medium' ? 100 : responsive.cardPercentage"
                     :size="responsive.cardSize"
-                    class="shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 origin-bottom"
+                    class="hover:-translate-y-2 transition-transform duration-200 origin-bottom"
                   />
                 </template>
                 <template v-else>
                   <CardSpace
-                    :id="
-                      'community-card-space-empty-' +
-                      (i - 1) +
-                      '-' +
-                      templateSuffix
-                    "
+                    :id="'community-card-space-empty-' + (i - 1) + '-' + templateSuffix"
                     :size="responsive.cardSize"
-                    :percentage="
-                      responsive.screenSize === 'medium'
-                        ? 100
-                        : responsive.cardPercentage
-                    "
-                    class="opacity-30 border-white/10 transition-all duration-300"
+                    :percentage="responsive.screenSize === 'medium' ? 100 : responsive.cardPercentage"
+                    class="opacity-20 transition-all duration-300"
                   />
                 </template>
               </div>
@@ -118,10 +96,8 @@
           </div>
         </div>
 
-        <!-- Subtle Decorative Inner Line -->
-        <div
-          class="absolute inset-3 rounded-lg lg:rounded-xl border border-white/[0.03] pointer-events-none"
-        ></div>
+        <!-- Subtle decorative inner rail line -->
+        <div :id="'table-inner-rail-line-' + templateSuffix" class="absolute inset-4 rounded-2xl pointer-events-none" style="border: 1px solid rgba(255,255,255,0.04);"></div>
       </div>
     </div>
   </div>
@@ -148,3 +124,16 @@ const props = defineProps({
   activePlayerId: String,
 })
 </script>
+
+<style scoped>
+.table-felt {
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 50%, #1a5c2a 0%, #14461f 40%, #0d3016 70%, #081e0e 100%);
+  border-bottom: 6px solid rgba(0,0,0,0.6);
+}
+
+.felt-texture {
+  background-image: url('https://www.transparenttextures.com/patterns/felt.png');
+  opacity: 0.25;
+}
+</style>

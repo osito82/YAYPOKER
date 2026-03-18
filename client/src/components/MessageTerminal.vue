@@ -2,9 +2,28 @@
   <div id="message-terminal" class="w-full h-full">
     <div
       id="terminal-container"
-      class="bg-black/60 backdrop-blur-md w-full h-full flex flex-col shadow-inner"
+      class="terminal-bg w-full h-full flex flex-col overflow-hidden"
     >
-      <!-- Terminal Body (No Header, Full Width) -->
+      <!-- Terminal header bar -->
+      <div class="terminal-header flex items-center gap-2 px-4 py-2 shrink-0">
+        <div class="flex gap-1.5">
+          <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
+        </div>
+        <span
+          class="text-[9px] font-mono font-bold text-white/20 uppercase tracking-widest ml-2"
+          >Game Log</span
+        >
+        <div class="ml-auto flex items-center gap-1">
+          <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+          <span class="text-[8px] font-mono text-green-500/60 uppercase"
+            >Live</span
+          >
+        </div>
+      </div>
+
+      <!-- Terminal body -->
       <div
         ref="logContainer"
         class="flex-grow overflow-y-auto p-4 lg:p-6 font-mono text-xs lg:text-sm space-y-1.5 scrollbar-thin scrollbar-thumb-white/20 scroll-smooth"
@@ -115,6 +134,16 @@ onMounted(scrollToBottom)
 </script>
 
 <style scoped>
+.terminal-bg {
+  background: rgba(2, 4, 2, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+.terminal-header {
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
 }

@@ -20,7 +20,7 @@
           <span
             id="logo-text-icon-TemplateSmall"
             class="text-black font-black text-sm"
-            >O</span
+            >Y</span
           >
         </div>
         <div

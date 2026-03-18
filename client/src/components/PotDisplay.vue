@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center justify-center py-1 px-8 bg-black/85 backdrop-blur-2xl rounded-b-2xl border-x border-b border-yellow-500/40 shadow-[0_10px_40px_rgba(0,0,0,0.9),0_0_25px_rgba(234,179,8,0.15)] transition-all duration-500 hover:border-yellow-400/70 hover:shadow-[0_15px_60px_rgba(0,0,0,1),0_0_40px_rgba(234,179,8,0.35)] group"
+    class="pot-display flex items-center justify-center py-1.5 px-6 backdrop-blur-2xl rounded-b-2xl transition-all duration-500 group"
   >
     <div v-if="lobbyTimer" class="flex flex-col items-center gap-1 py-1">
       <div class="flex items-center gap-3">
@@ -100,14 +100,11 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { computed, ref, onUnmounted, watch } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
 
 const props = defineProps({
-  amount: {
-    type: [Number, String],
-    default: 0,
-  },
+  amount: { type: [Number, String], default: 0 },
 })
 
 const store = usePokerStore()
@@ -167,6 +164,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.pot-display {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.85) 100%
+  );
+  border: 1px solid rgba(234, 179, 8, 0.25);
+  border-top: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 0 20px rgba(234, 179, 8, 0.08);
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

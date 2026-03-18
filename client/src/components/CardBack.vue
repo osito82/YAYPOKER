@@ -9,13 +9,15 @@
       :class="[
         sizeOption.width,
         sizeOption.heightClass,
-        'bg-white rounded-lg shadow-md border border-gray-300 relative select-none flex justify-center items-center overflow-hidden',
+        'card-back rounded-xl relative select-none flex justify-center items-center overflow-hidden',
       ]"
     >
-      <div
-        :id="'card-back-pattern-' + responsive.templateSuffix"
-        class="rayas"
-      ></div>
+      <!-- Inner border shine -->
+      <div class="absolute inset-[1px] rounded-[10px] pointer-events-none" style="border: 1px solid rgba(255,255,255,0.15); background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 50%)"></div>
+      <!-- Pattern -->
+      <div class="card-back-pattern absolute inset-2 rounded-lg overflow-hidden">
+        <div class="pattern-inner w-full h-full"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -28,50 +30,56 @@ const responsive = useResponsiveStore()
 
 const props = defineProps({
   size: String,
-  percentage: {
-    type: Number,
-    default: 100,
-  },
+  percentage: { type: Number, default: 100 },
 })
 
-// Define los tamaños de la carta
 const sizeOption = computed(() => {
   switch (props.size) {
-    case 'extraLarge':
-      return { heightClass: 'h-64', width: 'w-48', heightPx: 256 }
-    case 'large':
-      return { heightClass: 'h-48', width: 'w-36', heightPx: 192 }
-    case 'medium':
-      return { heightClass: 'h-40', width: 'w-28', heightPx: 160 }
-    case 'small':
-      return { heightClass: 'h-28', width: 'w-20', heightPx: 112 }
-    default:
-      return { heightClass: 'h-48', width: 'w-36', heightPx: 192 }
+    case 'extraLarge': return { heightClass: 'h-64', width: 'w-48', heightPx: 256 }
+    case 'large': return { heightClass: 'h-48', width: 'w-36', heightPx: 192 }
+    case 'medium': return { heightClass: 'h-40', width: 'w-28', heightPx: 160 }
+    case 'small': return { heightClass: 'h-28', width: 'w-20', heightPx: 112 }
+    default: return { heightClass: 'h-48', width: 'w-36', heightPx: 192 }
   }
 })
 
-// Calculamos el estilo de recorte dinámicamente
 const cropStyle = computed(() => {
   const pct = props.percentage ?? 100
   if (pct >= 100) return {}
-  return {
-    height: `${(sizeOption.value.heightPx * pct) / 100}px`,
-  }
+  return { height: `${(sizeOption.value.heightPx * pct) / 100}px` }
 })
 </script>
 
 <style scoped>
-.rayas {
-  width: 90%;
-  height: 90%;
-  border-radius: 6px;
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 5px,
-    #183b5a 5px,
-    #183b5a 10px
-  );
-  opacity: 0.5;
+.card-back {
+  background: linear-gradient(145deg, #1a3a5c 0%, #0f2340 50%, #0a1a30 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    0 1px 4px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.card-back-pattern {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pattern-inner {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 4px,
+      rgba(255, 255, 255, 0.04) 4px,
+      rgba(255, 255, 255, 0.04) 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 4px,
+      rgba(255, 255, 255, 0.025) 4px,
+      rgba(255, 255, 255, 0.025) 8px
+    );
+  background-color: rgba(20, 50, 90, 0.5);
 }
 </style>

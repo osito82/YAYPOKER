@@ -1,11 +1,11 @@
 <template>
   <div
     :id="'seat-wrapper-' + playerName + '-' + responsive.templateSuffix"
-    class="relative group flex items-center p-3 rounded-xl border transition-all duration-300 w-full overflow-hidden"
+    class="relative group flex items-center p-3 rounded-xl border transition-all duration-300 w-full overflow-hidden seat-base"
     :class="
       isActive
-        ? 'bg-yellow-500/20 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)] scale-[1.02]'
-        : 'bg-black/40 border-white/10 hover:bg-black/60'
+        ? 'seat-active'
+        : 'seat-idle hover:border-white/15'
     "
   >
     <!-- Active Turn Pulse -->
@@ -187,3 +187,23 @@ defineProps({
   isActive: { type: Boolean, default: false },
 })
 </script>
+
+<style scoped>
+.seat-base {
+  background: rgba(0,0,0,0.4);
+}
+
+.seat-idle {
+  border-color: rgba(255,255,255,0.08);
+}
+.seat-idle:hover {
+  background: rgba(0,0,0,0.55);
+}
+
+.seat-active {
+  background: rgba(212,160,23,0.1);
+  border-color: rgba(212,160,23,0.5);
+  box-shadow: 0 0 20px rgba(212,160,23,0.15), inset 0 0 20px rgba(212,160,23,0.04);
+  transform: scale(1.02);
+}
+</style>

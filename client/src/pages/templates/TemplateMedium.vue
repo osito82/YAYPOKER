@@ -20,25 +20,28 @@
           <span
             id="logo-text-icon-TemplateMedium"
             class="text-black font-black text-lg"
-            >O</span
+            >Y</span
           >
         </div>
-        <div class="h-6 w-px bg-white/10"></div>
+        <div id="header-divider-TemplateMedium" class="h-6 w-px bg-white/10"></div>
         <div
           id="game-metadata-info-TemplateMedium"
           class="flex flex-col justify-center"
         >
-          <div class="flex items-center gap-2 leading-none">
+          <div id="blinds-info-wrapper-TemplateMedium" class="flex items-center gap-2 leading-none">
             <span
+              id="blinds-text-TemplateMedium"
               class="text-[10px] font-mono font-bold text-white uppercase tracking-wider"
               >Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}</span
             >
             <span
+              id="game-id-text-TemplateMedium"
               class="text-[9px] font-mono text-gray-500 border-l border-white/10 pl-2"
               >ID: {{ gameCode }}</span
             >
           </div>
           <h1
+            id="game-type-title-TemplateMedium"
             class="text-[9px] font-black text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80"
           >
             No Limit Hold'em
@@ -56,9 +59,11 @@
           class="flex items-center gap-1.5 bg-white/5 px-2 py-1 rounded border border-white/5"
         >
           <div
+            id="online-indicator-dot-TemplateMedium"
             class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
           ></div>
           <span
+            id="online-count-text-TemplateMedium"
             class="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-tighter"
             >{{ allPlayers.length }} Online</span
           >
@@ -68,6 +73,7 @@
           class="bg-black/40 px-2 py-0.5 rounded-full border border-white/5 flex items-center gap-1.5 shrink-0"
         >
           <div
+            id="conn-indicator-dot-TemplateMedium"
             class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]"
             :class="
               isConnected
@@ -76,6 +82,7 @@
             "
           ></div>
           <span
+            id="conn-status-text-TemplateMedium"
             class="text-[9px] font-bold uppercase tracking-widest text-gray-200"
             >{{ isConnected ? 'LIVE' : 'OFFLINE' }}</span
           >
@@ -85,6 +92,7 @@
           class="bg-yellow-500/10 px-3 py-0.5 rounded-full border border-yellow-500/20 shrink-0"
         >
           <span
+            id="current-player-name-TemplateMedium"
             class="text-[10px] font-black text-yellow-500 uppercase tracking-widest"
             >{{ playerName }}</span
           >
@@ -137,7 +145,7 @@
           id="game-message-terminal-wrapper-TemplateMedium"
           class="h-[120px] border-t border-white/5 bg-black/40 shrink-0"
         >
-          <MessageTerminal :logs="logs" />
+          <MessageTerminal id="terminal-component-TemplateMedium" :logs="logs" />
         </div>
 
         <!-- SIDEPANEL (Now below terminal) -->
@@ -155,6 +163,7 @@
 
     <footer id="game-hud-bar-TemplateMedium" class="shrink-0 z-50 w-full">
       <ActionBar
+        id="action-bar-component-TemplateMedium"
         :isMyTurn="isMyTurn"
         :canBlind="canBlind" :blindInfo="blindInfo"
         :options="options"
