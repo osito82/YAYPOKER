@@ -45,10 +45,11 @@
           :id="'player-item-info-wrapper-' + player.id + '-' + templateSuffix"
           class="flex items-start justify-between gap-2 mb-1.5"
         >
-          <div class="flex flex-col min-w-0">
-            <div class="flex items-center gap-2">
+          <div :id="`player-item-identity-wrapper-${player.id}-${templateSuffix}`" class="flex flex-col min-w-0">
+            <div :id="`player-item-status-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-2">
               <div
                 v-if="player.id === delayedActivePlayerId"
+                :id="`player-item-active-pulse-${player.id}-${templateSuffix}`"
                 class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse shrink-0"
               ></div>
               <span
@@ -64,18 +65,21 @@
                 {{ player.name }}
               </span>
               <div
+                :id="`player-item-connectivity-dot-${player.id}-${templateSuffix}`"
                 class="w-1.5 h-1.5 rounded-full shrink-0"
                 :class="player.isConnected ? 'bg-green-500' : 'bg-gray-600'"
               ></div>
             </div>
-            <div class="h-4 flex items-center mt-1">
+            <div :id="`player-item-action-label-wrapper-${player.id}-${templateSuffix}`" class="h-4 flex items-center mt-1">
               <span
                 v-if="player.id === activePlayerId"
+                :id="`player-item-active-turn-label-${player.id}-${templateSuffix}`"
                 class="text-[10px] font-black uppercase tracking-widest text-yellow-500/80 leading-none"
                 >Active Turn</span
               >
               <span
                 v-else-if="player.folded"
+                :id="`player-item-folded-label-${player.id}-${templateSuffix}`"
                 class="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-none"
                 >Folded</span
               >
@@ -83,17 +87,20 @@
           </div>
 
           <!-- Stack Display -->
-          <div class="flex flex-col items-end shrink-0">
+          <div :id="`player-item-stack-container-${player.id}-${templateSuffix}`" class="flex flex-col items-end shrink-0">
             <span
+              :id="`player-item-stack-label-${player.id}-${templateSuffix}`"
               class="text-[10px] font-black text-gray-500 uppercase tracking-tighter mb-1 leading-none"
               >Stack</span
             >
-            <div class="flex items-center gap-0.5">
+            <div :id="`player-item-stack-value-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-0.5">
               <span
+                :id="`player-item-stack-currency-${player.id}-${templateSuffix}`"
                 class="text-sm text-yellow-500 font-mono font-bold leading-none"
                 >$</span
               >
               <span
+                :id="`player-item-stack-amount-${player.id}-${templateSuffix}`"
                 class="text-xl font-mono font-black text-white leading-none tracking-tight"
                 >{{ player.chips }}</span
               >
@@ -108,31 +115,36 @@
             player.lastAction ||
             (isShowDown && player.cards && player.cards.length > 0)
           "
+          :id="`player-item-activity-row-${player.id}-${templateSuffix}`"
           class="flex items-end justify-between gap-2 mt-2 pt-2 border-t border-white/5"
         >
           <!-- LEFT COLUMN: Cards + Live Bet -->
-          <div class="flex flex-col flex-1 gap-3">
+          <div :id="`player-item-left-activity-${player.id}-${templateSuffix}`" class="flex flex-col flex-1 gap-3">
             <!-- SHOWDOWN CARDS (55% Style) -->
             <div
               v-if="isShowDown && player.cards && player.cards.length > 0"
+              :id="`player-item-showdown-cards-${player.id}-${templateSuffix}`"
               class="flex flex-col animate-in fade-in slide-in-from-left-2 duration-700"
             >
-              <div class="flex items-center gap-2 mb-1.5">
+              <div :id="`player-item-hand-name-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-2 mb-1.5">
                 <span
+                  :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`"
                   class="text-[10px] font-black text-emerald-400 uppercase tracking-widest truncate leading-none"
                 >
                   {{ formatHandName(getPlayerHandName(player)) }}
                 </span>
                 <span
                   v-if="isPlayerWinner(player.id)"
+                  :id="`player-item-win-badge-${player.id}-${templateSuffix}`"
                   class="px-1.5 py-0.5 rounded bg-emerald-500 text-[9px] font-black text-black uppercase leading-none"
                   >Win</span
                 >
               </div>
-              <div class="flex gap-1.5">
+              <div :id="`player-item-cards-row-${player.id}-${templateSuffix}`" class="flex gap-1.5">
                 <Card
                   v-for="(card, idx) in player.cards"
                   :key="idx"
+                  :id="`player-item-card-visual-${player.id}-${idx}-${templateSuffix}`"
                   :numSymbol="card"
                   size="small"
                   :highlight="isCardWinning(player.id, card)"
@@ -142,12 +154,14 @@
             </div>
 
             <!-- Live Bet -->
-            <div v-if="player.currentBet > 0" class="flex flex-col">
+            <div v-if="player.currentBet > 0" :id="`player-item-live-bet-wrapper-${player.id}-${templateSuffix}`" class="flex flex-col">
               <span
+                :id="`player-item-live-bet-label-${player.id}-${templateSuffix}`"
                 class="text-[10px] font-black text-emerald-500/70 uppercase tracking-wider mb-1 leading-none"
                 >Live Bet</span
               >
               <span
+                :id="`player-item-live-bet-amount-${player.id}-${templateSuffix}`"
                 class="text-2xl font-mono font-black text-emerald-400 leading-none tracking-tight"
                 >${{ player.currentBet }}</span
               >
@@ -157,15 +171,18 @@
           <!-- RIGHT COLUMN: Last Action -->
           <div
             v-if="player.lastAction"
+            :id="`player-item-last-action-wrapper-${player.id}-${templateSuffix}`"
             class="flex flex-col items-end shrink-0"
           >
             <span
+              :id="`player-item-last-action-label-${player.id}-${templateSuffix}`"
               class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 leading-none"
               >Last Action</span
             >
             <Transition name="action-highlight" mode="out-in">
               <div
                 :key="player.lastAction"
+                :id="`player-item-action-badge-${player.id}-${templateSuffix}`"
                 class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/5 bg-white/[0.02]"
                 :class="[
                   getActionBgColor(player.lastAction),
@@ -173,10 +190,12 @@
                 ]"
               >
                 <div
+                  :id="`player-item-action-dot-${player.id}-${templateSuffix}`"
                   class="w-1.5 h-1.5 rounded-full"
                   :class="getActionDotColor(player.lastAction)"
                 ></div>
                 <span
+                  :id="`player-item-action-text-${player.id}-${templateSuffix}`"
                   class="text-[10px] font-black uppercase tracking-widest leading-none mt-px"
                   :class="getActionTextColor(player.lastAction)"
                 >
@@ -195,11 +214,11 @@
       class="p-4 border-t border-white/5 shrink-0"
       style="background: rgba(0,0,0,0.7);"
     >
-      <div class="flex justify-between items-center">
-        <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">Global Pot</span>
-        <div class="flex items-center gap-1">
-          <span class="text-amber-500 text-xs font-mono font-black leading-none">$</span>
-          <span class="text-emerald-400 text-lg font-mono font-black italic leading-none">{{ pot }}</span>
+      <div :id="`sidepanel-global-pot-row-${templateSuffix}`" class="flex justify-between items-center">
+        <span :id="`sidepanel-global-pot-label-${templateSuffix}`" class="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">Global Pot</span>
+        <div :id="`sidepanel-global-pot-value-wrapper-${templateSuffix}`" class="flex items-center gap-1">
+          <span :id="`sidepanel-global-pot-currency-${templateSuffix}`" class="text-amber-500 text-xs font-mono font-black leading-none">$</span>
+          <span :id="`sidepanel-global-pot-amount-${templateSuffix}`" class="text-lg font-mono font-black italic leading-none">{{ pot }}</span>
         </div>
       </div>
     </div>

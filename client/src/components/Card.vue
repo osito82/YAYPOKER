@@ -1,11 +1,11 @@
 <template>
   <div
-    :id="'poker-card-crop-container-' + responsive.templateSuffix"
+    :id="`poker-card-crop-container-${templateSuffix}`"
     class="relative overflow-hidden transition-all duration-300"
     :style="cropStyle"
   >
     <div
-      :id="'poker-card-outer-' + responsive.templateSuffix"
+      :id="`poker-card-outer-${templateSuffix}`"
       :class="[
         sizeOption.width,
         sizeOption.heightClass,
@@ -14,41 +14,80 @@
       ]"
     >
       <!-- Subtle inner border shine -->
-      <div class="absolute inset-[1px] rounded-[10px] pointer-events-none card-inner-shine"></div>
+      <div
+        :id="`poker-card-inner-shine-${templateSuffix}`"
+        class="absolute inset-[1px] rounded-[10px] pointer-events-none card-inner-shine"
+      ></div>
 
       <!-- Top-left corner -->
       <div
         v-if="props.percentage > 55"
-        :id="'card-corner-top-left-' + responsive.templateSuffix"
+        :id="`poker-card-corner-top-left-${templateSuffix}`"
         class="absolute top-1.5 left-1.5 flex flex-col items-center leading-none"
         :class="colorClass"
       >
-        <span :class="[sizeOption.cornerText, 'font-black leading-none']">{{ numSymbol.letter }}</span>
-        <span :class="[sizeOption.cornerSymbol, 'font-black leading-none mt-0.5']">{{ numSymbol.symbol }}</span>
+        <span
+          :id="`poker-card-letter-top-${templateSuffix}`"
+          :class="[sizeOption.cornerText, 'font-black leading-none']"
+          >{{ numSymbol.letter }}</span
+        >
+        <span
+          :id="`poker-card-symbol-top-${templateSuffix}`"
+          :class="[sizeOption.cornerSymbol, 'font-black leading-none mt-0.5']"
+          >{{ numSymbol.symbol }}</span
+        >
       </div>
 
       <!-- Center -->
       <div
-        :id="'card-center-symbol-container-' + responsive.templateSuffix"
+        :id="`poker-card-center-container-${templateSuffix}`"
         class="absolute inset-0 flex justify-center"
         :class="[colorClass, isCropped ? 'items-start pt-1' : 'items-center']"
       >
-        <div v-if="isCropped" class="flex items-center justify-center w-full gap-3">
-          <span :class="[sizeOption.cropTextSize, 'font-black tracking-tighter leading-none']">{{ numSymbol.letter }}</span>
-          <span :class="[sizeOption.cropTextSize, 'leading-none']">{{ numSymbol.symbol }}</span>
+        <div
+          v-if="isCropped"
+          :id="`poker-card-cropped-content-${templateSuffix}`"
+          class="flex items-center justify-center w-full gap-3"
+        >
+          <span
+            :id="`poker-card-cropped-letter-${templateSuffix}`"
+            :class="[
+              sizeOption.cropTextSize,
+              'font-black tracking-tighter leading-none',
+            ]"
+            >{{ numSymbol.letter }}</span
+          >
+          <span
+            :id="`poker-card-cropped-symbol-${templateSuffix}`"
+            :class="[sizeOption.cropTextSize, 'leading-none']"
+            >{{ numSymbol.symbol }}</span
+          >
         </div>
-        <span v-else :class="[sizeOption.centerSymbol, 'drop-shadow-sm']">{{ numSymbol.symbol }}</span>
+        <span
+          v-else
+          :id="`poker-card-center-symbol-${templateSuffix}`"
+          :class="[sizeOption.centerSymbol, 'drop-shadow-sm']"
+          >{{ numSymbol.symbol }}</span
+        >
       </div>
 
       <!-- Bottom-right corner (rotated) -->
       <div
         v-if="props.percentage > 55"
-        :id="'card-corner-bottom-right-' + responsive.templateSuffix"
+        :id="`poker-card-corner-bottom-right-${templateSuffix}`"
         class="absolute bottom-1.5 right-1.5 flex flex-col items-center leading-none transform rotate-180"
         :class="colorClass"
       >
-        <span :class="[sizeOption.cornerText, 'font-black leading-none']">{{ numSymbol.letter }}</span>
-        <span :class="[sizeOption.cornerSymbol, 'font-black leading-none mt-0.5']">{{ numSymbol.symbol }}</span>
+        <span
+          :id="`poker-card-letter-bottom-${templateSuffix}`"
+          :class="[sizeOption.cornerText, 'font-black leading-none']"
+          >{{ numSymbol.letter }}</span
+        >
+        <span
+          :id="`poker-card-symbol-bottom-${templateSuffix}`"
+          :class="[sizeOption.cornerSymbol, 'font-black leading-none mt-0.5']"
+          >{{ numSymbol.symbol }}</span
+        >
       </div>
     </div>
   </div>
@@ -60,6 +99,7 @@ import { simbolConverter, whatColor } from '../vutils.js'
 import { useResponsiveStore } from '../store/responsiveStore'
 
 const responsive = useResponsiveStore()
+const templateSuffix = computed(() => responsive.templateSuffix)
 
 const props = defineProps({
   numSymbol: String,
@@ -72,18 +112,74 @@ const isCropped = computed(() => props.percentage <= 55)
 
 const sizeOption = computed(() => {
   switch (props.size) {
-    case 'extraLarge': return { cornerText: 'text-3xl', cornerSymbol: 'text-2xl', centerSymbol: 'text-8xl', cropTextSize: 'text-8xl', heightClass: 'h-64', width: 'w-48', heightPx: 256 }
-    case 'large': return { cornerText: 'text-2xl', cornerSymbol: 'text-xl', centerSymbol: 'text-7xl', cropTextSize: 'text-7xl', heightClass: 'h-48', width: 'w-36', heightPx: 192 }
-    case 'medium': return { cornerText: 'text-xl', cornerSymbol: 'text-lg', centerSymbol: 'text-6xl', cropTextSize: 'text-6xl', heightClass: 'h-40', width: 'w-28', heightPx: 160 }
-    case 'small': return { cornerText: 'text-sm', cornerSymbol: 'text-xs', centerSymbol: 'text-4xl', cropTextSize: 'text-4xl', heightClass: 'h-28', width: 'w-20', heightPx: 112 }
-    case 'xsmall': return { cornerText: 'text-[10px]', cornerSymbol: 'text-[8px]', centerSymbol: 'text-xl', cropTextSize: 'text-xl', heightClass: 'h-12', width: 'w-10', heightPx: 48 }
-    default: return { cornerText: 'text-2xl', cornerSymbol: 'text-xl', centerSymbol: 'text-7xl', cropTextSize: 'text-7xl', heightClass: 'h-48', width: 'w-36', heightPx: 192 }
+    case 'extraLarge':
+      return {
+        cornerText: 'text-3xl',
+        cornerSymbol: 'text-2xl',
+        centerSymbol: 'text-8xl',
+        cropTextSize: 'text-8xl',
+        heightClass: 'h-64',
+        width: 'w-48',
+        heightPx: 256,
+      }
+    case 'large':
+      return {
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
+        centerSymbol: 'text-7xl',
+        cropTextSize: 'text-7xl',
+        heightClass: 'h-48',
+        width: 'w-36',
+        heightPx: 192,
+      }
+    case 'medium':
+      return {
+        cornerText: 'text-xl',
+        cornerSymbol: 'text-lg',
+        centerSymbol: 'text-6xl',
+        cropTextSize: 'text-6xl',
+        heightClass: 'h-40',
+        width: 'w-28',
+        heightPx: 160,
+      }
+    case 'small':
+      return {
+        cornerText: 'text-sm',
+        cornerSymbol: 'text-xs',
+        centerSymbol: 'text-4xl',
+        cropTextSize: 'text-4xl',
+        heightClass: 'h-28',
+        width: 'w-20',
+        heightPx: 112,
+      }
+    case 'xsmall':
+      return {
+        cornerText: 'text-[10px]',
+        cornerSymbol: 'text-[8px]',
+        centerSymbol: 'text-xl',
+        cropTextSize: 'text-xl',
+        heightClass: 'h-12',
+        width: 'w-10',
+        heightPx: 48,
+      }
+    default:
+      return {
+        cornerText: 'text-2xl',
+        cornerSymbol: 'text-xl',
+        centerSymbol: 'text-7xl',
+        cropTextSize: 'text-7xl',
+        heightClass: 'h-48',
+        width: 'w-36',
+        heightPx: 192,
+      }
   }
 })
 
 const numSymbol = computed(() => simbolConverter(props.numSymbol || 'Ah'))
 const color = computed(() => whatColor(props.numSymbol || 'Ah'))
-const colorClass = computed(() => color.value === 'red' ? 'text-red-500' : 'text-gray-900')
+const colorClass = computed(() =>
+  color.value === 'red' ? 'text-red-500' : 'text-gray-900',
+)
 
 const cropStyle = computed(() => {
   const pct = props.percentage ?? 100
@@ -103,8 +199,8 @@ const cropStyle = computed(() => {
 }
 
 .card-inner-shine {
-  background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 50%);
-  border: 1px solid rgba(255,255,255,0.8);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
 .highlight-card {

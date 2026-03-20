@@ -1,6 +1,6 @@
 <template>
   <div
-    :id="'poker-chip-' + value + '-' + size + '-' + responsive.templateSuffix"
+    :id="`poker-chip-${value}-${size}-${templateSuffix}`"
     :class="[
       chipSize.container,
       'relative rounded-full flex items-center justify-center select-none cursor-pointer transition-all duration-200 group',
@@ -11,6 +11,7 @@
   >
     <!-- Outer Rim -->
     <div
+      :id="`chip-outer-rim-${value}-${size}-${templateSuffix}`"
       :class="[
         color,
         'absolute inset-0 rounded-full border-[3px] border-white/20 border-dashed opacity-80',
@@ -19,19 +20,25 @@
 
     <!-- Main Body -->
     <div
+      :id="`chip-main-body-${value}-${size}-${templateSuffix}`"
       :class="[
         color,
         'absolute inset-1 rounded-full flex items-center justify-center overflow-hidden',
         'before:absolute before:inset-0 before:bg-gradient-to-br before:from-white/30 before:to-black/40',
       ]"
     >
-      <div class="absolute inset-1.5 rounded-full border border-white/20"></div>
+      <div
+        :id="`chip-inner-border-${value}-${size}-${templateSuffix}`"
+        class="absolute inset-1.5 rounded-full border border-white/20"
+      ></div>
 
       <!-- Center White Background -->
       <div
+        :id="`chip-center-background-${value}-${size}-${templateSuffix}`"
         class="absolute inset-[22%] bg-white rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] border border-black/5 flex items-center justify-center"
       >
         <div
+          :id="`chip-value-text-${value}-${size}-${templateSuffix}`"
           :class="[
             'text-black',
             chipSize.text,
@@ -46,6 +53,7 @@
     <!-- Shine Overlay -->
     <div
       v-if="!disabled"
+      :id="`chip-shine-overlay-${value}-${size}-${templateSuffix}`"
       class="absolute inset-0 rounded-full bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none"
     ></div>
   </div>
@@ -56,6 +64,7 @@ import { computed } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 
 const responsive = useResponsiveStore()
+const templateSuffix = computed(() => responsive.templateSuffix)
 
 const props = defineProps({
   value: [Number, String],
