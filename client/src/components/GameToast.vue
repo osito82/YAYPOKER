@@ -9,19 +9,19 @@
   >
     <div
       v-if="message"
-      id="game-toast-container"
+      :id="`game-toast-container-${templateSuffix}`"
       class="flex justify-center w-full pointer-events-none"
     >
       <div
-        id="game-toast-content"
+        :id="`game-toast-content-${templateSuffix}`"
         class="bg-black/60 backdrop-blur-md border border-white/10 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex items-center gap-3"
       >
         <div
-          id="toast-pulse"
+          :id="`toast-pulse-${templateSuffix}`"
           class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(234,179,8,0.6)]"
         ></div>
         <span
-          id="toast-message"
+          :id="`toast-message-${templateSuffix}`"
           class="text-xs lg:text-sm font-black text-gray-100 uppercase tracking-[0.15em] italic"
         >
           {{ message }}
@@ -32,10 +32,16 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useResponsiveStore } from '../store/responsiveStore'
+
 defineProps({
   message: {
     type: String,
     default: '',
   },
 })
+
+const responsive = useResponsiveStore()
+const templateSuffix = computed(() => responsive.templateSuffix)
 </script>

@@ -14,7 +14,10 @@
       }"
       :style="{ width: `${progress}%` }"
     >
-      <div class="absolute right-0 top-0 h-full w-4 timer-glow"></div>
+      <div
+        :id="`hud-turn-timer-glow-effect-${templateSuffix}`"
+        class="absolute right-0 top-0 h-full w-4 timer-glow"
+      ></div>
     </div>
   </div>
 </template>
@@ -30,13 +33,15 @@ const props = defineProps({
 </script>
 
 <style scoped>
-.timer-bar { position: relative; }
+.timer-bar {
+  position: relative;
+}
 
 .timer-bar--ok {
   background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
 }
 .timer-bar--warn {
-  background: linear-gradient(90deg, #b8860b 0%, #d4a017 100%);
+  background: linear-gradient(90deg, #ca8a04 0%, #eab308 100%);
 }
 .timer-bar--urgent {
   background: linear-gradient(90deg, #991b1b 0%, #ef4444 100%);
@@ -44,12 +49,17 @@ const props = defineProps({
 }
 
 .timer-glow {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4));
   pointer-events: none;
 }
 
 @keyframes pulse-red {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 </style>

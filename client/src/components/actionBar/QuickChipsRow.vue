@@ -10,6 +10,7 @@
     ]"
   >
     <div
+      :id="`hud-quick-chips-list-container-${templateSuffix}`"
       :class="[
         'flex gap-2 lg:gap-3',
         isVertical
@@ -20,6 +21,7 @@
       <Chip
         v-for="chip in chips"
         :key="chip.value"
+        :id="`hud-quick-chip-item-${chip.value}-${templateSuffix}`"
         :value="chip.label"
         :color="chip.color"
         :textColor="chip.text"

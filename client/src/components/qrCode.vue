@@ -1,7 +1,8 @@
 <template>
-  <div>
+  <div :id="`qr-code-main-wrapper-${templateSuffix}`">
     <QRCodeVue3
       v-if="renderComponent"
+      :id="`qr-code-component-${templateSuffix}`"
       :width="width"
       :height="height"
       :value="computedGameCode"
@@ -32,6 +33,10 @@
 import QRCodeVue3 from 'qrcode-vue3'
 import { computed, ref, nextTick } from 'vue'
 import { urlsFactory } from '../vutils'
+import { useResponsiveStore } from '../store/responsiveStore'
+
+const responsive = useResponsiveStore()
+const templateSuffix = computed(() => responsive.templateSuffix)
 
 const props = defineProps({
   width: { type: Number, default: 300 },
