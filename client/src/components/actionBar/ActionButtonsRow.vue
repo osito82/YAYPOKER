@@ -1,53 +1,52 @@
 <template>
-  <div class="flex gap-1.5 w-full h-10 lg:h-12">
+  <div :id="`hud-action-buttons-row-${templateSuffix}`" class="flex gap-2 w-full h-11 lg:h-13">
     <template v-if="canBlind">
       <button
+        :id="`hud-post-blind-button-${templateSuffix}`"
         @click="$emit('action', 'blind')"
-        class="flex-1 bg-yellow-500 text-black font-black uppercase rounded-lg shadow-lg active:scale-95 text-[10px] lg:text-sm px-2"
+        class="btn-blind flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm px-3 active:scale-95 transition-all duration-150"
       >
         <template v-if="blindInfo">
           Post {{ blindInfo.type }} Blind ${{ blindInfo.amount }}
         </template>
-        <template v-else>
-          Post Blind
-        </template>
+        <template v-else>Post Blind</template>
       </button>
     </template>
 
     <template v-else>
       <button
+        :id="`hud-fold-button-${templateSuffix}`"
         @click="$emit('action', 'fold')"
         :disabled="!isMyTurn || !options.includes('fold')"
-        class="flex-1 bg-white/5 border border-white/10 text-gray-400 font-black uppercase rounded-lg hover:bg-red-600/20 disabled:opacity-20 text-[10px] lg:text-sm"
+        class="btn-fold flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
       >
         Fold
       </button>
 
       <button
+        :id="`hud-check-button-${templateSuffix}`"
         @click="$emit('action', 'check')"
         :disabled="!isMyTurn || !options.includes('check')"
-        class="flex-1 bg-white/5 border border-white/10 text-gray-200 font-black uppercase rounded-lg hover:bg-white/10 disabled:opacity-20 text-[10px] lg:text-sm"
+        class="btn-check flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
       >
         Check
       </button>
 
       <button
+        :id="`hud-call-button-${templateSuffix}`"
         @click="$emit('action', 'call')"
         :disabled="!isMyTurn || !options.includes('call')"
-        class="flex-1 bg-blue-600/20 border border-blue-500/30 text-blue-400 font-black uppercase rounded-lg hover:bg-blue-600/40 disabled:opacity-20 text-[10px] lg:text-sm"
+        class="btn-call flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
       >
         Call
       </button>
 
       <button
+        :id="`hud-raise-bet-button-${templateSuffix}`"
         @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
         :disabled="isRaiseActionDisabled"
-        class="flex-[1.5] font-black uppercase rounded-lg shadow-lg disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed text-[10px] lg:text-sm active:scale-95 transition-all"
-        :class="[
-          pokerStore.blindsIncreasedFlag
-            ? 'bg-yellow-400 text-black shadow-[0_0_20px_rgba(250,204,21,0.8)] animate-pulse scale-105 z-10'
-            : 'bg-yellow-500 text-black'
-        ]"
+        class="btn-raise flex-[1.5] font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
+        :class="[pokerStore.blindsIncreasedFlag ? 'animate-pulse scale-105 z-10' : '']"
       >
         {{ options.includes('bet') ? 'Bet' : 'Raise' }}
       </button>
@@ -56,7 +55,9 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { usePokerStore } from '../../store/pokerStore'
+import { useResponsiveStore } from '../../store/responsiveStore'
 
 defineProps({
   isMyTurn: Boolean,
@@ -67,6 +68,65 @@ defineProps({
 })
 
 const pokerStore = usePokerStore()
+const responsive = useResponsiveStore()
+const templateSuffix = computed(() => responsive.templateSuffix)
 
 defineEmits(['action'])
 </script>
+
+<style scoped>
+.btn-fold {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: rgba(252, 165, 165, 0.9);
+}
+.btn-fold:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.18);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+}
+
+.btn-check {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.75);
+}
+.btn-check:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.btn-call {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #93c5fd;
+}
+.btn-call:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.22);
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #bfdbfe;
+}
+
+.btn-raise {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 60%, #a16207 100%);
+  border: 1px solid rgba(234, 179, 8, 0.6);
+  color: #1a0f00;
+  box-shadow: 0 2px 12px rgba(234, 179, 8, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+}
+.btn-raise:hover:not(:disabled) {
+  background: linear-gradient(135deg, #facc15 0%, #ca8a04 60%, #a16207 100%);
+  box-shadow: 0 4px 20px rgba(234, 179, 8, 0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+.btn-blind {
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 60%, #a16207 100%);
+  border: 1px solid rgba(234, 179, 8, 0.6);
+  color: #1a0f00;
+  box-shadow: 0 2px 12px rgba(234, 179, 8, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.btn-blind:hover {
+  background: linear-gradient(135deg, #facc15 0%, #ca8a04 60%, #a16207 100%);
+}
+</style>

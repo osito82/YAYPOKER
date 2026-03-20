@@ -192,17 +192,15 @@
     <!-- Sidepanel Footer -->
     <div
       :id="'sidepanel-footer-summary-wrapper-' + templateSuffix"
-      class="p-4 bg-black/60 border-t border-white/5 shrink-0"
+      class="p-4 border-t border-white/5 shrink-0"
+      style="background: rgba(0,0,0,0.7);"
     >
       <div class="flex justify-between items-center">
-        <span
-          class="text-xs font-black text-gray-500 uppercase tracking-widest leading-none"
-          >Global Pot</span
-        >
-        <span
-          class="text-emerald-400 text-lg font-mono font-black italic shadow-emerald-500/20 shadow-sm leading-none"
-          >${{ pot }}</span
-        >
+        <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none">Global Pot</span>
+        <div class="flex items-center gap-1">
+          <span class="text-amber-500 text-xs font-mono font-black leading-none">$</span>
+          <span class="text-emerald-400 text-lg font-mono font-black italic leading-none">{{ pot }}</span>
+        </div>
       </div>
     </div>
   </aside>

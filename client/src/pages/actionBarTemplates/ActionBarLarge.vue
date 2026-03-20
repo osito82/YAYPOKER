@@ -11,10 +11,8 @@
 
     <div
       :id="'hud-main-actions-container-' + templateSuffix"
-      class="relative w-full pointer-events-auto bg-black/95 backdrop-blur-3xl border-t border-white/10 p-2 lg:p-4"
-      :class="{
-        'border-yellow-500/40 shadow-[0_-15px_40px_rgba(0,0,0,0.8)]': isMyTurn,
-      }"
+      class="relative w-full pointer-events-auto backdrop-blur-3xl p-2 lg:p-4 hud-container"
+      :class="{ 'hud-container--active': isMyTurn }"
     >
       <div
         :id="'hud-content-layout-wrapper-' + templateSuffix"
@@ -111,3 +109,16 @@ const {
   responsive,
 } = useActionBar(props, emit)
 </script>
+
+<style scoped>
+.hud-container {
+  background: linear-gradient(180deg, rgba(8,8,8,0.97) 0%, rgba(5,5,5,0.99) 100%);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.7), 0 -1px 0 rgba(255,255,255,0.03);
+}
+
+.hud-container--active {
+  border-top-color: rgba(212,160,23,0.35);
+  box-shadow: 0 -4px 40px rgba(0,0,0,0.8), 0 -8px 30px rgba(212,160,23,0.08);
+}
+</style>
