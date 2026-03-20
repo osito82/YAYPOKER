@@ -205,8 +205,29 @@
           :id="`host-controls-wrapper-${templateSuffix}`"
           class="space-y-4"
         >
+          <!-- Bot Selection (Conditional) -->
+          <div
+            v-if="botsEnabled"
+            :id="`bot-selection-container-${templateSuffix}`"
+            class="flex flex-col gap-2 mb-4 bg-yellow-500/5 p-4 rounded-xl border border-yellow-500/10"
+          >
+            <label
+              class="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest"
+            >
+              Add AI Bots to Table
+            </label>
+            <select
+              v-model="botCount"
+              class="bg-black/60 text-white border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50"
+            >
+              <option :value="0">No Bots</option>
+              <option :value="1">1 Bot</option>
+              <option :value="2">2 Bots</option>
+            </select>
+          </div>
+
           <p
-            v-if="players.length < 2"
+            v-if="players.length + botCount < 2"
             :id="`waiting-players-warning-${templateSuffix}`"
             class="text-yellow-500/70 text-[10px] text-center font-black uppercase tracking-[0.2em] italic animate-pulse"
           >
@@ -214,8 +235,8 @@
           </p>
           <button
             :id="`start-game-submit-button-${templateSuffix}`"
-            @click="$emit('start')"
-            :disabled="players.length < 2"
+            @click="$emit('start', { bots: botCount })"
+            :disabled="players.length + botCount < 2"
             class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 rounded-2xl focus:outline-none transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl uppercase tracking-[0.2em] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed text-base"
           >
             Deal First Hand
@@ -279,6 +300,17 @@ const props = defineProps({
 const responsive = useResponsiveStore()
 const isHost = computed(() => props.myId === props.hostId)
 const copyStatus = ref('')
+const botCount = ref(0)
+
+// Check if bots are enabled from environment
+const botsEnabled = computed(() => {
+  return (
+    import.meta.env.VITE_BOTS === 'true' ||
+    import.meta.env.bots === 'true' ||
+    // Fallback if the user set it without VITE_ prefix but it somehow leaked or just default to true if the variable exists
+    import.meta.env.VITE_BOTS !== undefined
+  )
+})
 
 const qrSize = computed(() => {
   const size = responsive.screenSize

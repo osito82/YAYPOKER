@@ -37,14 +37,11 @@ const gameCode = args.gameCode || "LOBBY";
 const playerName = args.name || `${provider.toUpperCase()}_Bot`;
 const apiKey = args.key || process.env.GEMINI_API_KEY;
 
-// CONFIGURACIÓN DE CONEXIÓN
+// CONFIGURACIÓN DE CONEXIÓN DINÁMICA
 const wsHost =
-  process.env.VITE_WS_URL || process.env.VITE_CLIENT_URL || "73.7.52.167";
+  args.server || process.env.VITE_WS_URL || process.env.VITE_CLIENT_URL || "localhost";
 const wsPort =
-  process.env.VITE_WS_PORT ||
-  process.env.VITE_CLIENT_PORT ||
-  SERVER_CONFIG.PORT ||
-  "8888";
+  args.port || process.env.VITE_WS_PORT || process.env.VITE_CLIENT_PORT || SERVER_CONFIG.PORT || "8888";
 const serverUrl = `ws://${wsHost}:${wsPort}/?gameCode=${gameCode}&playerName=${playerName}`;
 
 log.Template({ name: "brakets", title: "BOT:START", date: true }).R({
@@ -310,35 +307,6 @@ async function handleAIDecision(msg) {
     sendAction(actionMsg);
   }
 }
-
-function mapAction(action) {
-  switch (action?.toLowerCase()) {
-    case "fold":
-      return ACTIONS.FOLD;
-    case "call":
-      return ACTIONS.CALL;
-    case "check":
-      return ACTIONS.CHECK;
-    case "raise":
-    case "bet":
-      return ACTIONS.RAISE;
-    default:
-      return ACTIONS.CHECK;
-  }
-}
-
-socket.on("close", (code, reason) => {
-  log
-    .Template({ name: "brakets", title: "BOT:DISCONNECTED", date: true })
-    .R({ code, reason: reason?.toString() || "No reason" });
-  process.exit(0);
-});
-
-socket.on("error", (err) => {
-  log
-    .Template({ name: "brakets", title: "ERROR:SOCKET", date: true })
-    .R({ error: err.message });
-});
 
 function mapAction(action) {
   switch (action?.toLowerCase()) {

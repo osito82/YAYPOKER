@@ -1,4 +1,6 @@
 const EventEmitter = require('node:events')
+const { spawn } = require('node:child_process')
+const path = require('node:path')
 const Player = require('./player')
 const Dealer = require('./dealer')
 const Deck = require('./deck')
@@ -7,7 +9,13 @@ const Socket = require('./sockets')
 const Communicator = require('./communicator')
 
 const { generateUniqueId } = require('./utils')
-const { TIMEOUTS, GAME_RULES, DECK_CONSTANTS } = require('./constants')
+const {
+  TIMEOUTS,
+  GAME_RULES,
+  DECK_CONSTANTS,
+  BOT_NAMES,
+  SERVER_CONFIG,
+} = require('./constants')
 
 const PokerOddsCalculator = require('./pokerOdds')
 const log = require('./logger')
@@ -48,6 +56,7 @@ class Match extends EventEmitter {
     this.isRunout = false
 
     this.hostId = null
+    this.botsProcesses = []
 
     this.initHand()
     this.setupEventListeners()
@@ -55,10 +64,86 @@ class Match extends EventEmitter {
 
   setupEventListeners() {
     // Escuchar eventos de los submódulos para orquestar el flujo
-    this.on('START_GAME', (socket) => this.startGame(socket))
+    this.on('START_GAME', (socket, data) => this.startGame(socket, data))
     this.on('CONTINUE', (socket, delay) => this.continue(socket, delay))
     this.on('NEXT_ROUND', () => this.nextRound())
     this.on('RESTART_MATCH', (customDeck) => this.restartMatch(customDeck))
+  }
+
+  spawnBots(count) {
+    if (count <= 0) return
+
+    this.log
+      .Template({ name: 'brakets', title: 'MATCH:SPAWNING_BOTS', date: true })
+      .R({ torneoId: this.torneoId, count })
+
+    const botScriptPath = path.resolve(__dirname, '..', 'bot', 'bot.js')
+    const availableNames = [...BOT_NAMES].filter(
+      (name) => !this.players.some((p) => p.name === name),
+    )
+
+    for (let i = 0; i < count; i++) {
+      const botName =
+        availableNames.length > 0
+          ? availableNames.splice(
+              Math.floor(Math.random() * availableNames.length),
+              1,
+            )[0]
+          : `Bot_${Math.floor(Math.random() * 1000)}`
+
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH:BOT_ATTEMPT', date: true })
+        .R({ name: botName, path: botScriptPath })
+
+      try {
+        // Ejecutamos el bot con el proveedor openllama como solicitaste
+        const botProcess = spawn(
+          'node',
+          [
+            'bot.js',
+            `--gameCode=${this.torneoId}`,
+            `--name=${botName}`,
+            `--provider=openllama`,
+            `--server=localhost`,
+            `--port=${SERVER_CONFIG.PORT}`,
+          ],
+          {
+            cwd: path.resolve(__dirname, '..', 'bot'),
+            env: { ...process.env },
+            shell: true,
+          },
+        )
+
+        botProcess.on('error', (err) => {
+          this.log
+            .Template({ name: 'brakets', title: 'BOT:SPAWN_ERROR', date: true })
+            .R({ bot: botName, error: err.message })
+        })
+
+        botProcess.stdout.on('data', (data) => {
+          this.log
+            .Template({ name: 'brakets', title: 'BOT:LOG', date: true })
+            .R({ bot: botName, msg: data.toString().trim() })
+        })
+
+        botProcess.stderr.on('data', (data) => {
+          this.log
+            .Template({ name: 'brakets', title: 'BOT:STDERR', date: true })
+            .R({ bot: botName, error: data.toString().trim() })
+        })
+
+        botProcess.on('close', (code) => {
+          this.log
+            .Template({ name: 'brakets', title: 'BOT:CLOSED', date: true })
+            .R({ bot: botName, code })
+          this.botsProcesses = this.botsProcesses.filter((p) => p !== botProcess)
+        })
+
+        this.botsProcesses.push(botProcess)
+      } catch (e) {
+        this.log.R({ error: 'Failed to spawn bot process', msg: e.message })
+      }
+    }
   }
 
   increaseBlinds() {
@@ -203,17 +288,30 @@ class Match extends EventEmitter {
     }, delay)
   }
 
-  startGame(thisSocket = {}) {
+  startGame(thisSocket = {}, data = {}) {
     if (this.stepChecker.checkStep('pause')) return
 
     // Si el juego aún no ha sido iniciado formalmente
     if (!this.stepChecker.checkStep('startGame')) {
       // Solo el host puede iniciar el juego la primera vez
-      if (thisSocket.id !== this.hostId) {
+      if (thisSocket.id && thisSocket.id !== this.hostId) {
         this.communicator.msgBuilder('lobbyError', 'private', null, {
           displayMsg: 'Only the host can start the game.',
         })
         this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
+        return
+      }
+
+      // Spawn bots if requested (AND haven't been spawned yet for this hand)
+      if (data.bots && Number(data.bots) > 0) {
+        const count = Number(data.bots)
+        this.spawnBots(count)
+
+        // Clean up data.bots so we don't recursive-spawn in the next call
+        delete data.bots
+
+        this.log.R({ msg: 'Waiting for bots to join before starting...' })
+        setTimeout(() => this.startGame(thisSocket, data), 3000)
         return
       }
 
@@ -225,7 +323,7 @@ class Match extends EventEmitter {
       const connectedPlayers = this.getConnectedPlayers()
       if (connectedPlayers.length < GAME_RULES.MIN_PLAYERS) {
         this.communicator.msgBuilder('lobbyError', 'public', null, {
-          displayMsg: `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected...`,
+          displayMsg: `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected (current: ${connectedPlayers.length})...`,
         })
         Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
         return
@@ -316,6 +414,8 @@ class Match extends EventEmitter {
 
     if (playersWithChips.length < GAME_RULES.MIN_PLAYERS) {
       this.log.R({ info: 'Tournament finished. No more rounds.' })
+      // Kill bots if they are the only ones left or tournament is over
+      this.botsProcesses.forEach((p) => p.kill())
       return
     }
     this.restartMatch()

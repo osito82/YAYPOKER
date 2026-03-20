@@ -52,5 +52,3 @@ node bot.js --name=Llama_Bot --provider=openllama --model=openllama --gameCode=N
 &copy; 2026 YayPoker Engineering
 
 
-
-curl http://127.0.0.1:11434/v1/models

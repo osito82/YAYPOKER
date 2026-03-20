@@ -46,6 +46,19 @@ const ACTIONS = {
   DEALT_PRIVATE_CARDS: 'dealtPrivateCards',
 }
 
+const BOT_NAMES = [
+  'Osito_Bot',
+  'Malafama_Bot',
+  'PokerFace_Bot',
+  'AllIn_Bot',
+  'FullHouse_Bot',
+  'AceHigh_Bot',
+  'FlushMaster_Bot',
+  'RoyalBot',
+  'Jack_IA',
+  'Deush_Bot',
+]
+
 const SERVER_CONFIG = {
   PORT: process.env.VITE_WS_PORT || '8888',
   PROTOCOL: 'http',
@@ -63,6 +76,7 @@ module.exports = {
   GAME_RULES,
   DECK_CONSTANTS,
   ACTIONS,
+  BOT_NAMES,
   SERVER_CONFIG,
   CLEANUP_CONFIG,
 }

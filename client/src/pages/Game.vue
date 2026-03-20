@@ -213,9 +213,9 @@ function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 }
 
-const startGame = () => {
+const startGame = (data = {}) => {
   if (isConnected.value) {
-    sendMessage({ action: 'startGame' })
+    sendMessage({ action: 'startGame', bots: data.bots })
   }
 }
 
