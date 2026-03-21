@@ -78,31 +78,30 @@ class PokerBot {
         const payload = JSON.parse(rawData);
         const msg = payload.message || payload;
 
+        // Actualizar mi apuesta actual desde la lista de jugadores
         if (this.myId && msg.players) {
           const me = msg.players.find(p => p.id === this.myId);
-          if (me) this.myCurrentBet = me.currentBet || 0;
+          if (me) this.myCurrentBet = Number(me.currentBet || 0);
         }
 
         // Registro de signup
         if (msg.action === "signUp" && msg.type === "private") {
           this.myId = msg.id || msg.playerId || msg.myPlayerInfo?.playerId;
-
           log.Template({ name: "brakets", title: "BOT:REGISTERED", date: true })
             .R({ bot: this.playerName, myId: this.myId });
-
           this.sendAction({ action: "playerReady" });
           return;
         }
 
         const stepId = JSON.stringify({
           action: msg.action,
-          turn: msg.currentPlayerId,
           pot: msg.pot,
           board: msg.dealerCards
         });
 
         if (this.lastStepId === stepId) return;
 
+        // Recibir cartas
         if (msg.action === "dealtPrivateCards" && msg.type === "private") {
           this.myCards = msg.myPlayerInfo?.privateCards || [];
           log.Template({ name: "brakets", title: "BOT:HAND", date: true })
@@ -110,10 +109,11 @@ class PokerBot {
           this.lastStepId = stepId;
         }
 
+        // Poner ciegas
         if (msg.action === "askForBlindBets" && msg.type === "private") {
-          const targetId = msg.myPlayerInfo?.playerId;
+          const targetId = msg.myPlayerInfo?.playerId || msg.data?.id;
           if (targetId === this.myId) {
-            const amount = msg.data?.blindAmount || 20;
+            const amount = msg.data?.blindAmount || msg.blindAmount || 20;
             log.Template({ name: "brakets", title: "BOT:POSTING_BLIND", date: true })
               .R({ bot: this.playerName, amount });
             this.sendAction({ action: "setBet", chipsToBet: amount });
@@ -121,11 +121,10 @@ class PokerBot {
           }
         }
 
+        // Turno de apuesta
         if (msg.action?.startsWith("bettingCore") && msg.type === "private") {
-          const targetId = msg.myPlayerInfo?.playerId;
+          const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.messageForId;
           if (targetId === this.myId) {
-            log.Template({ name: "brakets", title: "BOT:MY_TURN", date: true })
-              .R({ bot: this.playerName, action: msg.action });
             this.lastStepId = stepId;
             await this.handleDecision(msg);
           }
@@ -139,8 +138,7 @@ class PokerBot {
 
     this.socket.on("close", () => {
       log.Template({ name: "brakets", title: "BOT:DISCONNECTED", date: true })
-        .R({ bot: this.playerName, msg: "Reconnecting..." });
-      setTimeout(() => this.connect(), 2000);
+        .R({ bot: this.playerName, msg: "Connection lost." });
     });
 
     this.socket.on("error", (err) => {
@@ -152,7 +150,6 @@ class PokerBot {
   sendAction(data) {
     if (this.socket.readyState === WebSocket.OPEN) {
       const payload = JSON.stringify(data);
-      // ✅ LOG EXACTO DE SALIDA
       console.log(`[${this.playerName}] >>> OUTGOING:`, payload);
       
       log.Template({ name: "brakets", title: "BOT:SENDING", date: true })
@@ -164,44 +161,30 @@ class PokerBot {
   async handleDecision(msg) {
     const currentHighestBet = Number(msg.currentHighestBet || 0);
     const callAmount = Math.max(0, currentHighestBet - this.myCurrentBet);
-    const allowedActions = msg.data?.actions || [];
+    
+    // ✅ CORRECCIÓN: El servidor usa "action" en singular para las opciones permitidas
+    const allowedActions = msg.data?.action || msg.data?.actions || ["fold", "call"];
 
     const board = msg.dealerCards || [];
-    const players = msg.players || [];
-    const activePlayers = players.filter(p => !p.folded).length;
-
+    const activePlayers = (msg.players || []).filter(p => !p.folded).length;
     const handStrength = this.evaluateHandStrength(this.myCards, board);
 
-    let baseAction;
+    // Definir acción base segura en caso de que falle la IA
+    let baseAction = "fold";
     if (callAmount === 0) {
-      baseAction =
-        handStrength > 0.7 && allowedActions.includes("raise")
-          ? "raise"
-          : "check";
+        baseAction = allowedActions.includes("check") ? "check" : "call";
     } else {
-      if (handStrength < 0.3 && allowedActions.includes("fold")) {
-        baseAction = "fold";
-      } else if (handStrength > 0.75 && allowedActions.includes("raise")) {
-        baseAction = "raise";
-      } else {
-        baseAction = allowedActions.includes("call") ? "call" : "check";
-      }
+        baseAction = allowedActions.includes("call") ? "call" : "fold";
     }
 
     log.Template({ name: "brakets", title: "BOT:DECIDING", date: true })
-      .R({ bot: this.playerName, strength: handStrength, call: callAmount, base: baseAction });
+      .R({ bot: this.playerName, strength: handStrength, call: callAmount, allowed: allowedActions });
 
-    // Prompt IA
     const prompt = `
-Hand: ${this.myCards.join(", ")}
-Board: ${board.join(", ") || "none"}
-Players: ${activePlayers}
-Pot: ${msg.pot}
-Call: ${callAmount}
-Base: ${baseAction}
-Allowed: ${allowedActions.join(", ")}
-Return JSON:
-{"action":"fold|call|check|raise","amount":number}
+Hand: ${this.myCards.join(", ")} | Board: ${board.join(", ") || "none"}
+Pot: ${msg.pot} | Call Amount: ${callAmount}
+Allowed Actions: ${allowedActions.join(", ")}
+Respond JSON: {"action":"fold|call|check|raise","amount":number}
 `;
 
     let decision = null;
@@ -215,44 +198,41 @@ Return JSON:
         aiText = response.response;
       }
       decision = this.safeParseJSON(aiText);
-      log.Template({ name: "brakets", title: "BOT:IA_RESPONSE", date: true })
-        .R({ bot: this.playerName, decision });
     } catch (e) {
-      log.Template({ name: "brakets", title: "ERROR:IA", date: true })
-        .R({ bot: this.playerName, error: e.message });
+      log.Template({ name: "brakets", title: "ERROR:IA", date: true }).R({ bot: this.playerName, error: e.message });
     }
 
     if (!decision || !decision.action) decision = { action: baseAction };
+    
     let action = decision.action.toLowerCase();
+    // Validar que la IA no invente acciones
+    if (!allowedActions.includes(action)) action = baseAction;
 
-    if (!allowedActions.includes(action)) {
-      log.Template({ name: "brakets", title: "BOT:ACTION_INVALID", date: true })
-        .R({ bot: this.playerName, action, base: baseAction });
-      action = baseAction;
+    // Mapeo final a comandos del servidor
+    const actionMsg = {};
+    if (action === "fold") {
+        actionMsg.action = "fold";
+    } else if (action === "call") {
+        actionMsg.action = "setCall";
+        actionMsg.chipsToCall = callAmount;
+    } else if (action === "raise") {
+        actionMsg.action = "setRise";
+        actionMsg.chipsToRiseBet = Math.max(Number(decision.amount || 0), currentHighestBet + 20);
+    } else {
+        actionMsg.action = "setCheck";
     }
 
-    const actionMsg = { action: "setCheck" };
-    if (action === "fold") actionMsg.action = "fold";
-    else if (action === "call") actionMsg.action = "setCall", actionMsg.chipsToCall = callAmount;
-    else if (action === "check") actionMsg.action = "setCheck";
-    else if (action === "raise") {
-      actionMsg.action = "setRise";
-      const minRaise = currentHighestBet + 20;
-      const potRaise = Math.floor(msg.pot * 0.5);
-      actionMsg.chipsToRiseBet = Math.max(Number(decision.amount || 0), minRaise, potRaise);
-    }
+    log.Template({ name: "brakets", title: "BOT:DECISION", date: true })
+      .R({ bot: this.playerName, action: actionMsg.action, val: actionMsg.chipsToCall || actionMsg.chipsToRiseBet });
 
-    const delay = 500 + Math.random() * 1500; // Delay humano
-    setTimeout(() => this.sendAction(actionMsg), delay);
+    setTimeout(() => this.sendAction(actionMsg), 1000);
   }
 
   safeParseJSON(text) {
     try {
-      const start = text.indexOf("{");
-      const end = text.lastIndexOf("}");
-      if (start !== -1 && end !== -1) return JSON.parse(text.slice(start, end + 1));
-    } catch {}
-    return null;
+      const match = text.match(/\{.*\}/s);
+      return match ? JSON.parse(match[0]) : null;
+    } catch { return null; }
   }
 
   evaluateHandStrength(cards, board) {
@@ -267,22 +247,15 @@ Return JSON:
   }
 }
 
-// =========================
-// 🚀 API
-// =========================
-app.get("/health", (req, res) =>
-  res.json({ status: "healthy", ollama: ollamaClient ? "connected" : "off" })
-);
+app.get("/health", (req, res) => res.json({ status: "healthy", ollama: ollamaClient ? "connected" : "off" }));
 
 app.post("/spawn", (req, res) => {
   const { gameCode, playerName, provider, server, port } = req.body;
-  log.Template({ name: "brakets", title: "SERVICE:SPAWN", date: true })
-    .R({ gameCode, playerName });
+  log.Template({ name: "brakets", title: "SERVICE:SPAWN", date: true }).R({ gameCode, playerName });
   new PokerBot({ gameCode, playerName, provider, server, port });
   res.json({ message: `Spawned ${playerName}` });
 });
 
 app.listen(PORT, () => {
-  log.Template({ name: "brakets", title: "SERVICE:READY", date: true })
-    .R({ port: PORT });
+  log.Template({ name: "brakets", title: "SERVICE:READY", date: true }).R({ port: PORT });
 });
