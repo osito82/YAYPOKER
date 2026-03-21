@@ -70,8 +70,12 @@ class PokerBot {
     });
 
     this.socket.on("message", async (data) => {
+      const rawData = data.toString();
+      // ✅ LOG EXACTO DE ENTRADA
+      console.log(`[${this.playerName}] <<< INCOMING:`, rawData);
+
       try {
-        const payload = JSON.parse(data.toString());
+        const payload = JSON.parse(rawData);
         const msg = payload.message || payload;
 
         if (this.myId && msg.players) {
@@ -147,9 +151,13 @@ class PokerBot {
 
   sendAction(data) {
     if (this.socket.readyState === WebSocket.OPEN) {
+      const payload = JSON.stringify(data);
+      // ✅ LOG EXACTO DE SALIDA
+      console.log(`[${this.playerName}] >>> OUTGOING:`, payload);
+      
       log.Template({ name: "brakets", title: "BOT:SENDING", date: true })
         .R({ bot: this.playerName, action: data.action, data });
-      this.socket.send(JSON.stringify(data));
+      this.socket.send(payload);
     }
   }
 
