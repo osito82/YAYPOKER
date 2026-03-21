@@ -27,7 +27,6 @@ class PokerBot {
     this.provider = config.provider || "ollama";
     this.modelName = config.model || (this.provider === "gemini" ? "gemini-1.5-flash" : "llama3.2");
     this.secretCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    
     this.serverUrl = `ws://${config.server || "localhost"}:${config.port || "8888"}/?gameCode=${this.gameCode}&playerName=${this.playerName}&secretCode=${this.secretCode}`;
     
     this.myId = null;
@@ -56,38 +55,32 @@ class PokerBot {
     this.socket.on("message", async (data) => {
       try {
         const payload = JSON.parse(data.toString());
-        // ✅ CORRECCIÓN CRÍTICA: Extraer el mensaje real
         const msg = payload.message || payload;
         
-        if (msg.action !== "oddsUpdate") {
+        if (msg.action !== "oddsUpdate" && msg.action !== "signUp") {
             log.Template({ name: "brakets", title: `BOT:RECV:${msg.action?.toUpperCase()}`, date: true })
                .R({ bot: this.playerName, type: msg.type });
         }
 
-        // 1. REGISTRO
         if (msg.action === "signUp" && msg.type === "private") {
           this.myId = msg.id || msg.playerId || msg.myPlayerInfo?.playerId;
           log.Template({ name: "brakets", title: "BOT:REGISTERED", date: true }).R({ bot: this.playerName, myId: this.myId });
           this.sendAction({ action: "playerReady" });
         }
 
-        // 2. CARTAS
         if (msg.action === "dealtPrivateCards") {
           this.myCards = msg.myPlayerInfo?.privateCards || msg.cards || [];
           log.Template({ name: "brakets", title: "BOT:HAND", date: true }).R({ bot: this.playerName, cards: this.myCards });
         }
 
-        // 3. CIEGAS
         if (msg.action === "askForBlindBets" && msg.type === "private") {
           const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.messageForId;
           if (targetId === this.myId) {
-            const amount = msg.data?.blindAmount || msg.blindAmount || 10;
-            log.Template({ name: "brakets", title: "BOT:POSTING_BLIND", date: true }).R({ bot: this.playerName, amount });
+            const amount = msg.data?.blindAmount || msg.blindAmount || 20;
             this.sendAction({ action: "setBet", chipsToBet: amount });
           }
         }
 
-        // 4. TURNO
         if (msg.action?.startsWith("bettingCore") && msg.type === "private") {
           const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.messageForId;
           if (targetId === this.myId) {
@@ -111,12 +104,13 @@ class PokerBot {
   }
 
   async handleDecision(msg) {
-    const callAmount = msg.data?.chipsToCall || msg.chipsToCall || 0;
+    const callAmount = Number(msg.data?.chipsToCall || msg.chipsToCall || 0);
     const options = msg.data?.actions || msg.possibleActions || ["fold", "call", "check", "raise"];
+    const currentBet = Number(msg.currentHighestBet || 0);
     
     log.Template({ name: "brakets", title: "BOT:THINKING", date: true }).R({ bot: this.playerName, call: callAmount, options });
 
-    const prompt = `Poker AI. Hand: ${this.myCards.join(", ")} | Options: ${options.join(", ")}. Respond JSON: {"action": "choice", "amount": number}`;
+    const prompt = `Poker AI. Hand: ${this.myCards.join(", ")} | Options: ${options.join(", ")} | Call Amount: ${callAmount}. Respond ONLY JSON: {"action": "choice", "amount": number}. Choice must be one of the options. If you raise, amount must be at least ${currentBet + 40}.`;
 
     try {
       let aiText = "";
@@ -131,36 +125,35 @@ class PokerBot {
       const match = aiText.match(/\{.*\}/);
       const decision = match ? JSON.parse(match[0]) : { action: callAmount === 0 ? "check" : "call" };
       
-      log.Template({ name: "brakets", title: "BOT:DECISION", date: true }).R({ bot: this.playerName, action: decision.action });
+      log.Template({ name: "brakets", title: "BOT:DECISION", date: true }).R({ bot: this.playerName, action: decision.action, amount: decision.amount });
 
       setTimeout(() => {
         let action = decision.action?.toLowerCase();
-        let finalAction = callAmount === 0 ? "setCheck" : "setCall";
+        let finalAction = "setCall";
         
         if (action === "fold") finalAction = "fold";
         else if (action === "call") finalAction = "setCall";
-        else if (action === "check") finalAction = "setCheck";
+        else if (action === "check" || (action === "call" && callAmount === 0)) finalAction = "setCheck";
         else if (action === "raise" || action === "bet") finalAction = "setRise";
 
         const actionMsg = { action: finalAction };
-        if (finalAction === "setRise") actionMsg.chipsToRiseBet = Number(decision.amount || callAmount * 2);
+        if (finalAction === "setRise") {
+            // Un raise debe ser al menos el doble de la apuesta actual o un mínimo coherente
+            const minRaise = currentBet > 0 ? currentBet * 2 : 40;
+            actionMsg.chipsToRiseBet = Math.max(Number(decision.amount || minRaise), minRaise);
+        }
         if (finalAction === "setCall") actionMsg.chipsToCall = callAmount;
         
         this.sendAction(actionMsg);
-      }, 1500);
+      }, 1000);
     } catch (error) {
       this.sendAction({ action: callAmount === 0 ? "setCheck" : "setCall" });
     }
   }
 }
 
-app.get("/", (req, res) => {
-  res.json({ status: "active", service: "Poker Bot Service", port: PORT });
-});
-
-app.get("/health", (req, res) => {
-  res.json({ status: "healthy", ollama: ollamaClient ? "connected" : "disconnected" });
-});
+app.get("/", (req, res) => res.json({ status: "active", service: "Poker Bot Service", port: PORT }));
+app.get("/health", (req, res) => res.json({ status: "healthy", ollama: ollamaClient ? "connected" : "disconnected" }));
 
 app.post("/spawn", (req, res) => {
   const { gameCode, playerName, provider, server, port } = req.body;
