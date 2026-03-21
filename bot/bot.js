@@ -142,6 +142,10 @@ class PokerBot {
     const board = msg.dealerCards || [];
     const handStrength = this.evaluateHandStrength(this.myCards, board);
 
+const winChance = Number(msg.data.odds.win);
+const tieChance = Number(msg.data.odds.tie);
+const realEquity = (winChance + (tieChance / 2)) / 100; // Resultado entre 0 y 1
+
     // Default safety action
     let baseAction = callAmount === 0 ? (allowedActions.includes("check") ? "check" : "call") : (allowedActions.includes("call") ? "call" : "fold");
 
@@ -151,6 +155,7 @@ You are a professional Texas Hold'em player.
 Hand: ${this.myCards.join(", ")} | Board: ${board.join(", ") || "No cards dealt yet"}
 Hand Strength: ${handStrength} (0.0=Weak, 1.0=Strongest)
 Current Pot: ${msg.pot} | Amount to Call: ${callAmount}
+Your mathematical Equity is: ${realEquity}
 Allowed Actions: ${allowedActions.join(", ")}
 
 Strategy Rules:
