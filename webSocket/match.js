@@ -74,11 +74,18 @@ class Match extends EventEmitter {
 
     // Intentamos primero con la IP pública directa al servicio de bots
     const botServiceUrl = `http://73.7.52.167:8886/spawn`
-    
-    this.log.R({ msg: `[BOT_API] SENDING POST REQUEST`, url: botServiceUrl, count });
+
+    this.log.R({
+      msg: `[BOT_API] SENDING POST REQUEST`,
+      url: botServiceUrl,
+      count,
+    })
 
     for (let i = 0; i < count; i++) {
-      const botName = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)] + '_' + Math.floor(Math.random() * 100);
+      const botName =
+        BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)] +
+        '_' +
+        Math.floor(Math.random() * 100)
 
       try {
         const response = await fetch(botServiceUrl, {
@@ -89,28 +96,35 @@ class Match extends EventEmitter {
             playerName: botName,
             provider: 'ollama',
             server: '73.7.52.167', // Le pedimos que se conecte de vuelta por la pública
-            port: SERVER_CONFIG.PORT
-          })
-        });
+            port: SERVER_CONFIG.PORT,
+          }),
+        })
 
         if (response.ok) {
-          this.log.R({ msg: `[BOT_API] SUCCESS`, bot: botName });
+          this.log.R({ msg: `[BOT_API] SUCCESS`, bot: botName })
         } else {
-          this.log.R({ error: `[BOT_API] FAILED`, status: response.status });
+          this.log.R({ error: `[BOT_API] FAILED`, status: response.status })
         }
       } catch (e) {
-        this.log.R({ error: '[BOT_API] ERROR', msg: e.message });
+        this.log.R({ error: '[BOT_API] ERROR', msg: e.message })
       }
     }
-    
-    setTimeout(() => { this.isSpawningBots = false; }, 10000);
+
+    setTimeout(() => {
+      this.isSpawningBots = false
+    }, 10000)
   }
 
   increaseBlinds() {
     this.blindLevel++
-    this.smallBlind = Math.ceil(this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
-    this.bigBlind = Math.ceil(this.bigBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
-    if (this.ante > 0) this.ante = Math.ceil(this.ante * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
+    this.smallBlind = Math.ceil(
+      this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
+    )
+    this.bigBlind = Math.ceil(
+      this.bigBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
+    )
+    if (this.ante > 0)
+      this.ante = Math.ceil(this.ante * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
 
     this.communicator.msgBuilder('blindsIncreased', 'public', null, {
       level: this.blindLevel,
@@ -126,16 +140,41 @@ class Match extends EventEmitter {
   initHand() {
     this.handCount++
     this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}${this.handCount}`
-    const initialDeck = Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
+    const initialDeck = Deck.shuffleDeck(
+      Deck.cards,
+      DECK_CONSTANTS.SHUFFLE_TIMES,
+    )
     this.shuffledDeck = initialDeck
 
-    this.dealer = new Dealer(this.gameId, this.players, initialDeck, this.torneoId, this.pot, [])
+    this.dealer = new Dealer(
+      this.gameId,
+      this.players,
+      initialDeck,
+      this.torneoId,
+      this.pot,
+      [],
+    )
     this.cardsDealer = this.dealer.getDealerCards()
     this.stepChecker = new StepChecker(this.gameId)
-    this.communicator = new Communicator(this.gameId, this.torneoId, this.playersFold, this.stepChecker, this.players, this.dealer, this)
+    this.communicator = new Communicator(
+      this.gameId,
+      this.torneoId,
+      this.playersFold,
+      this.stepChecker,
+      this.players,
+      this.dealer,
+      this,
+    )
     this.oddsCalculator = new PokerOddsCalculator()
 
-    const context = { match: this, emitter: this, log: this.log, communicator: this.communicator, dealer: this.dealer, stepChecker: this.stepChecker }
+    const context = {
+      match: this,
+      emitter: this,
+      log: this.log,
+      communicator: this.communicator,
+      dealer: this.dealer,
+      stepChecker: this.stepChecker,
+    }
     this.comms = new MatchComms(context)
     this.actions = new MatchActions(context)
     this.lobby = new MatchLobby(context)
@@ -150,7 +189,9 @@ class Match extends EventEmitter {
   }
 
   getStartedPlayers(onlyConnected = true) {
-    return this.players.filter((p) => onlyConnected ? p.isStarted && p.connected : p.isStarted)
+    return this.players.filter((p) =>
+      onlyConnected ? p.isStarted && p.connected : p.isStarted,
+    )
   }
 
   getConnectedPlayers() {
@@ -159,7 +200,12 @@ class Match extends EventEmitter {
 
   continue(thisSocket, customDelay = null) {
     this.lastActivity = Date.now()
-    const delay = customDelay !== null ? customDelay : this.isRunout ? TIMEOUTS.runout : TIMEOUTS.standard
+    const delay =
+      customDelay !== null
+        ? customDelay
+        : this.isRunout
+          ? TIMEOUTS.runout
+          : TIMEOUTS.standard
     setTimeout(() => this.startGame(thisSocket), delay)
   }
 
@@ -168,7 +214,9 @@ class Match extends EventEmitter {
 
     if (!this.stepChecker.checkStep('startGame')) {
       if (thisSocket.id && this.hostId && thisSocket.id !== this.hostId) {
-        this.communicator.msgBuilder('lobbyError', 'private', null, { displayMsg: 'Only the host can start the game.' })
+        this.communicator.msgBuilder('lobbyError', 'private', null, {
+          displayMsg: 'Only the host can start the game.',
+        })
         this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
       }
@@ -184,16 +232,23 @@ class Match extends EventEmitter {
 
       const connectedCount = this.getConnectedPlayers().length
       if (this.isSpawningBots && connectedCount < GAME_RULES.MIN_PLAYERS) {
-        this.log.R({ msg: `[START] STILL WAITING FOR BOTS...`, current: connectedCount })
+        this.log.R({
+          msg: `[START] STILL WAITING FOR BOTS...`,
+          current: connectedCount,
+        })
         setTimeout(() => this.startGame(thisSocket, data), 1500)
         return
       }
 
-      this.players.forEach((p) => { if (p.connected) p.setStarted(true) })
+      this.players.forEach((p) => {
+        if (p.connected) p.setStarted(true)
+      })
 
       if (connectedCount < GAME_RULES.MIN_PLAYERS) {
         if (!this.isSpawningBots) {
-          this.communicator.msgBuilder('lobbyError', 'public', null, { displayMsg: `Waiting for at least 2 players (current: ${connectedCount})...` })
+          this.communicator.msgBuilder('lobbyError', 'public', null, {
+            displayMsg: `Waiting for at least 2 players (current: ${connectedCount})...`,
+          })
           Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
         } else {
           setTimeout(() => this.startGame(thisSocket, data), 1000)
@@ -205,29 +260,50 @@ class Match extends EventEmitter {
       this.stepChecker.grantStep('startGame')
     }
 
-    if (!this.stepChecker.checkStep('blindsBetting')) return this.actions.askForBlindBets(thisSocket)
-    if (!this.stepChecker.checkStep('dealtPrivateCards')) return this.actions.dealtPrivateCards(thisSocket)
-    if (!this.stepChecker.checkStep('firstBetting')) return this.actions.bettingCore(thisSocket, 'firstBetting')
+    if (!this.stepChecker.checkStep('blindsBetting'))
+      return this.actions.askForBlindBets(thisSocket)
+    if (!this.stepChecker.checkStep('dealtPrivateCards'))
+      return this.actions.dealtPrivateCards(thisSocket)
+    if (!this.stepChecker.checkStep('firstBetting'))
+      return this.actions.bettingCore(thisSocket, 'firstBetting')
     if (!this.stepChecker.checkStep('flop_Dealer_Hand')) {
-      this.dealer.clearActedPlayers(); this.dealer.getChipsFromPlayers(); return this.actions.dealerHand(thisSocket, 'flop')
+      this.dealer.clearActedPlayers()
+      this.dealer.getChipsFromPlayers()
+      return this.actions.dealerHand(thisSocket, 'flop')
     }
-    if (!this.stepChecker.checkStep('flop_Check_Prize_Step')) return this.actions.checkPrizes(thisSocket)
-    if (!this.stepChecker.checkStep('flop_Bet_Step')) return this.actions.bettingCore(thisSocket, 'flopBetting')
+    if (!this.stepChecker.checkStep('flop_Check_Prize_Step'))
+      return this.actions.checkPrizes(thisSocket)
+    if (!this.stepChecker.checkStep('flop_Bet_Step'))
+      return this.actions.bettingCore(thisSocket, 'flopBetting')
     if (!this.stepChecker.checkStep('turn_Dealer_Hand')) {
-      this.dealer.clearActedPlayers(); this.dealer.getChipsFromPlayers(); return this.actions.dealerHand(thisSocket, 'turn')
+      this.dealer.clearActedPlayers()
+      this.dealer.getChipsFromPlayers()
+      return this.actions.dealerHand(thisSocket, 'turn')
     }
-    if (!this.stepChecker.checkStep('turn_Check_Prize_Step')) return this.actions.checkPrizes(thisSocket)
-    if (!this.stepChecker.checkStep('turn_Bet_Step')) return this.actions.bettingCore(thisSocket, 'turnBetting')
+    if (!this.stepChecker.checkStep('turn_Check_Prize_Step'))
+      return this.actions.checkPrizes(thisSocket)
+    if (!this.stepChecker.checkStep('turn_Bet_Step'))
+      return this.actions.bettingCore(thisSocket, 'turnBetting')
     if (!this.stepChecker.checkStep('river_Dealer_Hand')) {
-      this.dealer.clearActedPlayers(); this.dealer.getChipsFromPlayers(); return this.actions.dealerHand(thisSocket, 'river')
+      this.dealer.clearActedPlayers()
+      this.dealer.getChipsFromPlayers()
+      return this.actions.dealerHand(thisSocket, 'river')
     }
-    if (!this.stepChecker.checkStep('river_Check_Prize_Step')) return this.actions.checkPrizes(thisSocket)
-    if (!this.stepChecker.checkStep('river_Bet_Step')) return this.actions.bettingCore(thisSocket, 'riverBetting')
+    if (!this.stepChecker.checkStep('river_Check_Prize_Step'))
+      return this.actions.checkPrizes(thisSocket)
+    if (!this.stepChecker.checkStep('river_Bet_Step'))
+      return this.actions.bettingCore(thisSocket, 'riverBetting')
     if (!this.stepChecker.checkStep('finalHands')) {
-      this.dealer.getChipsFromPlayers(); this.dealer.setFinalHands(); this.stepChecker.grantStep('finalHands'); return this.continue(thisSocket)
+      this.dealer.getChipsFromPlayers()
+      this.dealer.setFinalHands()
+      this.stepChecker.grantStep('finalHands')
+      return this.continue(thisSocket)
     }
     if (!this.stepChecker.checkStep('showDown')) {
-      this.communicator.msgBuilder('showDown', 'public', null, { method: 'showDown', showDown: this.dealer.getFinalHands() })
+      this.communicator.msgBuilder('showDown', 'public', null, {
+        method: 'showDown',
+        showDown: this.dealer.getFinalHands(),
+      })
       Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       this.stepChecker.grantStep('showDown')
       return this.continue(thisSocket)
@@ -235,7 +311,8 @@ class Match extends EventEmitter {
     if (!this.stepChecker.checkStep('winner')) {
       const { WinnerCore } = require('./winnerCore')
       const winnerData = WinnerCore.Winner(this.dealer.getFinalHands())
-      if (!winnerData || (Array.isArray(winnerData) && winnerData.length === 0)) return this.continue(thisSocket)
+      if (!winnerData || (Array.isArray(winnerData) && winnerData.length === 0))
+        return this.continue(thisSocket)
       this.actions.winner(winnerData)
       return
     }
@@ -244,7 +321,9 @@ class Match extends EventEmitter {
   nextRound() {
     if (!this.waitingForNextRound) return
     this.waitingForNextRound = false
-    const playersWithChips = this.getConnectedPlayers().filter((p) => p.chips > 0)
+    const playersWithChips = this.getConnectedPlayers().filter(
+      (p) => p.chips > 0,
+    )
     if (playersWithChips.length < GAME_RULES.MIN_PLAYERS) return
     this.restartMatch()
   }
@@ -260,25 +339,46 @@ class Match extends EventEmitter {
     this.isRunout = false
 
     this.players.forEach((p) => {
-      p.gameId = this.gameId; p.cards = []; p.currentBet = 0; p.handContribution = 0
-      p.folded = p.chips <= 0; p.lastAction = p.chips <= 0 ? 'Out' : ''; p.isAllIn = false
-      p.setStarted(p.connected && p.chips > 0); p.setCurrentPrize({})
+      p.gameId = this.gameId
+      p.cards = []
+      p.currentBet = 0
+      p.handContribution = 0
+      p.folded = p.chips <= 0
+      p.lastAction = p.chips <= 0 ? 'Out' : ''
+      p.isAllIn = false
+      p.setStarted(p.connected && p.chips > 0)
+      p.setCurrentPrize({})
     })
 
     const Deck = require('./deck')
-    this.shuffledDeck = customDeck || Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
-    this.dealer.gameId = this.gameId; this.dealer.deck = this.shuffledDeck; this.dealer.cardsDealer = []
-    this.cardsDealer = this.dealer.getDealerCards(); this.dealer.pot = 0; this.dealer.clearActedPlayers()
-    this.dealer.setCurrentHighestBet(0); this.dealer.setLastRaiseAmount(0); this.dealer.setLastRaiser(null)
+    this.shuffledDeck =
+      customDeck || Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
+    this.dealer.gameId = this.gameId
+    this.dealer.deck = this.shuffledDeck
+    this.dealer.cardsDealer = []
+    this.cardsDealer = this.dealer.getDealerCards()
+    this.dealer.pot = 0
+    this.dealer.clearActedPlayers()
+    this.dealer.setCurrentHighestBet(0)
+    this.dealer.setLastRaiseAmount(0)
+    this.dealer.setLastRaiser(null)
 
     this.communicator.gameId = this.gameId
     const shouldRotate = this.stepChecker.checkStep('winner')
-    this.stepChecker.reset(); this.stepChecker.gameFlow.gameId = this.gameId
-    if (this.players.length > 1 && shouldRotate) this.players.push(this.players.shift())
+    this.stepChecker.reset()
+    this.stepChecker.gameFlow.gameId = this.gameId
+    if (this.players.length > 1 && shouldRotate)
+      this.players.push(this.players.shift())
 
-    this.communicator.msgBuilder('gameRestarted', 'public', null, { displayMsg: 'New hand starting...', newGameId: this.gameId })
+    this.communicator.msgBuilder('gameRestarted', 'public', null, {
+      displayMsg: 'New hand starting...',
+      newGameId: this.gameId,
+    })
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-    setTimeout(() => { this.stepChecker.grantStep('startGame'); this.startGame() }, TIMEOUTS.nextRound)
+    setTimeout(() => {
+      this.stepChecker.grantStep('startGame')
+      this.startGame()
+    }, TIMEOUTS.nextRound)
   }
 }
 

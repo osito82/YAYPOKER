@@ -294,7 +294,7 @@ class MatchLobby {
       foundPlayer.setConnected(false)
       this.match.actions.clearAutofold()
       this.stepChecker.grantStep('pause')
-      
+
       this.communicator.msgBuilder('pause', 'public', foundPlayer, {
         displayMsg: `${foundPlayer.name} disconnected.`,
         timeout: time / 1000,
@@ -321,7 +321,7 @@ class MatchLobby {
         displayMsg: `${playerLeaving.name} has left the game.`,
       })
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
-      
+
       if (this.match.activePlayerId === playerLeaving.id) {
         this.match.activePlayerId = null
         this.match.actions.clearAutofold()
@@ -338,7 +338,10 @@ class MatchLobby {
               displayMsg: `${nextHost.name} is the new host.`,
               hostId: this.match.hostId,
             })
-            Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+            Socket.broadcastToTorneo(
+              this.match.torneoId,
+              this.communicator.getMsg(),
+            )
           }
         }
       } else {

@@ -29,8 +29,13 @@ const startTime = new Date()
 
 // Periodic garbage collector
 setInterval(() => {
-  const removedCount = Torneo.removeInactiveMatches(CLEANUP_CONFIG.MATCH_MAX_IDLE)
-  if (removedCount > 0) log.Template({ name: 'brakets', title: 'SERVER:GC', date: true }).R({ count: removedCount })
+  const removedCount = Torneo.removeInactiveMatches(
+    CLEANUP_CONFIG.MATCH_MAX_IDLE,
+  )
+  if (removedCount > 0)
+    log
+      .Template({ name: 'brakets', title: 'SERVER:GC', date: true })
+      .R({ count: removedCount })
 }, CLEANUP_CONFIG.GC_INTERVAL)
 
 const validateAction = (action, data) => {
@@ -40,15 +45,20 @@ const validateAction = (action, data) => {
 
 const actionHandlers = {
   [ACTIONS.SIGN_UP]: (match, socket, data) => match.lobby.signUp(data, socket),
-  [ACTIONS.SEND_MESSAGE]: (match, socket, data) => match.comms.sendMessage(data),
+  [ACTIONS.SEND_MESSAGE]: (match, socket, data) =>
+    match.comms.sendMessage(data),
   [ACTIONS.FOLD]: (match, socket) => match.actions.fold(socket),
   [ACTIONS.CLOSE]: (match, socket) => match.lobby.close(socket),
-  [ACTIONS.SET_BET]: (match, socket, data) => match.actions.setBet(socket, data.chipsToBet),
-  [ACTIONS.RAISE]: (match, socket, data) => match.actions.setRise(socket, data.chipsToRiseBet),
-  [ACTIONS.BLIND]: (match, socket, data) => match.actions.setBet(socket, data.blindAmount),
+  [ACTIONS.SET_BET]: (match, socket, data) =>
+    match.actions.setBet(socket, data.chipsToBet),
+  [ACTIONS.RAISE]: (match, socket, data) =>
+    match.actions.setRise(socket, data.chipsToRiseBet),
+  [ACTIONS.BLIND]: (match, socket, data) =>
+    match.actions.setBet(socket, data.blindAmount),
   [ACTIONS.CALL]: (match, socket) => match.actions.setCall(socket),
   [ACTIONS.CHECK]: (match, socket) => match.actions.setCheck(socket),
-  [ACTIONS.DEALT_PRIVATE_CARDS]: (match, socket) => match.actions.dealtPrivateCards(socket),
+  [ACTIONS.DEALT_PRIVATE_CARDS]: (match, socket) =>
+    match.actions.dealtPrivateCards(socket),
   [ACTIONS.STATS]: (match, socket) => match.comms.stats(socket.id),
   [ACTIONS.NEXT_ROUND]: (match) => match.nextRound(),
   [ACTIONS.START_GAME]: (match, socket, data) => match.startGame(socket, data),
@@ -61,7 +71,12 @@ wss.on('connection', (ws, req) => {
   const playerName = urlParams.get('playerName') ?? randomName()
   const secretCode = urlParams.get('secretCode') ?? generateSecretCode()
 
-  const thisSocket = { id: socketId(), name: playerName, secretCode, socket: ws }
+  const thisSocket = {
+    id: socketId(),
+    name: playerName,
+    secretCode,
+    socket: ws,
+  }
   Socket.addSocket(thisSocket, torneoId)
 
   let match = Torneo.getMatch(torneoId)
@@ -73,13 +88,13 @@ wss.on('connection', (ws, req) => {
   ws.on('message', (data) => {
     try {
       const jsonData = JSON.parse(data.toString())
-      
+
       // LOG DE EMERGENCIA: Ver qué llega realmente
       if (jsonData.action === 'startGame') {
-        console.log('------------------------------------------');
-        console.log('[DEBUG] RECEIVED startGame from client');
-        console.log('[DEBUG] Full Payload:', JSON.stringify(jsonData, null, 2));
-        console.log('------------------------------------------');
+        console.log('------------------------------------------')
+        console.log('[DEBUG] RECEIVED startGame from client')
+        console.log('[DEBUG] Full Payload:', JSON.stringify(jsonData, null, 2))
+        console.log('------------------------------------------')
       }
 
       const handler = actionHandlers[jsonData.action]
@@ -87,15 +102,17 @@ wss.on('connection', (ws, req) => {
         handler(match, thisSocket, jsonData)
       }
     } catch (error) {
-      console.error('[SERVER ERROR]', error.message);
+      console.error('[SERVER ERROR]', error.message)
     }
   })
 
-  ws.on('close', () => { if (match) match.lobby.pause(thisSocket) })
+  ws.on('close', () => {
+    if (match) match.lobby.pause(thisSocket)
+  })
 })
 
 server.listen(SERVER_CONFIG.PORT, () => {
-  console.log(`POKER SERVER RUNNING ON PORT ${SERVER_CONFIG.PORT}`);
+  console.log(`POKER SERVER RUNNING ON PORT ${SERVER_CONFIG.PORT}`)
 })
 
 module.exports = { app, server, wss }
