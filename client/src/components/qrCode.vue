@@ -1,68 +1,60 @@
 <template>
-  <div :id="id" class="qr-code-wrapper">
+  <div :id="`qr-code-main-wrapper-${templateSuffix}`">
     <QRCodeVue3
-      v-if="render"
-      :key="renderKey"
+      v-if="renderComponent"
+      :id="`qr-code-component-${templateSuffix}`"
       :width="width"
       :height="height"
-      :value="shareUrl"
+      :value="computedGameCode"
       :qrOptions="{ typeNumber: 0, mode: 'Byte', errorCorrectionLevel: 'H' }"
       :imageOptions="{ hideBackgroundDots: true, imageSize: 0.4, margin: 0 }"
       :dotsOptions="{
-        type: 'extra-rounded',
-        color: '#eab308',
+        type: 'classy',
+        color: '#000000',
+        gradient: {
+          type: 'linear',
+          rotation: 0,
+          colorStops: [
+            { offset: 0, color: '#000000' },
+            { offset: 1, color: '#000000' },
+          ],
+        },
       }"
       :backgroundOptions="{ color: '#ffffff' }"
-      :cornersSquareOptions="{ type: 'extra-rounded', color: '#000000' }"
-      :cornersDotOptions="{ type: 'dot', color: '#000000' }"
+      :cornersSquareOptions="{ type: 'dot', color: '#000000' }"
+      :cornersDotOptions="{ type: undefined, color: '#000000' }"
+      :download="false"
+      myclass="my-qur"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted, watch } from 'vue'
 import QRCodeVue3 from 'qrcode-vue3'
+import { computed, ref, nextTick } from 'vue'
 import { urlsFactory } from '../vutils'
+import { useResponsiveStore } from '../store/responsiveStore'
+
+const responsive = useResponsiveStore()
+const templateSuffix = computed(() => responsive.templateSuffix)
 
 const props = defineProps({
-  width: { type: Number, default: 200 },
-  height: { type: Number, default: 200 },
+  width: { type: Number, default: 300 },
+  height: { type: Number, default: 300 },
   gameCode: { type: String, required: true },
-  id: { type: String, default: 'qr-code-component' },
 })
 
-const render = ref(false)
-const renderKey = ref(0)
+const renderComponent = ref(true)
 
-const shareUrl = computed(() => {
+const forceRender = async () => {
+  renderComponent.value = false
+  await nextTick()
+  renderComponent.value = true
+}
+
+const computedGameCode = computed(() => {
+  forceRender()
   const urls = urlsFactory()
   return `${urls.url}/join/${props.gameCode}`
 })
-
-const forceRender = async () => {
-  render.value = false
-  renderKey.value++
-  setTimeout(() => {
-    render.value = true
-  }, 10)
-}
-
-onMounted(() => {
-  forceRender()
-})
-
-watch(
-  () => props.gameCode,
-  () => {
-    forceRender()
-  },
-)
 </script>
-
-<style scoped>
-.qr-code-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-</style>
