@@ -3,7 +3,6 @@ const WebSocket = require("ws");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { Ollama } = require("ollama");
 const log = require("./logger");
-const { ACTIONS, SERVER_CONFIG } = require("../webSocket/constants");
 require("dotenv").config();
 
 const app = express();
@@ -31,6 +30,9 @@ class PokerBot {
     
     this.myId = null;
     this.myCards = [];
+    this.myCurrentBet = 0;
+    this.lastStepId = null; // Guard para evitar duplicados
+    
     this.initIA();
     this.connect();
   }
@@ -57,33 +59,48 @@ class PokerBot {
         const payload = JSON.parse(data.toString());
         const msg = payload.message || payload;
         
-        if (msg.action !== "oddsUpdate" && msg.action !== "signUp") {
-            log.Template({ name: "brakets", title: `BOT:RECV:${msg.action?.toUpperCase()}`, date: true })
-               .R({ bot: this.playerName, type: msg.type });
+        // 0. ACTUALIZAR ESTADO PROPIO (Chips y apuesta actual)
+        const me = msg.players?.find(p => p.id === this.myId || p.name === this.playerName);
+        if (me) {
+            this.myCurrentBet = me.currentBet || 0;
         }
 
+        // 1. REGISTRO (Solo una vez)
         if (msg.action === "signUp" && msg.type === "private") {
           this.myId = msg.id || msg.playerId || msg.myPlayerInfo?.playerId;
           log.Template({ name: "brakets", title: "BOT:REGISTERED", date: true }).R({ bot: this.playerName, myId: this.myId });
           this.sendAction({ action: "playerReady" });
+          return;
         }
 
-        if (msg.action === "dealtPrivateCards") {
-          this.myCards = msg.myPlayerInfo?.privateCards || msg.cards || [];
+        // 2. GUARD DE ESTADO: Evitar procesar el mismo paso lógico dos veces
+        // Usamos action + pot + dealerCards para identificar el momento exacto del juego
+        const stepId = `${msg.action}_${msg.type}_${msg.pot}_${msg.dealerCards?.length}`;
+        if (this.lastStepId === stepId) return;
+
+        // 3. CARTAS (Solo de mensajes privados)
+        if (msg.action === "dealtPrivateCards" && msg.type === "private") {
+          this.myCards = msg.myPlayerInfo?.privateCards || [];
           log.Template({ name: "brakets", title: "BOT:HAND", date: true }).R({ bot: this.playerName, cards: this.myCards });
+          this.lastStepId = stepId;
         }
 
+        // 4. CIEGAS (Solo si es mensaje privado para mí)
         if (msg.action === "askForBlindBets" && msg.type === "private") {
           const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.messageForId;
           if (targetId === this.myId) {
             const amount = msg.data?.blindAmount || msg.blindAmount || 20;
+            log.Template({ name: "brakets", title: "BOT:POSTING_BLIND", date: true }).R({ bot: this.playerName, amount });
             this.sendAction({ action: "setBet", chipsToBet: amount });
+            this.lastStepId = stepId;
           }
         }
 
+        // 5. TURNO DE JUEGO (Solo mensajes privados)
         if (msg.action?.startsWith("bettingCore") && msg.type === "private") {
           const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.messageForId;
           if (targetId === this.myId) {
+            this.lastStepId = stepId;
             await this.handleDecision(msg);
           }
         }
@@ -104,13 +121,28 @@ class PokerBot {
   }
 
   async handleDecision(msg) {
-    const callAmount = Number(msg.data?.chipsToCall || msg.chipsToCall || 0);
-    const options = msg.data?.actions || msg.possibleActions || ["fold", "call", "check", "raise"];
-    const currentBet = Number(msg.currentHighestBet || 0);
+    // CORRECCIÓN 1: Cálculo real de Call Amount
+    const currentHighestBet = Number(msg.currentHighestBet || 0);
+    const callAmount = Math.max(0, currentHighestBet - this.myCurrentBet);
     
-    log.Template({ name: "brakets", title: "BOT:THINKING", date: true }).R({ bot: this.playerName, call: callAmount, options });
+    // CORRECCIÓN 4: Usar acciones permitidas por el servidor
+    const allowedActions = msg.data?.actions || ["fold", "call", "check", "raise"];
+    
+    log.Template({ name: "brakets", title: "BOT:THINKING", date: true })
+       .R({ bot: this.playerName, call: callAmount, actions: allowedActions });
 
-    const prompt = `Poker AI. Hand: ${this.myCards.join(", ")} | Options: ${options.join(", ")} | Call Amount: ${callAmount}. Respond ONLY JSON: {"action": "choice", "amount": number}. Choice must be one of the options. If you raise, amount must be at least ${currentBet + 40}.`;
+    const prompt = `
+      You are a Poker Bot. 
+      Your Hand: ${this.myCards.join(", ")}
+      Board: ${msg.dealerCards?.join(", ") || "Empty"}
+      Pot: ${msg.pot}
+      Amount to Call: ${callAmount}
+      Allowed Actions: ${allowedActions.join(", ")}
+      
+      Respond ONLY JSON: {"action": "choice", "amount": number}
+      "choice" must be from Allowed Actions. 
+      If you "raise", "amount" must be total bet (at least ${currentHighestBet + 20}).
+    `;
 
     try {
       let aiText = "";
@@ -125,23 +157,23 @@ class PokerBot {
       const match = aiText.match(/\{.*\}/);
       const decision = match ? JSON.parse(match[0]) : { action: callAmount === 0 ? "check" : "call" };
       
-      log.Template({ name: "brakets", title: "BOT:DECISION", date: true }).R({ bot: this.playerName, action: decision.action, amount: decision.amount });
-
       setTimeout(() => {
         let action = decision.action?.toLowerCase();
-        let finalAction = "setCall";
+        let finalAction = "setCheck";
         
+        // Mapeo seguro a comandos del servidor
         if (action === "fold") finalAction = "fold";
         else if (action === "call") finalAction = "setCall";
         else if (action === "check" || (action === "call" && callAmount === 0)) finalAction = "setCheck";
         else if (action === "raise" || action === "bet") finalAction = "setRise";
 
-        const actionMsg = { action: finalAction };
-        if (finalAction === "setRise") {
-            // Un raise debe ser al menos el doble de la apuesta actual o un mínimo coherente
-            const minRaise = currentBet > 0 ? currentBet * 2 : 40;
-            actionMsg.chipsToRiseBet = Math.max(Number(decision.amount || minRaise), minRaise);
+        // Validar que la acción elegida esté permitida
+        if (!allowedActions.includes(action) && action !== "raise" && action !== "bet") {
+            finalAction = callAmount === 0 ? "setCheck" : "setCall";
         }
+
+        const actionMsg = { action: finalAction };
+        if (finalAction === "setRise") actionMsg.chipsToRiseBet = Math.max(Number(decision.amount || 0), currentHighestBet + 20);
         if (finalAction === "setCall") actionMsg.chipsToCall = callAmount;
         
         this.sendAction(actionMsg);
@@ -150,9 +182,9 @@ class PokerBot {
       this.sendAction({ action: callAmount === 0 ? "setCheck" : "setCall" });
     }
   }
+  
 }
 
-app.get("/", (req, res) => res.json({ status: "active", service: "Poker Bot Service", port: PORT }));
 app.get("/health", (req, res) => res.json({ status: "healthy", ollama: ollamaClient ? "connected" : "disconnected" }));
 
 app.post("/spawn", (req, res) => {
