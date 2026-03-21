@@ -1,6 +1,6 @@
-# 🤖 Poker AI Bot (Multi-LLM Edition)
+# 🤖 Poker AI Bot Service (REST API Edition)
 
-Este es un cliente independiente para el servidor de Poker que puede utilizar tanto **Google Gemini** como modelos locales mediante **Ollama** (como OpenLLama).
+Este es un servicio REST independiente que gestiona bots de IA para el servidor de Poker. Los bots pueden utilizar tanto **Google Gemini** como modelos locales mediante **Ollama** (como OpenLLama).
 
 ## 🚀 Instalación
 
@@ -14,43 +14,48 @@ Este es un cliente independiente para el servidor de Poker que puede utilizar ta
    npm install
    ```
 
+## 🛠️ Iniciar el Servicio
+
+Para que el servidor de Poker pueda solicitar bots, este servicio debe estar corriendo:
+
+```bash
+node bot.js
+```
+*Por defecto, el servicio escucha en el puerto **3000**.*
+
 ## 🧠 Proveedores de IA
 
-El bot soporta dos proveedores:
+El bot soporta dos proveedores principales:
 
 ### 1. Google Gemini (Nube)
-Necesitas una API Key de [Google AI Studio](https://aistudio.google.com/).
-- **Uso**: `node bot.js --provider=gemini --key=TU_API_KEY`
+Configura tu API Key en el archivo `.env` de la carpeta `bot`:
+`GEMINI_API_KEY=tu_api_key`
 
 ### 2. OpenLLama / Ollama (Local)
-Para usar modelos locales, debes tener instalado [Ollama](https://ollama.com/).
-1. Descarga el modelo: `ollama run openllama` (o `llama3`, `mistral`, etc.)
+Requiere tener instalado [Ollama](https://ollama.com/).
+1. Descarga el modelo: `ollama pull llama3.2` (o el que prefieras).
 2. Asegúrate de que Ollama esté corriendo.
-- **Uso**: `node bot.js --provider=openllama --model=openllama`
 
-## 🎮 Comandos de ejemplo
+## 📡 Integración REST API
 
-### Jugar con Gemini
-```bash
-node bot.js --gameCode=TU_CODIGO --name=Gemini_Bot --provider=gemini --key=TU_API_KEY
+El servidor de Poker se comunica con este servicio mediante el siguiente endpoint:
+
+### `POST /spawn`
+Crea una nueva instancia de un bot y la conecta a una partida vía WebSocket.
+
+**Cuerpo de la petición (JSON):**
+```json
+{
+  "gameCode": "ABCDE-12345",
+  "playerName": "Osito_Bot",
+  "provider": "openllama",
+  "server": "localhost",
+  "port": "8888"
+}
 ```
 
-### Jugar con OpenLLama (Local)
-```bash
-node bot.js --name=Llama_Bot --provider=openllama --model=openllama --gameCode=TU_CODIGO
-node bot.js --name=Llama_Bot --provider=openllama --model=openllama --gameCode=NK2DF-CG0DL
-```
-
-## 🛠️ Argumentos
-- `--provider`: `gemini` (default) o `openllama`.
-- `--model`: Nombre del modelo (default: `gemini-1.5-flash` o `openllama`).
-- `--gameCode`: Código de la mesa.
-- `--name`: Nombre del bot.
-- `--key`: API Key (solo para Gemini).
+## 🎮 Uso desde el Cliente
+Cuando el servicio está activo, puedes simplemente seleccionar el número de bots (1 o 2) desde el **Lobby** de YayPoker y hacer clic en **"Deal First Hand"**. El servidor de Poker hará la petición automáticamente a este servicio.
 
 ---
 &copy; 2026 YayPoker Engineering
-
-
-
-curl http://127.0.0.1:11434/v1/models

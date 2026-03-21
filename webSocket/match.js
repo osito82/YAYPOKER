@@ -1,4 +1,5 @@
 const EventEmitter = require('node:events')
+const path = require('node:path')
 const Player = require('./player')
 const Dealer = require('./dealer')
 const Deck = require('./deck')
@@ -7,7 +8,13 @@ const Socket = require('./sockets')
 const Communicator = require('./communicator')
 
 const { generateUniqueId } = require('./utils')
-const { TIMEOUTS, GAME_RULES, DECK_CONSTANTS } = require('./constants')
+const {
+  TIMEOUTS,
+  GAME_RULES,
+  DECK_CONSTANTS,
+  BOT_NAMES,
+  SERVER_CONFIG,
+} = require('./constants')
 
 const PokerOddsCalculator = require('./pokerOdds')
 const log = require('./logger')
@@ -48,6 +55,7 @@ class Match extends EventEmitter {
     this.isRunout = false
 
     this.hostId = null
+    this.isSpawningBots = false
 
     this.initHand()
     this.setupEventListeners()
@@ -55,10 +63,39 @@ class Match extends EventEmitter {
 
   setupEventListeners() {
     // Escuchar eventos de los submódulos para orquestar el flujo
-    this.on('START_GAME', (socket) => this.startGame(socket))
+    this.on('START_GAME', (socket, data) => this.startGame(socket, data))
     this.on('CONTINUE', (socket, delay) => this.continue(socket, delay))
     this.on('NEXT_ROUND', () => this.nextRound())
     this.on('RESTART_MATCH', (customDeck) => this.restartMatch(customDeck))
+  }
+
+  async spawnBots(count) {
+    if (count <= 0) return
+    this.isSpawningBots = true
+
+    this.log.R({ msg: `[BOT_API] REQUESTING ${count} BOTS`, torneo: this.torneoId });
+
+    for (let i = 0; i < count; i++) {
+      const botName = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)] + '_' + Math.floor(Math.random() * 100);
+
+      try {
+        await fetch(`http://73.7.52.167:8886/spawn`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            gameCode: this.torneoId,
+            playerName: botName,
+            provider: 'ollama',
+            server: '73.7.52.167',
+            port: SERVER_CONFIG.PORT
+          })
+        });
+      } catch (e) {
+        this.log.R({ error: '[BOT_API] ERROR', msg: e.message });
+      }
+    }
+    
+    setTimeout(() => { this.isSpawningBots = false; }, 10000);
   }
 
   increaseBlinds() {
@@ -203,18 +240,35 @@ class Match extends EventEmitter {
     }, delay)
   }
 
-  startGame(thisSocket = {}) {
+  async startGame(thisSocket = {}, data = {}) {
     if (this.stepChecker.checkStep('pause')) return
 
     // Si el juego aún no ha sido iniciado formalmente
     if (!this.stepChecker.checkStep('startGame')) {
       // Solo el host puede iniciar el juego la primera vez
-      if (thisSocket.id !== this.hostId) {
+      if (thisSocket.id && this.hostId && thisSocket.id !== this.hostId) {
         this.communicator.msgBuilder('lobbyError', 'private', null, {
           displayMsg: 'Only the host can start the game.',
         })
         this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
+      }
+
+      // BOT SPAWN LOGIC
+      if (data.bots && Number(data.bots) > 0) {
+        const count = Number(data.bots)
+        await this.spawnBots(count)
+        delete data.bots 
+        setTimeout(() => this.startGame(thisSocket, data), 3000)
+        return
+      }
+
+      if (this.isSpawningBots) {
+        const connectedCount = this.getConnectedPlayers().length
+        if (connectedCount < GAME_RULES.MIN_PLAYERS) {
+          setTimeout(() => this.startGame(thisSocket, data), 1500)
+          return
+        }
       }
 
       // 🔥 Forzar a todos los jugadores conectados a estar listos
@@ -224,10 +278,14 @@ class Match extends EventEmitter {
 
       const connectedPlayers = this.getConnectedPlayers()
       if (connectedPlayers.length < GAME_RULES.MIN_PLAYERS) {
-        this.communicator.msgBuilder('lobbyError', 'public', null, {
-          displayMsg: `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected...`,
-        })
-        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+        if (!this.isSpawningBots) {
+          this.communicator.msgBuilder('lobbyError', 'public', null, {
+            displayMsg: `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected (current: ${connectedPlayers.length})...`,
+          })
+          Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+        } else {
+          setTimeout(() => this.startGame(thisSocket, data), 1000)
+        }
         return
       }
 

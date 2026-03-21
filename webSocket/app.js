@@ -122,7 +122,7 @@ const actionHandlers = {
     match.actions.dealtPrivateCards(socket),
   [ACTIONS.STATS]: (match, socket) => match.comms.stats(socket.id),
   [ACTIONS.NEXT_ROUND]: (match) => match.nextRound(),
-  [ACTIONS.START_GAME]: (match, socket) => match.startGame(socket),
+  [ACTIONS.START_GAME]: (match, socket, data) => match.startGame(socket, data),
   [ACTIONS.PLAYER_READY]: (match, socket) => match.lobby.playerReady(socket),
 }
 

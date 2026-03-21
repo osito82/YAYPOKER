@@ -1,370 +1,251 @@
+const express = require("express");
 const WebSocket = require("ws");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { Ollama } = require("ollama");
 const log = require("./logger");
-const PokerOddsCalculator = require("../webSocket/pokerOdds");
-const { ACTIONS, SERVER_CONFIG } = require("../webSocket/constants");
 require("dotenv").config();
 
-// Inicializar Cliente de Ollama
+const app = express();
+app.use(express.json());
+
+const PORT = 8886;
+const OLLAMA_URL = "http://127.0.0.1:11434";
+
 let ollamaClient;
 try {
-  ollamaClient = new Ollama({
-    host: process.env.OLLAMA_HOST || "http://127.0.0.1:11434",
-  });
-  log
-    .Template({ name: "brakets", title: "IA:OLLAMA_INIT", date: true })
-    .R({ msg: "Ollama client initialized" });
+  ollamaClient = new Ollama({ host: OLLAMA_URL });
+  log.Template({ name: "brakets", title: "IA:OLLAMA_INIT", date: true })
+    .R({ url: OLLAMA_URL, msg: "Ready" });
 } catch (error) {
-  log
-    .Template({ name: "brakets", title: "ERROR:OLLAMA_INIT", date: true })
+  log.Template({ name: "brakets", title: "ERROR:OLLAMA", date: true })
     .R({ error: error.message });
 }
 
-// Configuración de argumentos
-const args = process.argv.slice(2).reduce((acc, arg) => {
-  const [key, value] = arg.replace("--", "").split("=");
-  acc[key] = value;
-  return acc;
-}, {});
+class PokerBot {
+  constructor(config) {
+    this.gameCode = config.gameCode;
+    this.playerName = config.playerName;
+    this.provider = config.provider || "ollama";
+    this.modelName =
+      config.model || (this.provider === "gemini" ? "gemini-1.5-flash" : "llama3.2");
 
-let provider = args.provider || "gemini";
-if (provider.toLowerCase() === "openllama") provider = "ollama";
+    this.secretCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    this.serverUrl = `ws://${config.server || "localhost"}:${config.port || "8888"}/?gameCode=${this.gameCode}&playerName=${this.playerName}&secretCode=${this.secretCode}`;
 
-const modelName =
-  args.model || (provider === "gemini" ? "gemini-1.5-flash" : "llama3.2");
-const gameCode = args.gameCode || "LOBBY";
-const playerName = args.name || `${provider.toUpperCase()}_Bot`;
-const apiKey = args.key || process.env.GEMINI_API_KEY;
+    this.myId = null;
+    this.myCards = [];
+    this.myCurrentBet = 0;
+    this.lastStepId = null;
 
-// CONFIGURACIÓN DE CONEXIÓN
-const wsHost =
-  process.env.VITE_WS_URL || process.env.VITE_CLIENT_URL || "73.7.52.167";
-const wsPort =
-  process.env.VITE_WS_PORT ||
-  process.env.VITE_CLIENT_PORT ||
-  SERVER_CONFIG.PORT ||
-  "8888";
-const serverUrl = `ws://${wsHost}:${wsPort}/?gameCode=${gameCode}&playerName=${playerName}`;
-
-log.Template({ name: "brakets", title: "BOT:START", date: true }).R({
-  name: playerName,
-  url: serverUrl,
-  provider,
-  model: modelName,
-});
-
-if (provider === "gemini" && !apiKey) {
-  log
-    .Template({ name: "brakets", title: "ERROR:CONFIG", date: true })
-    .R({ msg: "No GEMINI_API_KEY found" });
-  process.exit(1);
-}
-
-let geminiModel = null;
-if (provider === "gemini" && apiKey) {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  geminiModel = genAI.getGenerativeModel({ model: modelName });
-}
-
-let myId = null;
-let myCards = [];
-let communityCards = [];
-let myOdds = { win: 0 };
-let gameState = { pot: 0, currentHighestBet: 0 };
-
-const socket = new WebSocket(serverUrl);
-
-// Función auxiliar para enviar mensajes con log
-function sendAction(data) {
-  const payload = JSON.stringify(data);
-  log
-    .Template({ name: "brakets", title: "BOT:SENDING", date: true })
-    .R({ action: data.action, payload: data });
-  socket.send(payload);
-}
-
-socket.on("open", () => {
-  log
-    .Template({ name: "brakets", title: "BOT:CONNECTED", date: true })
-    .R({ msg: "Connection established" });
-  sendAction({ action: ACTIONS.SIGN_UP, totalChips: 1000 });
-});
-
-socket.on("message", async (data) => {
-  try {
-    const rawData = data.toString();
-    const payload = JSON.parse(rawData);
-    const msg = payload.message;
-
-    if (!msg) return;
-
-    log
-      .Template({
-        name: "brakets",
-        title: `INCOMING:${msg.action?.toUpperCase() || "MSG"}`,
-        date: true,
-      })
-      .R({ type: msg.type, from: playerName, raw: rawData.substring(0, 200) });
-
-    // Actualizar estado global del juego
-    if (msg.pot !== undefined) gameState.pot = Number(msg.pot);
-    if (msg.currentHighestBet !== undefined)
-      gameState.currentHighestBet = Number(msg.currentHighestBet);
-
-    // 1. Registro y obtención de ID
-    if (msg.action === "signUp" && msg.type === "private") {
-      myId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.id || msg.playerId;
-      if (myId) {
-        log
-          .Template({ name: "brakets", title: "BOT:REGISTERED", date: true })
-          .R({ myId });
-        sendAction({ action: ACTIONS.PLAYER_READY });
-      }
-    }
-
-    // 2. Recibir cartas
-    if (msg.action === "dealtPrivateCards") {
-      const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.playerId || msg.id;
-      if (targetId === myId) {
-        myCards = msg.myPlayerInfo?.privateCards || msg.cards || [];
-        log
-          .Template({ name: "brakets", title: "BOT:HAND", date: true })
-          .R({ cards: myCards });
-      }
-    }
-
-    // 3. Cartas comunitarias
-    if (msg.action?.startsWith("dealerHand")) {
-      communityCards = msg.dealerCards || [];
-      log
-        .Template({ name: "brakets", title: "BOT:BOARD_UPDATE", date: true })
-        .R({ board: communityCards });
-    }
-
-    // 4. Probabilidades
-    if (msg.action === "oddsUpdate") {
-      myOdds = msg.data?.odds || msg.odds || { win: 0 };
-      log
-        .Template({ name: "brakets", title: "BOT:ODDS", date: true })
-        .R({ win: myOdds.win });
-    }
-
-    // 5. Manejar CIEGAS (Small/Big Blind)
-    if (msg.action === "askForBlindBets") {
-      const targetId =
-        msg.myPlayerInfo?.playerId ||
-        msg.data?.id ||
-        msg.playerId ||
-        msg.id ||
-        msg.messageForId;
-
-      if (msg.type === "private" && targetId === myId) {
-        handleBlind(msg);
-      } else if (msg.type === "public") {
-        if (
-          msg.smallBlind?.playerId === myId ||
-          msg.bigBlind?.playerId === myId
-        ) {
-          const amount =
-            msg.smallBlind?.playerId === myId
-              ? msg.smallBlind.amount
-              : msg.bigBlind.amount;
-          handleBlind({ blindAmount: amount });
-        }
-      }
-    }
-
-    // 6. Manejar TURNO de apuesta
-    if (msg.action?.startsWith("bettingCore")) {
-      const targetId =
-        msg.myPlayerInfo?.playerId ||
-        msg.data?.id ||
-        msg.messageForId ||
-        msg.playerId ||
-        msg.id;
-      if (msg.type === "private" && targetId === myId) {
-        await handleAIDecision(msg);
-      }
-    }
-  } catch (error) {
-    log
-      .Template({ name: "brakets", title: "ERROR:MSG_PROCESS", date: true })
-      .R({ error: error.message, stack: error.stack });
+    this.initIA();
+    this.connect();
   }
-});
 
-function handleBlind(msg) {
-  const amount = Number(msg.blindAmount || msg.data?.blindAmount || msg.amount || 10);
-  log
-    .Template({ name: "brakets", title: "BOT:BLIND_ACTION", date: true })
-    .R({ amount });
-  sendAction({ action: ACTIONS.BLIND, blindAmount: amount });
-}
-
-async function handleAIDecision(msg) {
-  // Extraer opciones válidas de forma robusta
-  const options = msg.data?.actions || msg.possibleActions || ["fold", "call", "check", "raise"];
-  
-  // Calcular cuánto falta por igualar
-  const callAmount = Number(msg.data?.chipsToCall || gameState.currentHighestBet || 0);
-
-  log.Template({ name: "brakets", title: "BOT:THINKING", date: true }).R({
-    provider,
-    odds: myOdds.win,
-    pot: gameState.pot,
-    call: callAmount,
-    options,
-  });
-
-  const prompt = `
-    You are a professional Poker AI.
-    HAND: ${myCards.join(", ")} | BOARD: ${communityCards.join(", ") || "None"}
-    WIN ODDS: ${myOdds.win}% | POT: $${gameState.pot} | CALL: $${callAmount}
-    OPTIONS: ${options.join(", ")}
-    
-    Respond ONLY with JSON: {"action": "choice", "amount": number, "thought": "reason"}
-    Choice must be one of: ${options.join(", ")}
-  `;
-
-  try {
-    let aiText = "";
-    if (provider === "gemini") {
-      log
-        .Template({ name: "brakets", title: "IA:GEMINI_CALL", date: true })
-        .R({ msg: "Calling Gemini API" });
-      const result = await geminiModel.generateContent(prompt);
-      aiText = (await result.response).text().trim();
-    } else {
-      log
-        .Template({ name: "brakets", title: "IA:OLLAMA_CALL", date: true })
-        .R({ msg: "Calling Ollama", model: modelName });
-      const response = await ollamaClient.generate({
-        model: modelName,
-        prompt: prompt,
-        stream: false,
-      });
-      aiText = response.response.trim();
+  initIA() {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (this.provider === "gemini" && apiKey) {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      this.geminiModel = genAI.getGenerativeModel({ model: this.modelName });
+      log.Template({ name: "brakets", title: "IA:GEMINI_INIT", date: true })
+        .R({ bot: this.playerName, model: this.modelName });
     }
+  }
 
-    const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      log
-        .Template({ name: "brakets", title: "ERROR:IA_RESPONSE", date: true })
-        .R({ raw: aiText });
-      throw new Error("Invalid AI Response Format");
-    }
+  connect() {
+    log.Template({ name: "brakets", title: "BOT:CONNECTING", date: true })
+      .R({ name: this.playerName, url: this.serverUrl });
 
-    const decision = JSON.parse(jsonMatch[0]);
-    log.Template({ name: "brakets", title: "IA:DECISION", date: true }).R({
-      action: decision.action,
-      amount: decision.amount,
-      thought: decision.thought,
+    this.socket = new WebSocket(this.serverUrl);
+
+    this.socket.on("open", () => {
+      log.Template({ name: "brakets", title: "BOT:CONNECTED", date: true }).R({ name: this.playerName });
+      this.sendAction({ action: "signUp", totalChips: 1000, name: this.playerName });
     });
 
-    let finalAction = mapAction(decision.action);
+    this.socket.on("message", async (data) => {
+      const rawData = data.toString();
+      // ✅ LOG EXACTO DE ENTRADA GEMINI DO NOT TOUCH
+      console.log(`[${this.playerName}] <<< INCOMING:`, rawData);
 
-    setTimeout(() => {
-      const actionMsg = { action: finalAction };
-      if (finalAction === ACTIONS.RAISE)
-        actionMsg.chipsToRiseBet = Number(decision.amount || callAmount * 2);
-      if (finalAction === ACTIONS.CALL)
-        actionMsg.chipsToCall = callAmount;
+      try {
+        const payload = JSON.parse(rawData);
+        const msg = payload.message || payload;
 
-      sendAction(actionMsg);
-    }, 1000);
-  } catch (error) {
-    const isModelMissing = error.message.includes("not found");
-    
-    log
-      .Template({ name: "brakets", title: "ERROR:IA_DECISION", date: true })
-      .R({ error: error.message, isModelMissing });
-    
-    if (isModelMissing) {
-      log
-        .Template({ name: "brakets", title: "BOT:HINT", date: true })
-        .R({ msg: `Model "${modelName}" not found in Ollama. Try "ollama pull ${modelName}" or check your spelling.` });
-    }
+        if (this.myId && msg.players) {
+          const me = msg.players.find(p => p.id === this.myId);
+          if (me) this.myCurrentBet = Number(me.currentBet || 0);
+        }
 
-    // FALLBACK INTELIGENTE
-    const winChance = parseFloat(myOdds.win) || 0;
-    let fallback;
-    if (options.includes("check") && callAmount === 0) {
-      fallback = ACTIONS.CHECK;
-    } else if (options.includes("call") && winChance > 30) {
-      fallback = ACTIONS.CALL;
-    } else if (options.includes("call") && callAmount < 50 && winChance > 15) {
-      // Si la apuesta es pequeña, podemos ser más arriesgados
-      fallback = ACTIONS.CALL;
-    } else {
-      fallback = ACTIONS.FOLD;
-    }
+        if (msg.action === "signUp" && msg.type === "private") {
+          this.myId = msg.id || msg.playerId || msg.myPlayerInfo?.playerId;
+          this.sendAction({ action: "playerReady" });
+          return;
+        }
 
-    log
-      .Template({ name: "brakets", title: "BOT:FALLBACK", date: true })
-      .R({ action: fallback, reason: isModelMissing ? "Model missing" : "AI Error", winChance });
+        const stepId = JSON.stringify({ action: msg.action, pot: msg.pot, board: msg.dealerCards });
+        if (this.lastStepId === stepId) return;
+
+        if (msg.action === "dealtPrivateCards" && msg.type === "private") {
+          this.myCards = msg.myPlayerInfo?.privateCards || [];
+          this.lastStepId = stepId;
+        }
+
+        if (msg.action === "askForBlindBets" && msg.type === "private") {
+          const targetId = msg.myPlayerInfo?.playerId || msg.data?.id;
+          if (targetId === this.myId) {
+            const amount = msg.data?.blindAmount || msg.blindAmount || 20;
+            this.sendAction({ action: "setBet", chipsToBet: amount });
+            this.lastStepId = stepId;
+          }
+        }
+
+        if (msg.action?.startsWith("bettingCore") && msg.type === "private") {
+          const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.messageForId;
+          if (targetId === this.myId) {
+            this.lastStepId = stepId;
+            await this.handleDecision(msg);
+          }
+        }
+      } catch (err) {
+        log.Template({ name: "brakets", title: "ERROR:MSG", date: true }).R({ error: err.message });
+      }
+    });
+
+    this.socket.on("close", () => log.Template({ name: "brakets", title: "BOT:DISCONNECTED", date: true }).R({ bot: this.playerName }));
+    this.socket.on("error", (err) => log.Template({ name: "brakets", title: "ERROR:SOCKET", date: true }).R({ bot: this.playerName, error: err.message }));
+  }
+
+  sendAction(data) {
+    if (this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify(data));
+
+
+  // ✅ LOG EXACTO DE SALIDA GEMINI DO NOT TOUCH
+      const payload = JSON.stringify(data);
+      console.log(`[${this.playerName}] >>> OUTGOING:`, payload);
       
-    const actionMsg = { action: fallback };
-    if (fallback === ACTIONS.CALL) actionMsg.chipsToCall = callAmount;
-    
-    sendAction(actionMsg);
+ 
+
+
+
+
+
+
+      log.Template({ name: "brakets", title: "BOT:SENDING", date: true }).R({ bot: this.playerName, action: data.action, data });
+    }
+  }
+
+  async handleDecision(msg) {
+    const currentHighestBet = Number(msg.currentHighestBet || 0);
+    const callAmount = Math.max(0, currentHighestBet - this.myCurrentBet);
+    const allowedActions = msg.data?.action || msg.data?.actions || ["fold", "call"];
+    const board = msg.dealerCards || [];
+    const handStrength = this.evaluateHandStrength(this.myCards, board);
+
+const winChance = Number(msg.data.odds.win);
+const tieChance = Number(msg.data.odds.tie);
+const realEquity = (winChance + (tieChance / 2)) / 100; // Resultado entre 0 y 1
+
+    // Default safety action
+    let baseAction = callAmount === 0 ? (allowedActions.includes("check") ? "check" : "call") : (allowedActions.includes("call") ? "call" : "fold");
+
+    // ENGLISH PROMPT
+    const prompt = `
+You are a professional Texas Hold'em player.
+Hand: ${this.myCards.join(", ")} | Board: ${board.join(", ") || "No cards dealt yet"}
+Hand Strength: ${handStrength} (0.0=Weak, 1.0=Strongest)
+Current Pot: ${msg.pot} | Amount to Call: ${callAmount}
+Your mathematical Equity is: ${realEquity}
+Allowed Actions: ${allowedActions.join(", ")}
+
+Strategy Rules:
+1. NEVER fold if "check" is an allowed action.
+2. If Hand Strength is below 0.4 and Call Amount > 20% of the Pot, consider folding.
+3. Only "raise" if Hand Strength is > 0.7 or if you want to bluff (10% chance).
+
+Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":number,"reason":"short explanation"}
+`;
+
+    let decision = null;
+    try {
+      let aiText = "";
+      if (this.provider === "gemini" && this.geminiModel) {
+        const result = await this.geminiModel.generateContent(prompt);
+        aiText = (await result.response).text();
+      } else if (ollamaClient) {
+        const response = await ollamaClient.generate({ model: this.modelName, prompt, stream: false });
+        aiText = response.response;
+      }
+      decision = this.safeParseJSON(aiText);
+    } catch (e) {
+      log.Template({ name: "brakets", title: "ERROR:IA", date: true }).R({ bot: this.playerName, error: e.message });
+    }
+
+    // LAYER OF SAFETY (DETERMINISTIC RULES)
+    let action = (decision && decision.action) ? decision.action.toLowerCase() : baseAction;
+    if (!allowedActions.includes(action)) action = baseAction;
+
+    // RULE: Never fold if checking is free
+    if (action === "fold" && allowedActions.includes("check")) {
+        action = "check";
+    }
+
+    // RULE: Don't call high bets with low strength (The RoyalBot Fix)
+    if (handStrength < 0.35 && callAmount > (msg.pot * 0.25) && action === "call") {
+        action = "fold";
+    }
+
+    const actionMsg = {};
+    if (action === "fold") {
+        actionMsg.action = "fold";
+    } else if (action === "call") {
+        actionMsg.action = "setCall";
+        actionMsg.chipsToCall = callAmount;
+    } else if (action === "raise") {
+        actionMsg.action = "setRise";
+        actionMsg.chipsToRiseBet = Math.max(Number(decision.amount || 0), currentHighestBet + 20);
+    } else {
+        actionMsg.action = "setCheck";
+    }
+
+    log.Template({ name: "brakets", title: "BOT:DECISION", date: true })
+      .R({ bot: this.playerName, action: actionMsg.action, val: actionMsg.chipsToCall || actionMsg.chipsToRiseBet });
+
+    setTimeout(() => this.sendAction(actionMsg), 1000);
+  }
+
+  safeParseJSON(text) {
+    try {
+      const match = text.match(/\{.*\}/s);
+      return match ? JSON.parse(match[0]) : null;
+    } catch { return null; }
+  }
+
+  evaluateHandStrength(cards, board) {
+    const all = [...cards, ...board];
+    if (all.length < 2) return 0.5;
+    const ranks = all.map(c => c[0]);
+    const pairs = ranks.filter((r, i) => ranks.indexOf(r) !== i);
+
+    // Pre-flop logic
+    if (board.length === 0) {
+        if (pairs.length > 0) return 0.8; // Pair in hand
+        if (ranks.includes('A') || ranks.includes('K')) return 0.7; // High cards
+        return 0.4;
+    }
+
+    // Post-flop logic
+    if (pairs.length >= 2) return 0.9; // Two pairs or better
+    if (pairs.length === 1) return 0.65; // One pair
+    if (ranks.includes('A')) return 0.5; // Ace high
+    return 0.25; // Nothing
   }
 }
 
-function mapAction(action) {
-  switch (action?.toLowerCase()) {
-    case "fold":
-      return ACTIONS.FOLD;
-    case "call":
-      return ACTIONS.CALL;
-    case "check":
-      return ACTIONS.CHECK;
-    case "raise":
-    case "bet":
-      return ACTIONS.RAISE;
-    default:
-      return ACTIONS.CHECK;
-  }
-}
-
-socket.on("close", (code, reason) => {
-  log
-    .Template({ name: "brakets", title: "BOT:DISCONNECTED", date: true })
-    .R({ code, reason: reason?.toString() || "No reason" });
-  process.exit(0);
+app.post("/spawn", (req, res) => {
+  const { gameCode, playerName, provider, server, port } = req.body;
+  new PokerBot({ gameCode, playerName, provider, server, port });
+  res.json({ message: `Spawned ${playerName}` });
 });
 
-socket.on("error", (err) => {
-  log
-    .Template({ name: "brakets", title: "ERROR:SOCKET", date: true })
-    .R({ error: err.message });
-});
-
-function mapAction(action) {
-  switch (action?.toLowerCase()) {
-    case "fold":
-      return ACTIONS.FOLD;
-    case "call":
-      return ACTIONS.CALL;
-    case "check":
-      return ACTIONS.CHECK;
-    case "raise":
-    case "bet":
-      return ACTIONS.RAISE;
-    default:
-      return ACTIONS.CHECK;
-  }
-}
-
-socket.on("close", (code, reason) => {
-  log
-    .Template({ name: "brakets", title: "BOT:DISCONNECTED", date: true })
-    .R({ code, reason: reason?.toString() || "No reason" });
-  process.exit(0);
-});
-
-socket.on("error", (err) => {
-  log
-    .Template({ name: "brakets", title: "ERROR:SOCKET", date: true })
-    .R({ error: err.message });
-});
+app.listen(PORT, () => log.Template({ name: "brakets", title: "SERVICE:READY", date: true }).R({ port: PORT }));
