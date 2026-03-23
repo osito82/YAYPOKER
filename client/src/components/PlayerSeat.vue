@@ -1,7 +1,7 @@
 <template>
   <div
     :id="'seat-wrapper-' + playerName + '-' + responsive.templateSuffix"
-    class="relative group flex items-center p-3 rounded-xl border transition-all duration-300 w-full overflow-hidden seat-base"
+    class="relative group flex items-center p-3 rounded-xl border transition-all duration-1000 w-full overflow-hidden seat-base"
     :class="
       isActive
         ? 'seat-active'
@@ -151,12 +151,12 @@
           :id="
             'seat-bet-container-' + playerName + '-' + responsive.templateSuffix
           "
-          class="flex flex-col items-end shrink-0 ml-2"
+          class="flex flex-col items-end shrink-0 ml-2 animate-in fade-in zoom-in duration-1000"
         >
           <span
             :id="'label-bet-' + playerName + '-' + responsive.templateSuffix"
             class="text-[10px] font-black text-emerald-400 uppercase leading-none mb-1"
-            >Bet</span
+            >Playing</span
           >
           <span
             :id="'display-bet-' + playerName + '-' + responsive.templateSuffix"
@@ -205,5 +205,6 @@ defineProps({
   border-color: rgba(212,160,23,0.5);
   box-shadow: 0 0 20px rgba(212,160,23,0.15), inset 0 0 20px rgba(212,160,23,0.04);
   transform: scale(1.02);
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

@@ -7,7 +7,7 @@
     <!-- Odds Panel -->
     <div
       :id="'hud-hand-odds-display-panel-' + templateSuffix"
-      class="w-full transition-all duration-500"
+      class="w-full transition-all duration-1000"
       :class="{
         'opacity-20 grayscale pointer-events-none': !playerCards?.length,
       }"
@@ -80,7 +80,7 @@
           <span
             :id="`hud-player-bet-label-${templateSuffix}`"
             class="block text-[7px] font-black text-emerald-500 uppercase leading-none mb-0.5"
-            >Bet</span
+            >Playing</span
           >
           <span
             :id="`hud-player-bet-value-text-${templateSuffix}`"

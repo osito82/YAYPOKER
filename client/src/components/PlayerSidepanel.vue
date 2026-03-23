@@ -31,7 +31,7 @@
         v-for="player in sortedPlayers"
         :key="player.id"
         :id="'player-item-card-' + player.id + '-' + templateSuffix"
-        class="group relative flex flex-col p-2.5 rounded-xl transition-all duration-500 border border-transparent"
+        class="group relative flex flex-col p-2.5 rounded-xl transition-all duration-1000 border border-transparent"
         :class="[
           player.id === delayedActivePlayerId
             ? 'bg-yellow-500/20 border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.15)] z-10'
@@ -86,24 +86,48 @@
             </div>
           </div>
 
-          <!-- Stack Display -->
-          <div :id="`player-item-stack-container-${player.id}-${templateSuffix}`" class="flex flex-col items-end shrink-0">
-            <span
-              :id="`player-item-stack-label-${player.id}-${templateSuffix}`"
-              class="text-[10px] font-black text-gray-500 uppercase tracking-tighter mb-1 leading-none"
-              >Stack</span
-            >
-            <div :id="`player-item-stack-value-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-0.5">
+          <!-- Chips Display (Stack & Current Bet) -->
+          <div :id="`player-item-chips-container-${player.id}-${templateSuffix}`" class="flex gap-4 shrink-0">
+            <!-- Current Bet -->
+            <div v-if="player.currentBet > 0" :id="`player-item-bet-container-${player.id}-${templateSuffix}`" class="flex flex-col items-end">
               <span
-                :id="`player-item-stack-currency-${player.id}-${templateSuffix}`"
-                class="text-sm text-yellow-500 font-mono font-bold leading-none"
-                >$</span
+                :id="`player-item-bet-label-${player.id}-${templateSuffix}`"
+                class="text-[10px] font-black text-emerald-500/70 uppercase tracking-tighter mb-1 leading-none"
+                >Playing</span
               >
+              <div :id="`player-item-bet-value-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-0.5">
+                <span
+                  :id="`player-item-bet-currency-${player.id}-${templateSuffix}`"
+                  class="text-xs text-emerald-500 font-mono font-bold leading-none"
+                  >$</span
+                >
+                <span
+                  :id="`player-item-bet-amount-${player.id}-${templateSuffix}`"
+                  class="text-lg font-mono font-black text-emerald-400 leading-none tracking-tight"
+                  >{{ player.currentBet }}</span
+                >
+              </div>
+            </div>
+
+            <!-- Stack Display -->
+            <div :id="`player-item-stack-container-${player.id}-${templateSuffix}`" class="flex flex-col items-end">
               <span
-                :id="`player-item-stack-amount-${player.id}-${templateSuffix}`"
-                class="text-xl font-mono font-black text-white leading-none tracking-tight"
-                >{{ player.chips }}</span
+                :id="`player-item-stack-label-${player.id}-${templateSuffix}`"
+                class="text-[10px] font-black text-gray-500 uppercase tracking-tighter mb-1 leading-none"
+                >Stack</span
               >
+              <div :id="`player-item-stack-value-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-0.5">
+                <span
+                  :id="`player-item-stack-currency-${player.id}-${templateSuffix}`"
+                  class="text-sm text-yellow-500 font-mono font-bold leading-none"
+                  >$</span
+                >
+                <span
+                  :id="`player-item-stack-amount-${player.id}-${templateSuffix}`"
+                  class="text-xl font-mono font-black text-white leading-none tracking-tight"
+                  >{{ player.chips }}</span
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -376,11 +400,11 @@ const getActionColor = (action) => {
 }
 
 .player-list-move {
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .player-list-enter-active,
 .player-list-leave-active {
-  transition: all 0.5s ease;
+  transition: all 1.2s ease;
 }
 .player-list-enter-from,
 .player-list-leave-to {
