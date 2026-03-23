@@ -68,11 +68,17 @@
         :id="'seat-header-' + playerName + '-' + responsive.templateSuffix"
         class="flex justify-between items-start mb-1"
       >
-        <span
-          :id="'seat-name-' + playerName + '-' + responsive.templateSuffix"
-          class="text-lg font-black text-white truncate leading-tight"
-          >{{ playerName }}</span
-        >
+        <div class="flex items-center gap-2 min-w-0">
+          <!-- Player Number Badge -->
+          <div class="w-5 h-5 flex items-center justify-center rounded bg-white/10 border border-white/5 text-[9px] font-black text-white/50 shrink-0">
+            {{ playerNumber }}
+          </div>
+          <span
+            :id="'seat-name-' + playerName + '-' + responsive.templateSuffix"
+            class="text-lg font-black text-white truncate leading-tight"
+            >{{ playerName }}</span
+          >
+        </div>
         <div
           :id="
             'seat-stack-container-' +
@@ -147,7 +153,7 @@
         </div>
 
         <div
-          v-if="playerBet > 0"
+          v-if="handContribution > 0"
           :id="
             'seat-bet-container-' + playerName + '-' + responsive.templateSuffix
           "
@@ -162,7 +168,7 @@
             :id="'display-bet-' + playerName + '-' + responsive.templateSuffix"
             class="text-sm font-mono font-black text-emerald-400 leading-none"
           >
-            ${{ playerBet }}
+            ${{ handContribution }}
           </span>
         </div>
       </div>
@@ -181,10 +187,12 @@ defineProps({
   playerName: { type: String, default: 'Guest' },
   playerChips: { type: Number, default: 0 },
   playerBet: { type: Number, default: 0 },
+  handContribution: { type: Number, default: 0 }, // ✅ AGREGADO
   playerAction: { type: String, default: '' },
   playerCards: { type: Array, default: () => [] },
   showCards: { type: Boolean, default: false },
   isActive: { type: Boolean, default: false },
+  playerNumber: { type: Number, default: 0 }, // ✅ AGREGADO
 })
 </script>
 

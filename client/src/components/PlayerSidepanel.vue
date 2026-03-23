@@ -47,6 +47,14 @@
         >
           <div :id="`player-item-identity-wrapper-${player.id}-${templateSuffix}`" class="flex flex-col min-w-0">
             <div :id="`player-item-status-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-2">
+              <!-- Player Number Badge -->
+              <div 
+                :id="`player-item-number-badge-${player.id}-${templateSuffix}`"
+                class="w-5 h-5 flex items-center justify-center rounded bg-gray-800 border border-white/10 text-[10px] font-black text-gray-400 shrink-0"
+              >
+                {{ player.playerNumber || '?' }}
+              </div>
+
               <div
                 v-if="player.id === delayedActivePlayerId"
                 :id="`player-item-active-pulse-${player.id}-${templateSuffix}`"
@@ -70,7 +78,7 @@
                 :class="player.isConnected ? 'bg-green-500' : 'bg-gray-600'"
               ></div>
             </div>
-            <div :id="`player-item-action-label-wrapper-${player.id}-${templateSuffix}`" class="h-4 flex items-center mt-1">
+            <div :id="`player-item-action-label-wrapper-${player.id}-${templateSuffix}`" class="h-4 flex items-center mt-1 ml-7">
               <span
                 v-if="player.id === activePlayerId"
                 :id="`player-item-active-turn-label-${player.id}-${templateSuffix}`"
@@ -86,10 +94,10 @@
             </div>
           </div>
 
-          <!-- Chips Display (Stack & Current Bet) -->
+          <!-- Chips Display (Stack & Hand Accumulated) -->
           <div :id="`player-item-chips-container-${player.id}-${templateSuffix}`" class="flex gap-4 shrink-0">
-            <!-- Current Bet -->
-            <div v-if="player.currentBet > 0" :id="`player-item-bet-container-${player.id}-${templateSuffix}`" class="flex flex-col items-end">
+            <!-- Hand Total (Accumulated) -->
+            <div v-if="player.handContribution > 0" :id="`player-item-bet-container-${player.id}-${templateSuffix}`" class="flex flex-col items-end">
               <span
                 :id="`player-item-bet-label-${player.id}-${templateSuffix}`"
                 class="text-[10px] font-black text-emerald-500/70 uppercase tracking-tighter mb-1 leading-none"
@@ -104,7 +112,7 @@
                 <span
                   :id="`player-item-bet-amount-${player.id}-${templateSuffix}`"
                   class="text-lg font-mono font-black text-emerald-400 leading-none tracking-tight"
-                  >{{ player.currentBet }}</span
+                  >{{ player.handContribution }}</span
                 >
               </div>
             </div>
@@ -132,7 +140,7 @@
           </div>
         </div>
 
-        <!-- MAIN ACTIVITY ROW: Cards & Bet (Left) | Last Action (Right) -->
+        <!-- MAIN ACTIVITY ROW -->
         <div
           v-if="
             player.currentBet > 0 ||
@@ -142,9 +150,8 @@
           :id="`player-item-activity-row-${player.id}-${templateSuffix}`"
           class="flex items-end justify-between gap-2 mt-2 pt-2 border-t border-white/5"
         >
-          <!-- LEFT COLUMN: Cards + Live Bet -->
+          <!-- LEFT COLUMN: Cards + Round Bet -->
           <div :id="`player-item-left-activity-${player.id}-${templateSuffix}`" class="flex flex-col flex-1 gap-3">
-            <!-- SHOWDOWN CARDS (55% Style) -->
             <div
               v-if="isShowDown && player.cards && player.cards.length > 0"
               :id="`player-item-showdown-cards-${player.id}-${templateSuffix}`"
@@ -177,16 +184,16 @@
               </div>
             </div>
 
-            <!-- Live Bet -->
+            <!-- Round Bet (Muestra lo apostado en el turno actual) -->
             <div v-if="player.currentBet > 0" :id="`player-item-live-bet-wrapper-${player.id}-${templateSuffix}`" class="flex flex-col">
               <span
                 :id="`player-item-live-bet-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black text-emerald-500/70 uppercase tracking-wider mb-1 leading-none"
-                >Live Bet</span
+                class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 leading-none"
+                >Current Bet</span
               >
               <span
                 :id="`player-item-live-bet-amount-${player.id}-${templateSuffix}`"
-                class="text-2xl font-mono font-black text-emerald-400 leading-none tracking-tight"
+                class="text-lg font-mono font-black text-gray-300 leading-none tracking-tight"
                 >${{ player.currentBet }}</span
               >
             </div>
