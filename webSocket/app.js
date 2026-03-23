@@ -25,6 +25,7 @@ const wss = new WebSocket.Server({ server })
 const Match = require('./match')
 const Socket = require('./sockets')
 const Torneo = require('./torneo')
+const WinnerCertificate = require('./winnerCertificate')
 
 const startTime = new Date()
 
@@ -305,6 +306,24 @@ app.get('/status', (req, res) => {
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' })
+})
+
+app.get('/verify/:torneoId/:code', (req, res) => {
+  const { torneoId, code } = req.params
+  const result = WinnerCertificate.verifyCertificate(torneoId, code)
+  res.json(result)
+})
+
+app.get('/certificate/:torneoId', (req, res) => {
+  const cert = WinnerCertificate.getCertificate(req.params.torneoId)
+  if (!cert) return res.status(404).json({ error: 'Not found' })
+  res.json({
+    torneoId: cert.torneoId,
+    winnerName: cert.winnerName,
+    date: cert.date,
+    totalPlayers: cert.totalPlayers,
+    verified: cert.verified,
+  })
 })
 
 app.get('/*splat', (req, res) => {

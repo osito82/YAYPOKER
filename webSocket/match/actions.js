@@ -1,6 +1,7 @@
 const Socket = require('../sockets')
 const { WinnerCore } = require('../winnerCore')
 const { GAME_RULES, TIMEOUTS } = require('../constants')
+const WinnerCertificate = require('../winnerCertificate')
 
 class MatchActions {
   constructor(context) {
@@ -784,6 +785,7 @@ class MatchActions {
 
   winnerTournament(winnersInfo) {
     const winner = winnersInfo[0]
+    const totalPlayers = this.match.players.length
 
     this.log
       .Template({
@@ -801,11 +803,22 @@ class MatchActions {
         chipsWon: winner.amount,
       })
 
+    const certificate = WinnerCertificate.registerWinner(
+      this.match.torneoId,
+      winner,
+      totalPlayers,
+    )
+
     this.communicator.msgBuilder('winnerTournament', 'public', null, {
       method: 'winnerTournament',
       displayMsg: `🏆 ${winner.name} wins the tournament!`,
       winner,
       isTournamentWinner: true,
+      certificate: {
+        code: certificate.code,
+        torneoId: certificate.torneoId,
+        date: certificate.date,
+      },
     })
 
     Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())

@@ -43,6 +43,11 @@ const routes = [
     component: Game,
     props: { isGuest: true },
   },
+  {
+    path: '/verify/:torneoId?/:code?',
+    name: 'verify',
+    component: () => import('./pages/VerifyCertificate.vue'),
+  },
   { name: 'about', path: '/about', component: About },
   // Catch-all 404
   {
