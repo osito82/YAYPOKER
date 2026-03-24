@@ -19,6 +19,18 @@ const {
 } = require('./constants')
 
 const app = express()
+
+// ✅ AGREGADO: Middleware de CORS quirúrgico para permitir peticiones desde el frontend
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200)
+  }
+  next()
+})
+
 const server = http.createServer(app)
 const wss = new WebSocket.Server({ server })
 
@@ -169,6 +181,15 @@ wss.on('connection', (ws, req) => {
     if (data) {
       try {
         jsonData = JSON.parse(data)
+        
+        // LOG DE EMERGENCIA: Ver qué llega realmente
+        if (jsonData.action === 'startGame') {
+          console.log('------------------------------------------');
+          console.log('[DEBUG] RECEIVED startGame from client');
+          console.log('[DEBUG] Full Payload:', JSON.stringify(jsonData, null, 2));
+          console.log('------------------------------------------');
+        }
+
         log
           .Template({
             name: 'brakets',
@@ -335,14 +356,12 @@ const PORT = SERVER_CONFIG.PORT
 const PROTOCOL = SERVER_CONFIG.PROTOCOL
 const BASE = SERVER_CONFIG.BASE_URL
 
-if (require.main === module) {
-  server.listen(PORT, () => {
-    log.Template({ name: 'brakets', title: 'SERVER:LISTENING', date: true }).R({
-      port: PORT,
-      url: `${PROTOCOL}://${BASE}:${PORT}`,
-      env: process.env.NODE_ENV || 'development',
-    })
+server.listen(PORT, () => {
+  log.Template({ name: 'brakets', title: 'SERVER:LISTENING', date: true }).R({
+    port: PORT,
+    url: `${PROTOCOL}://${BASE}:${PORT}`,
+    env: process.env.NODE_ENV || 'development',
   })
-}
+})
 
 module.exports = { app, server, wss, validateAction }
