@@ -36,6 +36,7 @@ class PokerBot {
     this.myCards = [];
     this.myCurrentBet = 0;
     this.lastStepId = null;
+    this.myOdds = { win: 0, tie: 0 }; // Estado persistente de probabilidades
 
     this.initIA();
     this.connect();
@@ -64,74 +65,99 @@ class PokerBot {
 
     this.socket.on("message", async (data) => {
       const rawData = data.toString();
-      // ✅ LOG EXACTO DE ENTRADA GEMINI DO NOT TOUCH
-      console.log(`[${this.playerName}] <<< INCOMING:`, rawData);
+      // Log de entrada solo para depuración pesada si es necesario
+      // console.log(`[${this.playerName}] <<< INCOMING:`, rawData);
 
       try {
         const payload = JSON.parse(rawData);
         const msg = payload.message || payload;
 
+        // Actualizar mi apuesta actual desde la lista de jugadores
         if (this.myId && msg.players) {
           const me = msg.players.find(p => p.id === this.myId);
           if (me) this.myCurrentBet = Number(me.currentBet || 0);
         }
 
+        // Registro de signup
         if (msg.action === "signUp" && msg.type === "private") {
           this.myId = msg.id || msg.playerId || msg.myPlayerInfo?.playerId;
+          log.Template({ name: "brakets", title: "BOT:REGISTERED", date: true })
+            .R({ bot: this.playerName, myId: this.myId });
           this.sendAction({ action: "playerReady" });
           return;
+        }
+
+        // Actualizar probabilidades si vienen en el mensaje
+        if (msg.action === "oddsUpdate" || (msg.data && msg.data.odds)) {
+            const odds = msg.data?.odds || msg.odds;
+            if (odds) {
+                this.myOdds = {
+                    win: Number(odds.win || 0),
+                    tie: Number(odds.tie || 0)
+                };
+            }
         }
 
         const stepId = JSON.stringify({ action: msg.action, pot: msg.pot, board: msg.dealerCards });
         if (this.lastStepId === stepId) return;
 
+        // Recibir cartas
         if (msg.action === "dealtPrivateCards" && msg.type === "private") {
           this.myCards = msg.myPlayerInfo?.privateCards || [];
+          log.Template({ name: "brakets", title: "BOT:HAND", date: true })
+            .R({ bot: this.playerName, cards: this.myCards });
           this.lastStepId = stepId;
         }
 
+        // Poner ciegas
         if (msg.action === "askForBlindBets" && msg.type === "private") {
           const targetId = msg.myPlayerInfo?.playerId || msg.data?.id;
           if (targetId === this.myId) {
             const amount = msg.data?.blindAmount || msg.blindAmount || 20;
+            log.Template({ name: "brakets", title: "BOT:POSTING_BLIND", date: true })
+              .R({ bot: this.playerName, amount });
             this.sendAction({ action: "setBet", chipsToBet: amount });
             this.lastStepId = stepId;
           }
         }
 
+        // Turno de apuesta
         if (msg.action?.startsWith("bettingCore") && msg.type === "private") {
           const targetId = msg.myPlayerInfo?.playerId || msg.data?.id || msg.messageForId;
           if (targetId === this.myId) {
+            log.Template({ name: "brakets", title: "BOT:MY_TURN", date: true })
+              .R({ bot: this.playerName, action: msg.action });
             this.lastStepId = stepId;
             await this.handleDecision(msg);
           }
         }
+
       } catch (err) {
-        log.Template({ name: "brakets", title: "ERROR:MSG", date: true }).R({ error: err.message });
+        log.Template({ name: "brakets", title: "ERROR:MSG", date: true })
+          .R({ error: err.message });
       }
     });
 
-    this.socket.on("close", () => log.Template({ name: "brakets", title: "BOT:DISCONNECTED", date: true }).R({ bot: this.playerName }));
-    this.socket.on("error", (err) => log.Template({ name: "brakets", title: "ERROR:SOCKET", date: true }).R({ bot: this.playerName, error: err.message }));
+    this.socket.on("close", () => {
+      log.Template({ name: "brakets", title: "BOT:DISCONNECTED", date: true })
+        .R({ bot: this.playerName, msg: "Connection lost." });
+    });
+
+    this.socket.on("error", (err) => {
+      log.Template({ name: "brakets", title: "ERROR:SOCKET", date: true })
+        .R({ bot: this.playerName, error: err.message });
+    });
   }
 
   sendAction(data) {
     if (this.socket.readyState === WebSocket.OPEN) {
-      this.socket.send(JSON.stringify(data));
-
-
-  // ✅ LOG EXACTO DE SALIDA GEMINI DO NOT TOUCH
       const payload = JSON.stringify(data);
       console.log(`[${this.playerName}] >>> OUTGOING:`, payload);
       
- 
-
-
-
-
-
-
-      log.Template({ name: "brakets", title: "BOT:SENDING", date: true }).R({ bot: this.playerName, action: data.action, data });
+      log.Template({ name: "brakets", title: "BOT:SENDING", date: true })
+        .R({ bot: this.playerName, action: data.action });
+      
+      this.socket.send(payload);
     }
   }
 
@@ -140,30 +166,33 @@ class PokerBot {
     const callAmount = Math.max(0, currentHighestBet - this.myCurrentBet);
     const allowedActions = msg.data?.action || msg.data?.actions || ["fold", "call"];
     const board = msg.dealerCards || [];
-    const handStrength = this.evaluateHandStrength(this.myCards, board);
+    
+    // Cálculo de Equity matemático basado en el estado guardado
+    const winChance = this.myOdds.win;
+    const tieChance = this.myOdds.tie;
+    const realEquity = (winChance + (tieChance / 2)) / 100;
 
-const winChance = Number(msg.data.odds.win);
-const tieChance = Number(msg.data.odds.tie);
-const realEquity = (winChance + (tieChance / 2)) / 100; // Resultado entre 0 y 1
+    // Acción base por defecto
+    let baseAction = callAmount === 0 ? 
+        (allowedActions.includes("check") ? "check" : "call") : 
+        (allowedActions.includes("call") ? "call" : "fold");
 
-    // Default safety action
-    let baseAction = callAmount === 0 ? (allowedActions.includes("check") ? "check" : "call") : (allowedActions.includes("call") ? "call" : "fold");
+    log.Template({ name: "brakets", title: "BOT:DECIDING", date: true })
+      .R({ bot: this.playerName, equity: realEquity, call: callAmount, allowed: allowedActions });
 
-    // ENGLISH PROMPT
     const prompt = `
 You are a professional Texas Hold'em player.
 Hand: ${this.myCards.join(", ")} | Board: ${board.join(", ") || "No cards dealt yet"}
-Hand Strength: ${handStrength} (0.0=Weak, 1.0=Strongest)
 Current Pot: ${msg.pot} | Amount to Call: ${callAmount}
-Your mathematical Equity is: ${realEquity}
+Your mathematical Equity is: ${realEquity.toFixed(2)} (0.0 to 1.0)
 Allowed Actions: ${allowedActions.join(", ")}
 
 Strategy Rules:
 1. NEVER fold if "check" is an allowed action.
-2. If Hand Strength is below 0.4 and Call Amount > 20% of the Pot, consider folding.
-3. Only "raise" if Hand Strength is > 0.7 or if you want to bluff (10% chance).
+2. If Equity < 0.2 and Call Amount > 15% of the Pot, consider folding.
+3. Only "raise" if Equity > 0.6 or if you want to bluff.
 
-Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":number,"reason":"short explanation"}
+Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":number}
 `;
 
     let decision = null;
@@ -181,19 +210,13 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
       log.Template({ name: "brakets", title: "ERROR:IA", date: true }).R({ bot: this.playerName, error: e.message });
     }
 
-    // LAYER OF SAFETY (DETERMINISTIC RULES)
-    let action = (decision && decision.action) ? decision.action.toLowerCase() : baseAction;
+    if (!decision || !decision.action) decision = { action: baseAction };
+    
+    let action = decision.action.toLowerCase();
+    
+    // Forzar reglas de seguridad deterministas
     if (!allowedActions.includes(action)) action = baseAction;
-
-    // RULE: Never fold if checking is free
-    if (action === "fold" && allowedActions.includes("check")) {
-        action = "check";
-    }
-
-    // RULE: Don't call high bets with low strength (The RoyalBot Fix)
-    if (handStrength < 0.35 && callAmount > (msg.pot * 0.25) && action === "call") {
-        action = "fold";
-    }
+    if (action === "fold" && allowedActions.includes("check")) action = "check";
 
     const actionMsg = {};
     if (action === "fold") {
@@ -220,30 +243,13 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
       return match ? JSON.parse(match[0]) : null;
     } catch { return null; }
   }
-
-  evaluateHandStrength(cards, board) {
-    const all = [...cards, ...board];
-    if (all.length < 2) return 0.5;
-    const ranks = all.map(c => c[0]);
-    const pairs = ranks.filter((r, i) => ranks.indexOf(r) !== i);
-
-    // Pre-flop logic
-    if (board.length === 0) {
-        if (pairs.length > 0) return 0.8; // Pair in hand
-        if (ranks.includes('A') || ranks.includes('K')) return 0.7; // High cards
-        return 0.4;
-    }
-
-    // Post-flop logic
-    if (pairs.length >= 2) return 0.9; // Two pairs or better
-    if (pairs.length === 1) return 0.65; // One pair
-    if (ranks.includes('A')) return 0.5; // Ace high
-    return 0.25; // Nothing
-  }
 }
+
+app.get("/health", (req, res) => res.json({ status: "healthy", ollama: ollamaClient ? "connected" : "off" }));
 
 app.post("/spawn", (req, res) => {
   const { gameCode, playerName, provider, server, port } = req.body;
+  log.Template({ name: "brakets", title: "SERVICE:SPAWN", date: true }).R({ gameCode, bot: playerName });
   new PokerBot({ gameCode, playerName, provider, server, port });
   res.json({ message: `Spawned ${playerName}` });
 });

@@ -221,7 +221,9 @@ const formatDate = (dateStr) => {
 </script>
 
 <style scoped>
-.font-bebas { font-family: 'Bebas Neue', sans-serif; }
+.font-bebas { font-family: var(--font-display); }
+.font-mono { font-family: var(--font-mono); }
+.font-sans { font-family: var(--font-sans); }
 
 .animate-fade-down {
   animation: fade-down 0.5s both;
