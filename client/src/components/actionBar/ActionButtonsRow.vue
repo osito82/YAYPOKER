@@ -1,5 +1,8 @@
 <template>
-  <div :id="`hud-action-buttons-row-${templateSuffix}`" class="flex gap-2 w-full h-11 lg:h-13">
+  <div
+    :id="`hud-action-buttons-row-${templateSuffix}`"
+    class="flex gap-2 w-full h-11 lg:h-13"
+  >
     <template v-if="canBlind">
       <button
         :id="`hud-post-blind-button-${templateSuffix}`"
@@ -46,7 +49,9 @@
         @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
         :disabled="isRaiseActionDisabled"
         class="btn-raise flex-[1.5] font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
-        :class="[pokerStore.blindsIncreasedFlag ? 'animate-pulse scale-105 z-10' : '']"
+        :class="[
+          pokerStore.blindsIncreasedFlag ? 'animate-pulse scale-105 z-10' : '',
+        ]"
       >
         {{ options.includes('bet') ? 'Bet' : 'Raise' }}
       </button>
@@ -112,19 +117,25 @@ defineEmits(['action'])
   background: linear-gradient(135deg, #eab308 0%, #ca8a04 60%, #a16207 100%);
   border: 1px solid rgba(234, 179, 8, 0.6);
   color: #1a0f00;
-  box-shadow: 0 2px 12px rgba(234, 179, 8, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
-  text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow:
+    0 2px 12px rgba(234, 179, 8, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 .btn-raise:hover:not(:disabled) {
   background: linear-gradient(135deg, #facc15 0%, #ca8a04 60%, #a16207 100%);
-  box-shadow: 0 4px 20px rgba(234, 179, 8, 0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow:
+    0 4px 20px rgba(234, 179, 8, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .btn-blind {
   background: linear-gradient(135deg, #eab308 0%, #ca8a04 60%, #a16207 100%);
   border: 1px solid rgba(234, 179, 8, 0.6);
   color: #1a0f00;
-  box-shadow: 0 2px 12px rgba(234, 179, 8, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow:
+    0 2px 12px rgba(234, 179, 8, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 .btn-blind:hover {
   background: linear-gradient(135deg, #facc15 0%, #ca8a04 60%, #a16207 100%);

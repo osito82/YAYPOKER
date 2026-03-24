@@ -1,5 +1,8 @@
 <template>
-  <div :id="`status-indicator-container-${templateSuffix}`" class="flex items-center">
+  <div
+    :id="`status-indicator-container-${templateSuffix}`"
+    class="flex items-center"
+  >
     <Transition
       enter-active-class="transition duration-300 ease-out"
       enter-from-class="transform translate-y-4 opacity-0"

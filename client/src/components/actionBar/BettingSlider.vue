@@ -14,9 +14,20 @@
       :disabled="isSliderDisabled"
       class="slider-input flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
     />
-    <div :id="`hud-bet-amount-display-box-${templateSuffix}`" class="bet-amount-display">
-      <span :id="`hud-bet-label-${templateSuffix}`" class="text-[9px] font-black text-yellow-500/60 uppercase leading-none">Bet</span>
-      <span :id="`hud-bet-value-text-${templateSuffix}`" class="text-sm font-mono font-black text-yellow-400 leading-none">${{ betAmount }}</span>
+    <div
+      :id="`hud-bet-amount-display-box-${templateSuffix}`"
+      class="bet-amount-display"
+    >
+      <span
+        :id="`hud-bet-label-${templateSuffix}`"
+        class="text-[9px] font-black text-yellow-500/60 uppercase leading-none"
+        >Bet</span
+      >
+      <span
+        :id="`hud-bet-value-text-${templateSuffix}`"
+        class="text-sm font-mono font-black text-yellow-400 leading-none"
+        >${{ betAmount }}</span
+      >
     </div>
   </div>
 </template>
@@ -44,12 +55,12 @@ const betProxy = computed({
 
 <style scoped>
 .betting-slider-wrap {
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(234, 179, 8, 0.15);
 }
 
 .slider-input {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
   accent-color: #eab308;
 }
 
@@ -57,17 +68,24 @@ const betProxy = computed({
   -webkit-appearance: none;
   width: 18px;
   height: 18px;
-  background: radial-gradient(circle at 35% 35%, #f5c842 0%, #eab308 60%, #a07810 100%);
+  background: radial-gradient(
+    circle at 35% 35%,
+    #f5c842 0%,
+    #eab308 60%,
+    #a07810 100%
+  );
   border-radius: 50%;
   cursor: pointer;
-  border: 2px solid rgba(255,220,80,0.4);
-  box-shadow: 0 0 8px rgba(234, 179, 8, 0.4), 0 2px 4px rgba(0,0,0,0.4);
+  border: 2px solid rgba(255, 220, 80, 0.4);
+  box-shadow:
+    0 0 8px rgba(234, 179, 8, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .slider-input::-webkit-slider-track {
   height: 6px;
   border-radius: 3px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .bet-amount-display {

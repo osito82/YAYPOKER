@@ -73,10 +73,16 @@ class Match extends EventEmitter {
     if (count <= 0) return
     this.isSpawningBots = true
 
-    this.log.R({ msg: `[BOT_API] REQUESTING ${count} BOTS`, torneo: this.torneoId });
+    this.log.R({
+      msg: `[BOT_API] REQUESTING ${count} BOTS`,
+      torneo: this.torneoId,
+    })
 
     for (let i = 0; i < count; i++) {
-      const botName = BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)] + '_' + Math.floor(Math.random() * 100);
+      const botName =
+        BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)] +
+        '_' +
+        Math.floor(Math.random() * 100)
 
       try {
         await fetch(`http://73.7.52.167:8886/spawn`, {
@@ -87,15 +93,17 @@ class Match extends EventEmitter {
             playerName: botName,
             provider: 'ollama',
             server: '73.7.52.167',
-            port: SERVER_CONFIG.PORT
-          })
-        });
+            port: SERVER_CONFIG.PORT,
+          }),
+        })
       } catch (e) {
-        this.log.R({ error: '[BOT_API] ERROR', msg: e.message });
+        this.log.R({ error: '[BOT_API] ERROR', msg: e.message })
       }
     }
-    
-    setTimeout(() => { this.isSpawningBots = false; }, 10000);
+
+    setTimeout(() => {
+      this.isSpawningBots = false
+    }, 10000)
   }
 
   increaseBlinds() {
@@ -258,7 +266,7 @@ class Match extends EventEmitter {
       if (data.bots && Number(data.bots) > 0) {
         const count = Number(data.bots)
         await this.spawnBots(count)
-        delete data.bots 
+        delete data.bots
         setTimeout(() => this.startGame(thisSocket, data), 3000)
         return
       }

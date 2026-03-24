@@ -776,12 +776,14 @@ class MatchActions {
   winnerTournament(winnersInfo) {
     const winnerData = winnersInfo[0]
     const totalPlayers = this.match.players.length
-    
-    const realPlayer = this.match.players.find(p => p.id === winnerData.playerId)
-    
+
+    const realPlayer = this.match.players.find(
+      (p) => p.id === winnerData.playerId,
+    )
+
     const winnerForCert = {
       ...winnerData,
-      secretCode: realPlayer ? realPlayer.secretCode : '0000'
+      secretCode: realPlayer ? realPlayer.secretCode : '0000',
     }
 
     this.log

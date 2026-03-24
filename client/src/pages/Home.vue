@@ -11,7 +11,9 @@
       :id="`landing-nav-bar-${templateSuffix}`"
       class="fixed top-0 left-0 right-0 z-50 nav-blur"
     >
-      <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div
+        class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center"
+      >
         <Logo :id="`nav-logo-${templateSuffix}`" />
         <div
           class="hidden md:flex gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-white/40"
@@ -52,22 +54,37 @@
       <div :id="`hero-glow-red-${templateSuffix}`" class="glow glow-red"></div>
 
       <!-- Card suit decorations -->
-      <div :id="`hero-suit-deco-1-${templateSuffix}`" class="suit-deco suit-deco-1">
+      <div
+        :id="`hero-suit-deco-1-${templateSuffix}`"
+        class="suit-deco suit-deco-1"
+      >
         ♠
       </div>
-      <div :id="`hero-suit-deco-2-${templateSuffix}`" class="suit-deco suit-deco-2">
+      <div
+        :id="`hero-suit-deco-2-${templateSuffix}`"
+        class="suit-deco suit-deco-2"
+      >
         ♥
       </div>
-      <div :id="`hero-suit-deco-3-${templateSuffix}`" class="suit-deco suit-deco-3">
+      <div
+        :id="`hero-suit-deco-3-${templateSuffix}`"
+        class="suit-deco suit-deco-3"
+      >
         ♦
       </div>
 
       <div class="max-w-6xl mx-auto w-full relative z-10">
         <!-- Eyebrow -->
-        <div :id="`hero-eyebrow-badge-${templateSuffix}`" class="eyebrow-badge mb-10">
-          <span :id="`hero-eyebrow-dot-${templateSuffix}`" class="eyebrow-dot"></span>
-          Free to play &nbsp;·&nbsp; No account needed &nbsp;·&nbsp; Works on any
-          device
+        <div
+          :id="`hero-eyebrow-badge-${templateSuffix}`"
+          class="eyebrow-badge mb-10"
+        >
+          <span
+            :id="`hero-eyebrow-dot-${templateSuffix}`"
+            class="eyebrow-dot"
+          ></span>
+          Free to play &nbsp;·&nbsp; No account needed &nbsp;·&nbsp; Works on
+          any device
         </div>
 
         <!-- Headline -->
@@ -78,7 +95,10 @@
         </h1>
 
         <!-- Sub -->
-        <p :id="`hero-sub-description-${templateSuffix}`" class="hero-sub mt-8 mb-14 max-w-xl">
+        <p
+          :id="`hero-sub-description-${templateSuffix}`"
+          class="hero-sub mt-8 mb-14 max-w-xl"
+        >
           Spin up a private table in seconds, share a link, and deal with your
           friends — wherever they are. No app downloads. No real money. Just the
           game.
@@ -118,8 +138,14 @@
         </div>
 
         <!-- Social proof strip -->
-        <div :id="`hero-social-proof-${templateSuffix}`" class="social-strip mt-16">
-          <div :id="`hero-social-avatars-${templateSuffix}`" class="social-avatars">
+        <div
+          :id="`hero-social-proof-${templateSuffix}`"
+          class="social-strip mt-16"
+        >
+          <div
+            :id="`hero-social-avatars-${templateSuffix}`"
+            class="social-avatars"
+          >
             <span class="avatar" style="background: #4f46e5">J</span>
             <span class="avatar" style="background: #0891b2">M</span>
             <span class="avatar" style="background: #be185d">A</span>
@@ -138,7 +164,10 @@
 
       <!-- Scroll hint -->
       <div :id="`hero-scroll-hint-${templateSuffix}`" class="scroll-hint">
-        <span :id="`hero-scroll-line-${templateSuffix}`" class="scroll-line"></span>
+        <span
+          :id="`hero-scroll-line-${templateSuffix}`"
+          class="scroll-line"
+        ></span>
         <span
           class="text-[10px] text-white/25 uppercase tracking-[0.3em] font-bold mt-3"
           >Scroll</span
@@ -156,7 +185,10 @@
         <div :id="`how-label-${templateSuffix}`" class="section-label mb-4">
           How it works
         </div>
-        <h2 :id="`how-headline-${templateSuffix}`" class="section-heading mb-20">
+        <h2
+          :id="`how-headline-${templateSuffix}`"
+          class="section-heading mb-20"
+        >
           From zero to all-in<br />in under a minute.
         </h2>
 
@@ -198,15 +230,24 @@
       class="py-32 px-6"
     >
       <div class="max-w-6xl mx-auto">
-        <div :id="`features-label-${templateSuffix}`" class="section-label mb-4">
+        <div
+          :id="`features-label-${templateSuffix}`"
+          class="section-label mb-4"
+        >
           Features
         </div>
-        <h2 :id="`features-headline-${templateSuffix}`" class="section-heading mb-20">
+        <h2
+          :id="`features-headline-${templateSuffix}`"
+          class="section-heading mb-20"
+        >
           Everything you need.<br />Nothing you don't.
         </h2>
 
         <div :id="`features-grid-${templateSuffix}`" class="features-grid">
-          <div :id="`feature-card-money-${templateSuffix}`" class="feature-card feature-card-large">
+          <div
+            :id="`feature-card-money-${templateSuffix}`"
+            class="feature-card feature-card-large"
+          >
             <div class="feature-icon feature-icon-green">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -231,7 +272,10 @@
             </p>
           </div>
 
-          <div :id="`feature-card-setup-${templateSuffix}`" class="feature-card">
+          <div
+            :id="`feature-card-setup-${templateSuffix}`"
+            class="feature-card"
+          >
             <div class="feature-icon feature-icon-blue">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -254,7 +298,10 @@
             </p>
           </div>
 
-          <div :id="`feature-card-private-${templateSuffix}`" class="feature-card">
+          <div
+            :id="`feature-card-private-${templateSuffix}`"
+            class="feature-card"
+          >
             <div class="feature-icon feature-icon-amber">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -277,7 +324,10 @@
             </p>
           </div>
 
-          <div :id="`feature-card-responsive-${templateSuffix}`" class="feature-card">
+          <div
+            :id="`feature-card-responsive-${templateSuffix}`"
+            class="feature-card"
+          >
             <div class="feature-icon feature-icon-pink">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -305,7 +355,10 @@
     </section>
 
     <!-- ───────── QUOTE / PULL ───────── -->
-    <section :id="`quote-section-${templateSuffix}`" class="py-32 px-6 border-y border-white/5 bg-white/[0.02]">
+    <section
+      :id="`quote-section-${templateSuffix}`"
+      class="py-32 px-6 border-y border-white/5 bg-white/[0.02]"
+    >
       <div class="max-w-4xl mx-auto text-center">
         <p :id="`quote-text-content-${templateSuffix}`" class="quote-text">
           "The best part of poker night was never the cards. It was the stories
@@ -323,8 +376,17 @@
         class="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-16"
       >
         <div>
-          <div :id="`final-cta-label-${templateSuffix}`" class="section-label mb-4">Ready?</div>
-          <h2 :id="`final-cta-headline-${templateSuffix}`" class="section-heading" style="max-width: 520px">
+          <div
+            :id="`final-cta-label-${templateSuffix}`"
+            class="section-label mb-4"
+          >
+            Ready?
+          </div>
+          <h2
+            :id="`final-cta-headline-${templateSuffix}`"
+            class="section-heading"
+            style="max-width: 520px"
+          >
             Start your table.<br />Deal the first hand.
           </h2>
         </div>
@@ -332,7 +394,11 @@
           :id="`final-cta-actions-wrapper-${templateSuffix}`"
           class="flex flex-col sm:flex-row gap-4 lg:pb-2"
         >
-          <router-link to="/new" :id="`final-cta-btn-create-${templateSuffix}`" class="btn-primary">
+          <router-link
+            to="/new"
+            :id="`final-cta-btn-create-${templateSuffix}`"
+            class="btn-primary"
+          >
             Create a table
             <svg
               class="btn-arrow"
@@ -347,7 +413,11 @@
               />
             </svg>
           </router-link>
-          <router-link to="/lobby" :id="`final-cta-btn-browse-${templateSuffix}`" class="btn-secondary">
+          <router-link
+            to="/lobby"
+            :id="`final-cta-btn-browse-${templateSuffix}`"
+            class="btn-secondary"
+          >
             Browse open tables
           </router-link>
         </div>
@@ -355,13 +425,19 @@
     </section>
 
     <!-- ───────── FOOTER ───────── -->
-    <footer :id="`landing-footer-${templateSuffix}`" class="py-16 border-t border-white/5 px-6">
+    <footer
+      :id="`landing-footer-${templateSuffix}`"
+      class="py-16 border-t border-white/5 px-6"
+    >
       <div
         class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-10"
       >
         <div class="max-w-xs">
           <Logo :id="`footer-logo-${templateSuffix}`" class="mb-5 opacity-60" />
-          <p :id="`footer-disclaimer-${templateSuffix}`" class="text-[11px] text-white/20 font-medium leading-relaxed">
+          <p
+            :id="`footer-disclaimer-${templateSuffix}`"
+            class="text-[11px] text-white/20 font-medium leading-relaxed"
+          >
             YayPoker is a free social game. No real money changes hands on this
             platform. Virtual chips have no monetary value. Side arrangements
             between players are solely their responsibility.
@@ -371,13 +447,34 @@
           :id="`footer-copyright-wrapper-${templateSuffix}`"
           class="flex flex-col items-start md:items-end gap-3"
         >
-          <p :id="`footer-copyright-text-${templateSuffix}`" class="text-[11px] text-white/20 font-bold uppercase tracking-widest">
+          <p
+            :id="`footer-copyright-text-${templateSuffix}`"
+            class="text-[11px] text-white/20 font-bold uppercase tracking-widest"
+          >
             &copy; 2026 YayPoker
           </p>
-          <div :id="`footer-links-wrapper-${templateSuffix}`" class="flex gap-6 text-[11px] text-white/30 font-medium">
-            <a href="#" :id="`footer-link-privacy-${templateSuffix}`" class="hover:text-white/60 transition-colors">Privacy</a>
-            <a href="#" :id="`footer-link-terms-${templateSuffix}`" class="hover:text-white/60 transition-colors">Terms</a>
-            <a href="#" :id="`footer-link-contact-${templateSuffix}`" class="hover:text-white/60 transition-colors">Contact</a>
+          <div
+            :id="`footer-links-wrapper-${templateSuffix}`"
+            class="flex gap-6 text-[11px] text-white/30 font-medium"
+          >
+            <a
+              href="#"
+              :id="`footer-link-privacy-${templateSuffix}`"
+              class="hover:text-white/60 transition-colors"
+              >Privacy</a
+            >
+            <a
+              href="#"
+              :id="`footer-link-terms-${templateSuffix}`"
+              class="hover:text-white/60 transition-colors"
+              >Terms</a
+            >
+            <a
+              href="#"
+              :id="`footer-link-contact-${templateSuffix}`"
+              class="hover:text-white/60 transition-colors"
+              >Contact</a
+            >
           </div>
         </div>
       </div>

@@ -29,7 +29,9 @@
         >
           <span
             class="text-[9px] font-mono font-bold text-white uppercase tracking-wider leading-none"
-            >Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}</span
+            >Blinds ${{ pokerStore.smallBlind }}/${{
+              pokerStore.bigBlind
+            }}</span
           >
           <h1
             class="text-[8px] font-black text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80 leading-none"
@@ -114,7 +116,8 @@
         <footer id="game-hud-bar-TemplateSmall" class="shrink-0 z-50">
           <ActionBar
             :isMyTurn="isMyTurn"
-            :canBlind="canBlind" :blindInfo="blindInfo"
+            :canBlind="canBlind"
+            :blindInfo="blindInfo"
             :options="options"
             :balance="myPlayer?.chips || 0"
             :currentBet="myPlayer?.currentBet || 0"

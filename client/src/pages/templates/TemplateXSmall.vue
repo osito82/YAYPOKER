@@ -46,7 +46,8 @@
       <ActionBar
         id="action-bar-component-TemplateXSmall"
         :isMyTurn="isMyTurn"
-        :canBlind="canBlind" :blindInfo="blindInfo"
+        :canBlind="canBlind"
+        :blindInfo="blindInfo"
         :options="options"
         :balance="myPlayer?.chips || 0"
         :currentBet="myPlayer?.currentBet || 0"

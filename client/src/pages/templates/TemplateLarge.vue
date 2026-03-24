@@ -9,44 +9,115 @@
       class="w-full backdrop-blur-xl border-b border-white/[0.06] px-6 py-0 flex items-stretch z-50 shrink-0 header-bar"
     >
       <!-- LEFT SECTION -->
-      <div id="header-left-content-TemplateLarge" class="flex items-center gap-4 py-2.5">
-        <div id="header-logo-wrapper-TemplateLarge" class="header-logo-wrap shrink-0">
-          <span id="header-logo-text-TemplateLarge" class="text-black font-black text-sm">Y</span>
+      <div
+        id="header-left-content-TemplateLarge"
+        class="flex items-center gap-4 py-2.5"
+      >
+        <div
+          id="header-logo-wrapper-TemplateLarge"
+          class="header-logo-wrap shrink-0"
+        >
+          <span
+            id="header-logo-text-TemplateLarge"
+            class="text-black font-black text-sm"
+            >Y</span
+          >
         </div>
-        <div id="header-divider-TemplateLarge" class="h-5 w-px bg-white/8"></div>
-        <div id="game-metadata-info-TemplateLarge" class="flex flex-col justify-center">
-          <div id="blinds-info-wrapper-TemplateLarge" class="flex items-center gap-2 leading-none">
-            <span id="blinds-text-TemplateLarge" class="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider">
+        <div
+          id="header-divider-TemplateLarge"
+          class="h-5 w-px bg-white/8"
+        ></div>
+        <div
+          id="game-metadata-info-TemplateLarge"
+          class="flex flex-col justify-center"
+        >
+          <div
+            id="blinds-info-wrapper-TemplateLarge"
+            class="flex items-center gap-2 leading-none"
+          >
+            <span
+              id="blinds-text-TemplateLarge"
+              class="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider"
+            >
               Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}
             </span>
-            <span id="game-id-text-TemplateLarge" class="text-[9px] font-mono text-white/25 border-l border-white/10 pl-2">
+            <span
+              id="game-id-text-TemplateLarge"
+              class="text-[9px] font-mono text-white/25 border-l border-white/10 pl-2"
+            >
               ID: {{ gameCode }}
             </span>
           </div>
-          <h1 id="game-type-title-TemplateLarge" class="text-[9px] font-black text-amber-500/70 uppercase tracking-widest mt-0.5">
+          <h1
+            id="game-type-title-TemplateLarge"
+            class="text-[9px] font-black text-amber-500/70 uppercase tracking-widest mt-0.5"
+          >
             No Limit Hold'em
           </h1>
         </div>
       </div>
 
       <!-- RIGHT SECTION -->
-      <div id="header-right-content-TemplateLarge" class="flex items-center gap-3 ml-auto py-2.5">
-        <div id="players-online-pill-TemplateLarge" class="flex items-center gap-1.5 px-2 py-1 rounded-md header-pill">
-          <div id="online-indicator-dot-TemplateLarge" class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_4px_rgba(74,222,128,0.8)]"></div>
-          <span id="online-count-text-TemplateLarge" class="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-tighter">{{ allPlayers.length }} Online</span>
+      <div
+        id="header-right-content-TemplateLarge"
+        class="flex items-center gap-3 ml-auto py-2.5"
+      >
+        <div
+          id="players-online-pill-TemplateLarge"
+          class="flex items-center gap-1.5 px-2 py-1 rounded-md header-pill"
+        >
+          <div
+            id="online-indicator-dot-TemplateLarge"
+            class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_4px_rgba(74,222,128,0.8)]"
+          ></div>
+          <span
+            id="online-count-text-TemplateLarge"
+            class="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-tighter"
+            >{{ allPlayers.length }} Online</span
+          >
         </div>
 
-        <div id="connection-status-badge-TemplateLarge" class="header-conn-badge px-3 py-1 rounded-full flex items-center gap-1.5 shrink-0">
-          <div id="conn-indicator-dot-TemplateLarge" class="w-1.5 h-1.5 rounded-full" :class="isConnected ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.8)]' : 'bg-red-500'"></div>
-          <span id="conn-status-text-TemplateLarge" class="text-[9px] font-bold uppercase tracking-widest" :class="isConnected ? 'text-green-400' : 'text-red-400'">{{ isConnected ? 'Live' : 'Offline' }}</span>
+        <div
+          id="connection-status-badge-TemplateLarge"
+          class="header-conn-badge px-3 py-1 rounded-full flex items-center gap-1.5 shrink-0"
+        >
+          <div
+            id="conn-indicator-dot-TemplateLarge"
+            class="w-1.5 h-1.5 rounded-full"
+            :class="
+              isConnected
+                ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.8)]'
+                : 'bg-red-500'
+            "
+          ></div>
+          <span
+            id="conn-status-text-TemplateLarge"
+            class="text-[9px] font-bold uppercase tracking-widest"
+            :class="isConnected ? 'text-green-400' : 'text-red-400'"
+            >{{ isConnected ? 'Live' : 'Offline' }}</span
+          >
         </div>
 
-        <div id="player-profile-badge-TemplateLarge" class="header-player-badge px-4 py-1 rounded-full shrink-0">
-          <span id="current-player-name-TemplateLarge" class="text-[11px] font-black text-amber-400 uppercase tracking-widest">{{ playerName }}</span>
+        <div
+          id="player-profile-badge-TemplateLarge"
+          class="header-player-badge px-4 py-1 rounded-full shrink-0"
+        >
+          <span
+            id="current-player-name-TemplateLarge"
+            class="text-[11px] font-black text-amber-400 uppercase tracking-widest"
+            >{{ playerName }}</span
+          >
         </div>
 
-        <div id="server-time-wrapper-TemplateLarge" class="flex flex-col items-end leading-none border-l border-white/8 pl-3">
-          <span id="server-time-text-TemplateLarge" class="text-[11px] font-mono font-bold text-gray-400">{{ serverTime }}</span>
+        <div
+          id="server-time-wrapper-TemplateLarge"
+          class="flex flex-col items-end leading-none border-l border-white/8 pl-3"
+        >
+          <span
+            id="server-time-text-TemplateLarge"
+            class="text-[11px] font-mono font-bold text-gray-400"
+            >{{ serverTime }}</span
+          >
         </div>
       </div>
     </header>
@@ -115,7 +186,8 @@
       <ActionBar
         id="action-bar-component-TemplateLarge"
         :isMyTurn="isMyTurn"
-        :canBlind="canBlind" :blindInfo="blindInfo"
+        :canBlind="canBlind"
+        :blindInfo="blindInfo"
         :options="options"
         :balance="myPlayer?.chips || 0"
         :currentBet="myPlayer?.currentBet || 0"
@@ -169,9 +241,15 @@ defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
 
 <style scoped>
 .header-bar {
-  background: linear-gradient(180deg, rgba(5,5,5,0.97) 0%, rgba(10,10,10,0.92) 100%);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 4px 20px rgba(0,0,0,0.5);
+  background: linear-gradient(
+    180deg,
+    rgba(5, 5, 5, 0.97) 0%,
+    rgba(10, 10, 10, 0.92) 100%
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.02),
+    0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .header-logo-wrap {
@@ -182,22 +260,24 @@ defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 10px rgba(212,160,23,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  box-shadow:
+    0 0 10px rgba(212, 160, 23, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   flex-shrink: 0;
 }
 
 .header-pill {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .header-conn-badge {
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .header-player-badge {
-  background: rgba(212,160,23,0.08);
-  border: 1px solid rgba(212,160,23,0.2);
+  background: rgba(212, 160, 23, 0.08);
+  border: 1px solid rgba(212, 160, 23, 0.2);
 }
 </style>

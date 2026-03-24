@@ -77,7 +77,9 @@ const cropStyle = computed(() => {
 .card-back {
   background: linear-gradient(145deg, #1a3a5c 0%, #0f2340 50%, #0a1a30 100%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3),
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    0 1px 4px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
@@ -86,7 +88,8 @@ const cropStyle = computed(() => {
 }
 
 .pattern-inner {
-  background-image: repeating-linear-gradient(
+  background-image:
+    repeating-linear-gradient(
       45deg,
       transparent,
       transparent 4px,

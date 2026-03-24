@@ -2,11 +2,7 @@
   <div
     :id="'seat-wrapper-' + playerName + '-' + responsive.templateSuffix"
     class="relative group flex items-center p-3 rounded-xl border transition-all duration-1000 w-full overflow-hidden seat-base"
-    :class="
-      isActive
-        ? 'seat-active'
-        : 'seat-idle hover:border-white/15'
-    "
+    :class="isActive ? 'seat-active' : 'seat-idle hover:border-white/15'"
   >
     <!-- Active Turn Pulse -->
     <div
@@ -70,7 +66,9 @@
       >
         <div class="flex items-center gap-2 min-w-0">
           <!-- Player Number Badge -->
-          <div class="w-5 h-5 flex items-center justify-center rounded bg-white/10 border border-white/5 text-[9px] font-black text-white/50 shrink-0">
+          <div
+            class="w-5 h-5 flex items-center justify-center rounded bg-white/10 border border-white/5 text-[9px] font-black text-white/50 shrink-0"
+          >
             {{ playerNumber }}
           </div>
           <span
@@ -198,20 +196,22 @@ defineProps({
 
 <style scoped>
 .seat-base {
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .seat-idle {
-  border-color: rgba(255,255,255,0.08);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 .seat-idle:hover {
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
 }
 
 .seat-active {
-  background: rgba(212,160,23,0.1);
-  border-color: rgba(212,160,23,0.5);
-  box-shadow: 0 0 20px rgba(212,160,23,0.15), inset 0 0 20px rgba(212,160,23,0.04);
+  background: rgba(212, 160, 23, 0.1);
+  border-color: rgba(212, 160, 23, 0.5);
+  box-shadow:
+    0 0 20px rgba(212, 160, 23, 0.15),
+    inset 0 0 20px rgba(212, 160, 23, 0.04);
   transform: scale(1.02);
   transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
 }

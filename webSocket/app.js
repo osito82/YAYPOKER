@@ -181,13 +181,16 @@ wss.on('connection', (ws, req) => {
     if (data) {
       try {
         jsonData = JSON.parse(data)
-        
+
         // LOG DE EMERGENCIA: Ver qué llega realmente
         if (jsonData.action === 'startGame') {
-          console.log('------------------------------------------');
-          console.log('[DEBUG] RECEIVED startGame from client');
-          console.log('[DEBUG] Full Payload:', JSON.stringify(jsonData, null, 2));
-          console.log('------------------------------------------');
+          console.log('------------------------------------------')
+          console.log('[DEBUG] RECEIVED startGame from client')
+          console.log(
+            '[DEBUG] Full Payload:',
+            JSON.stringify(jsonData, null, 2),
+          )
+          console.log('------------------------------------------')
         }
 
         log

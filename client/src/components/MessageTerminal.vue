@@ -16,7 +16,9 @@
           >Game Log</span
         >
         <div class="ml-auto flex items-center gap-1">
-          <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+          <div
+            class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
+          ></div>
           <span class="text-[8px] font-mono text-green-500/60 uppercase"
             >Live</span
           >

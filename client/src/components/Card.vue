@@ -199,7 +199,11 @@ const cropStyle = computed(() => {
 }
 
 .card-inner-shine {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    transparent 50%
+  );
   border: 1px solid rgba(255, 255, 255, 0.8);
 }
 

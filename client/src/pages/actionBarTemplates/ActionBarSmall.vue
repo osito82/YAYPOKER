@@ -50,7 +50,8 @@
 
           <ActionButtonsRow
             :isMyTurn="isMyTurn"
-            :canBlind="canBlind" :blindInfo="blindInfo"
+            :canBlind="canBlind"
+            :blindInfo="blindInfo"
             :options="options"
             :isRaiseActionDisabled="isRaiseActionDisabled"
             @action="(a) => $emit('action', a)"
