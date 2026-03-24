@@ -12,7 +12,11 @@
         'rounded-xl flex justify-center items-center card-slot',
       ]"
     >
-      <span :id="`card-space-suit-icon-${templateSuffix}`" class="card-slot-suit">♦</span>
+      <span
+        :id="`card-space-suit-icon-${templateSuffix}`"
+        class="card-slot-suit"
+        >♦</span
+      >
     </div>
   </div>
 </template>

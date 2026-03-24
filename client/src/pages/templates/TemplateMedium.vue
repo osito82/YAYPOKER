@@ -23,16 +23,24 @@
             >Y</span
           >
         </div>
-        <div id="header-divider-TemplateMedium" class="h-6 w-px bg-white/10"></div>
+        <div
+          id="header-divider-TemplateMedium"
+          class="h-6 w-px bg-white/10"
+        ></div>
         <div
           id="game-metadata-info-TemplateMedium"
           class="flex flex-col justify-center"
         >
-          <div id="blinds-info-wrapper-TemplateMedium" class="flex items-center gap-2 leading-none">
+          <div
+            id="blinds-info-wrapper-TemplateMedium"
+            class="flex items-center gap-2 leading-none"
+          >
             <span
               id="blinds-text-TemplateMedium"
               class="text-[10px] font-mono font-bold text-white uppercase tracking-wider"
-              >Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}</span
+              >Blinds ${{ pokerStore.smallBlind }}/${{
+                pokerStore.bigBlind
+              }}</span
             >
             <span
               id="game-id-text-TemplateMedium"
@@ -145,7 +153,10 @@
           id="game-message-terminal-wrapper-TemplateMedium"
           class="h-[120px] border-t border-white/5 bg-black/40 shrink-0"
         >
-          <MessageTerminal id="terminal-component-TemplateMedium" :logs="logs" />
+          <MessageTerminal
+            id="terminal-component-TemplateMedium"
+            :logs="logs"
+          />
         </div>
 
         <!-- SIDEPANEL (Now below terminal) -->
@@ -165,7 +176,8 @@
       <ActionBar
         id="action-bar-component-TemplateMedium"
         :isMyTurn="isMyTurn"
-        :canBlind="canBlind" :blindInfo="blindInfo"
+        :canBlind="canBlind"
+        :blindInfo="blindInfo"
         :options="options"
         :balance="myPlayer?.chips || 0"
         :currentBet="myPlayer?.currentBet || 0"

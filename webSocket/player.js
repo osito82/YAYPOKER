@@ -16,6 +16,8 @@ class Player {
     this.playerNumber = playerNumber
     this.currentBet = 0
     this.handContribution = 0
+    this.isBot =
+      name.toLowerCase().includes('bot') || name.toLowerCase().includes('_ia')
   }
 
   currentPrize = {}
@@ -117,7 +119,6 @@ class Player {
     const diff = amount - this.currentBet
     if (diff < 0) return false
 
-    // Poker Rule: If you don't have enough, you go All-In for the rest
     if (diff > this.chips) {
       this.handContribution += this.chips
       this.currentBet += this.chips
@@ -139,6 +140,7 @@ class Player {
       name: this.name,
       chips: this.chips,
       currentBet: this.currentBet,
+      handContribution: this.handContribution, // ✅ AHORA SE ENVÍA
       folded: this.folded,
       isAllIn: this.isAllIn,
       isStarted: this.isStarted,
@@ -146,6 +148,7 @@ class Player {
       lastAction: this.lastAction,
       playerNumber: this.playerNumber,
       currentPrize: this.currentPrize,
+      isBot: this.isBot,
     }
   }
 }

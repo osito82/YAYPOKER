@@ -218,8 +218,11 @@ onUnmounted(() => {
   );
   border: 1px solid rgba(234, 179, 8, 0.25);
   border-top: none;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 0 20px rgba(234, 179, 8, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 0 20px rgba(234, 179, 8, 0.08);
 }
 
 .no-scrollbar::-webkit-scrollbar {

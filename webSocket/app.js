@@ -19,12 +19,25 @@ const {
 } = require('./constants')
 
 const app = express()
+
+// ✅ AGREGADO: Middleware de CORS quirúrgico para permitir peticiones desde el frontend
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200)
+  }
+  next()
+})
+
 const server = http.createServer(app)
 const wss = new WebSocket.Server({ server })
 
 const Match = require('./match')
 const Socket = require('./sockets')
 const Torneo = require('./torneo')
+const WinnerCertificate = require('./winnerCertificate')
 
 const startTime = new Date()
 
@@ -168,6 +181,18 @@ wss.on('connection', (ws, req) => {
     if (data) {
       try {
         jsonData = JSON.parse(data)
+
+        // LOG DE EMERGENCIA: Ver qué llega realmente
+        if (jsonData.action === 'startGame') {
+          console.log('------------------------------------------')
+          console.log('[DEBUG] RECEIVED startGame from client')
+          console.log(
+            '[DEBUG] Full Payload:',
+            JSON.stringify(jsonData, null, 2),
+          )
+          console.log('------------------------------------------')
+        }
+
         log
           .Template({
             name: 'brakets',
@@ -305,6 +330,24 @@ app.get('/status', (req, res) => {
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' })
+})
+
+app.get('/verify/:torneoId/:code', (req, res) => {
+  const { torneoId, code } = req.params
+  const result = WinnerCertificate.verifyCertificate(torneoId, code)
+  res.json(result)
+})
+
+app.get('/certificate/:torneoId', (req, res) => {
+  const cert = WinnerCertificate.getCertificate(req.params.torneoId)
+  if (!cert) return res.status(404).json({ error: 'Not found' })
+  res.json({
+    torneoId: cert.torneoId,
+    winnerName: cert.winnerName,
+    date: cert.date,
+    totalPlayers: cert.totalPlayers,
+    verified: cert.verified,
+  })
 })
 
 app.get('/*splat', (req, res) => {

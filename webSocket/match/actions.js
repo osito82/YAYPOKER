@@ -1,6 +1,7 @@
 const Socket = require('../sockets')
 const { WinnerCore } = require('../winnerCore')
 const { GAME_RULES, TIMEOUTS } = require('../constants')
+const WinnerCertificate = require('../winnerCertificate')
 
 class MatchActions {
   constructor(context) {
@@ -59,7 +60,7 @@ class MatchActions {
       if (this.match.acceptingPlayers) {
         this.match.lobby.noMorePlayers()
       }
-      this.match.activePlayerId = null // ✅ CLEAR TURN IMMEDIATELY
+      this.match.activePlayerId = null
 
       foundPlayer.setLastAction('Fold')
       foundPlayer.setFolded(true)
@@ -84,21 +85,20 @@ class MatchActions {
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
       this.match.comms.sendOdds()
 
-      // Check if only one player remains after folding
       const activePlayers = this.match.getActivePlayers(true)
 
       if (activePlayers.length === 1) {
         return this.winner(activePlayers[0], true)
       }
 
-      this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast) // ✅ Fast transition via events
+      this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
     }
   }
 
   performCheck(foundPlayer) {
     if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
       this.clearAutofold()
-      this.match.activePlayerId = null // ✅ CLEAR TURN IMMEDIATELY
+      this.match.activePlayerId = null
       this.dealer.setPlayerActed(foundPlayer.id)
 
       foundPlayer.setLastAction('Check')
@@ -179,7 +179,7 @@ class MatchActions {
     if (foundPlayer) {
       const success = this.performCheck(foundPlayer)
       if (success) {
-        this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast) // ✅ Fast transition via events
+        this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
       }
     }
   }
@@ -219,7 +219,6 @@ class MatchActions {
     const currentBetBefore = foundPlayer.getCurrentBet()
     const diff = maxBet - currentBetBefore
 
-    // Si no hay nada que igualar, se trata como un Check
     if (diff <= 0) {
       const checkSuccess = this.performCheck(foundPlayer)
       if (checkSuccess) {
@@ -228,7 +227,7 @@ class MatchActions {
       return
     }
 
-    this.match.activePlayerId = null // ✅ CLEAR TURN IMMEDIATELY
+    this.match.activePlayerId = null
 
     let amountAdded = 0
     let actionType = 'Call'
@@ -274,7 +273,7 @@ class MatchActions {
     })
 
     Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
-    this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast) // ✅ Fast transition via events
+    this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
   }
 
   setBet(thisSocket, chipsToBet, type = 'setBet') {
@@ -304,9 +303,8 @@ class MatchActions {
 
     const amount = Number(chipsToBet)
     const currentMaxBet = this.dealer.getCurrentHighestBet()
-    const lastRaise = this.dealer.getLastRaiseAmount() || this.match.bigBlind // Default to Big Blind if no raise yet
+    const lastRaise = this.dealer.getLastRaiseAmount() || this.match.bigBlind
 
-    // REGLA DE MIN-RAISE: El aumento debe ser al menos igual al aumento anterior
     if (type === 'setRise') {
       const myRaiseAmount = amount - currentMaxBet
       if (myRaiseAmount < lastRaise && !foundPlayer.isAllIn) {
@@ -343,7 +341,6 @@ class MatchActions {
       }
     }
 
-    // Validar que al menos sea mayor que la apuesta actual si es raise
     if (type === 'setRise' && amount <= currentMaxBet) {
       this.log
         .Template({
@@ -387,7 +384,7 @@ class MatchActions {
     const success = foundPlayer.setTotalBet(amount)
 
     if (success) {
-      this.match.activePlayerId = null // ✅ CLEAR TURN IMMEDIATELY
+      this.match.activePlayerId = null
       const currentBetAfter = foundPlayer.getCurrentBet()
       const addedChips = currentBetAfter - currentBetBefore
 
@@ -437,7 +434,6 @@ class MatchActions {
       })
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
-      // If we are in blinds phase, use shorter delay to avoid test timeouts/race conditions
       const delay = !this.stepChecker.checkStep('blindsBetting')
         ? TIMEOUTS.fast
         : TIMEOUTS.standard
@@ -544,7 +540,7 @@ class MatchActions {
         })
       this.match.activePlayerId = null
       this.stepChecker.grantStep('blindsBetting')
-      this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast) // ✅ Fast transition via events
+      this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
     } else {
       let p = null
       if (p1Bet === 0) {
@@ -649,11 +645,9 @@ class MatchActions {
       let potWinners = []
 
       if (isFold) {
-        // En caso de fold, el único jugador activo se lleva todos los pots
         const winnerPlayerId = winnerData.playerId || winnerData.id
         potWinners = [this.match.players.find((p) => p.id === winnerPlayerId)]
       } else {
-        // Filtrar manos finales elegibles para este pot (jugadores que contribuyeron y no foldearon)
         const eligibleHands = finalHands.filter(
           (h) => pot.eligiblePlayerIds.includes(h.playerId) && !h.folded,
         )
@@ -716,7 +710,6 @@ class MatchActions {
     const winnersInfo = Object.values(winnersAggregation)
     const pot = this.dealer.getPot()
 
-    // verificar si ya hay ganador del torneo
     const playersWithChips = this.match.players.filter(
       (p) => p.chips > 0 && p.connected,
     )
@@ -731,12 +724,10 @@ class MatchActions {
 
     this.match.waitingForNextRound = true
 
-    // Blind increase check
     if (this.match.handCount % GAME_RULES.BLIND_INCREASE_INTERVAL === 0) {
       this.match.increaseBlinds()
     }
 
-    // Si es victoria por FOLD, auto-iniciar la siguiente ronda tras el delay estándar
     if (isFold && !isTournamentWinner) {
       setTimeout(() => {
         this.emitter.emit('NEXT_ROUND')
@@ -783,7 +774,17 @@ class MatchActions {
   }
 
   winnerTournament(winnersInfo) {
-    const winner = winnersInfo[0]
+    const winnerData = winnersInfo[0]
+    const totalPlayers = this.match.players.length
+
+    const realPlayer = this.match.players.find(
+      (p) => p.id === winnerData.playerId,
+    )
+
+    const winnerForCert = {
+      ...winnerData,
+      secretCode: realPlayer ? realPlayer.secretCode : '0000',
+    }
 
     this.log
       .Template({
@@ -794,18 +795,28 @@ class MatchActions {
       .R({
         torneoId: this.match.torneoId,
         handId: this.match.currentHandId,
-        winner: winner.name,
-        playerId: winner.playerId,
-        playerSecret: winner.secretCode, // Fixed to use winner object if provided, otherwise correct path
+        winner: winnerForCert.name,
+        playerId: winnerForCert.playerId,
         dealerCards: this.match.cardsDealer,
-        chipsWon: winner.amount,
+        chipsWon: winnerForCert.amount,
       })
+
+    const certificate = WinnerCertificate.registerWinner(
+      this.match.torneoId,
+      winnerForCert,
+      totalPlayers,
+    )
 
     this.communicator.msgBuilder('winnerTournament', 'public', null, {
       method: 'winnerTournament',
-      displayMsg: `🏆 ${winner.name} wins the tournament!`,
-      winner,
+      displayMsg: `🏆 ${winnerForCert.name} wins the tournament!`,
+      winner: winnerForCert,
       isTournamentWinner: true,
+      certificate: {
+        code: certificate.code,
+        torneoId: certificate.torneoId,
+        date: certificate.date,
+      },
     })
 
     Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
@@ -840,7 +851,7 @@ class MatchActions {
       const p = canActPlayers[0]
       if (!p || (p.getCurrentBet() >= maxBet && actedPlayers.includes(p.id))) {
         this.match.isRunout = true
-        this.stepChecker.grantStep('showDown') // 🔥 Activar showdown para que se vean las cartas
+        this.stepChecker.grantStep('showDown')
         this.log
           .Template({ name: 'brakets', title: 'MATCH:RUNOUT', date: true })
           .R({
@@ -906,10 +917,9 @@ class MatchActions {
       this.dealer.setLastRaiser(null)
 
       this.stepChecker.grantStep(steps[bettingFor])
-      this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.collectChips) // ✅ Delay for chip movement
+      this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.collectChips)
     } else {
       const p = playersToAct[0]
-      // Si no es un refresco y ya es el turno del jugador, no hacemos nada
       if (!isRefresh && this.match.activePlayerId === p.id) return
 
       this.match.activePlayerId = p.id
@@ -919,14 +929,11 @@ class MatchActions {
 
       let opts = []
       if (maxBet === 0) {
-        // Nadie ha apostado aún en esta calle
         opts = ['check', 'bet', 'fold']
       } else {
         if (p.getCurrentBet() < maxBet) {
-          // Alguien apostó más que yo
           opts = ['fold', 'call', 'raise']
         } else {
-          // Ya igualé la apuesta máxima (ej. BB pre-flop o después de un Call mutuo)
           opts = ['check', 'raise', 'fold']
         }
       }
@@ -1002,7 +1009,7 @@ class MatchActions {
     })
     Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
     this.match.comms.sendOdds()
-    this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.standard) // ✅ Standard transition for dealing
+    this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.standard)
   }
 
   checkPrizes(thisSocket) {
@@ -1032,7 +1039,7 @@ class MatchActions {
         dealerCards: cards,
       })
 
-    this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast) // ✅ Fast transition via events
+    this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
   }
 
   dealtPrivateCards(thisSocket) {
@@ -1072,7 +1079,7 @@ class MatchActions {
         )
       }
       this.match.comms.sendOdds()
-      this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.standard) // ✅ Standard transition after dealing
+      this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.standard)
     } catch (error) {
       console.error('Error in dealtPrivateCards:', error)
     }

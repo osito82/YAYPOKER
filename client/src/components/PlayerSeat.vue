@@ -1,12 +1,8 @@
 <template>
   <div
     :id="'seat-wrapper-' + playerName + '-' + responsive.templateSuffix"
-    class="relative group flex items-center p-3 rounded-xl border transition-all duration-300 w-full overflow-hidden seat-base"
-    :class="
-      isActive
-        ? 'seat-active'
-        : 'seat-idle hover:border-white/15'
-    "
+    class="relative group flex items-center p-3 rounded-xl border transition-all duration-1000 w-full overflow-hidden seat-base"
+    :class="isActive ? 'seat-active' : 'seat-idle hover:border-white/15'"
   >
     <!-- Active Turn Pulse -->
     <div
@@ -68,11 +64,19 @@
         :id="'seat-header-' + playerName + '-' + responsive.templateSuffix"
         class="flex justify-between items-start mb-1"
       >
-        <span
-          :id="'seat-name-' + playerName + '-' + responsive.templateSuffix"
-          class="text-lg font-black text-white truncate leading-tight"
-          >{{ playerName }}</span
-        >
+        <div class="flex items-center gap-2 min-w-0">
+          <!-- Player Number Badge -->
+          <div
+            class="w-5 h-5 flex items-center justify-center rounded bg-white/10 border border-white/5 text-[9px] font-black text-white/50 shrink-0"
+          >
+            {{ playerNumber }}
+          </div>
+          <span
+            :id="'seat-name-' + playerName + '-' + responsive.templateSuffix"
+            class="text-lg font-black text-white truncate leading-tight"
+            >{{ playerName }}</span
+          >
+        </div>
         <div
           :id="
             'seat-stack-container-' +
@@ -147,22 +151,22 @@
         </div>
 
         <div
-          v-if="playerBet > 0"
+          v-if="handContribution > 0"
           :id="
             'seat-bet-container-' + playerName + '-' + responsive.templateSuffix
           "
-          class="flex flex-col items-end shrink-0 ml-2"
+          class="flex flex-col items-end shrink-0 ml-2 animate-in fade-in zoom-in duration-1000"
         >
           <span
             :id="'label-bet-' + playerName + '-' + responsive.templateSuffix"
             class="text-[10px] font-black text-emerald-400 uppercase leading-none mb-1"
-            >Bet</span
+            >Playing</span
           >
           <span
             :id="'display-bet-' + playerName + '-' + responsive.templateSuffix"
             class="text-sm font-mono font-black text-emerald-400 leading-none"
           >
-            ${{ playerBet }}
+            ${{ handContribution }}
           </span>
         </div>
       </div>
@@ -181,29 +185,34 @@ defineProps({
   playerName: { type: String, default: 'Guest' },
   playerChips: { type: Number, default: 0 },
   playerBet: { type: Number, default: 0 },
+  handContribution: { type: Number, default: 0 }, // ✅ AGREGADO
   playerAction: { type: String, default: '' },
   playerCards: { type: Array, default: () => [] },
   showCards: { type: Boolean, default: false },
   isActive: { type: Boolean, default: false },
+  playerNumber: { type: Number, default: 0 }, // ✅ AGREGADO
 })
 </script>
 
 <style scoped>
 .seat-base {
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .seat-idle {
-  border-color: rgba(255,255,255,0.08);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 .seat-idle:hover {
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
 }
 
 .seat-active {
-  background: rgba(212,160,23,0.1);
-  border-color: rgba(212,160,23,0.5);
-  box-shadow: 0 0 20px rgba(212,160,23,0.15), inset 0 0 20px rgba(212,160,23,0.04);
+  background: rgba(212, 160, 23, 0.1);
+  border-color: rgba(212, 160, 23, 0.5);
+  box-shadow:
+    0 0 20px rgba(212, 160, 23, 0.15),
+    inset 0 0 20px rgba(212, 160, 23, 0.04);
   transform: scale(1.02);
+  transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 </style>

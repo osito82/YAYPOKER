@@ -1,7 +1,7 @@
 <template>
   <div
     :id="'player-card-' + playerName + '-' + responsive.templateSuffix"
-    class="flex flex-col items-center p-2 rounded-lg bg-gray-800 bg-opacity-80 shadow-lg text-white w-40 transition-all duration-300 border-2"
+    class="flex flex-col items-center p-2 rounded-lg bg-gray-800 bg-opacity-80 shadow-lg text-white w-40 transition-all duration-1000 border-2"
     :class="isActive ? 'border-yellow-400 scale-105' : 'border-transparent'"
   >
     <!-- Player Name & Avatar Placeholder -->
@@ -77,6 +77,16 @@
       >
         ${{ playerChips }}
       </div>
+
+      <!-- Playing Status -->
+      <div
+        v-if="playerBet > 0"
+        :id="'player-bet-display-' + responsive.templateSuffix"
+        class="text-emerald-400 font-mono text-sm font-black mt-1 animate-pulse"
+      >
+        Playing: ${{ playerBet }}
+      </div>
+
       <div
         v-if="playerAction"
         :id="'player-action-display-' + responsive.templateSuffix"
@@ -98,6 +108,7 @@ const responsive = useResponsiveStore()
 defineProps({
   playerName: { type: String, default: 'Player' },
   playerChips: { type: Number, default: 0 },
+  playerBet: { type: Number, default: 0 },
   playerAction: String,
   playerCards: {
     type: Array,

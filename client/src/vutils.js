@@ -66,6 +66,9 @@ function urlsFactory() {
     import.meta.env.VITE_WS_PROTOCOL ||
     (pageProtocol === 'https:' ? 'wss' : 'ws')
 
+  // HTTP protocol for REST calls to the same backend server
+  const httpProtocol = pageProtocol.replace(':', '')
+
   const clientProtocol =
     import.meta.env.VITE_CLIENT_PROTOCOL || pageProtocol.replace(':', '')
 
@@ -77,10 +80,12 @@ function urlsFactory() {
     import.meta.env.VITE_CLIENT_PORT || window.location.port || '5173'
 
   const server = `${wsProtocol}://${wsHost}:${wsPort}`
+  const serverHttp = `${httpProtocol}://${wsHost}:${wsPort}`
   const url = `${clientProtocol}://${clientHost}:${clientPort}`
 
   return {
     server,
+    serverHttp,
     url,
   }
 }

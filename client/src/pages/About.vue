@@ -18,13 +18,19 @@
       </router-link>
     </nav>
 
-    <main :id="`about-main-content-${templateSuffix}`" class="max-w-4xl mx-auto px-6 py-20 relative">
+    <main
+      :id="`about-main-content-${templateSuffix}`"
+      class="max-w-4xl mx-auto px-6 py-20 relative"
+    >
       <div
         :id="`about-bg-glow-${templateSuffix}`"
         class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-yellow-500/5 blur-[120px] rounded-full -z-10"
       ></div>
 
-      <header :id="`about-header-section-${templateSuffix}`" class="text-center mb-20">
+      <header
+        :id="`about-header-section-${templateSuffix}`"
+        class="text-center mb-20"
+      >
         <div
           :id="`about-eyebrow-badge-${templateSuffix}`"
           class="inline-block px-4 py-1 bg-white/5 border border-white/10 rounded-full mb-6"
@@ -51,22 +57,35 @@
         </p>
       </header>
 
-      <section :id="`about-philosophy-grid-${templateSuffix}`" class="grid md:grid-cols-2 gap-12 mb-20">
-        <div :id="`about-card-free-${templateSuffix}`" class="bg-white/5 border border-white/10 p-8 rounded-[2rem]">
+      <section
+        :id="`about-philosophy-grid-${templateSuffix}`"
+        class="grid md:grid-cols-2 gap-12 mb-20"
+      >
+        <div
+          :id="`about-card-free-${templateSuffix}`"
+          class="bg-white/5 border border-white/10 p-8 rounded-[2rem]"
+        >
           <h3 class="text-2xl font-black uppercase italic mb-4">
             ¿Por qué <span class="text-yellow-500">Gratis</span>?
           </h3>
-          <p class="text-gray-500 text-sm leading-relaxed font-bold uppercase tracking-widest">
+          <p
+            class="text-gray-500 text-sm leading-relaxed font-bold uppercase tracking-widest"
+          >
             Because poker is a sport of skill and laughs. We want the barrier to
             entry to be ZERO. We don't want your data, we don't want your cards,
             we just want you to deal the cards.
           </p>
         </div>
-        <div :id="`about-card-fast-${templateSuffix}`" class="bg-white/5 border border-white/10 p-8 rounded-[2rem]">
+        <div
+          :id="`about-card-fast-${templateSuffix}`"
+          class="bg-white/5 border border-white/10 p-8 rounded-[2rem]"
+        >
           <h3 class="text-2xl font-black uppercase italic mb-4">
             ¿Por qué <span class="text-yellow-500">Rápido</span>?
           </h3>
-          <p class="text-gray-500 text-sm leading-relaxed font-bold uppercase tracking-widest">
+          <p
+            class="text-gray-500 text-sm leading-relaxed font-bold uppercase tracking-widest"
+          >
             Because we hate 5-minute registrations. At YayPoker, the time
             between "I want to play" and being at the table is measured in
             blinks. Link, name, and All-in.
@@ -74,11 +93,20 @@
         </div>
       </section>
 
-      <footer :id="`about-page-footer-${templateSuffix}`" class="text-center border-t border-white/5 pt-20">
-        <h2 :id="`about-footer-tagline-${templateSuffix}`" class="text-3xl font-black uppercase tracking-widest mb-8 italic">
+      <footer
+        :id="`about-page-footer-${templateSuffix}`"
+        class="text-center border-t border-white/5 pt-20"
+      >
+        <h2
+          :id="`about-footer-tagline-${templateSuffix}`"
+          class="text-3xl font-black uppercase tracking-widest mb-8 italic"
+        >
           Hecho con <span class="text-red-500">♥</span> por entusiastas
         </h2>
-        <p :id="`about-footer-copyright-${templateSuffix}`" class="text-gray-600 text-xs font-black uppercase tracking-[0.4em]">
+        <p
+          :id="`about-footer-copyright-${templateSuffix}`"
+          class="text-gray-600 text-xs font-black uppercase tracking-[0.4em]"
+        >
           &copy; 2026 YayPoker Engineering
         </p>
       </footer>

@@ -220,8 +220,16 @@
               v-model="botCount"
               class="bg-black/60 text-white border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50"
             >
-              <option v-for="n in maxSelectableBots" :key="n-1" :value="n-1">
-                {{ n-1 === 0 ? 'No Bots' : (n-1) + (n-1 === 1 ? ' Bot' : ' Bots') }}
+              <option
+                v-for="n in maxSelectableBots"
+                :key="n - 1"
+                :value="n - 1"
+              >
+                {{
+                  n - 1 === 0
+                    ? 'No Bots'
+                    : n - 1 + (n - 1 === 1 ? ' Bot' : ' Bots')
+                }}
               </option>
             </select>
           </div>

@@ -48,7 +48,8 @@
 
           <ActionButtonsRow
             :isMyTurn="isMyTurn"
-            :canBlind="canBlind" :blindInfo="blindInfo"
+            :canBlind="canBlind"
+            :blindInfo="blindInfo"
             :options="options"
             :isRaiseActionDisabled="isRaiseActionDisabled"
             @action="(a) => $emit('action', a)"
@@ -112,13 +113,21 @@ const {
 
 <style scoped>
 .hud-container {
-  background: linear-gradient(180deg, rgba(8,8,8,0.97) 0%, rgba(5,5,5,0.99) 100%);
-  border-top: 1px solid rgba(255,255,255,0.07);
-  box-shadow: 0 -4px 30px rgba(0,0,0,0.7), 0 -1px 0 rgba(255,255,255,0.03);
+  background: linear-gradient(
+    180deg,
+    rgba(8, 8, 8, 0.97) 0%,
+    rgba(5, 5, 5, 0.99) 100%
+  );
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 -4px 30px rgba(0, 0, 0, 0.7),
+    0 -1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .hud-container--active {
-  border-top-color: rgba(212,160,23,0.35);
-  box-shadow: 0 -4px 40px rgba(0,0,0,0.8), 0 -8px 30px rgba(212,160,23,0.08);
+  border-top-color: rgba(212, 160, 23, 0.35);
+  box-shadow:
+    0 -4px 40px rgba(0, 0, 0, 0.8),
+    0 -8px 30px rgba(212, 160, 23, 0.08);
 }
 </style>

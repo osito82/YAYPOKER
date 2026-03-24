@@ -7,7 +7,7 @@
     <!-- Odds Panel -->
     <div
       :id="'hud-hand-odds-display-panel-' + templateSuffix"
-      class="w-full transition-all duration-500"
+      class="w-full transition-all duration-1000"
       :class="{
         'opacity-20 grayscale pointer-events-none': !playerCards?.length,
       }"
@@ -63,7 +63,10 @@
         :id="`hud-player-finance-stats-wrapper-${templateSuffix}`"
         class="flex flex-1 items-center gap-2 px-2 py-1 bg-white/5 rounded-lg border border-white/10 justify-around"
       >
-        <div :id="`hud-player-stack-info-box-${templateSuffix}`" class="text-center">
+        <div
+          :id="`hud-player-stack-info-box-${templateSuffix}`"
+          class="text-center"
+        >
           <span
             :id="`hud-player-stack-label-${templateSuffix}`"
             class="block text-[7px] font-black text-gray-500 uppercase leading-none mb-0.5"
@@ -75,12 +78,18 @@
             >${{ balance }}</span
           >
         </div>
-        <div :id="`hud-player-finance-divider-${templateSuffix}`" class="w-px h-3 bg-white/10"></div>
-        <div :id="`hud-player-bet-info-box-${templateSuffix}`" class="text-center">
+        <div
+          :id="`hud-player-finance-divider-${templateSuffix}`"
+          class="w-px h-3 bg-white/10"
+        ></div>
+        <div
+          :id="`hud-player-bet-info-box-${templateSuffix}`"
+          class="text-center"
+        >
           <span
             :id="`hud-player-bet-label-${templateSuffix}`"
             class="block text-[7px] font-black text-emerald-500 uppercase leading-none mb-0.5"
-            >Bet</span
+            >Playing</span
           >
           <span
             :id="`hud-player-bet-value-text-${templateSuffix}`"
