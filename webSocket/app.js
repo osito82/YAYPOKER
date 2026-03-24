@@ -356,12 +356,14 @@ const PORT = SERVER_CONFIG.PORT
 const PROTOCOL = SERVER_CONFIG.PROTOCOL
 const BASE = SERVER_CONFIG.BASE_URL
 
-server.listen(PORT, () => {
-  log.Template({ name: 'brakets', title: 'SERVER:LISTENING', date: true }).R({
-    port: PORT,
-    url: `${PROTOCOL}://${BASE}:${PORT}`,
-    env: process.env.NODE_ENV || 'development',
+if (require.main === module) {
+  server.listen(PORT, () => {
+    log.Template({ name: 'brakets', title: 'SERVER:LISTENING', date: true }).R({
+      port: PORT,
+      url: `${PROTOCOL}://${BASE}:${PORT}`,
+      env: process.env.NODE_ENV || 'development',
+    })
   })
-})
+}
 
 module.exports = { app, server, wss, validateAction }
