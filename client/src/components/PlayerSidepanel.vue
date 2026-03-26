@@ -117,7 +117,7 @@
               <span
                 :id="`player-item-bet-label-${player.id}-${templateSuffix}`"
                 class="text-[10px] font-black text-emerald-500/70 uppercase tracking-tighter mb-1 leading-none"
-                >Playing</span
+                >In Pot</span
               >
               <div
                 :id="`player-item-bet-value-wrapper-${player.id}-${templateSuffix}`"
@@ -227,7 +227,7 @@
               <span
                 :id="`player-item-live-bet-label-${player.id}-${templateSuffix}`"
                 class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 leading-none"
-                >Current Bet</span
+                >Bet</span
               >
               <span
                 :id="`player-item-live-bet-amount-${player.id}-${templateSuffix}`"

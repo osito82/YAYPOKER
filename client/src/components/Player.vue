@@ -84,7 +84,7 @@
         :id="'player-bet-display-' + responsive.templateSuffix"
         class="text-emerald-400 font-mono text-sm font-black mt-1 animate-pulse"
       >
-        Playing: ${{ playerBet }}
+        Bet: ${{ playerBet }}
       </div>
 
       <div
