@@ -205,6 +205,28 @@
           :id="`host-controls-wrapper-${templateSuffix}`"
           class="space-y-4"
         >
+          <!-- Stack Selection -->
+          <div
+            :id="`stack-selection-container-${templateSuffix}`"
+            class="flex flex-col gap-2 mb-4 bg-yellow-500/5 p-4 rounded-xl border border-yellow-500/10"
+          >
+            <label
+              class="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest"
+            >
+              Initial Stack per Player
+            </label>
+            <div class="flex items-center gap-3">
+              <input
+                v-model="initialStack"
+                type="number"
+                step="100"
+                min="100"
+                class="bg-black/60 text-white border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50 w-full font-mono"
+              />
+              <span class="text-yellow-500/40 font-black text-xs">CHIPS</span>
+            </div>
+          </div>
+
           <!-- Bot Selection (Conditional) -->
           <div
             v-if="botsEnabled"
@@ -243,7 +265,7 @@
           </p>
           <button
             :id="`start-game-submit-button-${templateSuffix}`"
-            @click="$emit('start', { bots: botCount })"
+            @click="$emit('start', { bots: botCount, initialStack: initialStack })"
             :disabled="players.length + botCount < 2"
             class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 rounded-2xl focus:outline-none transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl uppercase tracking-[0.2em] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed text-base"
           >
@@ -309,6 +331,7 @@ const responsive = useResponsiveStore()
 const isHost = computed(() => props.myId === props.hostId)
 const copyStatus = ref('')
 const botCount = ref(0)
+const initialStack = ref(1000)
 
 // Check if bots are enabled from environment
 const botsEnabled = computed(() => {

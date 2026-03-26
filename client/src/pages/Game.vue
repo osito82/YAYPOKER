@@ -217,7 +217,11 @@ function generateSecretCode() {
 
 const startGame = (data = {}) => {
   if (isConnected.value) {
-    sendMessage({ action: 'startGame', bots: data.bots })
+    sendMessage({
+      action: 'startGame',
+      bots: data.bots,
+      initialStack: data.initialStack,
+    })
   }
 }
 

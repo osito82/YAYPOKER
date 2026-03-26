@@ -239,7 +239,7 @@ class MatchLobby {
         this.match.gameId,
         finalName,
         thisSecretCode,
-        data.totalChips,
+        data.totalChips || this.match.initialStack,
         [],
         thisSocketId,
         playerNumber,
