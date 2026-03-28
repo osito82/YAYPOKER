@@ -89,7 +89,7 @@
           <span
             :id="`hud-player-bet-label-${templateSuffix}`"
             class="block text-[7px] font-black text-emerald-500 uppercase leading-none mb-0.5"
-            >Playing</span
+            >Bet</span
           >
           <span
             :id="`hud-player-bet-value-text-${templateSuffix}`"

@@ -41,6 +41,8 @@ class Match extends EventEmitter {
     this.bigBlind = GAME_RULES.DEFAULT_BIG_BLIND
     this.ante = GAME_RULES.DEFAULT_ANTE
 
+    this.initialStack = 1000 // Default initial stack
+
     this.players = []
     this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
@@ -277,6 +279,18 @@ class Match extends EventEmitter {
           setTimeout(() => this.startGame(thisSocket, data), 1500)
           return
         }
+      }
+
+      // INITIAL STACK LOGIC
+      if (data.initialStack && Number(data.initialStack) > 0) {
+        const stack = Number(data.initialStack)
+        this.players.forEach((p) => {
+          p.chips = stack
+        })
+        this.log.R({
+          msg: `[MATCH] SET INITIAL STACK TO ${stack}`,
+          torneo: this.torneoId,
+        })
       }
 
       // 🔥 Forzar a todos los jugadores conectados a estar listos

@@ -160,7 +160,7 @@
           <span
             :id="'label-bet-' + playerName + '-' + responsive.templateSuffix"
             class="text-[10px] font-black text-emerald-400 uppercase leading-none mb-1"
-            >Playing</span
+            >In Pot</span
           >
           <span
             :id="'display-bet-' + playerName + '-' + responsive.templateSuffix"
