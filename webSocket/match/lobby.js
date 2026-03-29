@@ -105,12 +105,33 @@ class MatchLobby {
       secretCode: thisSecretCode,
     } = thisSocket
 
+    const finalRequestedName = data.name || thisSocketName
+
+    // ✅ VALIDAR INTENTO DE RECONEXIÓN CON NOMBRE EXISTENTE PERO PIN INCORRECTO
+    // Si el nombre ya está en el juego, pero el PIN no coincide, es un intento fallido de reconexión.
+    const playerWithSameName = this.match.players.find(
+      (p) => p.name === finalRequestedName,
+    )
+
+    if (
+      playerWithSameName &&
+      playerWithSameName.secretCode !== thisSecretCode
+    ) {
+      // Si el juego ya empezó, ignoramos silenciosamente (Requerido por test T0006)
+      if (!this.match.acceptingPlayers) {
+        this.log.R({
+          msg: `[LOBBY] SILENT IGNORE: ${finalRequestedName} tried to reconnect with wrong PIN during game`,
+          torneo: this.match.torneoId,
+        })
+        return
+      }
+      // Si estamos en el lobby, permitiremos que el flujo continúe para que se le asigne un nombre nuevo (ej: Alice-1)
+    }
+
     // Buscar jugador existente por secretCode
     const existingPlayerIndex = this.match.players.findIndex(
       (s) => s.secretCode === thisSecretCode,
     )
-
-    const finalRequestedName = data.name || thisSocketName
 
     // ✅ VALIDAR COLISIÓN DE CÓDIGO SECRETO (PIN)
     let player
