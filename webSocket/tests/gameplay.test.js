@@ -1367,4 +1367,35 @@ describe('Poker Game Integration Tests', () => {
       `[TEST:INTEGRITY] Total chips after hand: ${totalCurrentChips} (Expected: ${TOTAL_CHIPS})`,
     )
   }, 60000)
+
+  it('T0012 - No permite que dos jugadores distintos usen el mismo PIN en el lobby', async () => {
+    const gameCode = 'pin-collision-' + Math.random().toString(36).substring(7)
+
+    // Alice se une con PIN 1234
+    const alice = createClient({ name: 'Alice', secretCode: '1234' }, gameCode)
+    await new Promise((r) => alice.ws.on('open', r))
+    alice.send(MOCK_ACTIONS.SIGN_UP(1000))
+    await alice.waitAction('signUp')
+
+    // Bob intenta unirse con el MISMO PIN 1234
+    const bob = createClient({ name: 'Bob', secretCode: '1234' }, gameCode)
+    await new Promise((r) => bob.ws.on('open', r))
+    bob.send(MOCK_ACTIONS.SIGN_UP(1000))
+
+    // Bob debería recibir un error de colisión de PIN
+    const errorMsg = await bob.waitAction('signUp')
+    expect(errorMsg.message.data.errorType).toBe('PIN_COLLISION')
+    expect(errorMsg.message.data.displayMsg).toContain(
+      'PIN is already in use by another player',
+    )
+
+    // Verificamos que Bob NO fue añadido a la lista de jugadores de Alice
+    // Esperamos un poco para asegurar que no hubo broadcast accidental
+    await new Promise((r) => setTimeout(r, 500))
+    const lastAliceMsg = alice.responses[alice.responses.length - 1]
+    const bobInAliceList = lastAliceMsg.message.players?.some(
+      (p) => p.name === 'Bob',
+    )
+    expect(bobInAliceList).toBeFalsy()
+  }, 15000)
 })
