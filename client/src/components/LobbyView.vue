@@ -17,6 +17,7 @@
         <Logo :id="`lobby-brand-logo-${templateSuffix}`" :class="logoScale" />
 
         <div
+          v-if="!lastError"
           :id="`generated-table-code-display-box-${templateSuffix}`"
           class="flex flex-col items-center gap-4 mb-4"
         >
@@ -75,7 +76,51 @@
           </div>
         </div>
 
+        <!-- Error State Display -->
+        <div
+          v-else
+          :id="`lobby-error-display-box-${templateSuffix}`"
+          class="flex flex-col items-center gap-4 mb-6 animate-fade-in w-full px-6"
+        >
+          <div
+            class="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl w-full text-center"
+          >
+            <div
+              class="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-500/20"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.5"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+            <h3 class="text-red-500 font-black uppercase tracking-widest mb-2">
+              Lobby Error
+            </h3>
+            <p class="text-gray-300 text-sm font-medium leading-relaxed">
+              {{ lastError.message }}
+            </p>
+          </div>
+
+          <button
+            @click="handleErrorBack"
+            class="bg-white/5 hover:bg-white/10 text-white font-black py-3 px-8 rounded-xl border border-white/10 transition-all uppercase tracking-widest text-[10px]"
+          >
+            ← Back to Setup
+          </button>
+        </div>
+
         <h2
+          v-if="!lastError"
           :id="`lobby-title-text-${templateSuffix}`"
           class="text-gray-200 font-black uppercase italic mt-2 text-center"
           :class="subtitleSize"
@@ -315,6 +360,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { usePokerStore } from '../store/pokerStore'
 import { urlsFactory, copyToClipboard as copyToClipboardUtil } from '../vutils'
 import Logo from './Logo.vue'
 import qrCode from './qrCode.vue'
@@ -325,13 +371,22 @@ const props = defineProps({
   myId: { type: String, default: null },
   gameCode: { type: String, required: true },
   templateSuffix: { type: String, default: 'TemplateLarge' },
+  lastError: { type: Object, default: null },
 })
 
 const responsive = useResponsiveStore()
+const pokerStore = usePokerStore()
 const isHost = computed(() => props.myId === props.hostId)
 const copyStatus = ref('')
 const botCount = ref(0)
 const initialStack = ref(1000)
+
+const emit = defineEmits(['start', 'goBack'])
+
+const handleErrorBack = () => {
+  pokerStore.clearError()
+  emit('goBack')
+}
 
 // Check if bots are enabled from environment
 const botsEnabled = computed(() => {
@@ -366,8 +421,6 @@ const copyToClipboard = async () => {
     }, 2000)
   }
 }
-
-defineEmits(['start'])
 
 // Responsive Computeds
 const cardClasses = computed(() => {

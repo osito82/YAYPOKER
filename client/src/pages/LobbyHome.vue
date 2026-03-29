@@ -30,6 +30,44 @@
         class="space-y-10"
         :class="formPadding"
       >
+        <!-- Global Error Display (e.g. PIN Collision) -->
+        <div
+          v-if="pokerStore.getLastError"
+          :id="`global-error-display-${templateSuffix}`"
+          class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex items-start gap-3 animate-shake"
+        >
+          <div class="bg-red-500 rounded-full p-1 mt-0.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-3 w-3 text-white"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <p class="text-red-500 text-[10px] font-black uppercase tracking-widest mb-1">
+              {{ pokerStore.getLastError.type || 'Error' }}
+            </p>
+            <p class="text-gray-300 text-xs font-medium leading-relaxed">
+              {{ pokerStore.getLastError.message }}
+            </p>
+          </div>
+          <button 
+            @click="pokerStore.clearError()"
+            class="text-gray-500 hover:text-white transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
         <!-- MODE: Selection (Home /) -->
         <template v-if="!isCreating">
           <!-- Join Game Section -->
@@ -257,6 +295,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { usePokerStore } from '../store/pokerStore'
 import QRCodeVue3 from 'qrcode-vue3'
 import Logo from '../components/Logo.vue'
 import {
@@ -267,6 +306,7 @@ import {
 } from '../vutils'
 
 const responsive = useResponsiveStore()
+const pokerStore = usePokerStore()
 const router = useRouter()
 const route = useRoute()
 
@@ -401,7 +441,7 @@ const checkRouteState = () => {
       route.query.joinCode ||
       ''
     ).toUpperCase()
-    playerName.value = ''
+    playerName.value = route.query.playerName || ''
     // Pre-fill secret if provided in path
     secretCode.value = route.params.secretCode || ''
     defaultSecret.value = ''
@@ -455,6 +495,7 @@ const isValidJoin = computed(() => {
 
 const joinGame = () => {
   if (isValidJoin.value) {
+    pokerStore.clearError() // Clear any previous error before trying again
     router.push({
       name: 'game.play',
       params: {
@@ -491,6 +532,7 @@ const startGame = () => {
   const finalSecret =
     secretCode.value.length === 4 ? secretCode.value : defaultSecret.value
   if (playerName.value.trim() && finalSecret) {
+    pokerStore.clearError()
     router.push({
       name: 'game.play',
       params: {
@@ -517,5 +559,16 @@ const startGame = () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 </style>

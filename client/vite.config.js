@@ -6,14 +6,5 @@ export default defineConfig({
   server: {
     allowedHosts: true,
     host: true, // Necessary to expose the server to the network
-    watch: {
-      usePolling: true,
-      ignored: [
-        '**/node_modules/**',
-        '**/dist/**',
-        '**/.git/**',
-        '**/.vscode/**',
-      ],
-    },
   },
 })

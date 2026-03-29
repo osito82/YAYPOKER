@@ -5,8 +5,10 @@
     :hostId="pokerStore.getHostId"
     :myId="pokerStore.myInfo.id"
     :gameCode="gameCode"
+    :lastError="pokerStore.getLastError"
     templateSuffix="Game"
     @start="startGame"
+    @goBack="handleGoBack"
   />
   <component
     v-else
@@ -72,6 +74,7 @@ const props = defineProps({
 })
 
 const route = useRoute()
+const router = useRouter()
 const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
 const gameCode = route.params.gameCode || 'default_Torneo'
@@ -198,6 +201,18 @@ const setQuickBet = (m) => {
   }
 }
 
+// Redirect back if PIN collision occurs
+watch(
+  () => pokerStore.getLastError,
+  (newError) => {
+    if (newError?.type === 'PIN_COLLISION') {
+      console.warn('Redirecting due to PIN collision:', newError.message)
+      handleGoBack()
+    }
+  },
+  { immediate: true },
+)
+
 watch(isMyTurn, (newVal) => {
   if (newVal) {
     betAmount.value = minBet.value
@@ -223,6 +238,14 @@ const startGame = (data = {}) => {
       initialStack: data.initialStack,
     })
   }
+}
+
+const handleGoBack = () => {
+  router.push({
+    name: 'game.join',
+    params: { gameCode },
+    query: { joinCode: gameCode },
+  })
 }
 
 const sendAction = (action) => {
@@ -254,8 +277,6 @@ const sendAction = (action) => {
       break
   }
 }
-
-const router = useRouter()
 
 onMounted(() => {
   pokerStore.setGameCredentials(gameCode, secretCode, playerName.value)

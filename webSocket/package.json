@@ -4,7 +4,7 @@
   "description": "Poker API",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --legacy-watch app.js",
+    "start": "nodemon app.js",
     "test": "vitest",
     "test:name": "vitest -t",
     "lint": "eslint . --fix",

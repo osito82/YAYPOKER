@@ -105,27 +105,36 @@ class MatchLobby {
       secretCode: thisSecretCode,
     } = thisSocket
 
-    // Buscar jugador existente por secretCode para re-conexión
+    // Buscar jugador existente por secretCode
     const existingPlayerIndex = this.match.players.findIndex(
       (s) => s.secretCode === thisSecretCode,
     )
 
-    // Si no coincide el código secreto pero el nombre ya está en la mesa, ignoramos silenciosamente
-    // para evitar suplantaciones o errores de reconexión durante el juego.
-    const nameMatch = this.match.players.find(
-      (p) => p.name === (data.name || thisSocketName),
-    )
-    if (
-      existingPlayerIndex === -1 &&
-      nameMatch &&
-      !this.match.acceptingPlayers
-    ) {
-      return
-    }
+    const finalRequestedName = data.name || thisSocketName
 
+    // ✅ VALIDAR COLISIÓN DE CÓDIGO SECRETO (PIN)
     let player
     if (existingPlayerIndex !== -1) {
-      // ✅ LÓGICA DE RE-CONEXIÓN
+      const existingPlayer = this.match.players[existingPlayerIndex]
+
+      // Si el código existe pero el nombre NO coincide, es una colisión de PIN
+      // (Otro jugador ya está usando este número secreto)
+      if (existingPlayer.name !== finalRequestedName) {
+        this.log.R({
+          msg: `[LOBBY] PIN COLLISION: ${finalRequestedName} tried to use PIN ${thisSecretCode} already owned by ${existingPlayer.name}`,
+          torneo: this.match.torneoId,
+        })
+
+        this.communicator.msgBuilder('signUp', 'private', null, {
+          displayMsg:
+            'This PIN is already in use by another player. Please go back and choose a different 4-digit code.',
+          errorType: 'PIN_COLLISION',
+        })
+        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
+        return
+      }
+
+      // ✅ LÓGICA DE RE-CONEXIÓN (Mismo código, mismo nombre)
       player = this.match.players[existingPlayerIndex]
       const oldId = player.id
 
