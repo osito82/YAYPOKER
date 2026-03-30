@@ -31,13 +31,22 @@
             >Features</a
           >
         </div>
-        <router-link
-          to="/lobby"
-          :id="`nav-cta-play-${templateSuffix}`"
-          class="cta-pill"
-        >
-          Play now
-        </router-link>
+        <div class="flex items-center gap-6">
+          <router-link
+            to="/lobby"
+            :id="`nav-link-join-${templateSuffix}`"
+            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 hover:text-white/80 transition-colors duration-200"
+          >
+            Join a Table
+          </router-link>
+          <router-link
+            to="/lobby"
+            :id="`nav-cta-play-${templateSuffix}`"
+            class="cta-pill"
+          >
+            Play now
+          </router-link>
+        </div>
       </div>
     </nav>
 
@@ -436,7 +445,7 @@
           <Logo :id="`footer-logo-${templateSuffix}`" class="mb-5 opacity-60" />
           <p
             :id="`footer-disclaimer-${templateSuffix}`"
-            class="text-[11px] text-white/20 font-medium leading-relaxed"
+            class="text-[13px] text-white/20 font-medium leading-relaxed"
           >
             YayPoker is a free social game. No real money changes hands on this
             platform. Virtual chips have no monetary value. Side arrangements
@@ -449,13 +458,13 @@
         >
           <p
             :id="`footer-copyright-text-${templateSuffix}`"
-            class="text-[11px] text-white/20 font-bold uppercase tracking-widest"
+            class="text-[13px] text-white/20 font-bold uppercase tracking-widest"
           >
             &copy; 2026 YayPoker
           </p>
           <div
             :id="`footer-links-wrapper-${templateSuffix}`"
-            class="flex gap-6 text-[11px] text-white/30 font-medium"
+            class="flex gap-6 text-[13px] text-white/30 font-medium"
           >
             <router-link
               to="/privacy"
@@ -623,7 +632,7 @@ const templateSuffix = computed(() => {
 
 /* ── Hero sub ── */
 .hero-sub {
-  font-size: clamp(15px, 1.5vw, 18px);
+  font-size: clamp(18px, 1.8vw, 22px);
   color: rgba(255, 255, 255, 0.45);
   font-weight: 400;
   line-height: 1.75;
@@ -833,7 +842,7 @@ const templateSuffix = computed(() => {
   letter-spacing: -0.01em;
 }
 .step-body {
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.4);
   line-height: 1.75;
   font-weight: 400;
@@ -905,7 +914,7 @@ const templateSuffix = computed(() => {
   letter-spacing: -0.01em;
 }
 .feature-body {
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.4);
   line-height: 1.8;
 }
