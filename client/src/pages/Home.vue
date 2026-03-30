@@ -457,23 +457,23 @@
             :id="`footer-links-wrapper-${templateSuffix}`"
             class="flex gap-6 text-[11px] text-white/30 font-medium"
           >
-            <a
-              href="#"
+            <router-link
+              to="/privacy"
               :id="`footer-link-privacy-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Privacy</a
+              >Privacy</router-link
             >
-            <a
-              href="#"
+            <router-link
+              to="/terms"
               :id="`footer-link-terms-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Terms</a
+              >Terms</router-link
             >
-            <a
-              href="#"
+            <router-link
+              to="/contact"
               :id="`footer-link-contact-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Contact</a
+              >Contact</router-link
             >
           </div>
         </div>

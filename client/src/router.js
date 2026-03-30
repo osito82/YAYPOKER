@@ -48,6 +48,21 @@ const routes = [
     name: 'verify',
     component: () => import('./pages/VerifyCertificate.vue'),
   },
+  {
+    path: '/privacy',
+    name: 'privacy',
+    component: () => import('./pages/Privacy.vue'),
+  },
+  {
+    path: '/terms',
+    name: 'terms',
+    component: () => import('./pages/Terms.vue'),
+  },
+  {
+    path: '/contact',
+    name: 'contact',
+    component: () => import('./pages/Contact.vue'),
+  },
   { name: 'about', path: '/about', component: About },
   // Catch-all 404
   {
