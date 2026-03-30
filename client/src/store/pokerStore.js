@@ -32,6 +32,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const hostId = ref(null)
   const isGameStarted = ref(false)
   const stepChecker = ref({})
+  const lastError = ref(null)
 
   // Blinds state
   const smallBlind = ref(10)
@@ -61,6 +62,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getHostId = computed(() => hostId.value)
   const getIsGameStarted = computed(() => isGameStarted.value)
   const getStepChecker = computed(() => stepChecker.value || {})
+  const getLastError = computed(() => lastError.value)
 
   const getCurrentHand = computed(() => {
     const me = players.value.find((p) => p.id === myInfo.value.id)
@@ -78,6 +80,11 @@ export const usePokerStore = defineStore('pokerStore', () => {
       if (!gameData) return
 
       console.log('POKER_STORE - Received:', gameData.action, gameData)
+
+      // Only clear last error on a SUCCESSFUL signUp
+      if (gameData.action === 'signUp' && gameData.data?.id) {
+        lastError.value = null
+      }
 
       // Update stepChecker
       if (gameData.stepChecker) {
@@ -185,6 +192,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
         }
       } else if (gameData.action === 'lobbyError') {
         // We can use this to show why game hasn't started
+        lastError.value = {
+          message: gameData.data.displayMsg,
+          type: 'LOBBY_ERROR',
+        }
         if (lobbyTimer.value) {
           lobbyTimer.value.error = gameData.data.displayMsg
         }
@@ -207,7 +218,15 @@ export const usePokerStore = defineStore('pokerStore', () => {
         autofoldStartTime.value = Date.now()
         autofoldDuration.value = gameData.autofoldDuration || 600
       } else if (gameData.action === 'signUp' && gameData.type === 'private') {
-        myInfo.value.id = gameData.data?.id
+        if (!gameData.data?.id && gameData.data?.displayMsg) {
+          lastError.value = {
+            message: gameData.data.displayMsg,
+            type: gameData.data.errorType || 'SIGNUP_ERROR',
+          }
+        } else {
+          myInfo.value.id = gameData.data?.id
+          lastError.value = null
+        }
       } else if (gameData.action === 'oddsUpdate') {
         odds.value = {
           win: Number(gameData.data.odds.win),
@@ -293,6 +312,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
     gameCredentials.value.secretCode = secretCode
   }
 
+  function clearError() {
+    lastError.value = null
+  }
+
   return {
     // State (refs)
     socketMessage,
@@ -344,11 +367,13 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getHostId,
     getIsGameStarted,
     getStepChecker,
+    getLastError,
 
     // Actions
     setSocketMessage,
     setConnected,
     setGameCredentials,
     clearWinnerInfo,
+    clearError,
   }
 })

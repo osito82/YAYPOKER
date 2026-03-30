@@ -31,13 +31,22 @@
             >Features</a
           >
         </div>
-        <router-link
-          to="/lobby"
-          :id="`nav-cta-play-${templateSuffix}`"
-          class="cta-pill"
-        >
-          Play now
-        </router-link>
+        <div class="flex items-center gap-6">
+          <router-link
+            to="/lobby"
+            :id="`nav-link-join-${templateSuffix}`"
+            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 hover:text-white/80 transition-colors duration-200"
+          >
+            Join a Table
+          </router-link>
+          <router-link
+            to="/lobby"
+            :id="`nav-cta-play-${templateSuffix}`"
+            class="cta-pill"
+          >
+            Play now
+          </router-link>
+        </div>
       </div>
     </nav>
 
@@ -114,7 +123,7 @@
             :id="`hero-btn-create-table-${templateSuffix}`"
             class="btn-primary"
           >
-            Create a table
+            Create a Table
             <svg
               class="btn-arrow"
               xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +142,7 @@
             :id="`hero-btn-browse-tables-${templateSuffix}`"
             class="btn-secondary"
           >
-            Browse open tables
+            Join a Table
           </router-link>
         </div>
 
@@ -399,7 +408,7 @@
             :id="`final-cta-btn-create-${templateSuffix}`"
             class="btn-primary"
           >
-            Create a table
+            Create a Table
             <svg
               class="btn-arrow"
               xmlns="http://www.w3.org/2000/svg"
@@ -418,7 +427,7 @@
             :id="`final-cta-btn-browse-${templateSuffix}`"
             class="btn-secondary"
           >
-            Browse open tables
+            Join a Table
           </router-link>
         </div>
       </div>
@@ -436,7 +445,7 @@
           <Logo :id="`footer-logo-${templateSuffix}`" class="mb-5 opacity-60" />
           <p
             :id="`footer-disclaimer-${templateSuffix}`"
-            class="text-[11px] text-white/20 font-medium leading-relaxed"
+            class="text-[13px] text-white/20 font-medium leading-relaxed"
           >
             YayPoker is a free social game. No real money changes hands on this
             platform. Virtual chips have no monetary value. Side arrangements
@@ -449,31 +458,31 @@
         >
           <p
             :id="`footer-copyright-text-${templateSuffix}`"
-            class="text-[11px] text-white/20 font-bold uppercase tracking-widest"
+            class="text-[13px] text-white/20 font-bold uppercase tracking-widest"
           >
             &copy; 2026 YayPoker
           </p>
           <div
             :id="`footer-links-wrapper-${templateSuffix}`"
-            class="flex gap-6 text-[11px] text-white/30 font-medium"
+            class="flex gap-6 text-[13px] text-white/30 font-medium"
           >
-            <a
-              href="#"
+            <router-link
+              to="/privacy"
               :id="`footer-link-privacy-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Privacy</a
+              >Privacy</router-link
             >
-            <a
-              href="#"
+            <router-link
+              to="/terms"
               :id="`footer-link-terms-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Terms</a
+              >Terms</router-link
             >
-            <a
-              href="#"
+            <router-link
+              to="/contact"
               :id="`footer-link-contact-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Contact</a
+              >Contact</router-link
             >
           </div>
         </div>
@@ -623,7 +632,7 @@ const templateSuffix = computed(() => {
 
 /* ── Hero sub ── */
 .hero-sub {
-  font-size: clamp(15px, 1.5vw, 18px);
+  font-size: clamp(18px, 1.8vw, 22px);
   color: rgba(255, 255, 255, 0.45);
   font-weight: 400;
   line-height: 1.75;
@@ -833,7 +842,7 @@ const templateSuffix = computed(() => {
   letter-spacing: -0.01em;
 }
 .step-body {
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.4);
   line-height: 1.75;
   font-weight: 400;
@@ -905,7 +914,7 @@ const templateSuffix = computed(() => {
   letter-spacing: -0.01em;
 }
 .feature-body {
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.4);
   line-height: 1.8;
 }

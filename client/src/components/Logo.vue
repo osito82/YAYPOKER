@@ -1,27 +1,28 @@
 <template>
-  <div
-    :id="`brand-logo-container-${templateSuffix}`"
-    class="flex items-center justify-center bg-gray-900 p-2 rounded-lg border border-gray-700 shadow-md"
-  >
-    <div
-      :id="`brand-logo-spade-${templateSuffix}`"
-      class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600 mr-2"
-    >
-      ♠
+<router-link
+  to="/"
+  :id="`brand-logo-container-${templateSuffix}`"
+  class="flex items-center justify-center px-4 cursor-pointer !no-underline hover:!no-underline hover:opacity-90 transition-opacity duration-200 gap-1"
+>
+    <!-- YAY Icon Pattern -->
+    <div class="flex gap-0.5 items-center">
+      <div
+        v-for="(letter, index) in ['Y', 'A', 'Y']"
+        :key="index"
+        class="w-8 h-8 bg-yellow-500 rounded flex items-center justify-center shadow-[0_0_10px_rgba(234,179,8,0.3)]"
+      >
+        <span class="text-black font-black text-xl italic">{{ letter }}</span>
+      </div>
     </div>
+
+    <!-- POKER Text -->
     <div
       :id="`brand-logo-text-${templateSuffix}`"
-      class="text-xl font-bold text-white tracking-wider uppercase font-mono"
+      class="text-3xl font-black italic tracking-tighter text-white drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]"
     >
-      Yay<span class="text-yellow-500">Poker</span>
+      POKER
     </div>
-    <div
-      :id="`brand-logo-diamond-${templateSuffix}`"
-      class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-400 ml-2"
-    >
-      ♦
-    </div>
-  </div>
+  </router-link>
 </template>
 
 <script setup>
