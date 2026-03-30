@@ -1,0 +1,27 @@
+{
+  "nav": {
+    "how": "How it works",
+    "features": "Features",
+    "join": "Join a Table",
+    "play": "Play now"
+  },
+  "hero": {
+    "badge": "Free to play · No account needed · Works on any device",
+
+    "headline": "Play Poker, {br} {like_pro} {br} FREE.",
+    "like_pro": "like a pro...",
+
+
+    "sub": "Spin up a private table in seconds, share a link, and deal with your friends — wherever they are. No app downloads. No real money. Just the game.",
+    "create": "Create a Table",
+    "browse": "Join a Table",
+    "social": "Played by {count} this week",
+    "thousands": "thousands of crews"
+  },
+  "footer": {
+    "disclaimer": "YayPoker is a free social game. No real money changes hands on this platform. Virtual chips have no monetary value. Side arrangements between players are solely their responsibility.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "contact": "Contact"
+  }
+}

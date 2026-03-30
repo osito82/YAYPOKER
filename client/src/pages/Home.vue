@@ -22,29 +22,44 @@
             href="#how"
             :id="`nav-link-how-${templateSuffix}`"
             class="hover:text-white/80 transition-colors duration-200"
-            >How it works</a
+            >{{ $t('nav.how') }}</a
           >
           <a
             href="#features"
             :id="`nav-link-features-${templateSuffix}`"
             class="hover:text-white/80 transition-colors duration-200"
-            >Features</a
+            >{{ $t('nav.features') }}</a
           >
         </div>
         <div class="flex items-center gap-6">
+          <!-- Language Switcher -->
+          <div class="flex gap-2 text-[10px] font-black uppercase tracking-widest mr-2">
+            <button 
+              @click="locale = 'en'" 
+              class="transition-colors cursor-pointer"
+              :class="locale === 'en' ? 'text-yellow-500' : 'text-white/20 hover:text-white/50'"
+            >EN</button>
+            <span class="text-white/10">|</span>
+            <button 
+              @click="locale = 'es'" 
+              class="transition-colors cursor-pointer"
+              :class="locale === 'es' ? 'text-yellow-500' : 'text-white/20 hover:text-white/50'"
+            >ES</button>
+          </div>
+
           <router-link
             to="/lobby"
             :id="`nav-link-join-${templateSuffix}`"
             class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 hover:text-white/80 transition-colors duration-200"
           >
-            Join a Table
+            {{ $t('nav.join') }}
           </router-link>
           <router-link
             to="/lobby"
             :id="`nav-cta-play-${templateSuffix}`"
             class="cta-pill"
           >
-            Play now
+            {{ $t('nav.play') }}
           </router-link>
         </div>
       </div>
@@ -92,15 +107,15 @@
             :id="`hero-eyebrow-dot-${templateSuffix}`"
             class="eyebrow-dot"
           ></span>
-          Free to play &nbsp;·&nbsp; No account needed &nbsp;·&nbsp; Works on
-          any device
+          {{ $t('hero.badge') }}
         </div>
 
         <!-- Headline -->
-        <h1 :id="`hero-headline-text-${templateSuffix}`" class="hero-headline">
-          Poker night,<br />
-          <em class="text-[#f5a623]">no strings</em><br />
-          attached.
+        <h1 
+          :id="`hero-headline-text-${templateSuffix}`" 
+          class="hero-headline"
+          v-html="$t('hero.headline', { br: '<br/>', no_strings: '<em class=\'text-[#f5a623]\'>' + $t('hero.no_strings') + '</em>' })"
+        >
         </h1>
 
         <!-- Sub -->
@@ -108,9 +123,7 @@
           :id="`hero-sub-description-${templateSuffix}`"
           class="hero-sub mt-8 mb-14 max-w-xl"
         >
-          Spin up a private table in seconds, share a link, and deal with your
-          friends — wherever they are. No app downloads. No real money. Just the
-          game.
+          {{ $t('hero.sub') }}
         </p>
 
         <!-- CTAs -->
@@ -123,7 +136,7 @@
             :id="`hero-btn-create-table-${templateSuffix}`"
             class="btn-primary"
           >
-            Create a Table
+            {{ $t('hero.create') }}
             <svg
               class="btn-arrow"
               xmlns="http://www.w3.org/2000/svg"
@@ -142,7 +155,7 @@
             :id="`hero-btn-browse-tables-${templateSuffix}`"
             class="btn-secondary"
           >
-            Join a Table
+            {{ $t('hero.browse') }}
           </router-link>
         </div>
 
@@ -163,10 +176,8 @@
           <p
             :id="`hero-social-text-${templateSuffix}`"
             class="text-[12px] text-white/40 font-medium"
+            v-html="$t('hero.social', { count: '<span class=\'text-white/70 font-bold\'>' + $t('hero.thousands') + '</span>' })"
           >
-            Played by&nbsp;<span class="text-white/70 font-bold"
-              >thousands of crews</span
-            >&nbsp;this week
           </p>
         </div>
       </div>
@@ -447,9 +458,7 @@
             :id="`footer-disclaimer-${templateSuffix}`"
             class="text-[13px] text-white/20 font-medium leading-relaxed"
           >
-            YayPoker is a free social game. No real money changes hands on this
-            platform. Virtual chips have no monetary value. Side arrangements
-            between players are solely their responsibility.
+            {{ $t('footer.disclaimer') }}
           </p>
         </div>
         <div
@@ -470,19 +479,19 @@
               to="/privacy"
               :id="`footer-link-privacy-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Privacy</router-link
+              >{{ $t('footer.privacy') }}</router-link
             >
             <router-link
               to="/terms"
               :id="`footer-link-terms-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Terms</router-link
+              >{{ $t('footer.terms') }}</router-link
             >
             <router-link
               to="/contact"
               :id="`footer-link-contact-${templateSuffix}`"
               class="hover:text-white/60 transition-colors"
-              >Contact</router-link
+              >{{ $t('footer.contact') }}</router-link
             >
           </div>
         </div>
@@ -493,9 +502,11 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useResponsiveStore } from '../store/responsiveStore'
 import Logo from '../components/Logo.vue'
 
+const { locale } = useI18n()
 const responsive = useResponsiveStore()
 const templateSuffix = computed(() => {
   switch (responsive.screenSize) {

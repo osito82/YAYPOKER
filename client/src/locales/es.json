@@ -1,0 +1,25 @@
+{
+  "nav": {
+    "how": "Cómo funciona",
+    "features": "Características",
+    "join": "Unirse a Mesa",
+    "play": "Jugar ahora"
+  },
+  "hero": {
+    "badge": "Gratis · Sin cuenta · Funciona en cualquier dispositivo",
+        "headline": "Juega Poker, {br} {like_pro} {br} GRATIS.",
+    "like_pro": "como un pro...",
+    
+    "sub": "Crea una mesa privada en segundos, comparte el enlace y reparte cartas con tus amigos, dondequiera que estén. Sin descargas. Sin dinero real. Solo el juego.",
+    "create": "Crear una Mesa",
+    "browse": "Unirse a Mesa",
+    "social": "Jugado por {count} esta semana",
+    "thousands": "miles de grupos"
+  },
+  "footer": {
+    "disclaimer": "YayPoker es un juego social gratuito. No se intercambia dinero real en esta plataforma. Los chips virtuales no tienen valor monetario. Los acuerdos entre jugadores son responsabilidad de ellos.",
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "contact": "Contacto"
+  }
+}
