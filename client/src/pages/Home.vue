@@ -190,7 +190,7 @@
         ></span>
         <span
           class="text-[10px] text-white/25 uppercase tracking-[0.3em] font-bold mt-3"
-          >Scroll</span
+          >{{ $t('hero.scroll') }}</span
         >
       </div>
     </header>
@@ -203,40 +203,37 @@
     >
       <div class="max-w-6xl mx-auto">
         <div :id="`how-label-${templateSuffix}`" class="section-label mb-4">
-          How it works
+          {{ $t('pages.home.how.label') }}
         </div>
         <h2
           :id="`how-headline-${templateSuffix}`"
           class="section-heading mb-20"
+          v-html="$t('pages.home.how.headline', { br: '<br/>' })"
         >
-          From zero to all-in<br />in under a minute.
         </h2>
 
         <div :id="`how-steps-grid-${templateSuffix}`" class="steps-grid">
           <div :id="`how-step-1-${templateSuffix}`" class="step-card">
             <div class="step-num">01</div>
-            <h3 class="step-title">Create your table</h3>
+            <h3 class="step-title">{{ $t('pages.home.how.step1_title') }}</h3>
             <p class="step-body">
-              Hit the button, choose an alias — your private table is live. No
-              forms, no passwords, no friction.
+              {{ $t('pages.home.how.step1_body') }}
             </p>
           </div>
           <div class="step-divider">→</div>
           <div :id="`how-step-2-${templateSuffix}`" class="step-card">
             <div class="step-num">02</div>
-            <h3 class="step-title">Share the link</h3>
+            <h3 class="step-title">{{ $t('pages.home.how.step2_title') }}</h3>
             <p class="step-body">
-              Copy the room code and drop it on WhatsApp, Discord, or wherever
-              your crew hangs out.
+              {{ $t('pages.home.how.step2_body') }}
             </p>
           </div>
           <div class="step-divider">→</div>
           <div :id="`how-step-3-${templateSuffix}`" class="step-card">
             <div class="step-num">03</div>
-            <h3 class="step-title">Play your hand</h3>
+            <h3 class="step-title">{{ $t('pages.home.how.step3_title') }}</h3>
             <p class="step-body">
-              Cards are dealt automatically. Chips are virtual. The trash talk
-              is very much real.
+              {{ $t('pages.home.how.step3_body') }}
             </p>
           </div>
         </div>
@@ -254,13 +251,13 @@
           :id="`features-label-${templateSuffix}`"
           class="section-label mb-4"
         >
-          Features
+          {{ $t('pages.home.features.label') }}
         </div>
         <h2
           :id="`features-headline-${templateSuffix}`"
           class="section-heading mb-20"
+          v-html="$t('pages.home.features.headline', { br: '<br/>' })"
         >
-          Everything you need.<br />Nothing you don't.
         </h2>
 
         <div :id="`features-grid-${templateSuffix}`" class="features-grid">
@@ -284,11 +281,9 @@
                 />
               </svg>
             </div>
-            <h4 class="feature-title">No real money — ever</h4>
+            <h4 class="feature-title">{{ $t('pages.home.features.money_title') }}</h4>
             <p class="feature-body">
-              YayPoker deals in virtual chips only. Want to make it interesting
-              with a side bet between friends? That's your business. We just run
-              the table.
+              {{ $t('pages.home.features.money_body') }}
             </p>
           </div>
 
@@ -312,9 +307,9 @@
                 />
               </svg>
             </div>
-            <h4 class="feature-title">Instant setup</h4>
+            <h4 class="feature-title">{{ $t('pages.home.features.setup_title') }}</h4>
             <p class="feature-body">
-              No install. No sign-up. Open the link and you're at the table.
+              {{ $t('pages.home.features.setup_body') }}
             </p>
           </div>
 
@@ -338,9 +333,9 @@
                 />
               </svg>
             </div>
-            <h4 class="feature-title">Private by default</h4>
+            <h4 class="feature-title">{{ $t('pages.home.features.private_title') }}</h4>
             <p class="feature-body">
-              Tables are invite-only. No strangers at your game.
+              {{ $t('pages.home.features.private_body') }}
             </p>
           </div>
 
@@ -364,10 +359,9 @@
                 />
               </svg>
             </div>
-            <h4 class="feature-title">Any screen, any place</h4>
+            <h4 class="feature-title">{{ $t('pages.home.features.responsive_title') }}</h4>
             <p class="feature-body">
-              Fully responsive — phone, tablet, laptop. Everyone at the table,
-              wherever they are.
+              {{ $t('pages.home.features.responsive_body') }}
             </p>
           </div>
         </div>
@@ -381,11 +375,10 @@
     >
       <div class="max-w-4xl mx-auto text-center">
         <p :id="`quote-text-content-${templateSuffix}`" class="quote-text">
-          "The best part of poker night was never the cards. It was the stories
-          you told after."
+          {{ $t('pages.home.quote.text') }}
         </p>
         <p :id="`quote-attribution-${templateSuffix}`" class="quote-attr mt-8">
-          YayPoker &mdash; built for the moments between the hands
+          {{ $t('pages.home.quote.attribution') }}
         </p>
       </div>
     </section>
@@ -400,14 +393,14 @@
             :id="`final-cta-label-${templateSuffix}`"
             class="section-label mb-4"
           >
-            Ready?
+            {{ $t('pages.home.final_cta.label') }}
           </div>
           <h2
             :id="`final-cta-headline-${templateSuffix}`"
             class="section-heading"
             style="max-width: 520px"
+            v-html="$t('pages.home.final_cta.headline', { br: '<br/>' })"
           >
-            Start your table.<br />Deal the first hand.
           </h2>
         </div>
         <div
@@ -419,7 +412,7 @@
             :id="`final-cta-btn-create-${templateSuffix}`"
             class="btn-primary"
           >
-            Create a Table
+            {{ $t('pages.home.final_cta.create') }}
             <svg
               class="btn-arrow"
               xmlns="http://www.w3.org/2000/svg"
@@ -438,7 +431,7 @@
             :id="`final-cta-btn-browse-${templateSuffix}`"
             class="btn-secondary"
           >
-            Join a Table
+            {{ $t('pages.home.final_cta.join') }}
           </router-link>
         </div>
       </div>

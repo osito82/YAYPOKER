@@ -31,9 +31,8 @@
         <h2
           :id="`not-found-headline-${templateSuffix}`"
           class="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter"
-        >
-          ¡Yay! <span class="text-yellow-500">404</span>
-        </h2>
+          v-html="$t('pages.not_found.headline', { span: '<span class=\'text-yellow-500\'>404</span>' })"
+        ></h2>
 
         <div
           :id="`funny-message-badge-${templateSuffix}`"
@@ -42,7 +41,7 @@
           <p
             class="text-yellow-500 font-mono text-[10px] md:text-xs font-black uppercase tracking-[0.2em]"
           >
-            Hiciste All-In en una página que no existe
+            {{ $t('pages.not_found.badge') }}
           </p>
         </div>
       </div>
@@ -51,8 +50,7 @@
         :id="`not-found-description-text-${templateSuffix}`"
         class="text-gray-500 text-xs md:text-sm font-bold uppercase tracking-widest max-w-sm mx-auto leading-relaxed"
       >
-        ¡Oops! Parece que este link es un bluff. Pero Yay, ¡siempre puedes
-        volver a la mesa principal!
+        {{ $t('pages.not_found.description') }}
       </p>
 
       <div :id="`not-found-actions-container-${templateSuffix}`" class="pt-8">
@@ -61,7 +59,7 @@
           to="/"
           class="inline-block bg-yellow-600 hover:bg-yellow-500 text-black font-black py-4 px-10 rounded-2xl transition-all transform hover:-translate-y-1 active:scale-95 uppercase tracking-[0.2em] text-sm shadow-[0_0_30px_rgba(234,179,8,0.2)]"
         >
-          Volver a la Mesa Principal
+          {{ $t('pages.not_found.back_button') }}
         </router-link>
       </div>
     </div>

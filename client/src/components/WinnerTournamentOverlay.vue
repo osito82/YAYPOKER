@@ -81,17 +81,17 @@
           <p
             class="title-eyebrow font-mono text-[11px] tracking-[4px] uppercase text-[#D4A853] mb-2"
           >
-            Deush Poker · Torneo Finalizado
+            Deush Poker · {{ $t('tournament.finished') }}
           </p>
           <h1
             class="title-main font-bebas text-7xl sm:text-8xl leading-[0.95] tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent"
           >
-            CAMPEÓN
+            {{ $t('tournament.champion') }}
           </h1>
           <p
             class="title-sub font-bebas text-3xl sm:text-4xl tracking-[6px] text-[#F5F0E8] opacity-85 mt-1"
           >
-            DEL TORNEO
+            {{ $t('tournament.of_the_tournament') }}
           </p>
         </div>
 
@@ -111,7 +111,7 @@
           <p
             class="winner-label font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853] mb-1.5"
           >
-            Ganador
+            {{ $t('tournament.winner') }}
           </p>
           <h2
             class="winner-name font-bebas text-5xl sm:text-6xl tracking-[2px] leading-none text-[#F5F0E8] mb-4 relative z-10"
@@ -123,17 +123,17 @@
             <div class="stat flex flex-col gap-0.5">
               <span
                 class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
-                >Fichas Finales</span
+                >{{ $t('tournament.final_chips') }}</span
               >
               <span
                 class="stat-value font-mono text-base text-[#F5D78E] font-medium"
-                >{{ totalAmount.toLocaleString() }} chips</span
+                >{{ totalAmount.toLocaleString() }} {{ $t('lobby.chips').toLowerCase() }}</span
               >
             </div>
             <div class="stat flex flex-col gap-0.5">
               <span
                 class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
-                >Torneo ID</span
+                >{{ $t('tournament.id') }}</span
               >
               <span
                 class="stat-value font-mono text-base text-[#F5D78E] font-medium"
@@ -148,7 +148,7 @@
             <div class="stat flex flex-col gap-0.5">
               <span
                 class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
-                >Fecha</span
+                >{{ $t('tournament.date') }}</span
               >
               <span
                 class="stat-value font-mono text-base text-[#F5D78E] font-medium"
@@ -165,7 +165,7 @@
           <div class="cert-header flex items-center justify-between mb-5">
             <span
               class="cert-title font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853]"
-              >🎖 Código de Certificado</span
+              >🎖 {{ $t('tournament.cert_code') }}</span
             >
             <div
               class="cert-badge flex items-center gap-1.5 px-2.5 py-1 bg-[#D4A853]/10 border border-[#D4A853]/25 rounded-full"
@@ -175,7 +175,7 @@
               ></div>
               <span
                 class="cert-badge-text font-mono text-[9px] tracking-[1px] text-[#D4A853]"
-                >OFICIAL</span
+                >{{ $t('tournament.official') }}</span
               >
             </div>
           </div>
@@ -197,10 +197,7 @@
           </div>
 
           <p class="code-info text-xs text-[#9E9080] leading-relaxed mb-6">
-            Este código de
-            <strong class="text-[#F5F0E8] font-medium">4 dígitos</strong> prueba
-            que fuiste el ganador de este torneo. Guárdalo — nadie más lo tiene.
-            Puedes verificarlo en la página oficial.
+            {{ $t('tournament.cert_desc') }}
           </p>
 
           <div
@@ -208,7 +205,7 @@
           >
             <span
               class="torneo-id-label font-mono text-[10px] tracking-[2px] uppercase text-[#9E9080]"
-              >Torneo ID</span
+              >{{ $t('tournament.id') }}</span
             >
             <span
               class="torneo-id-value font-mono text-[12px] text-[#F5F0E8] mx-2 truncate"
@@ -236,7 +233,7 @@
             target="_blank"
             class="verify-btn block w-full p-4 text-center bg-gradient-to-br from-[#D4A853]/15 to-[#D4A853]/08 border border-[#D4A853]/35 rounded-xl text-[#F5D78E] font-mono text-xs tracking-[2px] uppercase transition-all hover:bg-[#D4A853]/25 hover:border-[#D4A853] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(212,168,83,0.15)]"
           >
-            → Verificar Certificado en deush.poker/verify
+            → {{ $t('tournament.verify_link', { url: 'deush.poker/verify' }) }}
           </router-link>
         </div>
 
@@ -244,13 +241,13 @@
           @click="handleClose"
           class="mt-8 px-10 py-4 bg-transparent border-2 border-[#D4A853]/20 hover:border-[#D4A853]/50 text-[#D4A853]/70 hover:text-[#D4A853] rounded-full text-sm font-black uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95"
         >
-          Back to Lobby ({{ countdown }}s)
+          {{ $t('tournament.back_to_lobby', { count: countdown }) }}
         </button>
 
         <div
           class="footer mt-8 text-center font-mono text-[10px] tracking-[2px] text-[#8A6A2A] opacity-60 animate-fade-up animation-delay-1100"
         >
-          DEUSH POKER · SISTEMA DE CERTIFICACIÓN OFICIAL · v1.0
+          {{ $t('tournament.system_footer') }}
         </div>
       </div>
     </div>
@@ -259,9 +256,11 @@
 
 <script setup>
 import { computed, ref, onUnmounted, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 
+const { t, locale } = useI18n()
 const responsive = useResponsiveStore()
 const templateSuffix = computed(() => responsive.templateSuffix || 'Default')
 
@@ -275,7 +274,7 @@ const pokerStore = usePokerStore()
 const DURATION = 120 // Increased to 2 minutes to let winner enjoy the certificate
 const countdown = ref(DURATION)
 const isVisible = ref(true)
-const copyStatus = ref('COPIAR')
+const copyStatus = ref(t('tournament.copy'))
 let timer = null
 
 const certificate = computed(() => props.winnerInfo?.certificate)
@@ -288,7 +287,7 @@ const formattedDate = computed(() => {
   const date = certificate.value?.date
     ? new Date(certificate.value.date)
     : new Date()
-  return date.toLocaleDateString('es-ES', {
+  return date.toLocaleDateString(locale.value === 'es' ? 'es-ES' : 'en-US', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -366,9 +365,9 @@ const copyTorneoId = () => {
   if (!id) return
 
   navigator.clipboard.writeText(id).then(() => {
-    copyStatus.value = '✓ OK'
+    copyStatus.value = t('tournament.copied')
     setTimeout(() => {
-      copyStatus.value = 'COPIAR'
+      copyStatus.value = t('tournament.copy')
     }, 1500)
   })
 }
@@ -543,3 +542,23 @@ onUnmounted(() => {
   border-radius: 10px;
 }
 </style>
+.2);
+  border-radius: 10px;
+}
+</style>
+ustom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(212, 168, 83, 0.2);
+  border-radius: 10px;
+}
+</style>
+.2);
+  border-radius: 10px;
+}
+</style>
+
+}
+</style>
+tyle>

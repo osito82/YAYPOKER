@@ -66,8 +66,7 @@
           v-if="logs.length === 0"
           class="text-gray-600 font-bold italic animate-pulse flex items-center gap-2"
         >
-          <span class="text-yellow-400">»</span> SYSTEM_READY: Waiting for game
-          events... 📡
+          <span class="text-yellow-400">»</span> {{ $t('game.system_ready') }}
         </div>
 
         <!-- Bottom anchor for auto-scroll -->
@@ -158,5 +157,8 @@ onMounted(scrollToBottom)
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+</style>
+ckground: rgba(255, 255, 255, 0.2);
 }
 </style>

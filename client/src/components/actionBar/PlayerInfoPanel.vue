@@ -70,7 +70,7 @@
           <span
             :id="`hud-player-stack-label-${templateSuffix}`"
             class="block text-[7px] font-black text-gray-500 uppercase leading-none mb-0.5"
-            >Stack</span
+            >{{ $t('game.stack') }}</span
           >
           <span
             :id="`hud-player-stack-value-text-${templateSuffix}`"
@@ -89,7 +89,7 @@
           <span
             :id="`hud-player-bet-label-${templateSuffix}`"
             class="block text-[7px] font-black text-emerald-500 uppercase leading-none mb-0.5"
-            >Bet</span
+            >{{ $t('game.bet_label') }}</span
           >
           <span
             :id="`hud-player-bet-value-text-${templateSuffix}`"

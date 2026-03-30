@@ -21,16 +21,14 @@
         <p
           class="site-name font-mono text-[10px] tracking-[4px] text-[#8A6A2A] uppercase mb-3"
         >
-          Deush Poker
+          {{ $t('pages.verify.site_name') }}
         </p>
         <h1
           class="page-title font-bebas text-[clamp(36px,8vw,52px)] tracking-[2px] bg-gradient-to-br from-[#F5D78E] to-[#D4A853] bg-clip-text text-transparent"
         >
-          VERIFICADOR
+          {{ $t('pages.verify.headline') }}
         </h1>
-        <p class="page-sub text-[13px] text-[#7A7268] mt-1 leading-relaxed">
-          Ingresa el ID del torneo y el código de 4 dígitos<br />para confirmar
-          la identidad del ganador
+        <p class="page-sub text-[13px] text-[#7A7268] mt-1 leading-relaxed" v-html="$t('pages.verify.sub')">
         </p>
       </header>
 
@@ -44,12 +42,12 @@
         <div class="field-group mb-5">
           <label
             class="field-label font-mono text-[9px] tracking-[3px] uppercase text-[#D4A853] block mb-2"
-            >ID del Torneo</label
+            >{{ $t('pages.verify.torneo_id_label') }}</label
           >
           <input
             v-model="torneoId"
             class="field-input w-full bg-black/40 border border-white/10 rounded-xl p-3 px-4 text-[#F5F0E8] font-mono text-sm outline-none transition-colors tracking-widest focus:border-[#D4A853]/50 focus:ring-4 focus:ring-[#D4A853]/5"
-            placeholder="ej: abc1-9f3d"
+            :placeholder="$t('pages.verify.torneo_id_placeholder')"
             autocomplete="off"
             spellcheck="false"
             :class="{ 'shake-animation border-red-500/70': errors.torneoId }"
@@ -59,7 +57,7 @@
         <div class="field-group mb-5">
           <label
             class="field-label font-mono text-[9px] tracking-[3px] uppercase text-[#D4A853] block mb-2"
-            >Código del Ganador (4 dígitos)</label
+            >{{ $t('pages.verify.code_label') }}</label
           >
           <div class="code-input-row flex gap-2.5 items-center justify-center">
             <input
@@ -89,7 +87,7 @@
           class="verify-btn w-full p-4 bg-gradient-to-br from-[#D4A853] to-[#8A6A2A] border-none rounded-xl text-[#060E07] font-bebas text-[20px] tracking-[3px] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(212,168,83,0.3)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
         >
           <span class="relative z-10">{{
-            isVerifying ? 'VERIFICANDO...' : 'VERIFICAR CERTIFICADO'
+            isVerifying ? $t('pages.verify.verifying') : $t('pages.verify.verify_btn')
           }}</span>
           <div
             class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"
@@ -114,12 +112,12 @@
           class="result-status font-bebas text-2xl tracking-widest mb-1"
           :class="result.valid ? 'text-[#27AE60]' : 'text-[#C0392B]'"
         >
-          {{ result.valid ? 'CERTIFICADO VÁLIDO' : 'CERTIFICADO INVÁLIDO' }}
+          {{ result.valid ? $t('pages.verify.valid_status') : $t('pages.verify.invalid_status') }}
         </p>
         <p class="result-msg text-[13px] text-[#7A7268] mb-4 leading-relaxed">
           {{
             result.valid
-              ? 'Este código ha sido verificado exitosamente. El jugador es el ganador oficial de este torneo.'
+              ? $t('pages.verify.valid_msg')
               : result.error
           }}
         </p>
@@ -132,7 +130,7 @@
             <p
               class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
             >
-              Ganador del Torneo
+              {{ $t('pages.verify.winner_label') }}
             </p>
             <p
               class="detail-value name font-bebas text-2xl text-[#F5D78E] tracking-wider"
@@ -144,7 +142,7 @@
             <p
               class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
             >
-              Torneo ID
+              {{ $t('pages.verify.torneo_id_display') }}
             </p>
             <p
               class="detail-value font-mono text-[13px] text-[#F5F0E8] font-medium"
@@ -156,7 +154,7 @@
             <p
               class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
             >
-              Fecha
+              {{ $t('pages.verify.date_label') }}
             </p>
             <p
               class="detail-value font-mono text-[13px] text-[#F5F0E8] font-medium"
@@ -168,24 +166,24 @@
             <p
               class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
             >
-              Jugadores
+              {{ $t('pages.verify.players_label') }}
             </p>
             <p
               class="detail-value font-mono text-[13px] text-[#F5F0E8] font-medium"
             >
-              {{ result.certificate.totalPlayers }} jugadores
+              {{ $t('pages.verify.players_count', { count: result.certificate.totalPlayers }) }}
             </p>
           </div>
           <div class="detail-item">
             <p
               class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
             >
-              Fichas Finales
+              {{ $t('pages.verify.chips_label') }}
             </p>
             <p
               class="detail-value font-mono text-[13px] text-[#F5F0E8] font-medium"
             >
-              {{ result.certificate.chipsWon.toLocaleString() }} chips
+              {{ $t('pages.verify.chips_count', { count: result.certificate.chipsWon.toLocaleString() }) }}
             </p>
           </div>
         </div>
@@ -195,21 +193,21 @@
           class="seal inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full font-mono text-[10px] tracking-[2px] text-[#27AE60]"
         >
           <div class="seal-dot w-1.5 h-1.5 bg-[#27AE60] rounded-full"></div>
-          VERIFICADO POR DEUSH POKER
+          {{ $t('pages.verify.verified_by') }}
         </div>
 
         <button
           @click="reset"
           class="try-again mt-6 bg-transparent border border-white/15 rounded-lg text-[#7A7268] font-mono text-[10px] tracking-[2px] p-2 px-4 cursor-pointer transition-colors hover:border-white/30 hover:text-[#F5F0E8]"
         >
-          ← VERIFICAR OTRO
+          {{ $t('pages.verify.verify_another') }}
         </button>
       </div>
 
       <footer
         class="footer font-mono text-[9px] tracking-[2px] text-[#8A6A2A]/50 text-center"
       >
-        SISTEMA DE CERTIFICACIÓN OFICIAL · DEUSH POKER v1.0
+        {{ $t('pages.verify.footer') }}
       </footer>
     </div>
   </div>

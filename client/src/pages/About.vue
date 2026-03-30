@@ -14,7 +14,7 @@
         :id="`about-nav-link-back-${templateSuffix}`"
         class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 hover:text-yellow-500 transition-colors"
       >
-        Volver
+        {{ $t('pages.about.back') }}
       </router-link>
     </nav>
 
@@ -38,22 +38,19 @@
           <span
             class="text-yellow-500 font-mono text-[10px] font-black uppercase tracking-[0.3em]"
           >
-            Nuestra Filosofía
+            {{ $t('pages.about.philosophy_badge') }}
           </span>
         </div>
         <h1
           :id="`about-headline-text-${templateSuffix}`"
           class="text-5xl md:text-7xl font-black uppercase tracking-tighter italic mb-8"
-        >
-          Póker para <span class="text-yellow-500">Gozar</span>
-        </h1>
+          v-html="$t('pages.about.headline', { span: '<span class=\'text-yellow-500\'>' + $t('pages.about.headline_span') + '</span>' })"
+        ></h1>
         <p
           :id="`about-sub-description-${templateSuffix}`"
           class="text-gray-400 text-lg md:text-xl font-bold uppercase tracking-wide leading-relaxed"
         >
-          YayPoker no es solo un juego, es el patio de recreo digital donde tú y
-          tus amigos podéis demostrar quién es el rey del farol sin arriesgar el
-          alquiler.
+          {{ $t('pages.about.description') }}
         </p>
       </header>
 
@@ -65,30 +62,28 @@
           :id="`about-card-free-${templateSuffix}`"
           class="bg-white/5 border border-white/10 p-8 rounded-[2rem]"
         >
-          <h3 class="text-2xl font-black uppercase italic mb-4">
-            ¿Por qué <span class="text-yellow-500">Gratis</span>?
-          </h3>
+          <h3
+            class="text-2xl font-black uppercase italic mb-4"
+            v-html="$t('pages.about.why_free_title', { span: '<span class=\'text-yellow-500\'>' + $t('pages.about.free') + '</span>' })"
+          ></h3>
           <p
             class="text-gray-500 text-sm leading-relaxed font-bold uppercase tracking-widest"
           >
-            Because poker is a sport of skill and laughs. We want the barrier to
-            entry to be ZERO. We don't want your data, we don't want your cards,
-            we just want you to deal the cards.
+            {{ $t('pages.about.why_free_desc') }}
           </p>
         </div>
         <div
           :id="`about-card-fast-${templateSuffix}`"
           class="bg-white/5 border border-white/10 p-8 rounded-[2rem]"
         >
-          <h3 class="text-2xl font-black uppercase italic mb-4">
-            ¿Por qué <span class="text-yellow-500">Rápido</span>?
-          </h3>
+          <h3
+            class="text-2xl font-black uppercase italic mb-4"
+            v-html="$t('pages.about.why_fast_title', { span: '<span class=\'text-yellow-500\'>' + $t('pages.about.fast') + '</span>' })"
+          ></h3>
           <p
             class="text-gray-500 text-sm leading-relaxed font-bold uppercase tracking-widest"
           >
-            Because we hate 5-minute registrations. At YayPoker, the time
-            between "I want to play" and being at the table is measured in
-            blinks. Link, name, and All-in.
+            {{ $t('pages.about.why_fast_desc') }}
           </p>
         </div>
       </section>
@@ -100,14 +95,13 @@
         <h2
           :id="`about-footer-tagline-${templateSuffix}`"
           class="text-3xl font-black uppercase tracking-widest mb-8 italic"
-        >
-          Hecho con <span class="text-red-500">♥</span> por entusiastas
-        </h2>
+          v-html="$t('pages.about.made_by', { heart: '<span class=\'text-red-500\'>♥</span>' })"
+        ></h2>
         <p
           :id="`about-footer-copyright-${templateSuffix}`"
           class="text-gray-600 text-xs font-black uppercase tracking-[0.4em]"
         >
-          &copy; 2026 YayPoker Engineering
+          {{ $t('pages.about.copyright') }}
         </p>
       </footer>
     </main>

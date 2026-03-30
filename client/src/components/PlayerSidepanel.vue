@@ -16,7 +16,7 @@
           :id="'sidepanel-status-pulse-dot-' + templateSuffix"
           class="w-1.5 h-1.5 bg-green-500/50 rounded-full"
         ></div>
-        Players List
+        {{ $t('game.players_list') }}
       </h2>
     </div>
 
@@ -117,7 +117,7 @@
               <span
                 :id="`player-item-bet-label-${player.id}-${templateSuffix}`"
                 class="text-[10px] font-black text-emerald-500/70 uppercase tracking-tighter mb-1 leading-none"
-                >In Pot</span
+                >{{ $t('game.in_pot') }}</span
               >
               <div
                 :id="`player-item-bet-value-wrapper-${player.id}-${templateSuffix}`"
@@ -246,7 +246,7 @@
             <span
               :id="`player-item-last-action-label-${player.id}-${templateSuffix}`"
               class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 leading-none"
-              >Last Action</span
+              >{{ $t('game.last_action') }}</span
             >
             <Transition name="action-highlight" mode="out-in">
               <div
@@ -509,3 +509,7 @@ const getActionColor = (action) => {
   transform: translateY(10px) scale(0.9);
 }
 </style>
+0.9);
+}
+</style>
+tyle>

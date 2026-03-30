@@ -12,7 +12,7 @@
       :id="`waiting-state-text-${templateSuffix}`"
       class="text-[9px] font-black text-yellow-500/60 uppercase tracking-widest truncate"
     >
-      Wait: {{ activePlayerName }}
+      {{ $t('game.wait_for', { name: activePlayerName }) }}
     </span>
   </div>
 </template>

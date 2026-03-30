@@ -21,7 +21,7 @@
       <span
         :id="`hud-bet-label-${templateSuffix}`"
         class="text-[9px] font-black text-yellow-500/60 uppercase leading-none"
-        >Bet</span
+        >{{ $t('game.bet_label') }}</span
       >
       <span
         :id="`hud-bet-value-text-${templateSuffix}`"
