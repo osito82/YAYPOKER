@@ -1,4 +1,4 @@
-# Deush Poker Client 🃏
+# YAY Poker Client 🃏
 
 Un cliente de Poker moderno, rápido y visualmente atractivo construido con **Vue 3** y **Vite**. Diseñado para ofrecer una experiencia de juego fluida y responsiva en cualquier dispositivo.
 

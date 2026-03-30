@@ -116,7 +116,7 @@
     "copied": "✓ OK",
     "verify_link": "Verificar Certificado en {url}",
     "back_to_lobby": "Volver al Lobby ({count}s)",
-    "system_footer": "DEUSH POKER · SISTEMA DE CERTIFICACIÓN OFICIAL · v1.0"
+    "system_footer": "YAY Poker · SISTEMA DE CERTIFICACIÓN OFICIAL · v1.0"
   },
   "form": {
     "name": "Nombre:",
@@ -241,7 +241,7 @@
       "footer": "Al usar YayPoker, aceptas estos términos y reconoces que este es un juego social de dinero ficticio destinado al entretenimiento con amigos y familiares."
     },
     "verify": {
-      "site_name": "Deush Poker",
+      "site_name": "YAY Poker",
       "headline": "VERIFICADOR",
       "sub": "Ingresa el ID del torneo y el código de 4 dígitos para confirmar la identidad del ganador",
       "torneo_id_label": "ID del Torneo",
@@ -259,9 +259,9 @@
       "players_count": "{count} jugadores",
       "chips_label": "Fichas Finales",
       "chips_count": "{count} fichas",
-      "verified_by": "VERIFICADO POR DEUSH POKER",
+      "verified_by": "VERIFICADO POR YAY POKER",
       "verify_another": "← VERIFICAR OTRO",
-      "footer": "SISTEMA DE CERTIFICACIÓN OFICIAL · DEUSH POKER v1.0"
+      "footer": "SISTEMA DE CERTIFICACIÓN OFICIAL · YAY POKER v1.0"
     },
     "lobby_home": {
       "subtitle": "Texas Hold'em {span}",

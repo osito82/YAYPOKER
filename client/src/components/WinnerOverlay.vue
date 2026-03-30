@@ -561,6 +561,4 @@ const opponentsHands = computed(() => {
   background: rgba(234, 179, 8, 0.5);
 }
 </style>
-34, 179, 8, 0.5);
-}
-</style>
+

@@ -509,7 +509,4 @@ const getActionColor = (action) => {
   transform: translateY(10px) scale(0.9);
 }
 </style>
-0.9);
-}
-</style>
-tyle>
+

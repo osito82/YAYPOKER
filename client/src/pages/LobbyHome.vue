@@ -313,8 +313,8 @@ const vFocus = {
 }
 
 // State
-const playerName = ref('')
-const secretCode = ref('')
+const playerName = ref(pokerStore.gameCredentials.playerName || '')
+const secretCode = ref(pokerStore.gameCredentials.secretCode || '')
 const defaultSecret = ref('')
 const joinCode = ref('')
 const generatedCode = ref('')
@@ -430,7 +430,7 @@ const checkRouteState = () => {
     if (!defaultSecret.value) {
       defaultSecret.value = generateSecretCode()
     }
-    secretCode.value = ''
+    // Don't clear secretCode here if it was persisted
   } else if (route.name === 'game.join' || route.query.joinCode) {
     isCreating.value = false
     joinCode.value = (
@@ -438,16 +438,15 @@ const checkRouteState = () => {
       route.query.joinCode ||
       ''
     ).toUpperCase()
-    playerName.value = route.query.playerName || ''
-    // Pre-fill secret if provided in path
-    secretCode.value = route.params.secretCode || ''
+    if (route.query.playerName) playerName.value = route.query.playerName
+    // Pre-fill secret if provided in path, otherwise keep persisted
+    if (route.params.secretCode) secretCode.value = route.params.secretCode
     defaultSecret.value = ''
   } else {
     isCreating.value = false
     generatedCode.value = ''
-    playerName.value = ''
-    secretCode.value = ''
     defaultSecret.value = ''
+    // Keep persisted playerName and secretCode
   }
 }
 

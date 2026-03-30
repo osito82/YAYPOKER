@@ -98,7 +98,9 @@ const activeTemplate = computed(() => {
 })
 
 // Logic for name/uuid generation
-const playerName = ref(route.query.playerName || 'Guest')
+const playerName = ref(
+  route.query.playerName || pokerStore.gameCredentials.playerName || 'Guest',
+)
 
 if (props.isGuest) {
   playerName.value = `Spectator_${Math.floor(Math.random() * 1000)}`

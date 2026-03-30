@@ -81,7 +81,7 @@
           <p
             class="title-eyebrow font-mono text-[11px] tracking-[4px] uppercase text-[#D4A853] mb-2"
           >
-            Deush Poker · {{ $t('tournament.finished') }}
+            YAY Poker · {{ $t('tournament.finished') }}
           </p>
           <h1
             class="title-main font-bebas text-7xl sm:text-8xl leading-[0.95] tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent"
@@ -161,7 +161,7 @@
         <!-- Certificate Box -->
         <div
           class="cert-box w-full bg-[#060E07] border border-[#D4A853]/20 rounded-2xl p-7 sm:p-8 mb-5 relative animate-fade-up animation-delay-700"
-        >
+        >m
           <div class="cert-header flex items-center justify-between mb-5">
             <span
               class="cert-title font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853]"
@@ -542,23 +542,3 @@ onUnmounted(() => {
   border-radius: 10px;
 }
 </style>
-.2);
-  border-radius: 10px;
-}
-</style>
-ustom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(212, 168, 83, 0.2);
-  border-radius: 10px;
-}
-</style>
-.2);
-  border-radius: 10px;
-}
-</style>
-
-}
-</style>
-tyle>

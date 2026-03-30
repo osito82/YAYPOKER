@@ -1,4 +1,4 @@
-# Deush Poker Server ⚙️
+# YAY Poker Server ⚙️
 
 Servidor de Poker de alto rendimiento basado en **Node.js** y **WebSockets**. Actúa como el cerebro del juego, gestionando múltiples partidas, evaluando manos y sincronizando el estado en tiempo real.
 
