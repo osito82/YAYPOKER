@@ -70,7 +70,7 @@
 
         <!-- MODE: Selection (Home /) -->
         <template v-if="!isCreating">
-          <!-- Join Game Section -->
+          <!-- Join a Table Section -->
           <form
             :id="`join-game-form-section-${templateSuffix}`"
             @submit.prevent="joinGame"

@@ -114,7 +114,7 @@
             :id="`hero-btn-create-table-${templateSuffix}`"
             class="btn-primary"
           >
-            Create a table
+            Create a Table
             <svg
               class="btn-arrow"
               xmlns="http://www.w3.org/2000/svg"
@@ -133,7 +133,7 @@
             :id="`hero-btn-browse-tables-${templateSuffix}`"
             class="btn-secondary"
           >
-            Browse open tables
+            Join a Table
           </router-link>
         </div>
 
@@ -399,7 +399,7 @@
             :id="`final-cta-btn-create-${templateSuffix}`"
             class="btn-primary"
           >
-            Create a table
+            Create a Table
             <svg
               class="btn-arrow"
               xmlns="http://www.w3.org/2000/svg"
@@ -418,7 +418,7 @@
             :id="`final-cta-btn-browse-${templateSuffix}`"
             class="btn-secondary"
           >
-            Browse open tables
+            Join a Table
           </router-link>
         </div>
       </div>
