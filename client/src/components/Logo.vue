@@ -1,25 +1,13 @@
 <template>
   <div
     :id="`brand-logo-container-${templateSuffix}`"
-    class="flex items-center justify-center bg-gray-900 p-2 rounded-lg border border-gray-700 shadow-md"
+    class="flex items-center justify-center px-4"
   >
     <div
-      :id="`brand-logo-spade-${templateSuffix}`"
-      class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-600 mr-2"
-    >
-      ♠
-    </div>
-    <div
       :id="`brand-logo-text-${templateSuffix}`"
-      class="text-xl font-bold text-white tracking-wider uppercase font-mono"
+      class="text-3xl font-black italic tracking-tighter drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]"
     >
-      Yay<span class="text-yellow-500">Poker</span>
-    </div>
-    <div
-      :id="`brand-logo-diamond-${templateSuffix}`"
-      class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-yellow-400 ml-2"
-    >
-      ♦
+      <span class="text-yellow-500">YAY</span><span class="text-white">POKER</span>
     </div>
   </div>
 </template>
