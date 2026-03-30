@@ -114,7 +114,7 @@
         <h1 
           :id="`hero-headline-text-${templateSuffix}`" 
           class="hero-headline"
-          v-html="$t('hero.headline', { br: '<br/>', no_strings: '<em class=\'text-[#f5a623]\'>' + $t('hero.no_strings') + '</em>' })"
+          v-html="$t('hero.headline', { br: '<br/>', like_pro: '<em class=\'text-[#f5a623]\'>' + $t('hero.like_pro') + '</em>' })"
         >
         </h1>
 
