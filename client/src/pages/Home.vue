@@ -25,7 +25,7 @@
 
         <div class="flex items-center gap-4 sm:gap-8">
           <!-- Language Switcher -->
-          <div class="hidden xs:flex gap-3 text-[10px] font-black uppercase tracking-widest border border-white/10 rounded-full px-3 py-1.5 bg-white/5">
+          <div class="flex gap-3 text-[10px] font-black uppercase tracking-widest border border-white/10 rounded-full px-3 py-1.5 bg-white/5">
             <button 
               @click="locale = 'en'" 
               class="transition-colors cursor-pointer"
@@ -47,7 +47,7 @@
           </router-link>
           
           <router-link
-            to="/lobby"
+            to="/new"
             class="group relative px-6 py-2.5 bg-yellow-500 text-black text-[12px] font-black uppercase tracking-[0.15em] rounded-full overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] active:scale-95"
           >
             <span class="relative z-10">{{ $t('nav.play') }}</span>
@@ -98,7 +98,7 @@
           class="flex flex-col sm:flex-row gap-6 justify-center items-center"
         >
           <router-link
-            to="/lobby"
+            to="/new"
             class="w-full sm:w-auto px-10 py-5 bg-yellow-500 text-black font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 hover:shadow-[0_10px_40px_rgba(234,179,8,0.3)] active:scale-95 flex items-center justify-center gap-3"
           >
             {{ $t('hero.create') }}
