@@ -1,25 +1,25 @@
 <template>
-  <div id="message-terminal" class="w-full h-full">
+  <div id="message-terminal" class="w-full h-full transition-colors duration-300">
     <div
       id="terminal-container"
-      class="terminal-bg w-full h-full flex flex-col overflow-hidden"
+      class="w-full h-full flex flex-col overflow-hidden bg-white/90 dark:bg-[#020402]/85 backdrop-blur-xl"
     >
       <!-- Terminal header bar -->
-      <div class="terminal-header flex items-center gap-2 px-4 py-2 shrink-0">
+      <div class="flex items-center gap-2 px-4 py-2 shrink-0 bg-gray-100/50 dark:bg-black/40 border-b border-gray-200 dark:border-white/5">
         <div class="flex gap-1.5">
           <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
           <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
           <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
         </div>
         <span
-          class="text-[9px] font-mono font-bold text-white/20 uppercase tracking-widest ml-2"
+          class="text-[9px] font-mono font-bold text-gray-400 dark:text-white/20 uppercase tracking-widest ml-2"
           >Game Log</span
         >
         <div class="ml-auto flex items-center gap-1">
           <div
             class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
           ></div>
-          <span class="text-[8px] font-mono text-green-500/60 uppercase"
+          <span class="text-[8px] font-mono text-green-600 dark:text-green-500/60 uppercase"
             >Live</span
           >
         </div>
@@ -28,7 +28,7 @@
       <!-- Terminal body -->
       <div
         ref="logContainer"
-        class="flex-grow overflow-y-auto p-4 lg:p-6 font-mono text-xs lg:text-sm space-y-1.5 scrollbar-thin scrollbar-thumb-white/20 scroll-smooth"
+        class="flex-grow overflow-y-auto p-4 lg:p-6 font-mono text-xs lg:text-sm space-y-1.5 scrollbar-thin dark:scrollbar-thumb-white/20 scrollbar-thumb-gray-300 scroll-smooth"
       >
         <TransitionGroup
           enter-active-class="transition duration-200 ease-out"
@@ -38,21 +38,21 @@
           <div
             v-for="log in logs"
             :key="log.id"
-            class="flex gap-2 items-start leading-tight py-0.5 border-b border-white/[0.02] last:border-0"
+            class="flex gap-2 items-start leading-tight py-0.5 border-b border-gray-100 dark:border-white/[0.02] last:border-0"
           >
             <span
-              class="text-yellow-500/50 font-bold shrink-0 text-[10px] mt-0.5"
+              class="text-yellow-600 dark:text-yellow-500/50 font-bold shrink-0 text-[10px] mt-0.5"
               >[{{ formatTime(log.id) }}]</span
             >
-            <span class="text-yellow-400 font-black shrink-0">»</span>
+            <span class="text-yellow-600 dark:text-yellow-400 font-black shrink-0">»</span>
             <div class="flex flex-wrap gap-1 items-center">
               <span class="text-lg leading-none shrink-0">{{
                 getEmoji(log)
               }}</span>
               <span
-                class="font-bold tracking-tight break-words"
+                class="font-bold tracking-tight break-words transition-colors"
                 :class="[
-                  log.type === 'private' ? 'text-cyan-400' : 'text-gray-100',
+                  log.type === 'private' ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-800 dark:text-gray-100',
                 ]"
               >
                 {{ log.text }}
@@ -64,9 +64,9 @@
         <!-- Empty State -->
         <div
           v-if="logs.length === 0"
-          class="text-gray-600 font-bold italic animate-pulse flex items-center gap-2"
+          class="text-gray-400 dark:text-gray-600 font-bold italic animate-pulse flex items-center gap-2"
         >
-          <span class="text-yellow-400">»</span> {{ $t('game.system_ready') }}
+          <span class="text-yellow-600 dark:text-yellow-400">»</span> {{ $t('game.system_ready') }}
         </div>
 
         <!-- Bottom anchor for auto-scroll -->
@@ -135,28 +135,14 @@ onMounted(scrollToBottom)
 </script>
 
 <style scoped>
-.terminal-bg {
-  background: rgba(2, 4, 2, 0.85);
-  backdrop-filter: blur(12px);
-}
-
-.terminal-header {
-  background: rgba(0, 0, 0, 0.4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-}
-
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
+  background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
 }
 </style>
 
