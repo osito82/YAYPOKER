@@ -29,14 +29,12 @@
         >
           <span
             class="text-[9px] font-mono font-bold text-white uppercase tracking-wider leading-none"
-            >Blinds ${{ pokerStore.smallBlind }}/${{
-              pokerStore.bigBlind
-            }}</span
+            >{{ $t('game.blinds_info', { small: pokerStore.smallBlind, big: pokerStore.bigBlind }) }}</span
           >
           <h1
             class="text-[8px] font-black text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80 leading-none"
           >
-            No Limit Hold'em
+            {{ $t('game.type_label') }}
           </h1>
         </div>
       </div>
@@ -60,7 +58,7 @@
           ></div>
           <span
             class="text-[8px] font-bold uppercase tracking-widest text-gray-200"
-            >{{ isConnected ? 'LIVE' : 'OFF' }}</span
+            >{{ isConnected ? $t('game.status_live') : $t('game.status_offline') }}</span
           >
         </div>
         <div

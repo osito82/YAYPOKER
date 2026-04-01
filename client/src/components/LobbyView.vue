@@ -42,7 +42,7 @@
                 :id="`game-code-label-${templateSuffix}`"
                 class="font-black text-yellow-600 uppercase tracking-[0.2em]"
                 :class="badgeLabelSize"
-                >Table Code:</span
+                >{{ $t('lobby.table_code') }}</span
               >
               <span
                 :id="`game-code-value-${templateSuffix}`"
@@ -67,11 +67,11 @@
             </div>
             <!-- Tooltip -->
             <div
-              v-if="copyStatus === 'Copied!'"
+              v-if="copyStatus === $t('lobby.copied')"
               :id="`copy-status-tooltip-${templateSuffix}`"
               class="absolute -top-12 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest shadow-2xl animate-bounce z-10 whitespace-nowrap"
             >
-              Copied!
+              {{ $t('lobby.copied') }}
             </div>
           </div>
         </div>
@@ -104,7 +104,7 @@
               </svg>
             </div>
             <h3 class="text-red-500 font-black uppercase tracking-widest mb-2">
-              Lobby Error
+              {{ $t('lobby.error_title') }}
             </h3>
             <p class="text-gray-300 text-sm font-medium leading-relaxed">
               {{ lastError.message }}
@@ -115,7 +115,7 @@
             @click="handleErrorBack"
             class="bg-white/5 hover:bg-white/10 text-white font-black py-3 px-8 rounded-xl border border-white/10 transition-all uppercase tracking-widest text-[10px]"
           >
-            ← Back to Setup
+            {{ $t('lobby.back_to_setup') }}
           </button>
         </div>
 
@@ -124,8 +124,8 @@
           :id="`lobby-title-text-${templateSuffix}`"
           class="text-gray-200 font-black uppercase italic mt-2 text-center"
           :class="subtitleSize"
+          v-html="$t('lobby.waiting_room', { room: '<span class=\'text-yellow-500\'>' + $t('lobby.room') + '</span>' })"
         >
-          Waiting <span class="text-yellow-500">Room</span>
         </h2>
       </div>
 
@@ -143,7 +143,7 @@
             :id="`players-count-label-${templateSuffix}`"
             class="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]"
           >
-            Players Connected ({{ players.length }}/10)
+            {{ $t('lobby.players_connected', { count: players.length }) }}
           </h3>
           <div
             :id="`players-status-indicator-${templateSuffix}`"
@@ -154,7 +154,7 @@
             ></div>
             <span
               class="text-[9px] font-black text-green-500/80 uppercase tracking-widest"
-              >Live Updates</span
+              >{{ $t('lobby.live_updates') }}</span
             >
           </div>
         </div>
@@ -201,7 +201,7 @@
                   <span
                     v-if="player.id === myId"
                     class="text-[10px] text-yellow-500/50 ml-1 font-black"
-                    >YOU</span
+                    >{{ $t('lobby.you') }}</span
                   >
                 </span>
                 <span
@@ -209,7 +209,7 @@
                   :id="`player-role-badge-${player.id}-${templateSuffix}`"
                   class="text-[9px] font-black text-yellow-600 uppercase tracking-widest"
                 >
-                  Table Host
+                  {{ $t('lobby.table_host') }}
                 </span>
               </div>
             </div>
@@ -223,7 +223,7 @@
                 class="text-[9px] font-black uppercase tracking-widest"
                 :class="player.connected ? 'text-green-500' : 'text-red-500'"
               >
-                {{ player.connected ? 'Ready' : 'Lost' }}
+                {{ player.connected ? $t('lobby.status_ready') : $t('lobby.status_lost') }}
               </span>
               <div
                 :id="`connectivity-dot-${player.id}-${templateSuffix}`"
@@ -258,7 +258,7 @@
             <label
               class="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest"
             >
-              Initial Stack per Player
+              {{ $t('lobby.initial_stack') }}
             </label>
             <div class="flex items-center gap-3">
               <input
@@ -268,7 +268,7 @@
                 min="100"
                 class="bg-black/60 text-white border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50 w-full font-mono"
               />
-              <span class="text-yellow-500/40 font-black text-xs">CHIPS</span>
+              <span class="text-yellow-500/40 font-black text-xs">{{ $t('lobby.chips') }}</span>
             </div>
           </div>
 
@@ -281,7 +281,7 @@
             <label
               class="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest"
             >
-              Add AI Bots to Table (Max 10 players total)
+              {{ $t('lobby.add_bots') }}
             </label>
             <select
               v-model="botCount"
@@ -294,8 +294,8 @@
               >
                 {{
                   n - 1 === 0
-                    ? 'No Bots'
-                    : n - 1 + (n - 1 === 1 ? ' Bot' : ' Bots')
+                    ? $t('lobby.bot_none')
+                    : (n - 1 === 1 ? $t('lobby.bot_one') : $t('lobby.bot_many', { count: n - 1 }))
                 }}
               </option>
             </select>
@@ -306,7 +306,7 @@
             :id="`waiting-players-warning-${templateSuffix}`"
             class="text-yellow-500/70 text-[10px] text-center font-black uppercase tracking-[0.2em] italic animate-pulse"
           >
-            Need at least 2 players to start the match
+            {{ $t('lobby.min_players_warning') }}
           </p>
           <button
             :id="`start-game-submit-button-${templateSuffix}`"
@@ -314,7 +314,7 @@
             :disabled="players.length + botCount < 2"
             class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 rounded-2xl focus:outline-none transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl uppercase tracking-[0.2em] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed text-base"
           >
-            Deal First Hand
+            {{ $t('lobby.start_game') }}
           </button>
         </div>
 
@@ -341,7 +341,7 @@
             :id="`waiting-host-message-${templateSuffix}`"
             class="text-gray-400 text-xs font-black uppercase tracking-[0.2em] italic text-center"
           >
-            Waiting for Host to Start...
+            {{ $t('lobby.waiting_for_host') }}
           </p>
         </div>
       </div>
@@ -351,8 +351,8 @@
     <p
       :id="`lobby-copyright-footer-${templateSuffix}`"
       class="mt-10 text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]"
+      v-html="$t('lobby.copyright', { brand: '<span class=\'text-yellow-500/50\'>' + $t('lobby.brand') + '</span>' })"
     >
-      &copy; 2026 <span class="text-yellow-500/50">YayPoker</span> Engineering
     </p>
   </div>
 </template>

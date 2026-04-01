@@ -24,7 +24,7 @@
         <span
           :id="`status-indicator-my-turn-text-${templateSuffix}`"
           class="text-xs font-black text-yellow-500 uppercase tracking-widest italic"
-          >IT'S YOUR TURN</span
+          >{{ $t('game.your_turn') }}</span
         >
       </div>
       <div
@@ -54,7 +54,7 @@
         <span
           :id="`status-indicator-waiting-text-${templateSuffix}`"
           class="text-[10px] text-gray-500 font-bold uppercase tracking-widest"
-          >Waiting for others...</span
+          >{{ $t('game.waiting_others') }}</span
         >
       </div>
     </Transition>

@@ -40,7 +40,7 @@
         isVertical ? 'w-full py-2' : 'h-8 lg:h-11 px-3',
       ]"
     >
-      Clear
+      {{ $t('game.clear') }}
     </button>
   </div>
 </template>

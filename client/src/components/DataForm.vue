@@ -2,26 +2,26 @@
 <template>
   <form class="my-form" @submit.prevent="submitForm">
     <div class="form-group">
-      <label for="name">Name:</label>
+      <label for="name">{{ $t('form.name') }}</label>
       <input type="text" id="name" v-model="name" />
     </div>
 
     <div class="form-group">
-      <label for="secretCode">Secret Code:</label>
+      <label for="secretCode">{{ $t('form.secret_code') }}</label>
       <input type="password" id="secretCode" v-model="secretCode" />
     </div>
 
     <div class="button-group">
-      <button @click="startGame">New Game</button>
+      <button @click="startGame">{{ $t('form.new_game') }}</button>
     </div>
 
     <div class="form-group">
-      <label for="gameCode">Game Code:</label>
+      <label for="gameCode">{{ $t('form.game_code') }}</label>
       <input id="gameCode" v-model="gameCode" />
     </div>
 
     <div class="button-group">
-      <button type="submit">Join a Game</button>
+      <button type="submit">{{ $t('form.join_game') }}</button>
     </div>
   </form>
 </template>

@@ -39,20 +39,20 @@
               id="blinds-text-TemplateLarge"
               class="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider"
             >
-              Blinds ${{ pokerStore.smallBlind }}/${{ pokerStore.bigBlind }}
+              {{ $t('game.blinds_info', { small: pokerStore.smallBlind, big: pokerStore.bigBlind }) }}
             </span>
             <span
               id="game-id-text-TemplateLarge"
               class="text-[9px] font-mono text-white/25 border-l border-white/10 pl-2"
             >
-              ID: {{ gameCode }}
+              {{ $t('game.id_label', { id: gameCode }) }}
             </span>
           </div>
           <h1
             id="game-type-title-TemplateLarge"
             class="text-[9px] font-black text-amber-500/70 uppercase tracking-widest mt-0.5"
           >
-            No Limit Hold'em
+            {{ $t('game.type_label') }}
           </h1>
         </div>
       </div>
@@ -73,7 +73,7 @@
           <span
             id="online-count-text-TemplateLarge"
             class="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-tighter"
-            >{{ allPlayers.length }} Online</span
+            >{{ $t('game.online_count', { count: allPlayers.length }) }}</span
           >
         </div>
 
@@ -94,7 +94,7 @@
             id="conn-status-text-TemplateLarge"
             class="text-[9px] font-bold uppercase tracking-widest"
             :class="isConnected ? 'text-green-400' : 'text-red-400'"
-            >{{ isConnected ? 'Live' : 'Offline' }}</span
+            >{{ isConnected ? $t('game.status_live') : $t('game.status_offline') }}</span
           >
         </div>
 

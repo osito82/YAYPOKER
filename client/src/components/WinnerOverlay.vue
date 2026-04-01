@@ -147,7 +147,7 @@
                 <div class="flex flex-col items-center gap-1">
                   <span
                     class="text-[8px] sm:text-[10px] text-gray-400 uppercase font-black"
-                    >Hole Cards</span
+                    >{{ $t('winner.hole_cards') }}</span
                   >
                   <div
                     v-if="flattenCards(winner.playerCards).length > 0"
@@ -418,10 +418,9 @@
                   templateSuffix
                 "
                 class="w-3 h-3 sm:w-4 sm:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
-              ></div>
-              {{ isWaiting ? 'Waiting for others...' : 'Continue Next Round' }}
-            </button>
-          </div>
+                ></div>
+                {{ isWaiting ? $t('winner.waiting_others') : $t('winner.continue') }}
+                </button>          </div>
         </div>
       </div>
     </div>
@@ -562,3 +561,4 @@ const opponentsHands = computed(() => {
   background: rgba(234, 179, 8, 0.5);
 }
 </style>
+

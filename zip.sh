@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Nombre del archivo zip con timestamp
-OUTPUT_FILE="deush_$(date +%Y%m%d_%H%M%S).zip"
+OUTPUT_FILE="yayPoker_$(date +%Y%m%d_%H%M%S).zip"
 
 echo "📦 Comprimiendo el proyecto en $OUTPUT_FILE..."
 

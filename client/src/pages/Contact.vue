@@ -5,17 +5,18 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Back to Home
+        {{ $t('pages.contact.back') }}
       </router-link>
 
-      <h1 class="text-4xl md:text-5xl font-black text-white mb-8 italic uppercase tracking-tighter">
-        Get in <span class="text-yellow-500">Touch</span>
-      </h1>
+      <h1 
+        class="text-4xl md:text-5xl font-black text-white mb-8 italic uppercase tracking-tighter"
+        v-html="$t('pages.contact.headline', { span: '<span class=\'text-yellow-500\'>' + $t('pages.contact.headline_span') + '</span>' })"
+      ></h1>
 
       <div class="grid md:grid-cols-2 gap-16">
         <div>
           <p class="text-xl leading-relaxed mb-8">
-            Have questions about YayPoker? Want to report a bug or suggest a feature for your family game nights? We'd love to hear from you.
+            {{ $t('pages.contact.description') }}
           </p>
           
           <div class="space-y-4">
@@ -33,39 +34,39 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                 </svg>
               </div>
-              Join our Community
+              {{ $t('pages.contact.community') }}
             </div>
           </div>
         </div>
 
         <form @submit.prevent="handleSubmit" class="bg-white/5 p-8 rounded-3xl border border-white/10 space-y-6">
           <div>
-            <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Nickname (Optional)</label>
+            <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">{{ $t('pages.contact.nickname') }}</label>
             <input 
               type="text" 
               class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 transition-colors"
-              placeholder="How should we call you?"
+              :placeholder="$t('pages.contact.nickname_placeholder')"
             />
           </div>
           <div>
-            <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Subject</label>
+            <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">{{ $t('pages.contact.subject') }}</label>
             <select class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 transition-colors">
-              <option>General Inquiry</option>
-              <option>Bug Report</option>
-              <option>Feature Request</option>
-              <option>Other</option>
+              <option>{{ $t('pages.contact.subjects.general') }}</option>
+              <option>{{ $t('pages.contact.subjects.bug') }}</option>
+              <option>{{ $t('pages.contact.subjects.feature') }}</option>
+              <option>{{ $t('pages.contact.subjects.other') }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Message</label>
+            <label class="block text-xs font-black uppercase tracking-widest text-gray-500 mb-2">{{ $t('pages.contact.message') }}</label>
             <textarea 
               rows="4"
               class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 transition-colors"
-              placeholder="Tell us what's on your mind..."
+              :placeholder="$t('pages.contact.message_placeholder')"
             ></textarea>
           </div>
           <button class="w-full py-4 bg-yellow-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-yellow-400 transition-colors">
-            Send Message
+            {{ $t('pages.contact.send') }}
           </button>
         </form>
       </div>
@@ -74,7 +75,11 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 const handleSubmit = () => {
-  alert('Thank you for your message! This is a demo form.')
+  alert(t('pages.contact.success_alert'))
 }
 </script>

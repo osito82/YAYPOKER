@@ -10,9 +10,14 @@
         class="btn-blind flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm px-3 active:scale-95 transition-all duration-150"
       >
         <template v-if="blindInfo">
-          Post {{ blindInfo.type }} Blind ${{ blindInfo.amount }}
+          {{
+            $t('game.post_blind', {
+              type: $t('game.' + blindInfo.type.toLowerCase()),
+              amount: blindInfo.amount,
+            })
+          }}
         </template>
-        <template v-else>Post Blind</template>
+        <template v-else>{{ $t('game.post_blind_generic') }}</template>
       </button>
     </template>
 
@@ -23,7 +28,7 @@
         :disabled="!isMyTurn || !options.includes('fold')"
         class="btn-fold flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
       >
-        Fold
+        {{ $t('game.fold') }}
       </button>
 
       <button
@@ -32,7 +37,7 @@
         :disabled="!isMyTurn || !options.includes('check')"
         class="btn-check flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
       >
-        Check
+        {{ $t('game.check') }}
       </button>
 
       <button
@@ -41,7 +46,7 @@
         :disabled="!isMyTurn || !options.includes('call')"
         class="btn-call flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
       >
-        Call
+        {{ $t('game.call') }}
       </button>
 
       <button
@@ -53,7 +58,7 @@
           pokerStore.blindsIncreasedFlag ? 'animate-pulse scale-105 z-10' : '',
         ]"
       >
-        {{ options.includes('bet') ? 'Bet' : 'Raise' }}
+        {{ options.includes('bet') ? $t('game.bet') : $t('game.raise') }}
       </button>
     </template>
   </div>

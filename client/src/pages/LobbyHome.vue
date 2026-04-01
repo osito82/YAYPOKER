@@ -19,8 +19,8 @@
           :id="`lobby-game-subtitle-${templateSuffix}`"
           class="text-gray-200 font-black uppercase tracking-[0.3em] italic"
           :class="subtitleSize"
+          v-html="$t('pages.lobby_home.subtitle', { span: '<span class=\'text-yellow-500\'>' + $t('pages.lobby_home.subtitle_span') + '</span>' })"
         >
-          Texas Hold'em <span class="text-yellow-500">Lobby</span>
         </h2>
       </div>
 
@@ -84,11 +84,9 @@
                 :id="`new-game-main-title-${templateSuffix}`"
                 class="text-3xl font-black text-white uppercase tracking-[0.4em] italic"
               >
-                <span v-if="joinCode">
-                  Join <span class="text-yellow-500">Table</span>
+                <span v-if="joinCode" v-html="$t('pages.lobby_home.join_table', { span: '<span class=\'text-yellow-500\'>' + $t('pages.lobby_home.join_table_span') + '</span>' })">
                 </span>
-                <span v-else>
-                  Join Existing <span class="text-yellow-500">Table</span>
+                <span v-else v-html="$t('pages.lobby_home.join_existing', { span: '<span class=\'text-yellow-500\'>' + $t('pages.lobby_home.join_existing_span') + '</span>' })">
                 </span>
               </h1>
             </div>
@@ -97,7 +95,7 @@
               :id="`join-game-input-label-${templateSuffix}`"
               class="block text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
             >
-              Your info
+              {{ $t('pages.lobby_home.your_info') }}
             </label>
 
             <div
@@ -110,7 +108,7 @@
                 v-focus
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-yellow-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
                 type="text"
-                placeholder="Enter Your Name"
+                :placeholder="$t('pages.lobby_home.name_placeholder')"
               />
 
               <input
@@ -119,7 +117,7 @@
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-yellow-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
                 type="password"
                 maxlength="4"
-                placeholder="Invent 4-Digit Pin"
+                :placeholder="$t('pages.lobby_home.pin_placeholder')"
                 @input="secretCode = secretCode.replace(/\D/g, '')"
               />
 
@@ -133,7 +131,7 @@
                   :id="`join-code-error-tooltip-${templateSuffix}`"
                   class="absolute bottom-full left-0 mb-4 px-4 py-2 bg-red-600 text-white text-[12px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-widest z-20 whitespace-nowrap shadow-2xl border border-red-500"
                 >
-                  Format: XXXXX-XXXXX
+                  {{ $t('pages.lobby_home.format_tooltip') }}
                   <div
                     :id="`error-tooltip-pointer-${templateSuffix}`"
                     class="absolute top-full left-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-red-600"
@@ -162,7 +160,7 @@
                     :disabled="!isValidJoin"
                     class="bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-8 rounded-xl focus:outline-none transition-all shadow-lg disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
                   >
-                    Join
+                    {{ $t('pages.lobby_home.join_btn') }}
                   </button>
                 </div>
                 <p
@@ -170,7 +168,7 @@
                   :id="`join-code-format-error-message-${templateSuffix}`"
                   class="text-red-500 text-[12px] uppercase tracking-widest font-black ml-2 mt-2"
                 >
-                  Format must be XXXXX-XXXXX
+                  {{ $t('pages.lobby_home.format_error') }}
                 </p>
               </div>
             </div>
@@ -190,8 +188,8 @@
             <h1
               :id="`new-game-main-title-${templateSuffix}`"
               class="text-3xl font-black text-white uppercase tracking-[0.4em] italic"
+              v-html="$t('pages.lobby_home.new_game', { span: '<span class=\'text-yellow-500\'>' + $t('pages.lobby_home.new_game_span') + '</span>' })"
             >
-              New <span class="text-yellow-500">Game</span>
             </h1>
           </div>
 
@@ -205,7 +203,7 @@
               :id="`table-code-display-label-${templateSuffix}`"
               class="text-gray-300 text-xs uppercase tracking-[0.3em] mb-3 font-black"
             >
-              Your Table Code
+              {{ $t('pages.lobby_home.table_code_label') }}
             </p>
             <p
               :id="`table-code-text-display-${templateSuffix}`"
@@ -225,7 +223,7 @@
               :id="`creator-name-setup-label-${templateSuffix}`"
               class="block text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2"
             >
-              Set Your Display Name & Pin
+              {{ $t('pages.lobby_home.setup_label') }}
             </label>
             <div
               :id="`creator-info-inputs-wrapper-${templateSuffix}`"
@@ -237,7 +235,7 @@
                 v-focus
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-medium placeholder:text-gray-600"
                 type="text"
-                placeholder="Ex: Osito Malafama"
+                :placeholder="$t('pages.lobby_home.setup_name_placeholder')"
               />
               <input
                 :id="`creator-secret-pin-input-${templateSuffix}`"
@@ -245,7 +243,7 @@
                 class="shadow-inner appearance-none border border-white/10 rounded-xl w-full py-4 px-6 text-white bg-black/40 leading-tight focus:outline-none focus:border-green-500/50 transition-colors text-lg font-mono placeholder:text-gray-600"
                 type="password"
                 maxlength="4"
-                placeholder="Invent 4-Digit Pin"
+                :placeholder="$t('pages.lobby_home.pin_placeholder')"
                 @input="secretCode = secretCode.replace(/\D/g, '')"
               />
             </div>
@@ -263,7 +261,7 @@
                 "
                 class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-5 px-4 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-base"
               >
-                Start Playing
+                {{ $t('pages.lobby_home.start_btn') }}
               </button>
             </div>
           </form>
@@ -273,7 +271,7 @@
             @click="cancelCreate"
             class="w-full text-gray-400 hover:text-white text-[12px] font-black uppercase tracking-[0.2em] transition-colors"
           >
-            ← Back to Lobby
+            {{ $t('pages.lobby_home.back_to_lobby') }}
           </button>
         </div>
       </div>
@@ -283,9 +281,8 @@
         :id="`lobby-page-footer-${templateSuffix}`"
         class="bg-black/60 text-center text-gray-400 text-[11px] font-bold uppercase tracking-[0.2em] border-t border-white/5"
         :class="footerPadding"
+        v-html="$t('pages.lobby_home.footer', { span: '<span class=\'text-yellow-500\'>' + $t('pages.lobby_home.brand') + '</span>' })"
       >
-        &copy; 2026 <span class="text-yellow-500">YayPoker</span>. All chips are
-        virtual.
       </div>
     </div>
   </div>
@@ -316,8 +313,8 @@ const vFocus = {
 }
 
 // State
-const playerName = ref('')
-const secretCode = ref('')
+const playerName = ref(pokerStore.gameCredentials.playerName || '')
+const secretCode = ref(pokerStore.gameCredentials.secretCode || '')
 const defaultSecret = ref('')
 const joinCode = ref('')
 const generatedCode = ref('')
@@ -433,7 +430,7 @@ const checkRouteState = () => {
     if (!defaultSecret.value) {
       defaultSecret.value = generateSecretCode()
     }
-    secretCode.value = ''
+    // Don't clear secretCode here if it was persisted
   } else if (route.name === 'game.join' || route.query.joinCode) {
     isCreating.value = false
     joinCode.value = (
@@ -441,16 +438,15 @@ const checkRouteState = () => {
       route.query.joinCode ||
       ''
     ).toUpperCase()
-    playerName.value = route.query.playerName || ''
-    // Pre-fill secret if provided in path
-    secretCode.value = route.params.secretCode || ''
+    if (route.query.playerName) playerName.value = route.query.playerName
+    // Pre-fill secret if provided in path, otherwise keep persisted
+    if (route.params.secretCode) secretCode.value = route.params.secretCode
     defaultSecret.value = ''
   } else {
     isCreating.value = false
     generatedCode.value = ''
-    playerName.value = ''
-    secretCode.value = ''
     defaultSecret.value = ''
+    // Keep persisted playerName and secretCode
   }
 }
 

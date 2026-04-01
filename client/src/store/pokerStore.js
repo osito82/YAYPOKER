@@ -5,10 +5,14 @@ export const usePokerStore = defineStore('pokerStore', () => {
   // State
   const socketMessage = ref(null)
   const connected = ref(false)
+
+  const savedCredentials = JSON.parse(
+    localStorage.getItem('poker-credentials') || '{}',
+  )
   const gameCredentials = ref({
-    secretCode: '',
+    secretCode: savedCredentials.secretCode || '',
     gameCode: '',
-    playerName: '',
+    playerName: savedCredentials.playerName || '',
   })
   const players = ref([])
   const communityCards = ref([])
@@ -310,6 +314,15 @@ export const usePokerStore = defineStore('pokerStore', () => {
     gameCredentials.value.playerName = playerName
     gameCredentials.value.gameCode = gameCode
     gameCredentials.value.secretCode = secretCode
+
+    // Persist credentials (but not the gameCode as it's session-specific)
+    localStorage.setItem(
+      'poker-credentials',
+      JSON.stringify({
+        playerName,
+        secretCode,
+      }),
+    )
   }
 
   function clearError() {

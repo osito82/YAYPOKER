@@ -47,16 +47,16 @@ const ACTIONS = {
 }
 
 const BOT_NAMES = [
+  'ChipBlender_Bot',
   'Osito_Bot',
-  'Malafama_Bot',
   'PokerFace_Bot',
-  'AllIn_Bot',
-  'FullHouse_Bot',
-  'AceHigh_Bot',
+  'RoboFlush_Bot',
+  'Terminator_Bot',
+  'TurboFold_Bot',
   'FlushMaster_Bot',
-  'RoyalBot',
-  'Jack_IA',
-  'Deush_Bot',
+  'Optimus_Bot',
+  'JackAss_Bot',
+  'FiascoMatic_Bot',
 ]
 
 const SERVER_CONFIG = {

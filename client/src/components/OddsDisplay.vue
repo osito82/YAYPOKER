@@ -91,12 +91,12 @@
       <span
         :id="`odds-hand-label-${templateSuffix}`"
         class="text-[7px] font-black text-gray-500 uppercase tracking-widest mb-0.5 leading-none"
-        >Hand</span
+        >{{ $t('game.hand') }}</span
       >
       <span
         :id="`odds-hand-name-text-${templateSuffix}`"
         class="text-[9px] sm:text-[10px] font-black text-yellow-500 uppercase italic leading-none truncate max-w-[90px] text-center"
-        >{{ handName || 'Waiting...' }}</span
+        >{{ handName || $t('game.waiting') }}</span
       >
       <div
         :id="`odds-hand-rank-visual-wrapper-${templateSuffix}`"
