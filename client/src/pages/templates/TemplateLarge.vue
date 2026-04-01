@@ -1,12 +1,12 @@
 <template>
   <div
     id="game-container-TemplateLarge"
-    class="h-screen w-screen bg-neutral-950 overflow-hidden flex flex-col font-sans text-white select-none"
+    class="h-screen w-screen bg-white dark:bg-neutral-950 overflow-hidden flex flex-col font-sans text-gray-900 dark:text-white select-none transition-colors duration-300"
   >
     <!-- UNIFIED COMPACT HEADER -->
     <header
       id="game-header-bar-TemplateLarge"
-      class="w-full backdrop-blur-xl border-b border-white/[0.06] px-6 py-0 flex items-stretch z-50 shrink-0 header-bar"
+      class="w-full backdrop-blur-xl border-b border-gray-200 dark:border-white/[0.06] px-6 py-0 flex items-stretch z-50 shrink-0 header-bar transition-colors duration-300"
     >
       <!-- LEFT SECTION -->
       <div
@@ -25,7 +25,7 @@
         </div>
         <div
           id="header-divider-TemplateLarge"
-          class="h-5 w-px bg-white/8"
+          class="h-5 w-px bg-gray-300 dark:bg-white/8"
         ></div>
         <div
           id="game-metadata-info-TemplateLarge"
@@ -37,20 +37,20 @@
           >
             <span
               id="blinds-text-TemplateLarge"
-              class="text-[11px] font-mono font-bold text-white/80 uppercase tracking-wider"
+              class="text-[11px] font-mono font-bold text-gray-600 dark:text-white/80 uppercase tracking-wider"
             >
               {{ $t('game.blinds_info', { small: pokerStore.smallBlind, big: pokerStore.bigBlind }) }}
             </span>
             <span
               id="game-id-text-TemplateLarge"
-              class="text-[9px] font-mono text-white/25 border-l border-white/10 pl-2"
+              class="text-[9px] font-mono text-gray-400 dark:text-white/25 border-l border-gray-300 dark:border-white/10 pl-2"
             >
               {{ $t('game.id_label', { id: gameCode }) }}
             </span>
           </div>
           <h1
             id="game-type-title-TemplateLarge"
-            class="text-[9px] font-black text-amber-500/70 uppercase tracking-widest mt-0.5"
+            class="text-[9px] font-black text-amber-600 dark:text-amber-500/70 uppercase tracking-widest mt-0.5"
           >
             {{ $t('game.type_label') }}
           </h1>
@@ -64,58 +64,58 @@
       >
         <div
           id="players-online-pill-TemplateLarge"
-          class="flex items-center gap-1.5 px-2 py-1 rounded-md header-pill"
+          class="flex items-center gap-1.5 px-2 py-1 rounded-md header-pill border border-gray-200 dark:border-white/10"
         >
           <div
             id="online-indicator-dot-TemplateLarge"
-            class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_4px_rgba(74,222,128,0.8)]"
+            class="w-1.5 h-1.5 bg-green-500 dark:bg-green-400 rounded-full animate-pulse shadow-[0_0_4px_rgba(74,222,128,0.8)]"
           ></div>
           <span
             id="online-count-text-TemplateLarge"
-            class="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-tighter"
+            class="text-[9px] font-mono font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tighter"
             >{{ $t('game.online_count', { count: allPlayers.length }) }}</span
           >
         </div>
 
         <div
           id="connection-status-badge-TemplateLarge"
-          class="header-conn-badge px-3 py-1 rounded-full flex items-center gap-1.5 shrink-0"
+          class="header-conn-badge px-3 py-1 rounded-full flex items-center gap-1.5 shrink-0 border border-gray-200 dark:border-white/10"
         >
           <div
             id="conn-indicator-dot-TemplateLarge"
             class="w-1.5 h-1.5 rounded-full"
             :class="
               isConnected
-                ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.8)]'
+                ? 'bg-green-500 dark:bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.8)]'
                 : 'bg-red-500'
             "
           ></div>
           <span
             id="conn-status-text-TemplateLarge"
             class="text-[9px] font-bold uppercase tracking-widest"
-            :class="isConnected ? 'text-green-400' : 'text-red-400'"
+            :class="isConnected ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
             >{{ isConnected ? $t('game.status_live') : $t('game.status_offline') }}</span
           >
         </div>
 
         <div
           id="player-profile-badge-TemplateLarge"
-          class="header-player-badge px-4 py-1 rounded-full shrink-0"
+          class="header-player-badge px-4 py-1 rounded-full shrink-0 border border-amber-200 dark:border-amber-500/20"
         >
           <span
             id="current-player-name-TemplateLarge"
-            class="text-[11px] font-black text-amber-400 uppercase tracking-widest"
+            class="text-[11px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest"
             >{{ playerName }}</span
           >
         </div>
 
         <div
           id="server-time-wrapper-TemplateLarge"
-          class="flex flex-col items-end leading-none border-l border-white/8 pl-3"
+          class="flex flex-col items-end leading-none border-l border-gray-200 dark:border-white/8 pl-3"
         >
           <span
             id="server-time-text-TemplateLarge"
-            class="text-[11px] font-mono font-bold text-gray-400"
+            class="text-[11px] font-mono font-bold text-gray-500 dark:text-gray-400"
             >{{ serverTime }}</span
           >
         </div>
@@ -135,7 +135,7 @@
 
     <div
       id="main-game-layout-TemplateLarge"
-      class="flex-grow flex flex-row overflow-hidden relative"
+      class="flex-grow flex flex-row overflow-hidden relative transition-colors duration-300"
     >
       <!-- TOP AREA -->
       <div
@@ -144,7 +144,7 @@
       >
         <main
           id="poker-table-viewport-TemplateLarge"
-          class="flex-grow flex flex-col overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
+          class="flex-grow flex flex-col overflow-hidden bg-gray-100 dark:bg-transparent bg-[radial-gradient(circle_at_center,_#e2e8f0_0%,_#f8fafc_100%)] dark:bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
         >
           <div
             id="poker-table-container-TemplateLarge"
@@ -161,10 +161,10 @@
           </div>
         </main>
 
-        <!-- Terminal Area (Bottom of table) -->
+        <!-- Terminal Area -->
         <div
           id="game-message-terminal-wrapper-TemplateLarge"
-          class="h-[150px] border-t border-white/5 bg-black/40 shrink-0"
+          class="h-[150px] border-t border-gray-200 dark:border-white/5 bg-white/80 dark:bg-black/40 shrink-0"
         >
           <MessageTerminal id="terminal-component-TemplateLarge" :logs="logs" />
         </div>
@@ -173,7 +173,7 @@
       <!-- SIDEPANEL -->
       <PlayerSidepanel
         id="game-sidepanel-container-TemplateLarge"
-        class="w-[320px] min-h-0 border-l border-white/5"
+        class="w-[320px] min-h-0 border-l border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-transparent"
         :players="allPlayers"
         :activePlayerId="activePlayerId"
         :myPlayerId="myPlayerId"
@@ -182,7 +182,7 @@
       />
     </div>
 
-    <footer id="game-hud-bar-TemplateLarge" class="shrink-0 z-50 w-full">
+    <footer id="game-hud-bar-TemplateLarge" class="shrink-0 z-50 w-full bg-white dark:bg-neutral-950 border-t border-gray-200 dark:border-transparent transition-colors duration-300">
       <ActionBar
         id="action-bar-component-TemplateLarge"
         :isMyTurn="isMyTurn"
@@ -241,15 +241,14 @@ defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
 
 <style scoped>
 .header-bar {
+  background: white;
+}
+.dark .header-bar {
   background: linear-gradient(
     180deg,
     rgba(5, 5, 5, 0.97) 0%,
     rgba(10, 10, 10, 0.92) 100%
   );
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.02),
-    0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 .header-logo-wrap {
@@ -267,17 +266,23 @@ defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
 }
 
 .header-pill {
+  background: rgba(0, 0, 0, 0.03);
+}
+.dark .header-pill {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .header-conn-badge {
+  background: rgba(0, 0, 0, 0.05);
+}
+.dark .header-conn-badge {
   background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .header-player-badge {
+  background: rgba(212, 160, 23, 0.05);
+}
+.dark .header-player-badge {
   background: rgba(212, 160, 23, 0.08);
-  border: 1px solid rgba(212, 160, 23, 0.2);
 }
 </style>

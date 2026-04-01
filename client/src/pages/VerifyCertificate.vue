@@ -1,6 +1,6 @@
 <template>
   <div
-    class="verify-page min-h-screen bg-neutral-950 flex items-center justify-center p-6 relative overflow-hidden font-sans"
+    class="verify-page min-h-screen bg-white dark:bg-neutral-950 flex items-center justify-center p-6 relative overflow-hidden font-sans transition-colors duration-300"
   >
     <!-- Decorative background -->
     <div class="absolute inset-0 pointer-events-none">
@@ -8,7 +8,7 @@
         class="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(212,168,83,0.05)_0%,transparent_60%)]"
       ></div>
       <div
-        class="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,rgba(255,255,255,0.01)_2px,rgba(255,255,255,0.01)_4px)]"
+        class="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,rgba(0,0,0,0.01)_2px,rgba(0,0,0,0.01)_4px)] dark:bg-[repeating-linear-gradient(45deg,transparent,transparent_2px,rgba(255,255,255,0.01)_2px,rgba(255,255,255,0.01)_4px)]"
       ></div>
     </div>
 
@@ -19,34 +19,34 @@
       <header class="header text-center animate-fade-down">
         <span class="logo-mark text-[36px] mb-2 block">🃏</span>
         <p
-          class="site-name font-mono text-[10px] tracking-[4px] text-[#8A6A2A] uppercase mb-3"
+          class="site-name font-mono text-[10px] tracking-[4px] text-yellow-700 dark:text-[#8A6A2A] uppercase mb-3"
         >
           {{ $t('pages.verify.site_name') }}
         </p>
         <h1
-          class="page-title font-bebas text-[clamp(36px,8vw,52px)] tracking-[2px] bg-gradient-to-br from-[#F5D78E] to-[#D4A853] bg-clip-text text-transparent"
+          class="page-title font-bebas text-[clamp(36px,8vw,52px)] tracking-[2px] bg-gradient-to-br from-yellow-600 via-yellow-500 to-yellow-700 dark:from-[#F5D78E] dark:to-[#D4A853] bg-clip-text text-transparent"
         >
           {{ $t('pages.verify.headline') }}
         </h1>
-        <p class="page-sub text-[13px] text-[#7A7268] mt-1 leading-relaxed" v-html="$t('pages.verify.sub')">
+        <p class="page-sub text-[13px] text-gray-500 dark:text-[#7A7268] mt-1 leading-relaxed" v-html="$t('pages.verify.sub')">
         </p>
       </header>
 
-      <div class="divider w-10 h-px bg-[#D4A853]/30 mx-auto"></div>
+      <div class="divider w-10 h-px bg-yellow-500/30 mx-auto"></div>
 
       <!-- Input Card -->
       <div
         v-if="!result"
-        class="input-card w-full bg-[#142A16] border border-[#D4A853]/20 rounded-2xl p-7 animate-fade-up shadow-2xl"
+        class="input-card w-full bg-gray-50 dark:bg-[#142A16] border border-gray-200 dark:border-[#D4A853]/20 rounded-2xl p-7 animate-fade-up shadow-2xl transition-all duration-300"
       >
         <div class="field-group mb-5">
           <label
-            class="field-label font-mono text-[9px] tracking-[3px] uppercase text-[#D4A853] block mb-2"
+            class="field-label font-mono text-[9px] tracking-[3px] uppercase text-yellow-700 dark:text-[#D4A853] block mb-2"
             >{{ $t('pages.verify.torneo_id_label') }}</label
           >
           <input
             v-model="torneoId"
-            class="field-input w-full bg-black/40 border border-white/10 rounded-xl p-3 px-4 text-[#F5F0E8] font-mono text-sm outline-none transition-colors tracking-widest focus:border-[#D4A853]/50 focus:ring-4 focus:ring-[#D4A853]/5"
+            class="field-input w-full bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-xl p-3 px-4 text-gray-900 dark:text-[#F5F0E8] font-mono text-sm outline-none transition-colors tracking-widest focus:border-yellow-500 dark:focus:border-[#D4A853]/50 focus:ring-4 focus:ring-yellow-500/5 dark:focus:ring-[#D4A853]/5"
             :placeholder="$t('pages.verify.torneo_id_placeholder')"
             autocomplete="off"
             spellcheck="false"
@@ -56,7 +56,7 @@
 
         <div class="field-group mb-5">
           <label
-            class="field-label font-mono text-[9px] tracking-[3px] uppercase text-[#D4A853] block mb-2"
+            class="field-label font-mono text-[9px] tracking-[3px] uppercase text-yellow-700 dark:text-[#D4A853] block mb-2"
             >{{ $t('pages.verify.code_label') }}</label
           >
           <div class="code-input-row flex gap-2.5 items-center justify-center">
@@ -69,9 +69,9 @@
               type="text"
               inputmode="numeric"
               maxlength="1"
-              class="digit-input w-16 h-20 bg-black/50 border-2 border-white/10 rounded-xl text-center text-[#F5D78E] font-bebas text-[42px] outline-none transition-all focus:border-[#D4A853] focus:ring-4 focus:ring-[#D4A853]/10 focus:bg-[#D4A853]/5"
+              class="digit-input w-16 h-20 bg-white dark:bg-black/50 border-2 border-gray-200 dark:border-white/10 rounded-xl text-center text-yellow-600 dark:text-[#F5D78E] font-bebas text-[42px] outline-none transition-all focus:border-yellow-500 dark:focus:border-[#D4A853] focus:ring-4 focus:ring-yellow-500/10 dark:focus:ring-[#D4A853]/10"
               :class="{
-                'filled border-[#D4A853]/40': codeDigits[i],
+                'filled border-yellow-500/40 dark:border-[#D4A853]/40': codeDigits[i],
                 'shake-animation border-red-500/70': errors.code,
               }"
               @input="onInput($event, i)"
@@ -84,7 +84,7 @@
         <button
           @click="verify"
           :disabled="isVerifying"
-          class="verify-btn w-full p-4 bg-gradient-to-br from-[#D4A853] to-[#8A6A2A] border-none rounded-xl text-[#060E07] font-bebas text-[20px] tracking-[3px] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(212,168,83,0.3)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
+          class="verify-btn w-full p-4 bg-gradient-to-br from-yellow-500 to-yellow-700 dark:from-[#D4A853] dark:to-[#8A6A2A] border-none rounded-xl text-white dark:text-[#060E07] font-bebas text-[20px] tracking-[3px] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(212,168,83,0.3)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
         >
           <span class="relative z-10">{{
             isVerifying ? $t('pages.verify.verifying') : $t('pages.verify.verify_btn')
@@ -98,11 +98,11 @@
       <!-- Result Panel -->
       <div
         v-else
-        class="result-panel w-full rounded-2xl p-6 px-7 animate-result-pop shadow-2xl"
+        class="result-panel w-full rounded-2xl p-6 px-7 animate-result-pop shadow-2xl transition-all duration-300"
         :class="
           result.valid
-            ? 'valid bg-emerald-500/10 border border-emerald-500/40'
-            : 'invalid bg-red-500/10 border border-red-500/30'
+            ? 'valid bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/40'
+            : 'invalid bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30'
         "
       >
         <span class="result-icon text-4xl block mb-3">{{
@@ -110,11 +110,11 @@
         }}</span>
         <p
           class="result-status font-bebas text-2xl tracking-widest mb-1"
-          :class="result.valid ? 'text-[#27AE60]' : 'text-[#C0392B]'"
+          :class="result.valid ? 'text-emerald-600 dark:text-[#27AE60]' : 'text-red-600 dark:text-[#C0392B]'"
         >
           {{ result.valid ? $t('pages.verify.valid_status') : $t('pages.verify.invalid_status') }}
         </p>
-        <p class="result-msg text-[13px] text-[#7A7268] mb-4 leading-relaxed">
+        <p class="result-msg text-[13px] text-gray-500 dark:text-[#7A7268] mb-4 leading-relaxed">
           {{
             result.valid
               ? $t('pages.verify.valid_msg')
@@ -124,64 +124,64 @@
 
         <div
           v-if="result.valid && result.certificate"
-          class="winner-detail bg-black/30 rounded-xl p-4 grid grid-cols-2 gap-3 mb-4"
+          class="winner-detail bg-gray-100 dark:bg-black/30 border border-gray-200 dark:border-transparent rounded-xl p-4 grid grid-cols-2 gap-3 mb-4"
         >
           <div class="detail-item col-span-2">
             <p
-              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
+              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-gray-500 dark:text-[#7A7268] mb-0.5"
             >
               {{ $t('pages.verify.winner_label') }}
             </p>
             <p
-              class="detail-value name font-bebas text-2xl text-[#F5D78E] tracking-wider"
+              class="detail-value name font-bebas text-2xl text-yellow-700 dark:text-[#F5D78E] tracking-wider"
             >
               {{ result.certificate.winnerName.toUpperCase() }}
             </p>
           </div>
           <div class="detail-item">
             <p
-              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
+              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-gray-500 dark:text-[#7A7268] mb-0.5"
             >
               {{ $t('pages.verify.torneo_id_display') }}
             </p>
             <p
-              class="detail-value font-mono text-[13px] text-[#F5F0E8] font-medium"
+              class="detail-value font-mono text-[13px] text-gray-900 dark:text-[#F5F0E8] font-medium"
             >
               {{ result.certificate.torneoId }}
             </p>
           </div>
           <div class="detail-item">
             <p
-              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
+              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-gray-500 dark:text-[#7A7268] mb-0.5"
             >
               {{ $t('pages.verify.date_label') }}
             </p>
             <p
-              class="detail-value font-mono text-[13px] text-[#F5F0E8] font-medium"
+              class="detail-value font-mono text-[13px] text-gray-900 dark:text-[#F5F0E8] font-medium"
             >
               {{ formatDate(result.certificate.date) }}
             </p>
           </div>
           <div class="detail-item">
             <p
-              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
+              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-gray-500 dark:text-[#7A7268] mb-0.5"
             >
               {{ $t('pages.verify.players_label') }}
             </p>
             <p
-              class="detail-value font-mono text-[13px] text-[#F5F0E8] font-medium"
+              class="detail-value font-mono text-[13px] text-gray-900 dark:text-[#F5F0E8] font-medium"
             >
               {{ $t('pages.verify.players_count', { count: result.certificate.totalPlayers }) }}
             </p>
           </div>
           <div class="detail-item">
             <p
-              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-[#7A7268] mb-0.5"
+              class="detail-label font-mono text-[8px] tracking-[2px] uppercase text-gray-500 dark:text-[#7A7268] mb-0.5"
             >
               {{ $t('pages.verify.chips_label') }}
             </p>
             <p
-              class="detail-value font-mono text-[13px] text-[#F5F0E8] font-medium"
+              class="detail-value font-mono text-[13px] text-gray-900 dark:text-[#F5F0E8] font-medium"
             >
               {{ $t('pages.verify.chips_count', { count: result.certificate.chipsWon.toLocaleString() }) }}
             </p>
@@ -190,22 +190,22 @@
 
         <div
           v-if="result.valid"
-          class="seal inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full font-mono text-[10px] tracking-[2px] text-[#27AE60]"
+          class="seal inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-full font-mono text-[10px] tracking-[2px] text-emerald-700 dark:text-[#27AE60]"
         >
-          <div class="seal-dot w-1.5 h-1.5 bg-[#27AE60] rounded-full"></div>
+          <div class="seal-dot w-1.5 h-1.5 bg-emerald-600 dark:bg-[#27AE60] rounded-full"></div>
           {{ $t('pages.verify.verified_by') }}
         </div>
 
         <button
           @click="reset"
-          class="try-again mt-6 bg-transparent border border-white/15 rounded-lg text-[#7A7268] font-mono text-[10px] tracking-[2px] p-2 px-4 cursor-pointer transition-colors hover:border-white/30 hover:text-[#F5F0E8]"
+          class="try-again mt-6 bg-transparent border border-gray-300 dark:border-white/15 rounded-lg text-gray-500 dark:text-[#7A7268] font-mono text-[10px] tracking-[2px] p-2 px-4 cursor-pointer transition-colors hover:border-gray-400 dark:hover:border-white/30 hover:text-gray-700 dark:hover:text-[#F5F0E8]"
         >
           {{ $t('pages.verify.verify_another') }}
         </button>
       </div>
 
       <footer
-        class="footer font-mono text-[9px] tracking-[2px] text-[#8A6A2A]/50 text-center"
+        class="footer font-mono text-[9px] tracking-[2px] text-yellow-800/50 dark:text-[#8A6A2A]/50 text-center"
       >
         {{ $t('pages.verify.footer') }}
       </footer>
@@ -321,14 +321,16 @@ const formatDate = (dateStr) => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+
 .font-bebas {
-  font-family: var(--font-display);
+  font-family: 'Bebas Neue', sans-serif;
 }
 .font-mono {
-  font-family: var(--font-mono);
+  font-family: 'DM Mono', monospace;
 }
 .font-sans {
-  font-family: var(--font-sans);
+  font-family: 'DM Sans', sans-serif;
 }
 
 .animate-fade-down {
