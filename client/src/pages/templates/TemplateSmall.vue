@@ -1,12 +1,12 @@
 <template>
   <div
     id="game-container-TemplateSmall"
-    class="h-screen w-screen bg-neutral-950 overflow-hidden flex flex-col font-sans text-white select-none"
+    class="h-screen w-screen bg-white dark:bg-neutral-950 overflow-hidden flex flex-col font-sans text-gray-900 dark:text-white select-none transition-colors duration-300"
   >
     <!-- UNIFIED COMPACT HEADER -->
     <header
       id="game-header-bar-TemplateSmall"
-      class="w-full bg-black/80 backdrop-blur-xl border-b border-white/5 px-3 py-1 flex items-center justify-between z-50 shrink-0"
+      class="w-full bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 px-3 py-1 flex items-center justify-between z-50 shrink-0"
     >
       <!-- LEFT SECTION -->
       <div
@@ -28,11 +28,11 @@
           class="flex flex-col justify-center"
         >
           <span
-            class="text-[9px] font-mono font-bold text-white uppercase tracking-wider leading-none"
+            class="text-[9px] font-mono font-bold text-gray-700 dark:text-white uppercase tracking-wider leading-none"
             >{{ $t('game.blinds_info', { small: pokerStore.smallBlind, big: pokerStore.bigBlind }) }}</span
           >
           <h1
-            class="text-[8px] font-black text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80 leading-none"
+            class="text-[8px] font-black text-yellow-600 dark:text-yellow-500 uppercase tracking-widest mt-0.5 opacity-80 leading-none"
           >
             {{ $t('game.type_label') }}
           </h1>
@@ -46,7 +46,7 @@
       >
         <div
           id="connection-status-panel-TemplateSmall"
-          class="bg-black/40 px-2 py-0.5 rounded-full border border-white/5 flex items-center gap-1.5 shrink-0"
+          class="bg-gray-100 dark:bg-black/40 px-2 py-0.5 rounded-full border border-gray-200 dark:border-white/5 flex items-center gap-1.5 shrink-0"
         >
           <div
             class="w-1.5 h-1.5 rounded-full shadow-[0_0_8px_currentColor]"
@@ -57,7 +57,7 @@
             "
           ></div>
           <span
-            class="text-[8px] font-bold uppercase tracking-widest text-gray-200"
+            class="text-[8px] font-bold uppercase tracking-widest text-gray-600 dark:text-gray-200"
             >{{ isConnected ? $t('game.status_live') : $t('game.status_offline') }}</span
           >
         </div>
@@ -66,7 +66,7 @@
           class="bg-yellow-500/10 px-2 py-0.5 rounded-full border border-yellow-500/20 max-w-[70px] shrink-0"
         >
           <span
-            class="text-[9px] font-black text-yellow-500 uppercase tracking-widest truncate block"
+            class="text-[9px] font-black text-yellow-600 dark:text-yellow-500 uppercase tracking-widest truncate block"
             >{{ playerName }}</span
           >
         </div>
@@ -95,7 +95,7 @@
       >
         <main
           id="poker-table-viewport-TemplateSmall"
-          class="flex-none h-auto overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
+          class="flex-none h-auto overflow-hidden bg-gray-100 dark:bg-transparent dark:bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
         >
           <div
             id="poker-table-container-TemplateSmall"
@@ -111,7 +111,7 @@
             />
           </div>
         </main>
-        <footer id="game-hud-bar-TemplateSmall" class="shrink-0 z-50">
+        <footer id="game-hud-bar-TemplateSmall" class="shrink-0 z-50 bg-white dark:bg-neutral-900 border-t border-gray-200 dark:border-transparent">
           <ActionBar
             :isMyTurn="isMyTurn"
             :canBlind="canBlind"
@@ -133,7 +133,7 @@
       <!-- SIDEPANEL & TERMINAL -->
       <div
         id="game-sidepanel-terminal-container-TemplateSmall"
-        class="flex-1 min-h-0 flex flex-col bg-black/40 backdrop-blur-3xl border-t border-white/5"
+        class="flex-1 min-h-0 flex flex-col bg-gray-50 dark:bg-black/40 backdrop-blur-3xl border-t border-gray-200 dark:border-white/5 transition-colors duration-300"
       >
         <PlayerSidepanel
           id="game-sidepanel-component-TemplateSmall"
@@ -146,7 +146,7 @@
         />
         <div
           id="game-message-terminal-wrapper-TemplateSmall"
-          class="h-[180px] border-t border-white/5 bg-black/20 shrink-0"
+          class="h-[180px] border-t border-gray-200 dark:border-white/5 bg-white dark:bg-black/20 shrink-0"
         >
           <MessageTerminal :logs="logs" />
         </div>

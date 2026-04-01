@@ -1,65 +1,73 @@
 <template>
   <div
     :id="`landing-viewport-${templateSuffix}`"
-    class="min-h-screen bg-[#0a0a0a] text-white overflow-x-hidden font-sans"
+    class="min-h-screen bg-white dark:bg-[#030712] text-gray-900 dark:text-white overflow-x-hidden font-sans selection:bg-yellow-500/30 transition-colors duration-300"
   >
-    <!-- Grain overlay -->
-    <div :id="`grain-overlay-${templateSuffix}`" class="grain-overlay"></div>
+    <!-- Background Effects -->
+    <div class="fixed inset-0 z-0 pointer-events-none">
+      <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-yellow-500/10 rounded-full blur-[120px]"></div>
+      <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-yellow-600/5 rounded-full blur-[120px]"></div>
+      <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] dark:opacity-[0.03]"></div>
+    </div>
 
     <!-- ───────── NAV ───────── -->
     <nav
       :id="`landing-nav-bar-${templateSuffix}`"
-      class="fixed top-0 left-0 right-0 z-50 nav-blur"
+      class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[#030712]/80 backdrop-blur-xl"
     >
-      <div
-        class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center"
-      >
-        <Logo :id="`nav-logo-${templateSuffix}`" />
-        <div
-          class="hidden md:flex gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-white/40"
-        >
-          <a
-            href="#how"
-            :id="`nav-link-how-${templateSuffix}`"
-            class="hover:text-white/80 transition-colors duration-200"
-            >{{ $t('nav.how') }}</a
-          >
-          <a
-            href="#features"
-            :id="`nav-link-features-${templateSuffix}`"
-            class="hover:text-white/80 transition-colors duration-200"
-            >{{ $t('nav.features') }}</a
-          >
+      <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+        <Logo :id="`nav-logo-${templateSuffix}`" class="h-8 w-auto filter dark:invert-0 invert-0" />
+        
+        <div class="hidden md:flex gap-8 text-[12px] font-bold uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
+          <a href="#how" class="hover:text-yellow-500 transition-colors duration-300">{{ $t('nav.how') }}</a>
+          <a href="#features" class="hover:text-yellow-500 transition-colors duration-300">{{ $t('nav.features') }}</a>
         </div>
-        <div class="flex items-center gap-6">
-          <!-- Language Switcher -->
-          <div class="flex gap-2 text-[10px] font-black uppercase tracking-widest mr-2">
+
+        <div class="flex items-center gap-4 sm:gap-8">
+          <!-- Theme & Language Switcher -->
+          <div class="flex items-center gap-3 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full px-3 py-1.5">
+            <!-- Language -->
+            <div class="flex gap-2 text-[10px] font-black uppercase tracking-widest border-r border-gray-300 dark:border-white/10 pr-3">
+              <button 
+                @click="locale = 'en'" 
+                class="transition-colors cursor-pointer"
+                :class="locale === 'en' ? 'text-yellow-600 dark:text-yellow-500' : 'text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/60'"
+              >EN</button>
+              <button 
+                @click="locale = 'es'" 
+                class="transition-colors cursor-pointer"
+                :class="locale === 'es' ? 'text-yellow-600 dark:text-yellow-500' : 'text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/60'"
+              >ES</button>
+            </div>
+            
+            <!-- Theme Toggle -->
             <button 
-              @click="locale = 'en'" 
-              class="transition-colors cursor-pointer"
-              :class="locale === 'en' ? 'text-yellow-500' : 'text-white/20 hover:text-white/50'"
-            >EN</button>
-            <span class="text-white/10">|</span>
-            <button 
-              @click="locale = 'es'" 
-              class="transition-colors cursor-pointer"
-              :class="locale === 'es' ? 'text-yellow-500' : 'text-white/20 hover:text-white/50'"
-            >ES</button>
+              @click="themeStore.toggleTheme"
+              class="text-gray-500 dark:text-white/40 hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
+              aria-label="Toggle Theme"
+            >
+              <svg v-if="themeStore.theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 18v1m9-11h1m-18 0H2m3.364-7.364l.707.707m12.728 12.728l.707.707M6.343 17.657l-.707.707M17.657 6.343l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            </button>
           </div>
 
           <router-link
             to="/lobby"
-            :id="`nav-link-join-${templateSuffix}`"
-            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-white/40 hover:text-white/80 transition-colors duration-200"
+            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
           >
             {{ $t('nav.join') }}
           </router-link>
+          
           <router-link
-            to="/lobby"
-            :id="`nav-cta-play-${templateSuffix}`"
-            class="cta-pill"
+            to="/new"
+            class="group relative px-6 py-2.5 bg-yellow-500 text-black text-[12px] font-black uppercase tracking-[0.15em] rounded-full overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] active:scale-95"
           >
-            {{ $t('nav.play') }}
+            <span class="relative z-10">{{ $t('nav.play') }}</span>
+            <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
           </router-link>
         </div>
       </div>
@@ -68,60 +76,34 @@
     <!-- ───────── HERO ───────── -->
     <header
       :id="`landing-hero-section-${templateSuffix}`"
-      class="relative min-h-screen flex flex-col justify-center px-6 pt-24 pb-20 overflow-hidden"
+      class="relative pt-40 pb-20 px-6 min-h-[90vh] flex flex-col justify-center items-center text-center z-10"
     >
-      <!-- Ambient glows -->
-      <div
-        :id="`hero-glow-amber-${templateSuffix}`"
-        class="glow glow-amber"
-      ></div>
-      <div :id="`hero-glow-red-${templateSuffix}`" class="glow glow-red"></div>
-
-      <!-- Card suit decorations -->
-      <div
-        :id="`hero-suit-deco-1-${templateSuffix}`"
-        class="suit-deco suit-deco-1"
-      >
-        ♠
-      </div>
-      <div
-        :id="`hero-suit-deco-2-${templateSuffix}`"
-        class="suit-deco suit-deco-2"
-      >
-        ♥
-      </div>
-      <div
-        :id="`hero-suit-deco-3-${templateSuffix}`"
-        class="suit-deco suit-deco-3"
-      >
-        ♦
-      </div>
-
-      <div class="max-w-6xl mx-auto w-full relative z-10">
+      <div class="max-w-5xl mx-auto">
         <!-- Eyebrow -->
         <div
           :id="`hero-eyebrow-badge-${templateSuffix}`"
-          class="eyebrow-badge mb-10"
+          class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-yellow-500/20 bg-yellow-500/5 text-yellow-600 dark:text-yellow-500/80 text-[10px] font-bold uppercase tracking-[0.2em] mb-12 animate-fade-in"
         >
-          <span
-            :id="`hero-eyebrow-dot-${templateSuffix}`"
-            class="eyebrow-dot"
-          ></span>
+          <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span>
           {{ $t('hero.badge') }}
         </div>
 
         <!-- Headline -->
         <h1 
           :id="`hero-headline-text-${templateSuffix}`" 
-          class="hero-headline"
-          v-html="$t('hero.headline', { br: '<br/>', like_pro: '<em class=\'text-[#f5a623]\'>' + $t('hero.like_pro') + '</em>' })"
+          class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] uppercase mb-8 text-gray-900 dark:text-white"
         >
+          <span class="block">{{ $t('hero.headline').split('{br}')[0] }}</span>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 via-yellow-500 to-yellow-400 italic">
+            {{ $t('hero.like_pro') }}
+          </span>
+          <span class="block">{{ $t('hero.headline').split('{br}')[2] }}</span>
         </h1>
 
         <!-- Sub -->
         <p
           :id="`hero-sub-description-${templateSuffix}`"
-          class="hero-sub mt-8 mb-14 max-w-xl"
+          class="text-lg md:text-xl text-gray-500 dark:text-white/50 max-w-2xl mx-auto leading-relaxed mb-12"
         >
           {{ $t('hero.sub') }}
         </p>
@@ -129,364 +111,149 @@
         <!-- CTAs -->
         <div
           :id="`hero-actions-container-${templateSuffix}`"
-          class="flex flex-col sm:flex-row gap-4 items-start"
+          class="flex flex-col sm:flex-row gap-6 justify-center items-center"
         >
           <router-link
             to="/new"
-            :id="`hero-btn-create-table-${templateSuffix}`"
-            class="btn-primary"
+            class="w-full sm:w-auto px-10 py-5 bg-yellow-500 text-black font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 hover:shadow-[0_10px_40px_rgba(234,179,8,0.3)] active:scale-95 flex items-center justify-center gap-3"
           >
             {{ $t('hero.create') }}
-            <svg
-              class="btn-arrow"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
           </router-link>
+          
           <router-link
             to="/lobby"
-            :id="`hero-btn-browse-tables-${templateSuffix}`"
-            class="btn-secondary"
+            class="w-full sm:w-auto px-10 py-5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-bold uppercase tracking-widest text-sm rounded-xl transition-all hover:bg-gray-200 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20 active:scale-95"
           >
             {{ $t('hero.browse') }}
           </router-link>
         </div>
 
-        <!-- Social proof strip -->
-        <div
-          :id="`hero-social-proof-${templateSuffix}`"
-          class="social-strip mt-16"
-        >
-          <div
-            :id="`hero-social-avatars-${templateSuffix}`"
-            class="social-avatars"
-          >
-            <span class="avatar" style="background: #4f46e5">J</span>
-            <span class="avatar" style="background: #0891b2">M</span>
-            <span class="avatar" style="background: #be185d">A</span>
-            <span class="avatar" style="background: #b45309">R</span>
+        <!-- Social Proof -->
+        <div class="mt-20 pt-10 border-t border-gray-200 dark:border-white/5 flex flex-col items-center gap-4">
+          <div class="flex -space-x-3">
+            <div v-for="i in 4" :key="i" class="w-10 h-10 rounded-full border-2 border-white dark:border-[#030712] bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-900 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-white">
+              {{ ['J','M','A','R'][i-1] }}
+            </div>
           </div>
-          <p
-            :id="`hero-social-text-${templateSuffix}`"
-            class="text-[12px] text-white/40 font-medium"
-            v-html="$t('hero.social', { count: '<span class=\'text-white/70 font-bold\'>' + $t('hero.thousands') + '</span>' })"
-          >
-          </p>
+          <p class="text-xs text-gray-400 dark:text-white/30 font-medium tracking-wide uppercase" v-html="$t('hero.social', { count: '<span class=\'text-gray-600 dark:text-white/60 font-bold\'>' + $t('hero.thousands') + '</span>' })"></p>
         </div>
       </div>
 
-      <!-- Scroll hint -->
-      <div :id="`hero-scroll-hint-${templateSuffix}`" class="scroll-hint">
-        <span
-          :id="`hero-scroll-line-${templateSuffix}`"
-          class="scroll-line"
-        ></span>
-        <span
-          class="text-[10px] text-white/25 uppercase tracking-[0.3em] font-bold mt-3"
-          >{{ $t('hero.scroll') }}</span
-        >
+      <!-- Scroll Hint -->
+      <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-30">
+        <div class="w-[1px] h-12 bg-gradient-to-b from-yellow-500 to-transparent"></div>
       </div>
     </header>
 
     <!-- ───────── HOW IT WORKS ───────── -->
-    <section
-      id="how"
-      :id="`how-it-works-section-${templateSuffix}`"
-      class="py-32 px-6 border-t border-white/5"
-    >
-      <div class="max-w-6xl mx-auto">
-        <div :id="`how-label-${templateSuffix}`" class="section-label mb-4">
-          {{ $t('pages.home.how.label') }}
+    <section id="how" class="py-32 px-6 relative z-10 border-t border-gray-200 dark:border-white/5">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-24">
+          <span class="text-yellow-600 dark:text-yellow-500 font-black uppercase tracking-[0.3em] text-[10px] mb-4 block">{{ $t('pages.home.how.label') }}</span>
+          <h2 class="text-4xl md:text-6xl font-black tracking-tight uppercase leading-none text-gray-900 dark:text-white" v-html="$t('pages.home.how.headline', { br: '<br/>' })"></h2>
         </div>
-        <h2
-          :id="`how-headline-${templateSuffix}`"
-          class="section-heading mb-20"
-          v-html="$t('pages.home.how.headline', { br: '<br/>' })"
-        >
-        </h2>
 
-        <div :id="`how-steps-grid-${templateSuffix}`" class="steps-grid">
-          <div :id="`how-step-1-${templateSuffix}`" class="step-card">
-            <div class="step-num">01</div>
-            <h3 class="step-title">{{ $t('pages.home.how.step1_title') }}</h3>
-            <p class="step-body">
-              {{ $t('pages.home.how.step1_body') }}
-            </p>
-          </div>
-          <div class="step-divider">→</div>
-          <div :id="`how-step-2-${templateSuffix}`" class="step-card">
-            <div class="step-num">02</div>
-            <h3 class="step-title">{{ $t('pages.home.how.step2_title') }}</h3>
-            <p class="step-body">
-              {{ $t('pages.home.how.step2_body') }}
-            </p>
-          </div>
-          <div class="step-divider">→</div>
-          <div :id="`how-step-3-${templateSuffix}`" class="step-card">
-            <div class="step-num">03</div>
-            <h3 class="step-title">{{ $t('pages.home.how.step3_title') }}</h3>
-            <p class="step-body">
-              {{ $t('pages.home.how.step3_body') }}
-            </p>
+        <div class="grid md:grid-cols-3 gap-8 relative">
+          <!-- Connector Lines (Desktop) -->
+          <div class="hidden md:block absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-200 dark:via-white/10 to-transparent -translate-y-1/2 z-0"></div>
+          
+          <div v-for="i in 3" :key="i" class="relative z-10 p-8 rounded-3xl bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 hover:border-yellow-500/30 transition-all duration-500 group shadow-sm dark:shadow-none">
+            <div class="w-14 h-14 rounded-2xl bg-yellow-500 text-black flex items-center justify-center text-2xl font-black mb-8 group-hover:scale-110 transition-transform duration-500">
+              0{{ i }}
+            </div>
+            <h3 class="text-xl font-bold uppercase tracking-tight mb-4 text-gray-900 dark:text-white">{{ $t(`pages.home.how.step${i}_title`) }}</h3>
+            <p class="text-gray-500 dark:text-white/40 leading-relaxed">{{ $t(`pages.home.how.step${i}_body`) }}</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ───────── FEATURES ───────── -->
-    <section
-      id="features"
-      :id="`features-section-${templateSuffix}`"
-      class="py-32 px-6"
-    >
-      <div class="max-w-6xl mx-auto">
-        <div
-          :id="`features-label-${templateSuffix}`"
-          class="section-label mb-4"
-        >
-          {{ $t('pages.home.features.label') }}
-        </div>
-        <h2
-          :id="`features-headline-${templateSuffix}`"
-          class="section-heading mb-20"
-          v-html="$t('pages.home.features.headline', { br: '<br/>' })"
-        >
-        </h2>
-
-        <div :id="`features-grid-${templateSuffix}`" class="features-grid">
-          <div
-            :id="`feature-card-money-${templateSuffix}`"
-            class="feature-card feature-card-large"
-          >
-            <div class="feature-icon feature-icon-green">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <h4 class="feature-title">{{ $t('pages.home.features.money_title') }}</h4>
-            <p class="feature-body">
-              {{ $t('pages.home.features.money_body') }}
-            </p>
+    <section id="features" class="py-32 px-6 bg-gray-50 dark:bg-white/[0.01]">
+      <div class="max-w-7xl mx-auto">
+        <div class="grid lg:grid-cols-2 gap-20 items-center">
+          <div>
+            <span class="text-yellow-600 dark:text-yellow-500 font-black uppercase tracking-[0.3em] text-[10px] mb-4 block">{{ $t('pages.home.features.label') }}</span>
+            <h2 class="text-4xl md:text-6xl font-black tracking-tight uppercase leading-none mb-8 text-gray-900 dark:text-white" v-html="$t('pages.home.features.headline', { br: '<br/>' })"></h2>
+            <p class="text-lg text-gray-500 dark:text-white/40 max-w-md">{{ $t('hero.sub') }}</p>
           </div>
 
-          <div
-            :id="`feature-card-setup-${templateSuffix}`"
-            class="feature-card"
-          >
-            <div class="feature-icon feature-icon-blue">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div 
+              v-for="(feat, idx) in ['money', 'setup', 'private', 'responsive']" 
+              :key="feat"
+              class="p-8 rounded-2xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#030712] hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-all group shadow-sm dark:shadow-none"
+              :class="idx === 0 ? 'sm:col-span-2 sm:p-10' : ''"
+            >
+              <div class="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 flex items-center justify-center mb-6 group-hover:bg-yellow-500 group-hover:text-black transition-all">
+                <svg v-if="feat === 'money'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <svg v-if="feat === 'setup'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <svg v-if="feat === 'private'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <svg v-if="feat === 'responsive'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              </div>
+              <h4 class="text-lg font-bold uppercase tracking-tight mb-2 text-gray-900 dark:text-white">{{ $t(`pages.home.features.${feat}_title`) }}</h4>
+              <p class="text-sm text-gray-500 dark:text-white/40 leading-relaxed">{{ $t(`pages.home.features.${feat}_body`) }}</p>
             </div>
-            <h4 class="feature-title">{{ $t('pages.home.features.setup_title') }}</h4>
-            <p class="feature-body">
-              {{ $t('pages.home.features.setup_body') }}
-            </p>
-          </div>
-
-          <div
-            :id="`feature-card-private-${templateSuffix}`"
-            class="feature-card"
-          >
-            <div class="feature-icon feature-icon-amber">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-            </div>
-            <h4 class="feature-title">{{ $t('pages.home.features.private_title') }}</h4>
-            <p class="feature-body">
-              {{ $t('pages.home.features.private_body') }}
-            </p>
-          </div>
-
-          <div
-            :id="`feature-card-responsive-${templateSuffix}`"
-            class="feature-card"
-          >
-            <div class="feature-icon feature-icon-pink">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <h4 class="feature-title">{{ $t('pages.home.features.responsive_title') }}</h4>
-            <p class="feature-body">
-              {{ $t('pages.home.features.responsive_body') }}
-            </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ───────── QUOTE / PULL ───────── -->
-    <section
-      :id="`quote-section-${templateSuffix}`"
-      class="py-32 px-6 border-y border-white/5 bg-white/[0.02]"
-    >
-      <div class="max-w-4xl mx-auto text-center">
-        <p :id="`quote-text-content-${templateSuffix}`" class="quote-text">
+    <!-- ───────── QUOTE ───────── -->
+    <section class="py-40 px-6 relative overflow-hidden">
+      <div class="absolute inset-0 bg-yellow-500/[0.02]"></div>
+      <div class="max-w-4xl mx-auto text-center relative z-10">
+        <span class="text-5xl text-yellow-500/20 font-serif mb-8 block">“</span>
+        <p class="text-3xl md:text-5xl font-black italic tracking-tight leading-tight text-gray-800 dark:text-white/80 mb-12">
           {{ $t('pages.home.quote.text') }}
         </p>
-        <p :id="`quote-attribution-${templateSuffix}`" class="quote-attr mt-8">
-          {{ $t('pages.home.quote.attribution') }}
-        </p>
+        <p class="text-xs font-bold uppercase tracking-[0.4em] text-gray-400 dark:text-white/20">{{ $t('pages.home.quote.attribution') }}</p>
       </div>
     </section>
 
     <!-- ───────── FINAL CTA ───────── -->
-    <section :id="`final-cta-section-${templateSuffix}`" class="py-32 px-6">
-      <div
-        class="max-w-6xl mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-16"
-      >
-        <div>
-          <div
-            :id="`final-cta-label-${templateSuffix}`"
-            class="section-label mb-4"
-          >
-            {{ $t('pages.home.final_cta.label') }}
+    <section class="py-32 px-6">
+      <div class="max-w-7xl mx-auto rounded-[3rem] bg-gradient-to-br from-yellow-500 to-yellow-600 p-12 md:p-24 text-black overflow-hidden relative group shadow-2xl">
+        <div class="absolute top-0 right-0 p-10 text-[20rem] font-black opacity-10 leading-none translate-x-1/4 -translate-y-1/4 select-none pointer-events-none">♠</div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div class="text-center md:text-left">
+            <span class="font-black uppercase tracking-[0.3em] text-[10px] mb-4 block opacity-60">{{ $t('pages.home.final_cta.label') }}</span>
+            <h2 class="text-4xl md:text-6xl font-black tracking-tight uppercase leading-[0.9]" v-html="$t('pages.home.final_cta.headline', { br: '<br/>' })"></h2>
           </div>
-          <h2
-            :id="`final-cta-headline-${templateSuffix}`"
-            class="section-heading"
-            style="max-width: 520px"
-            v-html="$t('pages.home.final_cta.headline', { br: '<br/>' })"
-          >
-          </h2>
-        </div>
-        <div
-          :id="`final-cta-actions-wrapper-${templateSuffix}`"
-          class="flex flex-col sm:flex-row gap-4 lg:pb-2"
-        >
-          <router-link
-            to="/new"
-            :id="`final-cta-btn-create-${templateSuffix}`"
-            class="btn-primary"
-          >
-            {{ $t('pages.home.final_cta.create') }}
-            <svg
-              class="btn-arrow"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </router-link>
-          <router-link
-            to="/lobby"
-            :id="`final-cta-btn-browse-${templateSuffix}`"
-            class="btn-secondary"
-          >
-            {{ $t('pages.home.final_cta.join') }}
-          </router-link>
+          
+          <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <router-link to="/lobby" class="px-10 py-5 bg-black text-white font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 active:scale-95 text-center">
+              {{ $t('pages.home.final_cta.create') }}
+            </router-link>
+            <router-link to="/lobby" class="px-10 py-5 bg-transparent border-2 border-black text-black font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:bg-black hover:text-white active:scale-95 text-center">
+              {{ $t('pages.home.final_cta.join') }}
+            </router-link>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ───────── FOOTER ───────── -->
-    <footer
-      :id="`landing-footer-${templateSuffix}`"
-      class="py-16 border-t border-white/5 px-6"
-    >
-      <div
-        class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start gap-10"
-      >
-        <div class="max-w-xs">
-          <Logo :id="`footer-logo-${templateSuffix}`" class="mb-5 opacity-60" />
-          <p
-            :id="`footer-disclaimer-${templateSuffix}`"
-            class="text-[13px] text-white/20 font-medium leading-relaxed"
-          >
+    <footer class="py-20 px-6 border-t border-gray-200 dark:border-white/5">
+      <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-16 items-start">
+        <div class="max-w-sm">
+          <Logo class="h-6 w-auto mb-8 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all dark:invert-0 invert-0" />
+          <p class="text-sm text-gray-400 dark:text-white/20 font-medium leading-relaxed mb-8">
             {{ $t('footer.disclaimer') }}
           </p>
         </div>
-        <div
-          :id="`footer-copyright-wrapper-${templateSuffix}`"
-          class="flex flex-col items-start md:items-end gap-3"
-        >
-          <p
-            :id="`footer-copyright-text-${templateSuffix}`"
-            class="text-[13px] text-white/20 font-bold uppercase tracking-widest"
-          >
-            &copy; 2026 YayPoker
-          </p>
-          <div
-            :id="`footer-links-wrapper-${templateSuffix}`"
-            class="flex gap-6 text-[13px] text-white/30 font-medium"
-          >
-            <router-link
-              to="/privacy"
-              :id="`footer-link-privacy-${templateSuffix}`"
-              class="hover:text-white/60 transition-colors"
-              >{{ $t('footer.privacy') }}</router-link
-            >
-            <router-link
-              to="/terms"
-              :id="`footer-link-terms-${templateSuffix}`"
-              class="hover:text-white/60 transition-colors"
-              >{{ $t('footer.terms') }}</router-link
-            >
-            <router-link
-              to="/contact"
-              :id="`footer-link-contact-${templateSuffix}`"
-              class="hover:text-white/60 transition-colors"
-              >{{ $t('footer.contact') }}</router-link
-            >
+        
+        <div class="flex flex-col md:items-end gap-10">
+          <div class="flex flex-wrap gap-8 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
+            <router-link to="/privacy" class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors">{{ $t('footer.privacy') }}</router-link>
+            <router-link to="/terms" class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors">{{ $t('footer.terms') }}</router-link>
+            <router-link to="/contact" class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors">{{ $t('footer.contact') }}</router-link>
           </div>
+          <p class="text-[10px] text-gray-300 dark:text-white/10 font-black uppercase tracking-[0.5em]">
+            &copy; 2026 YayPoker Engineering
+          </p>
         </div>
       </div>
     </footer>
@@ -497,447 +264,29 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { useThemeStore } from '../store/themeStore'
 import Logo from '../components/Logo.vue'
 
 const { locale } = useI18n()
 const responsive = useResponsiveStore()
+const themeStore = useThemeStore()
+
 const templateSuffix = computed(() => {
   switch (responsive.screenSize) {
-    case 'xsmall':
-      return 'Home'
-    case 'small':
-      return 'Home'
-    case 'medium':
-      return 'Home'
-    default:
-      return 'Home'
+    case 'xsmall': return 'Home'
+    case 'small': return 'Home'
+    case 'medium': return 'Home'
+    default: return 'Home'
   }
 })
 </script>
 
 <style scoped>
-/* ── Grain overlay ── */
-.grain-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  pointer-events: none;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-/* ── Nav blur ── */
-.nav-blur {
-  background: rgba(10, 10, 10, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* ── Ambient glows ── */
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  pointer-events: none;
-}
-.glow-amber {
-  width: 600px;
-  height: 600px;
-  background: rgba(245, 166, 35, 0.07);
-  top: -100px;
-  left: 50%;
-  transform: translateX(-60%);
-}
-.glow-red {
-  width: 400px;
-  height: 400px;
-  background: rgba(239, 68, 68, 0.05);
-  top: 200px;
-  right: -100px;
-}
-
-/* ── Card suit decorations ── */
-.suit-deco {
-  position: absolute;
-  font-size: 120px;
-  font-family: serif;
-  pointer-events: none;
-  user-select: none;
-  opacity: 0.03;
-  line-height: 1;
-}
-.suit-deco-1 {
-  top: 80px;
-  right: 8%;
-  color: #fff;
-  transform: rotate(12deg);
-}
-.suit-deco-2 {
-  bottom: 120px;
-  left: 5%;
-  color: #ef4444;
-  transform: rotate(-8deg);
-  font-size: 90px;
-}
-.suit-deco-3 {
-  top: 40%;
-  right: 15%;
-  color: #f5a623;
-  transform: rotate(20deg);
-  font-size: 70px;
-}
-
-/* ── Eyebrow badge ── */
-.eyebrow-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  color: rgba(255, 255, 255, 0.5);
-}
-.eyebrow-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #22c55e;
-  animation: pulse-dot 2s ease infinite;
-}
-@keyframes pulse-dot {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: scale(0.7);
-  }
-}
-
-/* ── Hero headline ── */
-.hero-headline {
-  font-family: inherit;
-  font-weight: 800;
-  font-size: clamp(52px, 9vw, 110px);
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: #fff;
-}
-.hero-headline em {
-  font-style: italic;
-}
-
-/* ── Hero sub ── */
-.hero-sub {
-  font-size: clamp(18px, 1.8vw, 22px);
-  color: rgba(255, 255, 255, 0.45);
-  font-weight: 400;
-  line-height: 1.75;
-}
-
-/* ── Buttons ── */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 28px;
-  background: #f5a623;
-  color: #000;
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.01em;
-  border-radius: 12px;
-  transition:
-    background 0.2s,
-    transform 0.15s;
-  text-decoration: none;
-}
-.btn-primary:hover {
-  background: #fbbf24;
-  transform: translateY(-1px);
-}
-.btn-primary:active {
-  transform: scale(0.97);
-}
-.btn-arrow {
-  width: 16px;
-  height: 16px;
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  padding: 14px 28px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.6);
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  transition:
-    border-color 0.2s,
-    color 0.2s,
-    transform 0.15s;
-  text-decoration: none;
-}
-.btn-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.cta-pill {
-  padding: 8px 20px;
-  background: rgba(245, 166, 35, 0.12);
-  border: 1px solid rgba(245, 166, 35, 0.3);
-  color: #f5a623;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  transition:
-    background 0.2s,
-    border-color 0.2s;
-  text-decoration: none;
-}
-.cta-pill:hover {
-  background: rgba(245, 166, 35, 0.2);
-  border-color: rgba(245, 166, 35, 0.5);
-}
-
-/* ── Social strip ── */
-.social-strip {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.social-avatars {
-  display: flex;
-}
-.avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid #0a0a0a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  margin-left: -6px;
-}
-.avatar:first-child {
-  margin-left: 0;
-}
-
-/* ── Scroll hint ── */
-.scroll-hint {
-  position: absolute;
-  bottom: 36px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.scroll-line {
-  width: 1px;
-  height: 40px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
-  display: block;
-  margin-bottom: 6px;
-  animation: scroll-drop 2s ease infinite;
-}
-@keyframes scroll-drop {
-  0% {
-    transform: scaleY(0);
-    transform-origin: top;
-    opacity: 1;
-  }
-  60% {
-    transform: scaleY(1);
-    transform-origin: top;
-    opacity: 1;
-  }
-  100% {
-    transform: scaleY(1);
-    transform-origin: top;
-    opacity: 0;
-  }
-}
-
-/* ── Section labels & headings ── */
-.section-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: #f5a623;
-}
-.section-heading {
-  font-family: inherit;
-  font-weight: 800;
-  font-size: clamp(32px, 5vw, 60px);
-  line-height: 1.08;
-  letter-spacing: -0.025em;
-  color: #fff;
-}
-
-/* ── How it works ── */
-.steps-grid {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto 1fr;
-  gap: 0;
-  align-items: start;
-}
-@media (max-width: 768px) {
-  .steps-grid {
-    grid-template-columns: 1fr;
-  }
-  .step-divider {
-    display: none;
-  }
-}
-.step-card {
-  padding: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  transition:
-    border-color 0.2s,
-    background 0.2s;
-}
-.step-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-}
-.step-divider {
-  font-size: 22px;
-  color: rgba(255, 255, 255, 0.1);
-  align-self: center;
-  padding: 0 16px;
-  font-family: inherit;
-}
-.step-num {
-  font-family: inherit;
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.15);
-  margin-bottom: 20px;
-}
-.step-title {
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 18px;
-  color: #fff;
-  margin-bottom: 12px;
-  letter-spacing: -0.01em;
-}
-.step-body {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.75;
-  font-weight: 400;
-}
-
-/* ── Features ── */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-@media (max-width: 640px) {
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.feature-card {
-  padding: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  transition:
-    border-color 0.25s,
-    background 0.25s;
-}
-.feature-card:hover {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-}
-.feature-card-large {
-  grid-column: span 2;
-}
-@media (max-width: 640px) {
-  .feature-card-large {
-    grid-column: span 1;
-  }
-}
-.feature-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-.feature-icon-green {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-}
-.feature-icon-blue {
-  background: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
-}
-.feature-icon-amber {
-  background: rgba(245, 166, 35, 0.1);
-  color: #f5a623;
-}
-.feature-icon-pink {
-  background: rgba(236, 72, 153, 0.1);
-  color: #f472b6;
-}
-.feature-title {
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 17px;
-  color: #fff;
-  margin-bottom: 10px;
-  letter-spacing: -0.01em;
-}
-.feature-body {
-  font-size: 15px;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.8;
-}
-
-/* ── Quote ── */
-.quote-text {
-  font-family: inherit;
-  font-style: italic;
-  font-size: clamp(22px, 3.5vw, 38px);
-  font-weight: 700;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.75);
-  letter-spacing: -0.02em;
-}
-.quote-attr {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.2);
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
 }
 </style>

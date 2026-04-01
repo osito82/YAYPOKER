@@ -1,20 +1,20 @@
 <template>
   <div
     :id="`lobby-view-container-${templateSuffix}`"
-    class="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-4 select-none"
+    class="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-4 select-none transition-colors duration-300"
   >
     <div
       :id="`lobby-main-card-${templateSuffix}`"
-      class="w-full bg-gray-900 shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-hidden border border-white/5 animate-fade-in"
+      class="w-full bg-gray-50 dark:bg-gray-900 shadow-xl dark:shadow-[0_0_60px_rgba(0,0,0,0.6)] overflow-hidden border border-gray-200 dark:border-white/5 animate-fade-in transition-all duration-300"
       :class="cardClasses"
     >
       <!-- Header Area -->
       <div
         :id="`lobby-card-header-${templateSuffix}`"
-        class="bg-black/40 flex flex-col items-center border-b border-white/5 relative"
+        class="bg-gray-100 dark:bg-black/40 flex flex-col items-center border-b border-gray-200 dark:border-white/5 relative"
         :class="headerPadding"
       >
-        <Logo :id="`lobby-brand-logo-${templateSuffix}`" :class="logoScale" />
+        <Logo :id="`lobby-brand-logo-${templateSuffix}`" :class="logoScale" class="dark:invert-0" />
 
         <div
           v-if="!lastError"
@@ -34,25 +34,25 @@
           >
             <div
               :id="`game-code-copy-button-${templateSuffix}`"
-              class="bg-yellow-500/10 border border-yellow-500/20 rounded-full cursor-pointer hover:bg-yellow-500/20 transition-all active:scale-95 flex items-center justify-center gap-3 group"
+              class="bg-yellow-500/5 dark:bg-yellow-500/10 border border-yellow-500/20 rounded-full cursor-pointer hover:bg-yellow-500/10 dark:hover:bg-yellow-500/20 transition-all active:scale-95 flex items-center justify-center gap-3 group"
               :class="badgePadding"
               @click="copyToClipboard"
             >
               <span
                 :id="`game-code-label-${templateSuffix}`"
-                class="font-black text-yellow-600 uppercase tracking-[0.2em]"
+                class="font-black text-yellow-600 dark:text-yellow-600 uppercase tracking-[0.2em]"
                 :class="badgeLabelSize"
                 >{{ $t('lobby.table_code') }}</span
               >
               <span
                 :id="`game-code-value-${templateSuffix}`"
-                class="text-yellow-500 font-mono font-black tracking-widest"
+                class="text-yellow-700 dark:text-yellow-500 font-mono font-black tracking-widest"
                 :class="badgeValueSize"
                 >{{ gameCode }}</span
               >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="w-4 h-4 text-yellow-500/50 group-hover:text-yellow-500 transition-colors"
+                class="w-4 h-4 text-yellow-600/50 dark:text-yellow-500/50 group-hover:text-yellow-600 dark:group-hover:text-yellow-500 transition-colors"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -103,17 +103,17 @@
                 />
               </svg>
             </div>
-            <h3 class="text-red-500 font-black uppercase tracking-widest mb-2">
+            <h3 class="text-red-600 dark:text-red-500 font-black uppercase tracking-widest mb-2">
               {{ $t('lobby.error_title') }}
             </h3>
-            <p class="text-gray-300 text-sm font-medium leading-relaxed">
+            <p class="text-gray-600 dark:text-gray-300 text-sm font-medium leading-relaxed">
               {{ lastError.message }}
             </p>
           </div>
 
           <button
             @click="handleErrorBack"
-            class="bg-white/5 hover:bg-white/10 text-white font-black py-3 px-8 rounded-xl border border-white/10 transition-all uppercase tracking-widest text-[10px]"
+            class="bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-900 dark:text-white font-black py-3 px-8 rounded-xl border border-gray-300 dark:border-white/10 transition-all uppercase tracking-widest text-[10px]"
           >
             {{ $t('lobby.back_to_setup') }}
           </button>
@@ -122,9 +122,9 @@
         <h2
           v-if="!lastError"
           :id="`lobby-title-text-${templateSuffix}`"
-          class="text-gray-200 font-black uppercase italic mt-2 text-center"
+          class="text-gray-700 dark:text-gray-200 font-black uppercase italic mt-2 text-center"
           :class="subtitleSize"
-          v-html="$t('lobby.waiting_room', { room: '<span class=\'text-yellow-500\'>' + $t('lobby.room') + '</span>' })"
+          v-html="$t('lobby.waiting_room', { room: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('lobby.room') + '</span>' })"
         >
         </h2>
       </div>
@@ -141,7 +141,7 @@
         >
           <h3
             :id="`players-count-label-${templateSuffix}`"
-            class="text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]"
+            class="text-gray-500 dark:text-gray-400 text-[10px] font-black uppercase tracking-[0.3em]"
           >
             {{ $t('lobby.players_connected', { count: players.length }) }}
           </h3>
@@ -153,7 +153,7 @@
               class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
             ></div>
             <span
-              class="text-[9px] font-black text-green-500/80 uppercase tracking-widest"
+              class="text-[9px] font-black text-green-600 dark:text-green-500/80 uppercase tracking-widest"
               >{{ $t('lobby.live_updates') }}</span
             >
           </div>
@@ -168,9 +168,9 @@
             v-for="player in players"
             :key="player.id"
             :id="`player-item-row-${player.id}-${templateSuffix}`"
-            class="group flex items-center justify-between p-4 rounded-2xl bg-black/40 border border-white/5 hover:border-white/10 transition-all hover:translate-x-1"
+            class="group flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-black/40 border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 shadow-sm dark:shadow-none transition-all hover:translate-x-1"
             :class="{
-              'border-yellow-500/30 bg-yellow-500/5': player.id === hostId,
+              'border-yellow-500/30 bg-yellow-500/5 dark:bg-yellow-500/5': player.id === hostId,
             }"
           >
             <div
@@ -183,7 +183,7 @@
                 :class="
                   player.id === hostId
                     ? 'bg-yellow-500 text-black'
-                    : 'bg-gray-800 text-gray-400 border border-white/5'
+                    : 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-white/5'
                 "
               >
                 {{ player.name.charAt(0).toUpperCase() }}
@@ -195,12 +195,12 @@
                 <span
                   :id="`player-display-name-${player.id}-${templateSuffix}`"
                   class="font-bold text-base tracking-tight"
-                  :class="player.id === myId ? 'text-white' : 'text-gray-300'"
+                  :class="player.id === myId ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'"
                 >
                   {{ player.name }}
                   <span
                     v-if="player.id === myId"
-                    class="text-[10px] text-yellow-500/50 ml-1 font-black"
+                    class="text-[10px] text-yellow-600 dark:text-yellow-500/50 ml-1 font-black"
                     >{{ $t('lobby.you') }}</span
                   >
                 </span>
@@ -221,7 +221,7 @@
               <span
                 :id="`connectivity-status-text-${player.id}-${templateSuffix}`"
                 class="text-[9px] font-black uppercase tracking-widest"
-                :class="player.connected ? 'text-green-500' : 'text-red-500'"
+                :class="player.connected ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'"
               >
                 {{ player.connected ? $t('lobby.status_ready') : $t('lobby.status_lost') }}
               </span>
@@ -242,7 +242,7 @@
       <!-- Action Area -->
       <div
         :id="`lobby-actions-footer-${templateSuffix}`"
-        class="bg-black/60 border-t border-white/5"
+        class="bg-gray-100 dark:bg-black/60 border-t border-gray-200 dark:border-white/5 transition-colors duration-300"
         :class="footerPadding"
       >
         <div
@@ -256,7 +256,7 @@
             class="flex flex-col gap-2 mb-4 bg-yellow-500/5 p-4 rounded-xl border border-yellow-500/10"
           >
             <label
-              class="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest"
+              class="text-yellow-600 dark:text-yellow-500/80 text-[10px] font-black uppercase tracking-widest"
             >
               {{ $t('lobby.initial_stack') }}
             </label>
@@ -266,26 +266,26 @@
                 type="number"
                 step="100"
                 min="100"
-                class="bg-black/60 text-white border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50 w-full font-mono"
+                class="bg-white dark:bg-black/60 text-gray-900 dark:text-white border border-gray-300 dark:border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50 w-full font-mono shadow-sm dark:shadow-none"
               />
-              <span class="text-yellow-500/40 font-black text-xs">{{ $t('lobby.chips') }}</span>
+              <span class="text-yellow-600/40 dark:text-yellow-500/40 font-black text-xs">{{ $t('lobby.chips') }}</span>
             </div>
           </div>
 
-          <!-- Bot Selection (Conditional) -->
+          <!-- Bot Selection -->
           <div
             v-if="botsEnabled"
             :id="`bot-selection-container-${templateSuffix}`"
             class="flex flex-col gap-2 mb-4 bg-yellow-500/5 p-4 rounded-xl border border-yellow-500/10"
           >
             <label
-              class="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest"
+              class="text-yellow-600 dark:text-yellow-500/80 text-[10px] font-black uppercase tracking-widest"
             >
               {{ $t('lobby.add_bots') }}
             </label>
             <select
               v-model="botCount"
-              class="bg-black/60 text-white border border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50"
+              class="bg-white dark:bg-black/60 text-gray-900 dark:text-white border border-gray-300 dark:border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50 shadow-sm dark:shadow-none"
             >
               <option
                 v-for="n in maxSelectableBots"
@@ -304,7 +304,7 @@
           <p
             v-if="players.length + botCount < 2"
             :id="`waiting-players-warning-${templateSuffix}`"
-            class="text-yellow-500/70 text-[10px] text-center font-black uppercase tracking-[0.2em] italic animate-pulse"
+            class="text-yellow-600 dark:text-yellow-500/70 text-[10px] text-center font-black uppercase tracking-[0.2em] italic animate-pulse"
           >
             {{ $t('lobby.min_players_warning') }}
           </p>
@@ -339,7 +339,7 @@
           </div>
           <p
             :id="`waiting-host-message-${templateSuffix}`"
-            class="text-gray-400 text-xs font-black uppercase tracking-[0.2em] italic text-center"
+            class="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-[0.2em] italic text-center"
           >
             {{ $t('lobby.waiting_for_host') }}
           </p>
@@ -350,8 +350,8 @@
     <!-- Footer Attribution -->
     <p
       :id="`lobby-copyright-footer-${templateSuffix}`"
-      class="mt-10 text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]"
-      v-html="$t('lobby.copyright', { brand: '<span class=\'text-yellow-500/50\'>' + $t('lobby.brand') + '</span>' })"
+      class="mt-10 text-gray-400 dark:text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]"
+      v-html="$t('lobby.copyright', { brand: '<span class=\'text-yellow-600/50 dark:text-yellow-500/50\'>' + $t('lobby.brand') + '</span>' })"
     >
     </p>
   </div>

@@ -1,7 +1,7 @@
 <template>
   <div
     id="main-game-layout-TemplateXSmall"
-    class="flex-grow flex flex-col overflow-hidden relative"
+    class="flex-grow flex flex-col overflow-hidden relative bg-white dark:bg-neutral-950 transition-colors duration-300"
   >
     <WinnerTournamentOverlay
       v-if="winnerInfo?.isTournamentWinner"
@@ -23,7 +23,7 @@
     >
       <main
         id="poker-table-viewport-TemplateXSmall"
-        class="flex-none h-auto overflow-hidden bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
+        class="flex-none h-auto overflow-hidden bg-gray-100 dark:bg-transparent dark:bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
       >
         <div
           id="poker-table-container-TemplateXSmall"
@@ -41,8 +41,8 @@
       </main>
     </div>
 
-    <!-- ACTION BAR (now middle) -->
-    <div id="action-bar-wrapper-TemplateXSmall" class="shrink-0 z-50">
+    <!-- ACTION BAR -->
+    <div id="action-bar-wrapper-TemplateXSmall" class="shrink-0 z-50 bg-white dark:bg-neutral-900 border-y border-gray-200 dark:border-transparent">
       <ActionBar
         id="action-bar-component-TemplateXSmall"
         :isMyTurn="isMyTurn"
@@ -61,10 +61,10 @@
       />
     </div>
 
-    <!-- PLAYER SIDEPANEL & TERMINAL (now footer) -->
+    <!-- PLAYER SIDEPANEL & TERMINAL -->
     <footer
       id="game-footer-container-TemplateXSmall"
-      class="flex-1 min-h-0 z-50 flex flex-col"
+      class="flex-1 min-h-0 z-50 flex flex-col bg-gray-50 dark:bg-transparent"
     >
       <PlayerSidepanel
         id="game-sidepanel-component-TemplateXSmall"
@@ -78,7 +78,7 @@
       />
       <div
         id="game-message-terminal-wrapper-TemplateXSmall"
-        class="h-[150px] border-t border-white/5 bg-black/20 shrink-0"
+        class="h-[150px] border-t border-gray-200 dark:border-white/5 bg-white dark:bg-black/20 shrink-0"
       >
         <MessageTerminal id="terminal-component-TemplateXSmall" :logs="logs" />
       </div>

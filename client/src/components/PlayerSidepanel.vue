@@ -1,16 +1,16 @@
 <template>
   <aside
     :id="'player-sidepanel-root-container-' + templateSuffix"
-    class="w-full lg:w-[350px] flex-1 lg:h-full bg-black/40 backdrop-blur-3xl border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col shrink-0 min-h-0 z-40"
+    class="w-full lg:w-[350px] flex-1 lg:h-full bg-white/80 dark:bg-black/40 backdrop-blur-3xl border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-white/5 flex flex-col shrink-0 min-h-0 z-40 transition-colors duration-300"
   >
     <!-- Sidepanel Header -->
     <div
       :id="'sidepanel-header-wrapper-' + templateSuffix"
-      class="py-2 px-4 border-b border-white/5 bg-white/[0.01] flex items-center shrink-0"
+      class="py-2 px-4 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.01] flex items-center shrink-0"
     >
       <h2
         :id="'sidepanel-main-heading-' + templateSuffix"
-        class="text-[10px] lg:text-xs font-black text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2"
+        class="text-[10px] lg:text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] flex items-center gap-2"
       >
         <div
           :id="'sidepanel-status-pulse-dot-' + templateSuffix"
@@ -31,13 +31,13 @@
         v-for="player in sortedPlayers"
         :key="player.id"
         :id="'player-item-card-' + player.id + '-' + templateSuffix"
-        class="group relative flex flex-col p-2.5 rounded-xl transition-all duration-1000 border border-transparent"
+        class="group relative flex flex-col p-2.5 rounded-xl transition-all duration-1000 border border-transparent shadow-sm dark:shadow-none"
         :class="[
           player.id === delayedActivePlayerId
-            ? 'bg-yellow-500/20 border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.15)] z-10'
+            ? 'bg-yellow-500/10 dark:bg-yellow-500/20 border-yellow-500/30 dark:border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.15)] z-10'
             : isPlayerWinner(player.id)
-              ? 'bg-emerald-500/20 border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.15)] z-10'
-              : 'bg-white/[0.03] hover:bg-white/[0.06]',
+              ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/30 dark:border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.15)] z-10'
+              : 'bg-gray-50 dark:bg-white/[0.03] border-gray-100 dark:border-transparent hover:bg-gray-100 dark:hover:bg-white/[0.06]',
         ]"
       >
         <!-- Player Info Header: Name & Stack -->
@@ -56,7 +56,7 @@
               <!-- Player Number Badge -->
               <div
                 :id="`player-item-number-badge-${player.id}-${templateSuffix}`"
-                class="w-5 h-5 flex items-center justify-center rounded bg-gray-800 border border-white/10 text-[10px] font-black text-gray-400 shrink-0"
+                class="w-5 h-5 flex items-center justify-center rounded bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-white/10 text-[10px] font-black text-gray-500 dark:text-gray-400 shrink-0"
               >
                 {{ player.playerNumber || '?' }}
               </div>
@@ -70,10 +70,10 @@
                 :id="
                   'player-item-display-name-' + player.id + '-' + templateSuffix
                 "
-                class="font-black text-lg text-gray-100 truncate uppercase tracking-tight leading-none"
+                class="font-black text-lg text-gray-900 dark:text-gray-100 truncate uppercase tracking-tight leading-none transition-colors"
                 :class="{
-                  'text-yellow-400': player.id === delayedActivePlayerId,
-                  'text-emerald-400': isPlayerWinner(player.id),
+                  'text-yellow-600 dark:text-yellow-400': player.id === delayedActivePlayerId,
+                  'text-emerald-600 dark:text-emerald-400': isPlayerWinner(player.id),
                 }"
               >
                 {{ player.name }}
@@ -81,7 +81,7 @@
               <div
                 :id="`player-item-connectivity-dot-${player.id}-${templateSuffix}`"
                 class="w-1.5 h-1.5 rounded-full shrink-0"
-                :class="player.isConnected ? 'bg-green-500' : 'bg-gray-600'"
+                :class="player.isConnected ? 'bg-green-500' : 'bg-gray-400 dark:bg-gray-600'"
               ></div>
             </div>
             <div
@@ -91,13 +91,13 @@
               <span
                 v-if="player.id === activePlayerId"
                 :id="`player-item-active-turn-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black uppercase tracking-widest text-yellow-500/80 leading-none"
+                class="text-[10px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-500/80 leading-none"
                 >Active Turn</span
               >
               <span
                 v-else-if="player.folded"
                 :id="`player-item-folded-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-none"
+                class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 leading-none"
                 >Folded</span
               >
             </div>
@@ -116,7 +116,7 @@
             >
               <span
                 :id="`player-item-bet-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black text-emerald-500/70 uppercase tracking-tighter mb-1 leading-none"
+                class="text-[10px] font-black text-emerald-600 dark:text-emerald-500/70 uppercase tracking-tighter mb-1 leading-none"
                 >{{ $t('game.in_pot') }}</span
               >
               <div
@@ -125,12 +125,12 @@
               >
                 <span
                   :id="`player-item-bet-currency-${player.id}-${templateSuffix}`"
-                  class="text-xs text-emerald-500 font-mono font-bold leading-none"
+                  class="text-xs text-emerald-600 dark:text-emerald-500 font-mono font-bold leading-none"
                   >$</span
                 >
                 <span
                   :id="`player-item-bet-amount-${player.id}-${templateSuffix}`"
-                  class="text-lg font-mono font-black text-emerald-400 leading-none tracking-tight"
+                  class="text-lg font-mono font-black text-emerald-700 dark:text-emerald-400 leading-none tracking-tight"
                   >{{ player.handContribution }}</span
                 >
               </div>
@@ -143,7 +143,7 @@
             >
               <span
                 :id="`player-item-stack-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black text-gray-500 uppercase tracking-tighter mb-1 leading-none"
+                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-tighter mb-1 leading-none"
                 >Stack</span
               >
               <div
@@ -152,12 +152,12 @@
               >
                 <span
                   :id="`player-item-stack-currency-${player.id}-${templateSuffix}`"
-                  class="text-sm text-yellow-500 font-mono font-bold leading-none"
+                  class="text-sm text-yellow-600 dark:text-yellow-500 font-mono font-bold leading-none"
                   >$</span
                 >
                 <span
                   :id="`player-item-stack-amount-${player.id}-${templateSuffix}`"
-                  class="text-xl font-mono font-black text-white leading-none tracking-tight"
+                  class="text-xl font-mono font-black text-gray-900 dark:text-white leading-none tracking-tight transition-colors"
                   >{{ player.chips }}</span
                 >
               </div>
@@ -173,7 +173,7 @@
             (isShowDown && player.cards && player.cards.length > 0)
           "
           :id="`player-item-activity-row-${player.id}-${templateSuffix}`"
-          class="flex items-end justify-between gap-2 mt-2 pt-2 border-t border-white/5"
+          class="flex items-end justify-between gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-white/5"
         >
           <!-- LEFT COLUMN: Cards + Round Bet -->
           <div
@@ -191,14 +191,14 @@
               >
                 <span
                   :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`"
-                  class="text-[10px] font-black text-emerald-400 uppercase tracking-widest truncate leading-none"
+                  class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest truncate leading-none"
                 >
                   {{ formatHandName(getPlayerHandName(player)) }}
                 </span>
                 <span
                   v-if="isPlayerWinner(player.id)"
                   :id="`player-item-win-badge-${player.id}-${templateSuffix}`"
-                  class="px-1.5 py-0.5 rounded bg-emerald-500 text-[9px] font-black text-black uppercase leading-none"
+                  class="px-1.5 py-0.5 rounded bg-emerald-500 text-[9px] font-black text-white dark:text-black uppercase leading-none"
                   >Win</span
                 >
               </div>
@@ -218,7 +218,7 @@
               </div>
             </div>
 
-            <!-- Round Bet (Muestra lo apostado en el turno actual) -->
+            <!-- Round Bet -->
             <div
               v-if="player.currentBet > 0"
               :id="`player-item-live-bet-wrapper-${player.id}-${templateSuffix}`"
@@ -226,12 +226,12 @@
             >
               <span
                 :id="`player-item-live-bet-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black text-gray-500 uppercase tracking-wider mb-1 leading-none"
+                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 leading-none"
                 >Bet</span
               >
               <span
                 :id="`player-item-live-bet-amount-${player.id}-${templateSuffix}`"
-                class="text-lg font-mono font-black text-gray-300 leading-none tracking-tight"
+                class="text-lg font-mono font-black text-gray-700 dark:text-gray-300 leading-none tracking-tight transition-colors"
                 >${{ player.currentBet }}</span
               >
             </div>
@@ -245,14 +245,14 @@
           >
             <span
               :id="`player-item-last-action-label-${player.id}-${templateSuffix}`"
-              class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 leading-none"
+              class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 leading-none"
               >{{ $t('game.last_action') }}</span
             >
             <Transition name="action-highlight" mode="out-in">
               <div
                 :key="player.lastAction"
                 :id="`player-item-action-badge-${player.id}-${templateSuffix}`"
-                class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/5 bg-white/[0.02]"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/5 bg-white dark:bg-white/[0.02]"
                 :class="[
                   getActionBgColor(player.lastAction),
                   player.id === justActedPlayerId ? 'animate-action-flash' : '',
@@ -280,8 +280,7 @@
     <!-- Sidepanel Footer -->
     <div
       :id="'sidepanel-footer-summary-wrapper-' + templateSuffix"
-      class="p-4 border-t border-white/5 shrink-0"
-      style="background: rgba(0, 0, 0, 0.7)"
+      class="p-4 border-t border-gray-200 dark:border-white/5 shrink-0 bg-white dark:bg-black/70 transition-colors"
     >
       <div
         :id="`sidepanel-global-pot-row-${templateSuffix}`"
@@ -289,7 +288,7 @@
       >
         <span
           :id="`sidepanel-global-pot-label-${templateSuffix}`"
-          class="text-[10px] font-black text-gray-500 uppercase tracking-widest leading-none"
+          class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-none"
           >Global Pot</span
         >
         <div
@@ -298,12 +297,12 @@
         >
           <span
             :id="`sidepanel-global-pot-currency-${templateSuffix}`"
-            class="text-amber-500 text-xs font-mono font-black leading-none"
+            class="text-yellow-600 dark:text-amber-500 text-xs font-mono font-black leading-none"
             >$</span
           >
           <span
             :id="`sidepanel-global-pot-amount-${templateSuffix}`"
-            class="text-lg font-mono font-black italic leading-none"
+            class="text-lg font-mono font-black italic text-gray-900 dark:text-white transition-colors leading-none"
             >{{ pot }}</span
           >
         </div>
