@@ -97,45 +97,64 @@
 
         <!-- Winner Card -->
         <div
+          :id="'winner-tournament-card-' + templateSuffix"
           class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-7 sm:p-8 mb-5 relative overflow-hidden animate-fade-up animation-delay-500"
         >
           <div
+            :id="'winner-tournament-card-accent-' + templateSuffix"
             class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4A853] to-transparent"
           ></div>
           <div
+            :id="'winner-tournament-card-bg-icon-' + templateSuffix"
             class="absolute -top-5 -right-2 text-[120px] text-black/25 rotate-[-15deg] select-none"
           >
             ♠
           </div>
 
           <p
+            :id="'winner-tournament-label-' + templateSuffix"
             class="winner-label font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853] mb-1.5"
           >
             {{ $t('tournament.winner') }}
           </p>
           <h2
-            class="winner-name font-bebas text-5xl sm:text-6xl tracking-[2px] leading-none text-[#F5F0E8] mb-4 relative z-10"
+            :id="'winner-tournament-name-text-' + templateSuffix"
+            class="winner-name font-bebas text-5xl sm:text-6xl tracking-[2px] leading-[1.15] text-[#F5F0E8] mb-4 relative z-10 break-words overflow-visible"
           >
             {{ winnerName.toUpperCase() }}
           </h2>
 
-          <div class="winner-stats flex gap-6 flex-wrap relative z-10">
-            <div class="stat flex flex-col gap-0.5">
+          <div
+            :id="'winner-tournament-stats-grid-' + templateSuffix"
+            class="winner-stats flex gap-6 flex-wrap relative z-10"
+          >
+            <div
+              :id="'winner-tournament-stat-chips-' + templateSuffix"
+              class="stat flex flex-col gap-0.5"
+            >
               <span
+                :id="'winner-tournament-stat-chips-label-' + templateSuffix"
                 class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
                 >{{ $t('tournament.final_chips') }}</span
               >
               <span
+                :id="'winner-tournament-stat-chips-value-' + templateSuffix"
                 class="stat-value font-mono text-base text-[#F5D78E] font-medium"
-                >{{ totalAmount.toLocaleString() }} {{ $t('lobby.chips').toLowerCase() }}</span
+                >{{ totalAmount.toLocaleString() }}
+                {{ $t('lobby.chips').toLowerCase() }}</span
               >
             </div>
-            <div class="stat flex flex-col gap-0.5">
+            <div
+              :id="'winner-tournament-stat-id-' + templateSuffix"
+              class="stat flex flex-col gap-0.5"
+            >
               <span
+                :id="'winner-tournament-stat-id-label-' + templateSuffix"
                 class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
                 >{{ $t('tournament.id') }}</span
               >
               <span
+                :id="'winner-tournament-stat-id-value-' + templateSuffix"
                 class="stat-value font-mono text-base text-[#F5D78E] font-medium"
                 >{{
                   (certificate?.torneoId || pokerStore.torneoId || '').slice(
@@ -145,12 +164,17 @@
                 }}...</span
               >
             </div>
-            <div class="stat flex flex-col gap-0.5">
+            <div
+              :id="'winner-tournament-stat-date-' + templateSuffix"
+              class="stat flex flex-col gap-0.5"
+            >
               <span
+                :id="'winner-tournament-stat-date-label-' + templateSuffix"
                 class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
                 >{{ $t('tournament.date') }}</span
               >
               <span
+                :id="'winner-tournament-stat-date-value-' + templateSuffix"
                 class="stat-value font-mono text-base text-[#F5D78E] font-medium"
                 >{{ formattedDate }}</span
               >
@@ -160,58 +184,81 @@
 
         <!-- Certificate Box -->
         <div
+          :id="'winner-tournament-cert-box-' + templateSuffix"
           class="cert-box w-full bg-[#060E07] border border-[#D4A853]/20 rounded-2xl p-7 sm:p-8 mb-5 relative animate-fade-up animation-delay-700"
-        >m
-          <div class="cert-header flex items-center justify-between mb-5">
+        >
+          <div
+            :id="'winner-tournament-cert-header-' + templateSuffix"
+            class="cert-header flex items-center justify-between mb-5"
+          >
             <span
+              :id="'winner-tournament-cert-title-' + templateSuffix"
               class="cert-title font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853]"
               >🎖 {{ $t('tournament.cert_code') }}</span
             >
             <div
+              :id="'winner-tournament-cert-badge-' + templateSuffix"
               class="cert-badge flex items-center gap-1.5 px-2.5 py-1 bg-[#D4A853]/10 border border-[#D4A853]/25 rounded-full"
             >
               <div
+                :id="'winner-tournament-cert-badge-dot-' + templateSuffix"
                 class="cert-badge-dot w-1.5 h-1.5 bg-[#D4A853] rounded-full animate-blink"
               ></div>
               <span
+                :id="'winner-tournament-cert-badge-text-' + templateSuffix"
                 class="cert-badge-text font-mono text-[9px] tracking-[1px] text-[#D4A853]"
                 >{{ $t('tournament.official') }}</span
               >
             </div>
           </div>
 
-          <div class="code-display flex items-center gap-3 mb-4">
-            <div class="code-digits flex gap-2">
+          <div
+            :id="'winner-tournament-cert-code-container-' + templateSuffix"
+            class="code-display flex items-center gap-3 mb-4"
+          >
+            <div
+              :id="'winner-tournament-cert-digits-row-' + templateSuffix"
+              class="code-digits flex gap-2"
+            >
               <div
                 v-for="(digit, i) in codeDisplay"
+                :id="`winner-tournament-cert-digit-${i}-${templateSuffix}`"
                 :key="i"
                 class="code-digit w-14 h-18 bg-[#1E3D20] border-2 border-[#D4A853]/40 rounded-xl flex items-center justify-center font-bebas text-4xl text-[#F5D78E] relative overflow-hidden shadow-2xl animate-digit-reveal"
                 :style="{ animationDelay: `${0.8 + i * 0.15}s` }"
               >
                 {{ digit }}
                 <div
+                  :id="`winner-tournament-cert-digit-gradient-${i}-${templateSuffix}`"
                   class="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-white/5 to-transparent"
                 ></div>
               </div>
             </div>
           </div>
 
-          <p class="code-info text-xs text-[#9E9080] leading-relaxed mb-6">
+          <p
+            :id="'winner-tournament-cert-description-' + templateSuffix"
+            class="code-info text-xs text-[#9E9080] leading-relaxed mb-6"
+          >
             {{ $t('tournament.cert_desc') }}
           </p>
 
           <div
+            :id="'winner-tournament-torneo-id-row-' + templateSuffix"
             class="torneo-row flex items-center justify-between p-3 px-4 bg-white/[0.03] border border-white/[0.06] rounded-lg"
           >
             <span
+              :id="'winner-tournament-torneo-id-label-' + templateSuffix"
               class="torneo-id-label font-mono text-[10px] tracking-[2px] uppercase text-[#9E9080]"
               >{{ $t('tournament.id') }}</span
             >
             <span
+              :id="'winner-tournament-torneo-id-value-' + templateSuffix"
               class="torneo-id-value font-mono text-[12px] text-[#F5F0E8] mx-2 truncate"
               >{{ certificate?.torneoId || pokerStore.torneoId }}</span
             >
             <button
+              :id="'winner-tournament-torneo-id-copy-btn-' + templateSuffix"
               @click="copyTorneoId"
               class="copy-btn bg-transparent border border-[#D4A853]/30 rounded-md text-[#D4A853] font-mono text-[10px] tracking-[1px] px-2.5 py-1 transition-all hover:bg-[#D4A853]/10 hover:border-[#D4A853] active:scale-95 shrink-0"
             >
@@ -221,8 +268,12 @@
         </div>
 
         <!-- Verify Link -->
-        <div class="verify-link w-full animate-fade-up animation-delay-900">
+        <div
+          :id="'winner-tournament-verify-link-container-' + templateSuffix"
+          class="verify-link w-full animate-fade-up animation-delay-900"
+        >
           <router-link
+            :id="'winner-tournament-verify-link-anchor-' + templateSuffix"
             :to="{
               name: 'verify',
               params: {
@@ -238,6 +289,7 @@
         </div>
 
         <button
+          :id="'winner-tournament-close-action-btn-' + templateSuffix"
           @click="handleClose"
           class="mt-8 px-10 py-4 bg-transparent border-2 border-[#D4A853]/20 hover:border-[#D4A853]/50 text-[#D4A853]/70 hover:text-[#D4A853] rounded-full text-sm font-black uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95"
         >
@@ -245,6 +297,7 @@
         </button>
 
         <div
+          :id="'winner-tournament-footer-summary-' + templateSuffix"
           class="footer mt-8 text-center font-mono text-[10px] tracking-[2px] text-[#8A6A2A] opacity-60 animate-fade-up animation-delay-1100"
         >
           {{ $t('tournament.system_footer') }}
