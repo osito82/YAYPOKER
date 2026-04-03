@@ -15,27 +15,27 @@
     "pinia": "^3.0.4",
     "qrcode-vue3": "^1.7.1",
     "uuid": "^13.0.0",
-    "vue": "^3.5.29",
+    "vue": "^3.5.31",
     "vue-i18n": "^11.3.0",
-    "vue-router": "^5.0.3",
-    "ws": "^8.19.0"
+    "vue-router": "^5.0.4",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@pinia/testing": "^1.0.3",
-    "@tailwindcss/postcss": "^4.2.1",
-    "@vitejs/plugin-vue": "^6.0.4",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@vitejs/plugin-vue": "^6.0.5",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.27",
-    "eslint": "^10.0.2",
+    "eslint": "^10.1.0",
     "eslint-plugin-vue": "^10.8.0",
-    "globals": "^17.3.0",
-    "jsdom": "^28.1.0",
-    "postcss": "^8.5.6",
+    "globals": "^17.4.0",
+    "jsdom": "^29.0.1",
+    "postcss": "^8.5.8",
     "prettier": "^3.8.1",
-    "tailwindcss": "^4.2.1",
-    "vite": "^7.3.1",
-    "vitest": "^4.0.18"
+    "tailwindcss": "^4.2.2",
+    "vite": "^8.0.3",
+    "vitest": "^4.1.2"
   }
 }
