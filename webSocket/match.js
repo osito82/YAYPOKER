@@ -266,8 +266,22 @@ class Match extends EventEmitter {
 
       // BOT SPAWN LOGIC
       if (data.bots && Number(data.bots) > 0) {
-        const count = Number(data.bots)
-        await this.spawnBots(count)
+        let count = Number(data.bots)
+        const currentPlayers = this.getConnectedPlayers().length
+        const availableSlots = Math.max(0, GAME_RULES.MAX_PLAYERS - currentPlayers)
+        const botLimit = Math.min(GAME_RULES.MAX_NUMBER_BOTS, availableSlots)
+
+        if (count > botLimit) {
+          this.log.R({
+            msg: `[BOT_API] WARNING: Requested ${count} bots, but only ${botLimit} are allowed. Adjusting.`,
+            torneo: this.torneoId,
+          })
+          count = botLimit
+        }
+
+        if (count > 0) {
+          await this.spawnBots(count)
+        }
         delete data.bots
         setTimeout(() => this.startGame(thisSocket, data), 3000)
         return

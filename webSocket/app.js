@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const R = require('radash')
 const log = require('./logger')

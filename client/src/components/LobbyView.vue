@@ -433,11 +433,14 @@ const botsEnabled = computed(() => {
   return import.meta.env.VITE_BOTS === 'true'
 })
 
-// Max bots logic: total players (humans + bots) cannot exceed 10
+// Max bots logic: total players (humans + bots) cannot exceed 10 (hard limit)
+// and we also respect the MAX_NUMBER_BOTS from env
 const maxSelectableBots = computed(() => {
+  const envMaxBots = parseInt(import.meta.env.VITE_MAX_NUMBER_BOTS) || 9
   const humanCount = props.players.length
   const availableSlots = Math.max(0, 10 - humanCount)
-  return availableSlots + 1 // +1 for the 0 option
+  const actualLimit = Math.min(envMaxBots, availableSlots)
+  return actualLimit + 1 // +1 for the 0 option
 })
 
 const qrSize = computed(() => {
