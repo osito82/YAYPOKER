@@ -14,14 +14,24 @@
         class="bg-gray-100 dark:bg-black/40 flex flex-col items-center border-b border-gray-200 dark:border-white/5"
         :class="headerPadding"
       >
-        <Logo :id="`lobby-brand-logo-${templateSuffix}`" :class="logoScale" class="dark:invert-0 grayscale-0" />
+        <Logo
+          :id="`lobby-brand-logo-${templateSuffix}`"
+          :class="logoScale"
+          class="dark:invert-0 grayscale-0"
+        />
         <h2
           :id="`lobby-game-subtitle-${templateSuffix}`"
           class="text-gray-600 dark:text-gray-200 font-black uppercase tracking-[0.3em] italic"
           :class="subtitleSize"
-          v-html="$t('pages.lobby_home.subtitle', { span: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('pages.lobby_home.subtitle_span') + '</span>' })"
-        >
-        </h2>
+          v-html="
+            $t('pages.lobby_home.subtitle', {
+              span:
+                '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+                $t('pages.lobby_home.subtitle_span') +
+                '</span>',
+            })
+          "
+        ></h2>
       </div>
 
       <!-- Form -->
@@ -37,40 +47,102 @@
           class="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex items-start gap-3 animate-shake"
         >
           <div class="bg-red-500 rounded-full p-1 mt-0.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-3 w-3 text-white"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
             </svg>
           </div>
           <div class="flex-1">
-            <p class="text-red-600 dark:text-red-500 text-[10px] font-black uppercase tracking-widest mb-1">
+            <p
+              class="text-red-600 dark:text-red-500 text-[10px] font-black uppercase tracking-widest mb-1"
+            >
               {{ pokerStore.getLastError.type || 'Error' }}
             </p>
-            <p class="text-gray-700 dark:text-gray-300 text-xs font-medium leading-relaxed">
+            <p
+              class="text-gray-700 dark:text-gray-300 text-xs font-medium leading-relaxed"
+            >
               {{ pokerStore.getLastError.message }}
             </p>
           </div>
-          <button @click="pokerStore.clearError()" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          <button
+            @click="pokerStore.clearError()"
+            class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         <!-- MODE: Selection (Home /) -->
         <template v-if="!isCreating">
-          <form :id="`join-game-form-section-${templateSuffix}`" @submit.prevent="joinGame" class="space-y-6">
-            <div :id="`join-game-title-wrapper-${templateSuffix}`" class="text-center">
-              <h1 :id="`new-game-main-title-${templateSuffix}`" class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic">
-                <span v-if="joinCode" v-html="$t('pages.lobby_home.join_table', { span: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('pages.lobby_home.join_table_span') + '</span>' })"></span>
-                <span v-else v-html="$t('pages.lobby_home.join_existing', { span: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('pages.lobby_home.join_existing_span') + '</span>' })"></span>
+          <form
+            :id="`join-game-form-section-${templateSuffix}`"
+            @submit.prevent="joinGame"
+            class="space-y-6"
+          >
+            <div
+              :id="`join-game-title-wrapper-${templateSuffix}`"
+              class="text-center"
+            >
+              <h1
+                :id="`new-game-main-title-${templateSuffix}`"
+                class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic"
+              >
+                <span
+                  v-if="joinCode"
+                  v-html="
+                    $t('pages.lobby_home.join_table', {
+                      span:
+                        '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+                        $t('pages.lobby_home.join_table_span') +
+                        '</span>',
+                    })
+                  "
+                ></span>
+                <span
+                  v-else
+                  v-html="
+                    $t('pages.lobby_home.join_existing', {
+                      span:
+                        '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+                        $t('pages.lobby_home.join_existing_span') +
+                        '</span>',
+                    })
+                  "
+                ></span>
               </h1>
             </div>
 
-            <label :id="`join-game-input-label-${templateSuffix}`" class="block text-gray-500 dark:text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2">
-              {{ $t('pages.lobby_home.your_info') }}
-            </label>
-
-            <div :id="`join-game-inputs-wrapper-${templateSuffix}`" class="space-y-4">
+            <div
+              :id="`join-game-inputs-wrapper-${templateSuffix}`"
+              class="space-y-4"
+            >
+              <label
+                :id="`join-game-input-label-${templateSuffix}`"
+                class="block text-gray-500 dark:text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
+              >
+                {{ $t('pages.lobby_home.setup_label') }}
+              </label>
               <input
                 :id="`player-name-input-field-${templateSuffix}`"
                 v-model="playerName"
@@ -80,36 +152,74 @@
                 :placeholder="$t('pages.lobby_home.name_placeholder')"
               />
 
+              <label
+                :id="`join-game-input-label-pin-${templateSuffix}`"
+                class="block text-gray-500 dark:text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
+              >
+                {{ $t('pages.lobby_home.setup_label_pin') }}
+              </label>
               <input
                 :id="`player-secret-pin-input-${templateSuffix}`"
                 v-model="secretCode"
                 class="shadow-inner appearance-none border border-gray-300 dark:border-white/10 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-white dark:bg-black/40 leading-tight focus:outline-none focus:border-yellow-500 transition-colors text-lg font-mono placeholder:text-gray-400 dark:placeholder:text-gray-600"
-                type="password"
                 maxlength="4"
                 :placeholder="$t('pages.lobby_home.pin_placeholder')"
                 @input="secretCode = secretCode.replace(/\D/g, '')"
               />
 
-              <div :id="`game-join-code-input-wrapper-${templateSuffix}`" class="space-y-2 relative group">
-                <div v-if="joinCode && !isGameCodeValid" :id="`join-code-error-tooltip-${templateSuffix}`" class="absolute bottom-full left-0 mb-4 px-4 py-2 bg-red-600 text-white text-[12px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-widest z-20 whitespace-nowrap shadow-2xl border border-red-500">
+              <label
+                :id="`join-game-input-label-table-code-${templateSuffix}`"
+                class="block text-gray-500 dark:text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
+              >
+                {{ $t('pages.lobby_home.setup_table_code') }}
+              </label>
+
+              <div
+                :id="`game-join-code-input-wrapper-${templateSuffix}`"
+                class="space-y-2 relative group"
+              >
+                <div
+                  v-if="joinCode && !isGameCodeValid"
+                  :id="`join-code-error-tooltip-${templateSuffix}`"
+                  class="absolute bottom-full left-0 mb-4 px-4 py-2 bg-red-600 text-white text-[12px] font-black rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none uppercase tracking-widest z-20 whitespace-nowrap shadow-2xl border border-red-500"
+                >
                   {{ $t('pages.lobby_home.format_tooltip') }}
-                  <div :id="`error-tooltip-pointer-${templateSuffix}`" class="absolute top-full left-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-red-600"></div>
+                  <div
+                    :id="`error-tooltip-pointer-${templateSuffix}`"
+                    class="absolute top-full left-6 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-red-600"
+                  ></div>
                 </div>
 
-                <div :id="`join-controls-action-layout-${templateSuffix}`" class="flex space-x-3">
+                <div
+                  :id="`join-controls-action-layout-${templateSuffix}`"
+                  class="flex space-x-3"
+                >
                   <input
                     :id="`game-table-join-code-input-${templateSuffix}`"
                     v-model="joinCode"
                     class="shadow-inner appearance-none border rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-white dark:bg-black/40 leading-tight focus:outline-none transition-colors font-mono uppercase text-lg tracking-widest placeholder:text-gray-400 dark:placeholder:text-gray-600"
-                    :class="joinCode && !isGameCodeValid ? 'border-red-500 focus:border-red-600' : 'border-gray-300 dark:border-white/10 focus:border-blue-500'"
+                    :class="
+                      joinCode && !isGameCodeValid
+                        ? 'border-red-500 focus:border-red-600'
+                        : 'border-gray-300 dark:border-white/10 focus:border-blue-500'
+                    "
                     type="text"
                     placeholder="ABC12-DEF34"
                   />
-                  <button :id="`join-game-submit-button-${templateSuffix}`" type="submit" :disabled="!isValidJoin" class="bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-8 rounded-xl focus:outline-none transition-all shadow-lg disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest text-sm">
+                  <button
+                    :id="`join-game-submit-button-${templateSuffix}`"
+                    type="submit"
+                    :disabled="!isValidJoin"
+                    class="bg-blue-600 hover:bg-blue-500 text-white font-black py-4 px-8 rounded-xl focus:outline-none transition-all shadow-lg disabled:opacity-30 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
+                  >
                     {{ $t('pages.lobby_home.join_btn') }}
                   </button>
                 </div>
-                <p v-if="joinCode && !isGameCodeValid" :id="`join-code-format-error-message-${templateSuffix}`" class="text-red-600 dark:text-red-500 text-[12px] uppercase tracking-widest font-black ml-2 mt-2">
+                <p
+                  v-if="joinCode && !isGameCodeValid"
+                  :id="`join-code-format-error-message-${templateSuffix}`"
+                  class="text-red-600 dark:text-red-500 text-[12px] uppercase tracking-widest font-black ml-2 mt-2"
+                >
                   {{ $t('pages.lobby_home.format_error') }}
                 </p>
               </div>
@@ -118,25 +228,63 @@
         </template>
 
         <!-- MODE: New Game Created (/newgame) -->
-        <div v-else :id="`create-game-success-view-${templateSuffix}`" class="space-y-8 animate-fade-in">
-          <div :id="`new-game-title-wrapper-${templateSuffix}`" class="text-center">
-            <h1 :id="`new-game-main-title-${templateSuffix}`" class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic" v-html="$t('pages.lobby_home.new_game', { span: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('pages.lobby_home.new_game_span') + '</span>' })"></h1>
+        <div
+          v-else
+          :id="`create-game-success-view-${templateSuffix}`"
+          class="space-y-8 animate-fade-in"
+        >
+          <div
+            :id="`new-game-title-wrapper-${templateSuffix}`"
+            class="text-center"
+          >
+            <h1
+              :id="`new-game-main-title-${templateSuffix}`"
+              class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic"
+              v-html="
+                $t('pages.lobby_home.new_game', {
+                  span:
+                    '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+                    $t('pages.lobby_home.new_game_span') +
+                    '</span>',
+                })
+              "
+            ></h1>
           </div>
 
-          <div :id="`generated-table-code-display-box-${templateSuffix}`" class="bg-gray-100 dark:bg-black/40 rounded-2xl border border-yellow-500/20 dark:border-yellow-500/20 text-center relative overflow-hidden shadow-inner" :class="generatedBoxPadding">
-            <p :id="`table-code-display-label-${templateSuffix}`" class="text-gray-500 dark:text-gray-300 text-xs uppercase tracking-[0.3em] mb-3 font-black">
+          <div
+            :id="`generated-table-code-display-box-${templateSuffix}`"
+            class="bg-gray-100 dark:bg-black/40 rounded-2xl border border-yellow-500/20 dark:border-yellow-500/20 text-center relative overflow-hidden shadow-inner"
+            :class="generatedBoxPadding"
+          >
+            <p
+              :id="`table-code-display-label-${templateSuffix}`"
+              class="text-gray-500 dark:text-gray-300 text-xs uppercase tracking-[0.3em] mb-3 font-black"
+            >
               {{ $t('pages.lobby_home.table_code_label') }}
             </p>
-            <p :id="`table-code-text-display-${templateSuffix}`" class="text-3xl font-mono font-black text-yellow-600 dark:text-yellow-500 tracking-[0.2em]">
+            <p
+              :id="`table-code-text-display-${templateSuffix}`"
+              class="text-3xl font-mono font-black text-yellow-600 dark:text-yellow-500 tracking-[0.2em]"
+            >
               {{ generatedCode }}
             </p>
           </div>
 
-          <form :id="`creator-info-setup-section-${templateSuffix}`" @submit.prevent="startGame" class="space-y-3">
-            <label :id="`creator-name-setup-label-${templateSuffix}`" class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2">
-              {{ $t('pages.lobby_home.setup_label') }}
-            </label>
-            <div :id="`creator-info-inputs-wrapper-${templateSuffix}`" class="space-y-4">
+          <form
+            :id="`creator-info-setup-section-${templateSuffix}`"
+            @submit.prevent="startGame"
+            class="space-y-3"
+          >
+            <div
+              :id="`creator-info-inputs-wrapper-${templateSuffix}`"
+              class="space-y-4"
+            >
+              <label
+                :id="`creator-name-setup-label-${templateSuffix}`"
+                class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2"
+              >
+                {{ $t('pages.lobby_home.setup_label') }}
+              </label>
               <input
                 :id="`creator-name-input-field-${templateSuffix}`"
                 v-model="playerName"
@@ -145,33 +293,64 @@
                 type="text"
                 :placeholder="$t('pages.lobby_home.setup_name_placeholder')"
               />
+              <label
+                :id="`creator-pin-setup-label-${templateSuffix}`"
+                class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2"
+              >
+                {{ $t('pages.lobby_home.setup_label_pin') }}
+              </label>
               <input
                 :id="`creator-secret-pin-input-${templateSuffix}`"
                 v-model="secretCode"
                 class="shadow-inner appearance-none border border-gray-300 dark:border-white/10 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-white dark:bg-black/40 leading-tight focus:outline-none focus:border-green-500 transition-colors text-lg font-mono placeholder:text-gray-400 dark:placeholder:text-gray-600"
-                type="password"
                 maxlength="4"
                 :placeholder="$t('pages.lobby_home.pin_placeholder')"
                 @input="secretCode = secretCode.replace(/\D/g, '')"
               />
             </div>
 
-            <div :id="`creator-actions-button-grid-${templateSuffix}`" class="mt-8">
-              <button :id="`start-game-submit-button-${templateSuffix}`" type="submit" :disabled="!playerName.trim() || (secretCode.length > 0 && secretCode.length !== 4)" class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-5 px-4 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-base">
+            <div
+              :id="`creator-actions-button-grid-${templateSuffix}`"
+              class="mt-8"
+            >
+              <button
+                :id="`start-game-submit-button-${templateSuffix}`"
+                type="submit"
+                :disabled="
+                  !playerName.trim() ||
+                  (secretCode.length > 0 && secretCode.length !== 4)
+                "
+                class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-5 px-4 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-base"
+              >
                 {{ $t('pages.lobby_home.start_btn') }}
               </button>
             </div>
           </form>
 
-          <button :id="`cancel-creation-back-button-${templateSuffix}`" @click="cancelCreate" class="w-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-[12px] font-black uppercase tracking-[0.2em] transition-colors">
+          <button
+            :id="`cancel-creation-back-button-${templateSuffix}`"
+            @click="cancelCreate"
+            class="w-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-[12px] font-black uppercase tracking-[0.2em] transition-colors"
+          >
             {{ $t('pages.lobby_home.back_to_lobby') }}
           </button>
         </div>
       </div>
 
       <!-- Footer -->
-      <div :id="`lobby-page-footer-${templateSuffix}`" class="bg-gray-100 dark:bg-black/60 text-center text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-[0.2em] border-t border-gray-200 dark:border-white/5 transition-colors duration-300" :class="footerPadding" v-html="$t('pages.lobby_home.footer', { span: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('pages.lobby_home.brand') + '</span>' })">
-      </div>
+      <div
+        :id="`lobby-page-footer-${templateSuffix}`"
+        class="bg-gray-100 dark:bg-black/60 text-center text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-[0.2em] border-t border-gray-200 dark:border-white/5 transition-colors duration-300"
+        :class="footerPadding"
+        v-html="
+          $t('pages.lobby_home.footer', {
+            span:
+              '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+              $t('pages.lobby_home.brand') +
+              '</span>',
+          })
+        "
+      ></div>
     </div>
   </div>
 </template>
@@ -446,13 +625,26 @@ const startGame = () => {
 }
 
 .animate-shake {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 @keyframes shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
 }
 </style>

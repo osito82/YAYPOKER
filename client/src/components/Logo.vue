@@ -1,9 +1,9 @@
 <template>
-<router-link
-  to="/"
-  :id="`brand-logo-container-${templateSuffix}`"
-  class="flex items-center justify-center px-4 cursor-pointer !no-underline hover:!no-underline hover:opacity-90 transition-opacity duration-200 gap-1"
->
+  <router-link
+    to="/"
+    :id="`brand-logo-container-${templateSuffix}`"
+    class="flex items-center justify-center px-4 cursor-pointer !no-underline hover:!no-underline hover:opacity-90 transition-opacity duration-200 gap-1"
+  >
     <!-- YAY Icon Pattern -->
     <div class="flex gap-0.5 items-center">
       <div

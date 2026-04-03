@@ -28,8 +28,10 @@
         >
           {{ $t('pages.verify.headline') }}
         </h1>
-        <p class="page-sub text-[13px] text-gray-500 dark:text-[#7A7268] mt-1 leading-relaxed" v-html="$t('pages.verify.sub')">
-        </p>
+        <p
+          class="page-sub text-[13px] text-gray-500 dark:text-[#7A7268] mt-1 leading-relaxed"
+          v-html="$t('pages.verify.sub')"
+        ></p>
       </header>
 
       <div class="divider w-10 h-px bg-yellow-500/30 mx-auto"></div>
@@ -71,7 +73,8 @@
               maxlength="1"
               class="digit-input w-16 h-20 bg-white dark:bg-black/50 border-2 border-gray-200 dark:border-white/10 rounded-xl text-center text-yellow-600 dark:text-[#F5D78E] font-bebas text-[42px] outline-none transition-all focus:border-yellow-500 dark:focus:border-[#D4A853] focus:ring-4 focus:ring-yellow-500/10 dark:focus:ring-[#D4A853]/10"
               :class="{
-                'filled border-yellow-500/40 dark:border-[#D4A853]/40': codeDigits[i],
+                'filled border-yellow-500/40 dark:border-[#D4A853]/40':
+                  codeDigits[i],
                 'shake-animation border-red-500/70': errors.code,
               }"
               @input="onInput($event, i)"
@@ -87,7 +90,9 @@
           class="verify-btn w-full p-4 bg-gradient-to-br from-yellow-500 to-yellow-700 dark:from-[#D4A853] dark:to-[#8A6A2A] border-none rounded-xl text-white dark:text-[#060E07] font-bebas text-[20px] tracking-[3px] cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(212,168,83,0.3)] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none relative overflow-hidden group"
         >
           <span class="relative z-10">{{
-            isVerifying ? $t('pages.verify.verifying') : $t('pages.verify.verify_btn')
+            isVerifying
+              ? $t('pages.verify.verifying')
+              : $t('pages.verify.verify_btn')
           }}</span>
           <div
             class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"
@@ -110,16 +115,22 @@
         }}</span>
         <p
           class="result-status font-bebas text-2xl tracking-widest mb-1"
-          :class="result.valid ? 'text-emerald-600 dark:text-[#27AE60]' : 'text-red-600 dark:text-[#C0392B]'"
+          :class="
+            result.valid
+              ? 'text-emerald-600 dark:text-[#27AE60]'
+              : 'text-red-600 dark:text-[#C0392B]'
+          "
         >
-          {{ result.valid ? $t('pages.verify.valid_status') : $t('pages.verify.invalid_status') }}
-        </p>
-        <p class="result-msg text-[13px] text-gray-500 dark:text-[#7A7268] mb-4 leading-relaxed">
           {{
             result.valid
-              ? $t('pages.verify.valid_msg')
-              : result.error
+              ? $t('pages.verify.valid_status')
+              : $t('pages.verify.invalid_status')
           }}
+        </p>
+        <p
+          class="result-msg text-[13px] text-gray-500 dark:text-[#7A7268] mb-4 leading-relaxed"
+        >
+          {{ result.valid ? $t('pages.verify.valid_msg') : result.error }}
         </p>
 
         <div
@@ -171,7 +182,11 @@
             <p
               class="detail-value font-mono text-[13px] text-gray-900 dark:text-[#F5F0E8] font-medium"
             >
-              {{ $t('pages.verify.players_count', { count: result.certificate.totalPlayers }) }}
+              {{
+                $t('pages.verify.players_count', {
+                  count: result.certificate.totalPlayers,
+                })
+              }}
             </p>
           </div>
           <div class="detail-item">
@@ -183,7 +198,11 @@
             <p
               class="detail-value font-mono text-[13px] text-gray-900 dark:text-[#F5F0E8] font-medium"
             >
-              {{ $t('pages.verify.chips_count', { count: result.certificate.chipsWon.toLocaleString() }) }}
+              {{
+                $t('pages.verify.chips_count', {
+                  count: result.certificate.chipsWon.toLocaleString(),
+                })
+              }}
             </p>
           </div>
         </div>
@@ -192,7 +211,9 @@
           v-if="result.valid"
           class="seal inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-full font-mono text-[10px] tracking-[2px] text-emerald-700 dark:text-[#27AE60]"
         >
-          <div class="seal-dot w-1.5 h-1.5 bg-emerald-600 dark:bg-[#27AE60] rounded-full"></div>
+          <div
+            class="seal-dot w-1.5 h-1.5 bg-emerald-600 dark:bg-[#27AE60] rounded-full"
+          ></div>
           {{ $t('pages.verify.verified_by') }}
         </div>
 

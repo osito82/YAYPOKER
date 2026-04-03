@@ -5,6 +5,7 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
+    "format": "prettier --write .",
     "bot": "node bot.js --gameCode=LOBBY --name=Gemini_Bot",
     "llama": "node bot.js --gameCode=LOBBY --name=Llama_Bot --provider=openllama"
   },
@@ -18,5 +19,10 @@
     "winston": "^3.19.0",
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1"
   }
 }

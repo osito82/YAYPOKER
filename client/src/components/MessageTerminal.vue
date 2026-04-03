@@ -1,11 +1,16 @@
 <template>
-  <div id="message-terminal" class="w-full h-full transition-colors duration-300">
+  <div
+    id="message-terminal"
+    class="w-full h-full transition-colors duration-300"
+  >
     <div
       id="terminal-container"
       class="w-full h-full flex flex-col overflow-hidden bg-white/90 dark:bg-[#020402]/85 backdrop-blur-xl"
     >
       <!-- Terminal header bar -->
-      <div class="flex items-center gap-2 px-4 py-2 shrink-0 bg-gray-100/50 dark:bg-black/40 border-b border-gray-200 dark:border-white/5">
+      <div
+        class="flex items-center gap-2 px-4 py-2 shrink-0 bg-gray-100/50 dark:bg-black/40 border-b border-gray-200 dark:border-white/5"
+      >
         <div class="flex gap-1.5">
           <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
           <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
@@ -19,7 +24,8 @@
           <div
             class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
           ></div>
-          <span class="text-[8px] font-mono text-green-600 dark:text-green-500/60 uppercase"
+          <span
+            class="text-[8px] font-mono text-green-600 dark:text-green-500/60 uppercase"
             >Live</span
           >
         </div>
@@ -44,7 +50,10 @@
               class="text-yellow-600 dark:text-yellow-500/50 font-bold shrink-0 text-[10px] mt-0.5"
               >[{{ formatTime(log.id) }}]</span
             >
-            <span class="text-yellow-600 dark:text-yellow-400 font-black shrink-0">»</span>
+            <span
+              class="text-yellow-600 dark:text-yellow-400 font-black shrink-0"
+              >»</span
+            >
             <div class="flex flex-wrap gap-1 items-center">
               <span class="text-lg leading-none shrink-0">{{
                 getEmoji(log)
@@ -52,7 +61,9 @@
               <span
                 class="font-bold tracking-tight break-words transition-colors"
                 :class="[
-                  log.type === 'private' ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-800 dark:text-gray-100',
+                  log.type === 'private'
+                    ? 'text-cyan-600 dark:text-cyan-400'
+                    : 'text-gray-800 dark:text-gray-100',
                 ]"
               >
                 {{ log.text }}
@@ -66,7 +77,8 @@
           v-if="logs.length === 0"
           class="text-gray-400 dark:text-gray-600 font-bold italic animate-pulse flex items-center gap-2"
         >
-          <span class="text-yellow-600 dark:text-yellow-400">»</span> {{ $t('game.system_ready') }}
+          <span class="text-yellow-600 dark:text-yellow-400">»</span>
+          {{ $t('game.system_ready') }}
         </div>
 
         <!-- Bottom anchor for auto-scroll -->
@@ -145,4 +157,3 @@ onMounted(scrollToBottom)
   border-radius: 10px;
 }
 </style>
-
