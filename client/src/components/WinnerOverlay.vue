@@ -43,29 +43,57 @@
       >
         <!-- Chip decoration -->
         <div class="chip-deco flex gap-1.5 justify-center mb-6 animate-fade-up">
-          <div class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#2471A3]"></div>
-          <div class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#C0392B]"></div>
-          <div class="chip w-5 h-5 rounded-full border-2 border-white/30 bg-[#D4A853]"></div>
-          <div class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#F5F0E8]"></div>
-          <div class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#C0392B]"></div>
-          <div class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#2471A3]"></div>
+          <div
+            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#2471A3]"
+          ></div>
+          <div
+            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#C0392B]"
+          ></div>
+          <div
+            class="chip w-5 h-5 rounded-full border-2 border-white/30 bg-[#D4A853]"
+          ></div>
+          <div
+            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#F5F0E8]"
+          ></div>
+          <div
+            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#C0392B]"
+          ></div>
+          <div
+            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#2471A3]"
+          ></div>
         </div>
 
         <!-- Trophy -->
         <div class="trophy-wrap relative mb-6 animate-trophy-drop">
-          <div class="trophy-glow absolute -inset-8 bg-[radial-gradient(ellipse,rgba(212,168,83,0.35)_0%,transparent_70%)] animate-pulse-glow"></div>
-          <span class="trophy-icon text-8xl sm:text-9xl relative z-10 drop-shadow-[0_0_20px_rgba(212,168,83,0.7)] animate-trophy-bounce">🏆</span>
+          <div
+            class="trophy-glow absolute -inset-8 bg-[radial-gradient(ellipse,rgba(212,168,83,0.35)_0%,transparent_70%)] animate-pulse-glow"
+          ></div>
+          <span
+            class="trophy-icon text-8xl sm:text-9xl relative z-10 drop-shadow-[0_0_20px_rgba(212,168,83,0.7)] animate-trophy-bounce"
+            >🏆</span
+          >
         </div>
 
         <!-- Title -->
-        <div class="title-block text-center mb-8 animate-fade-up animation-delay-300">
-          <p class="title-eyebrow font-mono text-[11px] tracking-[4px] uppercase text-[#D4A853] mb-2">
-            YAY Poker · {{ winners.length > 1 ? $t('winner.split_pot') : $t('winner.wins') }}
+        <div
+          class="title-block text-center mb-8 animate-fade-up animation-delay-300"
+        >
+          <p
+            class="title-eyebrow font-mono text-[11px] tracking-[4px] uppercase text-[#D4A853] mb-2"
+          >
+            YAY Poker ·
+            {{
+              winners.length > 1 ? $t('winner.split_pot') : $t('winner.wins')
+            }}
           </p>
-          <h1 class="title-main font-bebas text-6xl sm:text-8xl leading-[0.95] tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent">
+          <h1
+            class="title-main font-bebas text-6xl sm:text-8xl leading-[0.95] tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent"
+          >
             {{ winnerNames.toUpperCase() }}
           </h1>
-          <div class="text-4xl sm:text-6xl font-mono font-black text-[#F5D78E] mt-4 drop-shadow-2xl">
+          <div
+            class="text-4xl sm:text-6xl font-mono font-black text-[#F5D78E] mt-4 drop-shadow-2xl"
+          >
             +${{ totalAmount.toLocaleString() }}
           </div>
         </div>
@@ -77,22 +105,44 @@
             :key="'winner-' + idx"
             class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-6 relative overflow-hidden"
           >
-            <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4A853] to-transparent"></div>
-            
+            <div
+              class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4A853] to-transparent"
+            ></div>
+
             <div class="flex justify-between items-center mb-4 relative z-10">
-              <span class="font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853]">
-                {{ winners.length > 1 ? $t('winner.player_hand', { name: winner.name }) : $t('winner.winning_hand') }}
+              <span
+                class="font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853]"
+              >
+                {{
+                  winners.length > 1
+                    ? $t('winner.player_hand', { name: winner.name })
+                    : $t('winner.winning_hand')
+                }}
               </span>
-              <span v-if="winners.length > 1" class="font-mono text-lg text-[#F5D78E] font-bold">+${{ winner.amount.toLocaleString() }}</span>
+              <span
+                v-if="winners.length > 1"
+                class="font-mono text-lg text-[#F5D78E] font-bold"
+                >+${{ winner.amount.toLocaleString() }}</span
+              >
             </div>
 
-            <h3 class="font-bebas text-3xl text-[#F5F0E8] mb-6 tracking-[1px]">{{ winner.handName }}</h3>
+            <h3 class="font-bebas text-3xl text-[#F5F0E8] mb-6 tracking-[1px]">
+              {{ winner.handName }}
+            </h3>
 
-            <div class="flex flex-col gap-6 items-center sm:flex-row sm:justify-around">
+            <div
+              class="flex flex-col gap-6 items-center sm:flex-row sm:justify-around"
+            >
               <!-- Hole Cards -->
               <div class="flex flex-col items-center gap-2">
-                <span class="font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]">{{ $t('winner.hole_cards') }}</span>
-                <div v-if="flattenCards(winner.playerCards).length > 0" class="flex gap-1.5">
+                <span
+                  class="font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
+                  >{{ $t('winner.hole_cards') }}</span
+                >
+                <div
+                  v-if="flattenCards(winner.playerCards).length > 0"
+                  class="flex gap-1.5"
+                >
                   <Card
                     v-for="(card, i) in flattenCards(winner.playerCards)"
                     :key="'hole-' + i"
@@ -100,13 +150,24 @@
                     :numSymbol="card"
                   />
                 </div>
-                <div v-else class="text-[10px] text-[#9E9080] italic">{{ $t('winner.no_cards') }}</div>
+                <div v-else class="text-[10px] text-[#9E9080] italic">
+                  {{ $t('winner.no_cards') }}
+                </div>
               </div>
 
               <!-- Best Hand -->
-              <div v-if="!winnerInfo.isFold" class="flex flex-col items-center gap-2">
-                <span class="font-mono text-[9px] tracking-[2px] uppercase text-[#D4A853]/70">{{ $t('winner.best_hand') }}</span>
-                <div v-if="flattenCards(winner.winningCards).length > 0" class="flex gap-1.5">
+              <div
+                v-if="!winnerInfo.isFold"
+                class="flex flex-col items-center gap-2"
+              >
+                <span
+                  class="font-mono text-[9px] tracking-[2px] uppercase text-[#D4A853]/70"
+                  >{{ $t('winner.best_hand') }}</span
+                >
+                <div
+                  v-if="flattenCards(winner.winningCards).length > 0"
+                  class="flex gap-1.5"
+                >
                   <Card
                     v-for="(card, i) in flattenCards(winner.winningCards)"
                     :key="'card-' + i"
@@ -121,35 +182,65 @@
         </div>
 
         <!-- Showdown Opponents -->
-        <div v-if="opponentsHands.length > 0" class="w-full mb-8 animate-fade-up animation-delay-700">
-          <span class="font-mono text-[10px] tracking-[3px] uppercase text-[#9E9080] block mb-4 border-b border-white/5 pb-2">
+        <div
+          v-if="opponentsHands.length > 0"
+          class="w-full mb-8 animate-fade-up animation-delay-700"
+        >
+          <span
+            class="font-mono text-[10px] tracking-[3px] uppercase text-[#9E9080] block mb-4 border-b border-white/5 pb-2"
+          >
             {{ $t('winner.showdown_opponents') }}
           </span>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar"
+          >
             <div
               v-for="player in opponentsHands"
               :key="player.playerId"
               class="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5 hover:border-white/10 transition-colors"
             >
               <div class="flex-1 min-w-0">
-                <div class="text-sm font-bold text-[#F5F0E8] truncate">{{ player.name }}</div>
-                <div class="text-[9px] font-mono uppercase text-[#9E9080] tracking-wider">{{ player.pokerHand || (player.folded ? $t('winner.folded') : $t('winner.active')) }}</div>
+                <div class="text-sm font-bold text-[#F5F0E8] truncate">
+                  {{ player.name }}
+                </div>
+                <div
+                  class="text-[9px] font-mono uppercase text-[#9E9080] tracking-wider"
+                >
+                  {{
+                    player.pokerHand ||
+                    (player.folded ? $t('winner.folded') : $t('winner.active'))
+                  }}
+                </div>
               </div>
               <div class="flex -space-x-4 opacity-90 scale-75 origin-right">
-                <template v-if="flattenCards(player.playerCards || player.show).length > 0">
+                <template
+                  v-if="
+                    flattenCards(player.playerCards || player.show).length > 0
+                  "
+                >
                   <Card
-                    v-for="(c, idx) in flattenCards(player.playerCards || player.show).slice(0, 2)"
+                    v-for="(c, idx) in flattenCards(
+                      player.playerCards || player.show,
+                    ).slice(0, 2)"
                     :key="idx"
                     size="small"
                     :numSymbol="c"
                   />
                 </template>
                 <template v-else>
-                  <div class="w-8 h-12 bg-white/5 rounded-md border border-white/10 flex items-center justify-center opacity-30">
-                    <div class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
+                  <div
+                    class="w-8 h-12 bg-white/5 rounded-md border border-white/10 flex items-center justify-center opacity-30"
+                  >
+                    <div
+                      class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"
+                    ></div>
                   </div>
-                  <div class="w-8 h-12 bg-white/5 rounded-md border border-white/10 flex items-center justify-center opacity-30">
-                    <div class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"></div>
+                  <div
+                    class="w-8 h-12 bg-white/5 rounded-md border border-white/10 flex items-center justify-center opacity-30"
+                  >
+                    <div
+                      class="w-full h-full bg-[repeating-linear-gradient(45deg,#2d3748,#2d3748_5px,#1a202c_5px,#1a202c_10px)] rounded-sm"
+                    ></div>
                   </div>
                 </template>
               </div>
@@ -158,11 +249,17 @@
         </div>
 
         <!-- Footer & Timer -->
-        <div class="w-full flex flex-col items-center gap-6 animate-fade-up animation-delay-900">
+        <div
+          class="w-full flex flex-col items-center gap-6 animate-fade-up animation-delay-900"
+        >
           <div class="flex flex-col items-center gap-3 w-full">
-            <div class="flex justify-between w-full font-mono text-[10px] tracking-[2px] uppercase text-[#9E9080]">
+            <div
+              class="flex justify-between w-full font-mono text-[10px] tracking-[2px] uppercase text-[#9E9080]"
+            >
               <div class="flex items-center gap-2">
-                <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-blink"></div>
+                <div
+                  class="w-1.5 h-1.5 bg-green-500 rounded-full animate-blink"
+                ></div>
                 {{ $t('winner.next_round', { count: countdown }) }}
               </div>
               <div>{{ $t('winner.pot_cleared') }}</div>
@@ -180,8 +277,13 @@
             :disabled="isWaiting"
             class="group relative px-12 py-4 bg-transparent border-2 border-[#D4A853]/20 hover:border-[#D4A853]/50 text-[#D4A853]/70 hover:text-[#D4A853] rounded-full text-sm font-black uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95 flex items-center gap-3"
           >
-            <div v-if="isWaiting" class="w-4 h-4 border-2 border-[#D4A853]/30 border-t-[#D4A853] rounded-full animate-spin"></div>
-            {{ isWaiting ? $t('winner.waiting_others') : $t('winner.continue') }}
+            <div
+              v-if="isWaiting"
+              class="w-4 h-4 border-2 border-[#D4A853]/30 border-t-[#D4A853] rounded-full animate-spin"
+            ></div>
+            {{
+              isWaiting ? $t('winner.waiting_others') : $t('winner.continue')
+            }}
           </button>
         </div>
       </div>
@@ -302,7 +404,14 @@ const opponentsHands = computed(() => {
 
 // Confetti Styles (Copied from WinnerTournamentOverlay)
 const confettiShapes = ['■', '●', '▲', '◆']
-const confettiColors = ['#D4A853', '#F5D78E', '#E74C3C', '#2471A3', '#F0F0F0', '#C0392B']
+const confettiColors = [
+  '#D4A853',
+  '#F5D78E',
+  '#E74C3C',
+  '#2471A3',
+  '#F0F0F0',
+  '#C0392B',
+]
 
 const getConfettiStyle = (i) => {
   const left = Math.random() * 100
@@ -330,18 +439,32 @@ const getConfettiStyle = (i) => {
   font-family: 'Bebas Neue', sans-serif;
 }
 
-.animation-delay-300 { animation-delay: 0.3s; }
-.animation-delay-500 { animation-delay: 0.5s; }
-.animation-delay-700 { animation-delay: 0.7s; }
-.animation-delay-900 { animation-delay: 0.9s; }
+.animation-delay-300 {
+  animation-delay: 0.3s;
+}
+.animation-delay-500 {
+  animation-delay: 0.5s;
+}
+.animation-delay-700 {
+  animation-delay: 0.7s;
+}
+.animation-delay-900 {
+  animation-delay: 0.9s;
+}
 
 .animate-fade-up {
   animation: fade-up 0.6s both;
 }
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-trophy-drop {
@@ -349,8 +472,14 @@ const getConfettiStyle = (i) => {
 }
 
 @keyframes trophy-drop {
-  from { transform: translateY(-60px) scale(0.5); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
+  from {
+    transform: translateY(-60px) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 .animate-pulse-glow {
@@ -358,8 +487,14 @@ const getConfettiStyle = (i) => {
 }
 
 @keyframes pulse-glow {
-  from { opacity: 0.6; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1.1); }
+  from {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .animate-trophy-bounce {
@@ -367,8 +502,13 @@ const getConfettiStyle = (i) => {
 }
 
 @keyframes trophy-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .animate-blink {
@@ -376,8 +516,13 @@ const getConfettiStyle = (i) => {
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
 }
 
 .confetti-piece {
@@ -389,7 +534,10 @@ const getConfettiStyle = (i) => {
 }
 
 @keyframes fall {
-  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  to {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
 }
 
 .custom-scrollbar::-webkit-scrollbar {

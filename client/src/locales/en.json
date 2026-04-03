@@ -11,7 +11,6 @@
     "headline": "Play Poker, {br} {like_pro} {br} FREE.",
     "like_pro": "like a pro...",
 
-
     "sub": "Spin up a private table in seconds, share a link, and deal with your friends — wherever they are. No app downloads. No real money. Just the game.",
     "create": "Create a Table",
     "browse": "Join a Table",
@@ -273,7 +272,6 @@
       "join_table_span": "Table",
       "join_existing": "Join Existing {span}",
       "join_existing_span": "Table",
-      "your_info": "Your info",
       "name_placeholder": "Enter Your Name",
       "pin_placeholder": "Invent 4-Digit Pin",
       "format_tooltip": "Format: XXXXX-XXXXX",
@@ -282,8 +280,10 @@
       "new_game": "New {span}",
       "new_game_span": "Game",
       "table_code_label": "Your Table Code",
-      "setup_label": "Set Your Display Name & Pin",
-      "setup_name_placeholder": "Ex: Osito Malafama",
+      "setup_label": "Set Your Display Name",
+      "setup_label_pin": "Set Your your secret PIN",
+      "setup_name_placeholder": "Ex: Osito",
+      "setup_table_code": "Enter your Table Code",
       "start_btn": "Start Playing",
       "back_to_lobby": "← Back to Lobby",
       "footer": "© 2026 {span}. All chips are virtual.",

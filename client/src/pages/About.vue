@@ -8,7 +8,10 @@
       :id="`about-nav-bar-${templateSuffix}`"
       class="flex justify-between items-center p-6 max-w-7xl mx-auto relative z-50"
     >
-      <Logo :id="`about-nav-logo-${templateSuffix}`" class="scale-90 dark:invert-0" />
+      <Logo
+        :id="`about-nav-logo-${templateSuffix}`"
+        class="scale-90 dark:invert-0"
+      />
       <router-link
         to="/"
         :id="`about-nav-link-back-${templateSuffix}`"
@@ -44,7 +47,14 @@
         <h1
           :id="`about-headline-text-${templateSuffix}`"
           class="text-5xl md:text-7xl font-black uppercase tracking-tighter italic mb-8 text-gray-900 dark:text-white"
-          v-html="$t('pages.about.headline', { span: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('pages.about.headline_span') + '</span>' })"
+          v-html="
+            $t('pages.about.headline', {
+              span:
+                '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+                $t('pages.about.headline_span') +
+                '</span>',
+            })
+          "
         ></h1>
         <p
           :id="`about-sub-description-${templateSuffix}`"
@@ -64,7 +74,14 @@
         >
           <h3
             class="text-2xl font-black uppercase italic mb-4 text-gray-900 dark:text-white"
-            v-html="$t('pages.about.why_free_title', { span: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('pages.about.free') + '</span>' })"
+            v-html="
+              $t('pages.about.why_free_title', {
+                span:
+                  '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+                  $t('pages.about.free') +
+                  '</span>',
+              })
+            "
           ></h3>
           <p
             class="text-gray-500 dark:text-gray-500 text-sm leading-relaxed font-bold uppercase tracking-widest"
@@ -78,7 +95,14 @@
         >
           <h3
             class="text-2xl font-black uppercase italic mb-4 text-gray-900 dark:text-white"
-            v-html="$t('pages.about.why_fast_title', { span: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('pages.about.fast') + '</span>' })"
+            v-html="
+              $t('pages.about.why_fast_title', {
+                span:
+                  '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+                  $t('pages.about.fast') +
+                  '</span>',
+              })
+            "
           ></h3>
           <p
             class="text-gray-500 dark:text-gray-500 text-sm leading-relaxed font-bold uppercase tracking-widest"
@@ -95,7 +119,11 @@
         <h2
           :id="`about-footer-tagline-${templateSuffix}`"
           class="text-3xl font-black uppercase tracking-widest mb-8 italic text-gray-900 dark:text-white"
-          v-html="$t('pages.about.made_by', { heart: '<span class=\'text-red-500\'>♥</span>' })"
+          v-html="
+            $t('pages.about.made_by', {
+              heart: '<span class=\'text-red-500\'>♥</span>',
+            })
+          "
         ></h2>
         <p
           :id="`about-footer-copyright-${templateSuffix}`"

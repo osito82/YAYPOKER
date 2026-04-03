@@ -31,7 +31,11 @@
         <h2
           :id="`not-found-headline-${templateSuffix}`"
           class="text-3xl md:text-5xl font-black text-white uppercase tracking-tighter"
-          v-html="$t('pages.not_found.headline', { span: '<span class=\'text-yellow-500\'>404</span>' })"
+          v-html="
+            $t('pages.not_found.headline', {
+              span: '<span class=\'text-yellow-500\'>404</span>',
+            })
+          "
         ></h2>
 
         <div

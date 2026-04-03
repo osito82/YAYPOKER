@@ -72,8 +72,11 @@
                 "
                 class="font-black text-lg text-gray-900 dark:text-gray-100 truncate uppercase tracking-tight leading-none transition-colors"
                 :class="{
-                  'text-yellow-600 dark:text-yellow-400': player.id === delayedActivePlayerId,
-                  'text-emerald-600 dark:text-emerald-400': isPlayerWinner(player.id),
+                  'text-yellow-600 dark:text-yellow-400':
+                    player.id === delayedActivePlayerId,
+                  'text-emerald-600 dark:text-emerald-400': isPlayerWinner(
+                    player.id,
+                  ),
                 }"
               >
                 {{ player.name }}
@@ -81,7 +84,11 @@
               <div
                 :id="`player-item-connectivity-dot-${player.id}-${templateSuffix}`"
                 class="w-1.5 h-1.5 rounded-full shrink-0"
-                :class="player.isConnected ? 'bg-green-500' : 'bg-gray-400 dark:bg-gray-600'"
+                :class="
+                  player.isConnected
+                    ? 'bg-green-500'
+                    : 'bg-gray-400 dark:bg-gray-600'
+                "
               ></div>
             </div>
             <div
@@ -508,4 +515,3 @@ const getActionColor = (action) => {
   transform: translateY(10px) scale(0.9);
 }
 </style>
-

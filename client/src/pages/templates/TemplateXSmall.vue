@@ -42,7 +42,10 @@
     </div>
 
     <!-- ACTION BAR -->
-    <div id="action-bar-wrapper-TemplateXSmall" class="shrink-0 z-50 bg-white dark:bg-neutral-900 border-y border-gray-200 dark:border-transparent">
+    <div
+      id="action-bar-wrapper-TemplateXSmall"
+      class="shrink-0 z-50 bg-white dark:bg-neutral-900 border-y border-gray-200 dark:border-transparent"
+    >
       <ActionBar
         id="action-bar-component-TemplateXSmall"
         :isMyTurn="isMyTurn"

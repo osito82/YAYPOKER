@@ -4,7 +4,8 @@ import en from './locales/en.json'
 import es from './locales/es.json'
 
 const savedLocale = localStorage.getItem('user-locale')
-const defaultLocale = savedLocale || (navigator.language.startsWith('es') ? 'es' : 'en')
+const defaultLocale =
+  savedLocale || (navigator.language.startsWith('es') ? 'es' : 'en')
 
 const i18n = createI18n({
   legacy: false, // Use Composition API
@@ -12,8 +13,8 @@ const i18n = createI18n({
   fallbackLocale: 'en',
   messages: {
     en,
-    es
-  }
+    es,
+  },
 })
 
 // Persist language changes

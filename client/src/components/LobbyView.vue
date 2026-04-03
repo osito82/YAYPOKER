@@ -14,7 +14,11 @@
         class="bg-gray-100 dark:bg-black/40 flex flex-col items-center border-b border-gray-200 dark:border-white/5 relative"
         :class="headerPadding"
       >
-        <Logo :id="`lobby-brand-logo-${templateSuffix}`" :class="logoScale" class="dark:invert-0" />
+        <Logo
+          :id="`lobby-brand-logo-${templateSuffix}`"
+          :class="logoScale"
+          class="dark:invert-0"
+        />
 
         <div
           v-if="!lastError"
@@ -103,10 +107,14 @@
                 />
               </svg>
             </div>
-            <h3 class="text-red-600 dark:text-red-500 font-black uppercase tracking-widest mb-2">
+            <h3
+              class="text-red-600 dark:text-red-500 font-black uppercase tracking-widest mb-2"
+            >
               {{ $t('lobby.error_title') }}
             </h3>
-            <p class="text-gray-600 dark:text-gray-300 text-sm font-medium leading-relaxed">
+            <p
+              class="text-gray-600 dark:text-gray-300 text-sm font-medium leading-relaxed"
+            >
               {{ lastError.message }}
             </p>
           </div>
@@ -124,9 +132,15 @@
           :id="`lobby-title-text-${templateSuffix}`"
           class="text-gray-700 dark:text-gray-200 font-black uppercase italic mt-2 text-center"
           :class="subtitleSize"
-          v-html="$t('lobby.waiting_room', { room: '<span class=\'text-yellow-600 dark:text-yellow-500\'>' + $t('lobby.room') + '</span>' })"
-        >
-        </h2>
+          v-html="
+            $t('lobby.waiting_room', {
+              room:
+                '<span class=\'text-yellow-600 dark:text-yellow-500\'>' +
+                $t('lobby.room') +
+                '</span>',
+            })
+          "
+        ></h2>
       </div>
 
       <!-- Player List Area -->
@@ -170,7 +184,8 @@
             :id="`player-item-row-${player.id}-${templateSuffix}`"
             class="group flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-black/40 border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 shadow-sm dark:shadow-none transition-all hover:translate-x-1"
             :class="{
-              'border-yellow-500/30 bg-yellow-500/5 dark:bg-yellow-500/5': player.id === hostId,
+              'border-yellow-500/30 bg-yellow-500/5 dark:bg-yellow-500/5':
+                player.id === hostId,
             }"
           >
             <div
@@ -195,7 +210,11 @@
                 <span
                   :id="`player-display-name-${player.id}-${templateSuffix}`"
                   class="font-bold text-base tracking-tight"
-                  :class="player.id === myId ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300'"
+                  :class="
+                    player.id === myId
+                      ? 'text-gray-900 dark:text-white'
+                      : 'text-gray-700 dark:text-gray-300'
+                  "
                 >
                   {{ player.name }}
                   <span
@@ -221,9 +240,17 @@
               <span
                 :id="`connectivity-status-text-${player.id}-${templateSuffix}`"
                 class="text-[9px] font-black uppercase tracking-widest"
-                :class="player.connected ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'"
+                :class="
+                  player.connected
+                    ? 'text-green-600 dark:text-green-500'
+                    : 'text-red-600 dark:text-red-500'
+                "
               >
-                {{ player.connected ? $t('lobby.status_ready') : $t('lobby.status_lost') }}
+                {{
+                  player.connected
+                    ? $t('lobby.status_ready')
+                    : $t('lobby.status_lost')
+                }}
               </span>
               <div
                 :id="`connectivity-dot-${player.id}-${templateSuffix}`"
@@ -268,7 +295,10 @@
                 min="100"
                 class="bg-white dark:bg-black/60 text-gray-900 dark:text-white border border-gray-300 dark:border-white/10 rounded-lg p-2 text-sm focus:outline-none focus:border-yellow-500/50 w-full font-mono shadow-sm dark:shadow-none"
               />
-              <span class="text-yellow-600/40 dark:text-yellow-500/40 font-black text-xs">{{ $t('lobby.chips') }}</span>
+              <span
+                class="text-yellow-600/40 dark:text-yellow-500/40 font-black text-xs"
+                >{{ $t('lobby.chips') }}</span
+              >
             </div>
           </div>
 
@@ -295,7 +325,9 @@
                 {{
                   n - 1 === 0
                     ? $t('lobby.bot_none')
-                    : (n - 1 === 1 ? $t('lobby.bot_one') : $t('lobby.bot_many', { count: n - 1 }))
+                    : n - 1 === 1
+                      ? $t('lobby.bot_one')
+                      : $t('lobby.bot_many', { count: n - 1 })
                 }}
               </option>
             </select>
@@ -310,7 +342,9 @@
           </p>
           <button
             :id="`start-game-submit-button-${templateSuffix}`"
-            @click="$emit('start', { bots: botCount, initialStack: initialStack })"
+            @click="
+              $emit('start', { bots: botCount, initialStack: initialStack })
+            "
             :disabled="players.length + botCount < 2"
             class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 rounded-2xl focus:outline-none transition-all transform hover:-translate-y-1 active:scale-95 shadow-2xl uppercase tracking-[0.2em] disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed text-base"
           >
@@ -351,9 +385,15 @@
     <p
       :id="`lobby-copyright-footer-${templateSuffix}`"
       class="mt-10 text-gray-400 dark:text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]"
-      v-html="$t('lobby.copyright', { brand: '<span class=\'text-yellow-600/50 dark:text-yellow-500/50\'>' + $t('lobby.brand') + '</span>' })"
-    >
-    </p>
+      v-html="
+        $t('lobby.copyright', {
+          brand:
+            '<span class=\'text-yellow-600/50 dark:text-yellow-500/50\'>' +
+            $t('lobby.brand') +
+            '</span>',
+        })
+      "
+    ></p>
   </div>
 </template>
 
@@ -393,11 +433,14 @@ const botsEnabled = computed(() => {
   return import.meta.env.VITE_BOTS === 'true'
 })
 
-// Max bots logic: total players (humans + bots) cannot exceed 10
+// Max bots logic: total players (humans + bots) cannot exceed 10 (hard limit)
+// and we also respect the MAX_NUMBER_BOTS from env
 const maxSelectableBots = computed(() => {
+  const envMaxBots = parseInt(import.meta.env.VITE_MAX_NUMBER_BOTS) || 9
   const humanCount = props.players.length
   const availableSlots = Math.max(0, 10 - humanCount)
-  return availableSlots + 1 // +1 for the 0 option
+  const actualLimit = Math.min(envMaxBots, availableSlots)
+  return actualLimit + 1 // +1 for the 0 option
 })
 
 const qrSize = computed(() => {

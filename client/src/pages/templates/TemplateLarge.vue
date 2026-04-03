@@ -39,7 +39,12 @@
               id="blinds-text-TemplateLarge"
               class="text-[11px] font-mono font-bold text-gray-600 dark:text-white/80 uppercase tracking-wider"
             >
-              {{ $t('game.blinds_info', { small: pokerStore.smallBlind, big: pokerStore.bigBlind }) }}
+              {{
+                $t('game.blinds_info', {
+                  small: pokerStore.smallBlind,
+                  big: pokerStore.bigBlind,
+                })
+              }}
             </span>
             <span
               id="game-id-text-TemplateLarge"
@@ -93,8 +98,14 @@
           <span
             id="conn-status-text-TemplateLarge"
             class="text-[9px] font-bold uppercase tracking-widest"
-            :class="isConnected ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
-            >{{ isConnected ? $t('game.status_live') : $t('game.status_offline') }}</span
+            :class="
+              isConnected
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-red-600 dark:text-red-400'
+            "
+            >{{
+              isConnected ? $t('game.status_live') : $t('game.status_offline')
+            }}</span
           >
         </div>
 
@@ -182,7 +193,10 @@
       />
     </div>
 
-    <footer id="game-hud-bar-TemplateLarge" class="shrink-0 z-50 w-full bg-white dark:bg-neutral-950 border-t border-gray-200 dark:border-transparent transition-colors duration-300">
+    <footer
+      id="game-hud-bar-TemplateLarge"
+      class="shrink-0 z-50 w-full bg-white dark:bg-neutral-950 border-t border-gray-200 dark:border-transparent transition-colors duration-300"
+    >
       <ActionBar
         id="action-bar-component-TemplateLarge"
         :isMyTurn="isMyTurn"
