@@ -8,8 +8,8 @@ require("dotenv").config();
 const app = express();
 app.use(express.json());
 
-const PORT = 8886;
-const OLLAMA_URL = "http://127.0.0.1:11434";
+const PORT = process.env.PORT || 8886;
+const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
 
 let ollamaClient;
 try {
