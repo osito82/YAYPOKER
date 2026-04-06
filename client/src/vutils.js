@@ -66,22 +66,37 @@ function urlsFactory() {
     import.meta.env.VITE_WS_PROTOCOL ||
     (pageProtocol === 'https:' ? 'wss' : 'ws')
 
-  // HTTP protocol for REST calls to the same backend server
-  const httpProtocol = pageProtocol.replace(':', '')
-
   const clientProtocol =
     import.meta.env.VITE_CLIENT_PROTOCOL || pageProtocol.replace(':', '')
 
-  const wsHost = import.meta.env.VITE_WS_URL || host
-  const clientHost = import.meta.env.VITE_CLIENT_URL || host
+  let wsHost = import.meta.env.VITE_WS_URL || host
+  let clientHost = import.meta.env.VITE_CLIENT_URL || host
+
+  // LIMPIEZA: Si el host ya trae http:// o https://, se lo quitamos porque buildUrl lo pondrá
+  wsHost = wsHost.replace(/^https?:\/\//, '').split(':')[0]
+  clientHost = clientHost.replace(/^https?:\/\//, '').split(':')[0]
 
   const wsPort = import.meta.env.VITE_WS_PORT || '8888'
   const clientPort =
     import.meta.env.VITE_CLIENT_PORT || window.location.port || '5173'
 
-  const server = `${wsProtocol}://${wsHost}:${wsPort}`
-  const serverHttp = `${httpProtocol}://${wsHost}:${wsPort}`
-  const url = `${clientProtocol}://${clientHost}:${clientPort}`
+  const buildUrl = (protocol, host, port) => {
+    // Si el puerto ya está en el host (ej: localhost:8888), no lo repetimos
+    if (host.includes(':')) return `${protocol}://${host}`
+    // Si es puerto estándar, omitimos el puerto
+    if (port === '80' || port === '443') return `${protocol}://${host}`
+    return `${protocol}://${host}:${port}`
+  }
+
+  const server = buildUrl(wsProtocol, wsHost, wsPort)
+  const serverHttp = buildUrl(
+    pageProtocol.replace(':', ''),
+    wsHost,
+    wsPort,
+  )
+  const url = buildUrl(clientProtocol, clientHost, clientPort)
+
+  console.log({ server, serverHttp, url }, '--------URLs Generadas')
 
   return {
     server,

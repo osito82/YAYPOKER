@@ -1,0 +1,59 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - client
+      - websocket
+
+  client:
+    build:
+      context: ./client
+      args:
+        - VITE_WS_PORT=443
+        - VITE_WS_URL=ws.yaypoker.com
+        - VITE_BOTS=true
+        - VITE_MAX_NUMBER_BOTS=10
+    restart: unless-stopped
+    depends_on:
+      - websocket
+    volumes:
+      - ./Logs:/usr/share/nginx/html/Logs
+
+  websocket:
+    build: ./webSocket
+    restart: unless-stopped
+    environment:
+      - PORT=8888
+      - VITE_WS_URL=websocket
+      - VITE_WS_PORT=8888
+      - MAX_NUMBER_BOTS=10
+      - BOT_SERVICE_URL=http://bot:8886
+    depends_on:
+      - bot
+    volumes:
+      - ./Logs:/Logs
+
+  bot:
+    build: ./bot
+    restart: unless-stopped
+    environment:
+      - PORT=8886
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OLLAMA_URL=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./Logs:/Logs
+
+volumes:
+  caddy_data:
+  caddy_config:
+

@@ -1,0 +1,44 @@
+services:
+  client:
+    build:
+      context: ./client
+      args:
+        - VITE_WS_PORT=8888
+        - VITE_WS_URL=73.7.52.167
+        - VITE_BOTS=true
+        - VITE_MAX_NUMBER_BOTS=10
+    ports:
+      - "8080:80"
+    depends_on:
+      - websocket
+    volumes:
+      - ./Logs:/usr/share/nginx/html/Logs
+
+  websocket:
+    build: ./webSocket
+    ports:
+      - "8888:8888"
+    environment:
+      - PORT=8888
+      - VITE_WS_URL=websocket
+      - VITE_WS_PORT=8888
+      - MAX_NUMBER_BOTS=10
+      - BOT_SERVICE_URL=http://bot:8886
+    depends_on:
+      - bot
+    volumes:
+      - ./Logs:/Logs # <--- CORREGIDO: Coincide con ../Logs desde /app
+
+  bot:
+    build: ./bot
+    ports:
+      - "8886:8886"
+    environment:
+      - PORT=8886
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OLLAMA_URL=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./Logs:/Logs # <--- CORREGIDO: Coincide con ../Logs desde /app
+

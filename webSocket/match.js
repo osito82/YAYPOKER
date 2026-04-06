@@ -87,14 +87,14 @@ class Match extends EventEmitter {
         Math.floor(Math.random() * 100)
 
       try {
-        await fetch(`http://73.7.52.167:8886/spawn`, {
+        await fetch(`${SERVER_CONFIG.BOT_SERVICE_URL}/spawn`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             gameCode: this.torneoId,
             playerName: botName,
             provider: 'ollama',
-            server: '73.7.52.167',
+            server: SERVER_CONFIG.BASE_URL,
             port: SERVER_CONFIG.PORT,
           }),
         })
