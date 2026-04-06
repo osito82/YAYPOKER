@@ -1,0 +1,7 @@
+yaypoker.com, www.yaypoker.com {
+    reverse_proxy client:80
+}
+
+ws.yaypoker.com {
+    reverse_proxy websocket:8888
+}
