@@ -50,7 +50,9 @@ class Match extends EventEmitter {
     this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
     this.autofoldTimer = null
-    this.autofoldDuration = TIMEOUTS.autofold
+    this.autofoldDuration = this.isPublic
+      ? TIMEOUTS.autofoldPublic
+      : TIMEOUTS.autofold
 
     this.playersFold = []
     this.pot = 0

@@ -22,6 +22,12 @@ class MatchLobby {
 
     const finalRequestedName = data.name || thisSocketName
 
+    this.log.Template({ name: 'brakets', title: 'LOBBY:SIGNUP_ATTEMPT', date: true }).R({
+      playerName: finalRequestedName,
+      torneoId: this.match.torneoId,
+      socketId: thisSocketId,
+    })
+
     // ✅ VALIDAR INTENTO DE RECONEXIÓN CON NOMBRE EXISTENTE PERO PIN INCORRECTO
     const playerWithSameName = this.match.players.find(
       (p) => p.name === finalRequestedName,

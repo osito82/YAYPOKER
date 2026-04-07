@@ -16,6 +16,7 @@ class Player {
     this.playerNumber = playerNumber
     this.currentBet = 0
     this.handContribution = 0
+    this.consecutiveAutofolds = 0
     this.isBot =
       name.toLowerCase().includes('bot') || name.toLowerCase().includes('_ia')
   }

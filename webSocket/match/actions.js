@@ -24,6 +24,53 @@ class MatchActions {
     return this.isPublic() ? GAME_RULES.MIN_PLAYERS_PUBLIC : GAME_RULES.MIN_PLAYERS
   }
 
+  resetConsecutiveAutofolds = (player) => {
+    if (player) player.consecutiveAutofolds = 0
+  }
+
+  disconnectPlayer = (player) => {
+    if (!player) return
+    player.setConnected(false)
+    this.log
+      .Template({ name: 'brakets', title: 'MATCH:PLAYER_ABANDONED', date: true })
+      .R({
+        torneoId: this.match.torneoId,
+        playerName: player.name,
+        reason: 'Consecutive autofolds',
+      })
+
+    // Find and close the actual socket
+    const torneoSockets = Socket.getSocketsByTorneo(this.match.torneoId)
+    if (torneoSockets) {
+      for (const [secretCode, socketWrapper] of torneoSockets.entries()) {
+        if (socketWrapper.id === player.id) {
+          // Send a last message to the player explaining why they are being disconnected
+          if (socketWrapper.socket && socketWrapper.socket.readyState === 1) {
+            this.communicator.msgBuilder('disconnected', 'private', player, {
+              reason: 'abandoned',
+              displayMsg:
+                'You have been disconnected for being inactive for 2 consecutive turns.',
+            })
+            socketWrapper.socket.send(
+              JSON.stringify({ message: this.communicator.getMsg() }),
+            )
+
+            setTimeout(() => {
+              if (
+                socketWrapper.socket &&
+                socketWrapper.socket.readyState === 1
+              ) {
+                socketWrapper.socket.close(1000, 'Abandoned')
+              }
+            }, 500)
+          }
+          torneoSockets.delete(secretCode)
+          break
+        }
+      }
+    }
+  }
+
   // --- CORE GAME LOGIC ---
 
   autofold = () => {
@@ -31,18 +78,30 @@ class MatchActions {
       (p) => p.id == this.match.activePlayerId,
     )
     if (foundPlayer) {
+      foundPlayer.consecutiveAutofolds++
+
       this.log
         .Template({ name: 'brakets', title: 'ACTION:AUTOFOLD', date: true })
         .R({
           torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
-          player: foundPlayer.name,
-          playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
-          dealerCards: this.match.cardsDealer,
+          playerName: foundPlayer.name,
+          playerId: foundPlayer.id,
+          consecutive: foundPlayer.consecutiveAutofolds,
+          limit: GAME_RULES.MAX_CONSECUTIVE_AUTOFOLDS,
+          isPublic: this.isPublic(),
           reason: 'Timeout',
         })
-      this.fold({ id: foundPlayer.id })
+
+      const isAbandoned =
+        this.isPublic() &&
+        foundPlayer.consecutiveAutofolds >= GAME_RULES.MAX_CONSECUTIVE_AUTOFOLDS
+
+      if (isAbandoned) {
+        this.disconnectPlayer(foundPlayer)
+      }
+
+      this.fold({ id: foundPlayer.id }, true)
     }
   }
 
@@ -60,7 +119,7 @@ class MatchActions {
     }
   }
 
-  fold = (thisSocket) => {
+  fold = (thisSocket, isAutofold = false) => {
     if (
       !this.match.activePlayerId ||
       this.match.activePlayerId !== thisSocket.id
@@ -69,6 +128,7 @@ class MatchActions {
 
     const foundPlayer = this.match.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer && !foundPlayer.folded) {
+      if (!isAutofold) this.resetConsecutiveAutofolds(foundPlayer)
       this.clearAutofold()
       if (this.match.acceptingPlayers) {
         this.match.lobby.noMorePlayers()
@@ -110,6 +170,7 @@ class MatchActions {
 
   performCheck = (foundPlayer) => {
     if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
+      this.resetConsecutiveAutofolds(foundPlayer)
       this.clearAutofold()
       this.match.activePlayerId = null
       this.dealer.setPlayerActed(foundPlayer.id)
@@ -199,6 +260,7 @@ class MatchActions {
       return this.setCheck(thisSocket)
     }
 
+    this.resetConsecutiveAutofolds(foundPlayer)
     this.clearAutofold()
     if (this.match.acceptingPlayers) {
       this.match.lobby.noMorePlayers()
@@ -345,6 +407,7 @@ class MatchActions {
       return
     }
 
+    this.resetConsecutiveAutofolds(foundPlayer)
     this.clearAutofold()
     if (this.match.acceptingPlayers) {
       this.match.lobby.noMorePlayers()

@@ -84,7 +84,7 @@
             YAY Poker · {{ $t('tournament.finished') }}
           </p>
           <h1
-            class="title-main font-bebas text-7xl sm:text-8xl leading-[0.95] tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent"
+            class="title-main font-bebas text-7xl sm:text-8xl leading-tight tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent py-1"
           >
             {{ $t('tournament.champion') }}
           </h1>
@@ -119,7 +119,7 @@
           </p>
           <h2
             :id="'winner-tournament-name-text-' + templateSuffix"
-            class="winner-name font-bebas text-5xl sm:text-6xl tracking-[2px] leading-[1.15] text-[#F5F0E8] mb-4 relative z-10 break-words overflow-visible"
+            class="winner-name font-bebas text-5xl sm:text-6xl tracking-[2px] leading-tight text-[#F5F0E8] py-1 mb-4 relative z-10 break-words overflow-visible"
           >
             {{ winnerName.toUpperCase() }}
           </h2>
