@@ -1,4 +1,5 @@
 const log = require('./logger')
+const { GAME_RULES } = require('./constants')
 
 class Torneo {
   static torneos = new Map()
@@ -51,7 +52,11 @@ class Torneo {
     )
 
     const publicMatches = allMatches.filter(
-      (m) => m && m.torneoId && m.torneoId.startsWith('P_') && m.players.length < 10,
+      (m) =>
+        m &&
+        m.torneoId &&
+        m.torneoId.startsWith('P_') &&
+        m.players.length < GAME_RULES.MAX_PLAYERS_PUBLIC,
     )
 
     if (publicMatches.length === 0) return null

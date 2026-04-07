@@ -35,7 +35,7 @@ const routes = [
   },
   {
     name: 'game.play',
-    path: '/play/:gameCode/:secretCode(\\d{4})',
+    path: '/play/:gameCode/:secretCode',
     component: Game,
     props: (route) => ({
       gameCode: route.params.gameCode,

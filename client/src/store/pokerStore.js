@@ -35,6 +35,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const lobbyTimer = ref(null)
   const hostId = ref(null)
   const isGameStarted = ref(false)
+  const torneoId = ref(null)
+  const isPublic = ref(false)
   const stepChecker = ref({})
   const lastError = ref(null)
 
@@ -65,6 +67,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getLobbyTimer = computed(() => lobbyTimer.value)
   const getHostId = computed(() => hostId.value)
   const getIsGameStarted = computed(() => isGameStarted.value)
+  const getTorneoId = computed(() => torneoId.value)
+  const getIsPublic = computed(() => isPublic.value)
   const getStepChecker = computed(() => stepChecker.value || {})
   const getLastError = computed(() => lastError.value)
 
@@ -100,6 +104,12 @@ export const usePokerStore = defineStore('pokerStore', () => {
         torneoId.value = gameData.torneoId
       } else if (gameData.data?.torneoId) {
         torneoId.value = gameData.data.torneoId
+      }
+
+      if (gameData.isPublic !== undefined) {
+        isPublic.value = !!gameData.isPublic
+      } else if (torneoId.value?.startsWith('P_')) {
+        isPublic.value = true
       }
 
       // Update game started state based on server stepChecker
@@ -362,6 +372,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     lobbyTimer,
     hostId,
     isGameStarted,
+    torneoId,
+    isPublic,
     smallBlind,
     bigBlind,
     ante,
@@ -389,6 +401,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getLobbyTimer,
     getHostId,
     getIsGameStarted,
+    getTorneoId,
+    getIsPublic,
     getStepChecker,
     getLastError,
 

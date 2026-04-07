@@ -54,6 +54,7 @@ class Communicator {
       type,
       gameId: this.gameId,
       torneoId: this.torneoId,
+      isPublic: !!this.match.isPublic,
       pot: this.dealer.getPot(),
       pots: this.dealer.calculatePots(),
       currentHighestBet: this.dealer.getCurrentHighestBet(),

@@ -38,7 +38,11 @@
     "min_players_warning": "Se necesitan al menos 2 jugadores para empezar el juego",
     "start_game": "Repartir Primera Mano",
     "waiting_for_host": "Esperando al Anfitrión...",
-    "public_table_waiting": "Mesa Pública: El juego comenzará automáticamente con 2 o más jugadores...",
+    "public_waiting_players": "Esperando Jugadores...",
+    "public_starting_soon": "Comenzando pronto...",
+    "public_min_players_hint": "Las mesas públicas inician automáticamente con al menos 2 jugadores.",
+    "public_auto_start_hint": "La partida comenzará en unos segundos.",
+    "public_badge": "Mesa Pública",
     "copyright": "© 2026 {brand} Engineering",
     "brand": "YayPoker"
   },

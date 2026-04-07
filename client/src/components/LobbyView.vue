@@ -34,8 +34,18 @@
 
           <div
             :id="`game-code-copy-wrapper-${templateSuffix}`"
-            class="relative"
+            class="relative flex flex-col items-center gap-3"
           >
+            <!-- Public Table Badge -->
+            <div 
+              v-if="isPublicTable"
+              class="bg-blue-500/10 border border-blue-500/20 px-4 py-1 rounded-full shadow-lg shadow-blue-500/5 animate-pulse"
+            >
+              <span class="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em]">
+                {{ $t('lobby.public_badge') }}
+              </span>
+            </div>
+
             <div
               :id="`game-code-copy-button-${templateSuffix}`"
               class="bg-yellow-500/5 dark:bg-yellow-500/10 border border-yellow-500/20 rounded-full cursor-pointer hover:bg-yellow-500/10 dark:hover:bg-yellow-500/20 transition-all active:scale-95 flex items-center justify-center gap-3 group"
@@ -272,8 +282,26 @@
         class="bg-gray-100 dark:bg-black/60 border-t border-gray-200 dark:border-white/5 transition-colors duration-300"
         :class="footerPadding"
       >
+        <!-- PUBLIC TABLE VIEW -->
         <div
-          v-if="isHost"
+          v-if="isPublicTable"
+          :id="`public-table-info-${templateSuffix}`"
+          class="flex flex-col items-center py-4 space-y-4"
+        >
+          <div class="flex items-center gap-3 bg-yellow-500/10 px-6 py-3 rounded-2xl border border-yellow-500/20 shadow-lg shadow-yellow-500/5">
+            <div class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+            <span class="text-xs font-black text-yellow-600 dark:text-yellow-500 uppercase tracking-[0.2em]">
+              {{ players.length < 2 ? $t('lobby.public_waiting_players') : $t('lobby.public_starting_soon') }}
+            </span>
+          </div>
+          <p class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-[0.1em] text-center max-w-[250px] leading-relaxed">
+            {{ players.length < 2 ? $t('lobby.public_min_players_hint') : $t('lobby.public_auto_start_hint') }}
+          </p>
+        </div>
+
+        <!-- PRIVATE TABLE HOST CONTROLS -->
+        <div
+          v-else-if="isHost"
           :id="`host-controls-wrapper-${templateSuffix}`"
           class="space-y-4"
         >

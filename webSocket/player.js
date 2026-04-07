@@ -82,6 +82,10 @@ class Player {
     this.connected = !!status
   }
 
+  setAllIn = (status) => {
+    this.isAllIn = !!status
+  }
+
   setFolded = (status) => {
     this.folded = !!status
     if (this.folded) this.cards = []

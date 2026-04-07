@@ -19,8 +19,8 @@ services:
       args:
         - VITE_WS_PORT=443
         - VITE_WS_URL=ws.yaypoker.com
-        - VITE_BOTS=true
-        - VITE_MAX_NUMBER_BOTS=10
+        - VITE_BOTS=false
+        - VITE_MAX_NUMBER_BOTS=0
     restart: unless-stopped
     depends_on:
       - websocket

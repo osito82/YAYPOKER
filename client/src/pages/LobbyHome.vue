@@ -116,16 +116,9 @@
               :placeholder="$t('pages.lobby_home.setup_name_placeholder')"
             />
             
-            <label class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2">
-              {{ $t('pages.lobby_home.setup_label_pin') }}
-            </label>
-            <input
-              v-model="secretCode"
-              class="shadow-inner appearance-none border border-gray-300 dark:border-white/10 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-white dark:bg-black/40 leading-tight focus:outline-none focus:border-blue-500 transition-colors text-lg font-mono placeholder:text-gray-400 dark:placeholder:text-gray-600"
-              maxlength="4"
-              :placeholder="$t('pages.lobby_home.pin_placeholder')"
-              @input="secretCode = secretCode.replace(/\D/g, '')"
-            />
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest text-center italic mt-2">
+              A secure PIN will be generated automatically for your session.
+            </p>
           </div>
 
           <button
@@ -401,6 +394,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { v4 as uuidv4 } from 'uuid'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { usePokerStore } from '../store/pokerStore'
 import QRCodeVue3 from 'qrcode-vue3'
@@ -624,10 +618,8 @@ const joinPublicGame = async () => {
     return
   }
 
-  const finalSecret =
-    secretCode.value && secretCode.value.length === 4 
-      ? secretCode.value 
-      : generateSecretCode()
+  // Generamos un PIN único UUID v4 para evitar colisiones en mesas públicas
+  const finalSecret = uuidv4()
 
   pokerStore.clearError()
   

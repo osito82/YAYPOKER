@@ -1,5 +1,6 @@
 const Socket = require('../sockets')
 const { WinnerCore } = require('../winnerCore')
+const PokerCore = require('../pokerCore')
 const { GAME_RULES, TIMEOUTS } = require('../constants')
 const WinnerCertificate = require('../winnerCertificate')
 
@@ -12,6 +13,18 @@ class MatchActions {
     this.dealer = context.dealer
     this.stepChecker = context.stepChecker
   }
+
+  // --- PRIVATE / PUBLIC DIFFERENTIATION HELPERS ---
+
+  isPublic() {
+    return !!this.match.isPublic
+  }
+
+  getMinPlayers() {
+    return this.isPublic() ? GAME_RULES.MIN_PLAYERS_PUBLIC : GAME_RULES.MIN_PLAYERS
+  }
+
+  // --- CORE GAME LOGIC ---
 
   autofold() {
     const foundPlayer = this.match.players.find(
@@ -47,7 +60,7 @@ class MatchActions {
     }
   }
 
-  fold(thisSocket) {
+  fold = (thisSocket) => {
     if (
       !this.match.activePlayerId ||
       this.match.activePlayerId !== thisSocket.id
@@ -149,7 +162,6 @@ class MatchActions {
         foundPlayer.secretCode,
         this.communicator.getMsg(),
       )
-
       return false
     }
   }
@@ -158,22 +170,8 @@ class MatchActions {
     if (
       !this.match.activePlayerId ||
       this.match.activePlayerId !== thisSocket.id
-    ) {
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'ERROR:ACTION_REJECTED',
-          date: true,
-        })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          player: thisSocket.name,
-          reason: 'Not your turn',
-          action: 'Check',
-        })
+    )
       return
-    }
 
     const foundPlayer = this.match.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
@@ -184,67 +182,40 @@ class MatchActions {
     }
   }
 
-  setCall(thisSocket) {
+  setCall = (thisSocket) => {
     if (
       !this.match.activePlayerId ||
       this.match.activePlayerId !== thisSocket.id
-    ) {
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'ERROR:ACTION_REJECTED',
-          date: true,
-        })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          player: thisSocket.name,
-          reason: 'Not your turn',
-          action: 'Call',
-          expected: this.match.activePlayerId,
-          received: thisSocket.id,
-        })
+    )
       return
-    }
 
-    const maxBet = this.dealer.getCurrentHighestBet()
     const foundPlayer = this.match.players.find((p) => p.id == thisSocket.id)
     if (!foundPlayer) return
+
+    const currentMaxBet = this.dealer.getCurrentHighestBet()
+    const amountAdded = currentMaxBet - foundPlayer.getCurrentBet()
+
+    if (amountAdded <= 0) {
+      return this.setCheck(thisSocket)
+    }
 
     this.clearAutofold()
     if (this.match.acceptingPlayers) {
       this.match.lobby.noMorePlayers()
     }
 
-    const currentBetBefore = foundPlayer.getCurrentBet()
-    const diff = maxBet - currentBetBefore
-
-    if (diff <= 0) {
-      const checkSuccess = this.performCheck(foundPlayer)
-      if (checkSuccess) {
-        this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
-      }
-      return
-    }
+    const success = foundPlayer.setTotalBet(currentMaxBet)
+    if (!success) return
 
     this.match.activePlayerId = null
+    this.dealer.setPlayerActed(foundPlayer.id)
+    this.dealer.setPot(amountAdded)
 
-    let amountAdded = 0
     let actionType = 'Call'
-
-    if (foundPlayer.chips <= diff) {
-      amountAdded = foundPlayer.chips
-      foundPlayer.setTotalBet(currentBetBefore + amountAdded)
-      foundPlayer.chips = 0
-      foundPlayer.isAllIn = true
+    if (foundPlayer.isAllIn) {
       actionType = 'All-In'
-    } else {
-      amountAdded = diff
-      foundPlayer.setTotalBet(maxBet)
     }
 
-    this.dealer.setPot(amountAdded)
-    this.dealer.setPlayerActed(foundPlayer.id)
     foundPlayer.setLastAction(actionType)
 
     this.log
@@ -276,7 +247,7 @@ class MatchActions {
     this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
   }
 
-  setBet(thisSocket, chipsToBet, type = 'setBet') {
+  setBet = (thisSocket, chipsToBet, type = 'setBet') => {
     if (
       !this.match.activePlayerId ||
       this.match.activePlayerId !== thisSocket.id
@@ -469,7 +440,7 @@ class MatchActions {
     }
   }
 
-  setRise(thisSocket, chipsToBet) {
+  setRise = (thisSocket, chipsToBet) => {
     this.setBet(thisSocket, chipsToBet, 'setRise')
   }
 
@@ -491,8 +462,9 @@ class MatchActions {
 
   askForBlindBets(thisSocket, isRefresh = false) {
     const activePlayers = this.match.getActivePlayers(true)
+    const minPlayers = this.getMinPlayers()
 
-    if (activePlayers.length < GAME_RULES.MIN_PLAYERS) {
+    if (activePlayers.length < minPlayers) {
       this.log
         .Template({
           name: 'brakets',
@@ -519,6 +491,11 @@ class MatchActions {
       return
     }
 
+    if (this.isPublic()) {
+      this.stepChecker.grantStep('blindsBetting')
+      return this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
+    }
+
     const p1 = activePlayers[0]
     const p2 = activePlayers[1]
 
@@ -527,11 +504,7 @@ class MatchActions {
 
     if (p1Bet > 0 && p2Bet > 0) {
       this.log
-        .Template({
-          name: 'brakets',
-          title: 'MATCH:BLINDS_COMPLETED',
-          date: true,
-        })
+        .Template({ name: 'brakets', title: 'MATCH:BLINDS_COMPLETED', date: true })
         .R({
           torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
@@ -560,29 +533,21 @@ class MatchActions {
         if (p.lastAction !== 'Out') p.setLastAction('')
 
         this.log
-          .Template({
-            name: 'brakets',
-            title: isRefresh ? 'MATCH:REFRESH_BLINDS' : 'MATCH:ASK_BLINDS',
-            date: true,
-          })
+          .Template({ name: 'brakets', title: isRefresh ? 'MATCH:REFRESH_BLINDS' : 'MATCH:ASK_BLINDS', date: true })
           .R({
             torneoId: this.match.torneoId,
             handId: this.match.currentHandId,
             player: p.name,
-            playerCards: p.cards,
-            playerSecret: p.secretCode,
-            dealerCards: this.match.cardsDealer,
             type: isSB ? 'SB' : 'BB',
             amount: blindAmount,
           })
+
         this.communicator.msgBuilder(`askForBlindBets`, 'public', p, {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
           blindAmount,
         })
-        Socket.broadcastToTorneo(
-          this.match.torneoId,
-          this.communicator.getMsg(),
-        )
+        Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+
         this.communicator.msgBuilder(`askForBlindBets`, 'private', p, {
           id: p.id,
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
@@ -593,6 +558,7 @@ class MatchActions {
           p.secretCode,
           this.communicator.getMsg(),
         )
+
         this.startAutofold()
       }
     }
@@ -620,95 +586,83 @@ class MatchActions {
     this.match.activePlayerId = null
     this.clearAutofold()
 
-    this.dealer.setFinalHands()
-    const finalHands = this.dealer.getFinalHands()
-    const pots = this.dealer.calculatePots()
+    let winnersInfo = winnerData
 
-    const winnersAggregation = {}
-    let totalPotDistributed = 0
-
-    if (pots.length === 0 && isFold) {
-      const winnerPlayerId = winnerData.playerId || winnerData.id
-      const player = this.match.players.find((p) => p.id === winnerPlayerId)
-      if (player) {
-        winnersAggregation[player.id] = {
-          name: player.name,
-          playerId: player.id,
-          amount: 0,
-          handName: 'Fold Victory',
-          winningCards: [],
-        }
-      }
+    if (winnersInfo && !Array.isArray(winnersInfo)) {
+      winnersInfo = [winnersInfo]
     }
 
-    pots.forEach((pot, index) => {
-      let potWinners = []
-
-      if (isFold) {
-        const winnerPlayerId = winnerData.playerId || winnerData.id
-        potWinners = [this.match.players.find((p) => p.id === winnerPlayerId)]
-      } else {
-        const eligibleHands = finalHands.filter(
-          (h) => pot.eligiblePlayerIds.includes(h.playerId) && !h.folded,
-        )
-
-        if (eligibleHands.length > 0) {
-          potWinners = WinnerCore.Winner(eligibleHands)
+    if (!winnersInfo || winnersInfo.length === 0) {
+      // Evaluate hands if not already done (e.g. everyone folded)
+      const dealerCards = this.dealer.getDealerCards()
+      const playerEvaluations = this.match.players.map((p) => {
+        const prize = p.folded
+          ? { prizeRank: 11 }
+          : PokerCore.betterHand(dealerCards, p.cards)
+        return {
+          ...prize,
+          name: p.name,
+          playerId: p.id,
+          gameId: p.gameId,
+          chips: p.chips,
+          playerCards: p.cards,
+          folded: p.folded,
         }
+      })
+      winnersInfo = WinnerCore.Winner(playerEvaluations)
+    }
+
+    // Map winners to include handName for compatibility
+    winnersInfo = winnersInfo.map((w) => ({
+      ...w,
+      handName: w.pokerHand,
+    }))
+
+    const finalHands = this.dealer.getFinalHands()
+    const pot = this.dealer.getPot()
+
+    this.log
+      .Template({ name: 'brakets', title: 'MATCH:HAND_RESULT', date: true })
+      .R({
+        torneoId: this.match.torneoId,
+        handId: this.match.currentHandId,
+        winners: winnersInfo.map((w) => w.name),
+        pot,
+        isFold,
+        dealerCards: this.match.cardsDealer,
+      })
+
+    let displayMsg = ''
+    if (winnersInfo.length === 1) {
+      const winner = winnersInfo[0]
+      const player = this.match.players.find((p) => p.id === winner.playerId)
+      if (player) {
+        player.chips += pot
       }
+      displayMsg = isFold
+        ? `${winner.name} wins ${pot} (others folded)`
+        : `${winner.name} wins ${pot} with ${winner.pokerHand}`
+    } else {
+      const splitPot = Math.floor(pot / winnersInfo.length)
+      winnersInfo.forEach((winner) => {
+        const player = this.match.players.find((p) => p.id === winner.playerId)
+        if (player) {
+          player.chips += splitPot
+        }
+      })
+      displayMsg = `Split pot: ${winnersInfo.map((w) => w.name).join(', ')} win ${splitPot} each`
+    }
 
-      if (potWinners.length > 0) {
-        const splitAmount = Math.floor(pot.amount / potWinners.length)
-        const remainder = pot.amount % potWinners.length
-
-        potWinners.forEach((pw, pwIndex) => {
-          const playerId = pw.playerId || pw.id
-          const player = this.match.players.find((p) => p.id === playerId)
-
-          if (player) {
-            const amountToGive =
-              pwIndex === 0 ? splitAmount + remainder : splitAmount
-            player.chips += amountToGive
-            totalPotDistributed += amountToGive
-
-            if (!winnersAggregation[playerId]) {
-              const winningHand = isFold
-                ? null
-                : finalHands.find((h) => h.playerId === playerId)
-              winnersAggregation[playerId] = {
-                name: player.name,
-                playerId: player.id,
-                amount: 0,
-                handName: isFold
-                  ? 'Fold Victory'
-                  : winningHand?.pokerHand || 'High Card',
-                winningCards: isFold ? [] : winningHand?.show || [],
-                playerCards: player.getCards(),
-              }
-            }
-            winnersAggregation[playerId].amount += amountToGive
-
-            this.log
-              .Template({
-                name: 'brakets',
-                title: `MATCH:POT_${index}_WINNER`,
-                date: true,
-              })
-              .R({
-                torneoId: this.match.torneoId,
-                handId: this.match.currentHandId,
-                winner: player.name,
-                potIndex: index,
-                amount: amountToGive,
-                isFold,
-              })
-          }
-        })
-      }
+    this.communicator.msgBuilder('winner', 'public', null, {
+      method: 'winner',
+      displayMsg,
+      winners: winnersInfo,
+      allHands: finalHands,
+      isFold,
+      isTournamentWinner: false,
     })
 
-    const winnersInfo = Object.values(winnersAggregation)
-    const pot = this.dealer.getPot()
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
     const playersWithChips = this.match.players.filter(
       (p) => p.chips > 0 && p.connected,
@@ -741,36 +695,18 @@ class MatchActions {
       return
     }
 
-    const displayMsg =
-      winnersInfo.length > 1
-        ? `Tie! ${winnersInfo.map((w) => w.name).join(' and ')} split $${pot}!`
-        : `${winnersInfo[0].name} wins $${pot}${isFold ? ' (Fold)' : ''}!`
-
-    this.log
-      .Template({
-        name: 'brakets',
-        title: 'MATCH:HAND_RESULT',
-        date: true,
-      })
-      .R({
-        torneoId: this.match.torneoId,
-        handId: this.match.currentHandId,
-        winners: winnersInfo.map((w) => w.name),
-        pot,
-        isFold,
-        dealerCards: this.match.cardsDealer,
-      })
-
-    this.communicator.msgBuilder('winner', 'public', null, {
-      method: 'winner',
-      displayMsg,
-      winners: winnersInfo,
-      allHands: finalHands,
-      isFold,
-      isTournamentWinner: false,
+    winnersInfo.forEach((winner, index) => {
+      this.log
+        .Template({ name: 'brakets', title: `MATCH:POT_${index}_WINNER`, date: true })
+        .R({
+          torneoId: this.match.torneoId,
+          handId: this.match.currentHandId,
+          winner: winner.name,
+          potIndex: index,
+          amount: winner.amount || pot,
+          isFold,
+        })
     })
-
-    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
   }
 
   winnerTournament(winnersInfo) {
@@ -878,7 +814,9 @@ class MatchActions {
 
     let sorted = []
     const allPlayers = this.match.players
-    if (bettingFor === 'firstBetting') {
+    if (this.isPublic()) {
+      sorted = [...allPlayers]
+    } else if (bettingFor === 'firstBetting') {
       if (allPlayers.length === 2) {
         sorted = [...allPlayers]
       } else {
@@ -1071,7 +1009,8 @@ class MatchActions {
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
       for (const player of this.match.players) {
-        this.communicator.msgBuilder('dealtPrivateCards', 'private', player, {})
+        this.communicator.msgBuilder('dealtPrivateCards', 'private', player, {
+        })
         Socket.sendToPlayer(
           this.match.torneoId,
           player.secretCode,
