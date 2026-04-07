@@ -289,9 +289,8 @@ wss.on('connection', (ws, req) => {
       .R({ playerName })
     try {
       if (match) {
-        // En mesas públicas, si el juego no ha arrancado, eliminamos al jugador del todo
-        // para no ocupar slots con gente desconectada.
-        if (match.isPublic && !match.stepChecker.checkStep('startGame')) {
+        // En mesas públicas, el jugador se va inmediatamente
+        if (match.isPublic) {
           match.lobby.playerLeave(thisSocket)
         } else {
           match.lobby.pause(thisSocket)

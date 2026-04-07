@@ -98,6 +98,7 @@ class MatchLobby {
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
       this.match.comms.sendOdds(player)
+      this.match.actions.sendCurrentPrompt(player)
       return 
     } else {
       const maxPlayers = this.match.isPublic ? GAME_RULES.MAX_PLAYERS_PUBLIC : GAME_RULES.MAX_PLAYERS
@@ -236,6 +237,22 @@ class MatchLobby {
     const index = this.match.players.findIndex((p) => p.id === socketId)
     if (index !== -1) {
       const playerLeaving = this.match.players[index]
+
+      // Si es una mesa pública y hay juego en curso, forzamos fold
+      if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
+        if (!playerLeaving.folded) {
+          // Si era su turno, el fold disparará el CONTINUE
+          // Si no, simplemente lo marcamos como fold para que el dealer lo ignore
+          if (this.match.activePlayerId === playerLeaving.id) {
+            this.match.actions.fold({ id: playerLeaving.id })
+          } else {
+            playerLeaving.setFolded(true)
+            this.match.playersFold.push(playerLeaving.name)
+            this.dealer.setPlayerActed(playerLeaving.id)
+          }
+        }
+      }
+
       this.communicator.msgBuilder('playerLeave', 'public', playerLeaving, {
         displayMsg: `${playerLeaving.name} has left the game.`,
       })
