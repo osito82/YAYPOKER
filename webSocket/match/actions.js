@@ -660,6 +660,7 @@ class MatchActions {
       const player = this.match.players.find((p) => p.id === winner.playerId)
       if (player) {
         player.chips += pot
+        winner.amount = pot
       }
       displayMsg = isFold
         ? `${winner.name} wins ${pot} (others folded)`
@@ -670,6 +671,7 @@ class MatchActions {
         const player = this.match.players.find((p) => p.id === winner.playerId)
         if (player) {
           player.chips += splitPot
+          winner.amount = splitPot
         }
       })
       displayMsg = `Split pot: ${winnersInfo.map((w) => w.name).join(', ')} win ${splitPot} each`
