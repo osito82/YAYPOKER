@@ -411,6 +411,11 @@ class Match extends EventEmitter {
     // Rotate players
     this.players.push(this.players.shift())
 
+    // Remove busted players (only in private matches/tournaments)
+    if (!this.isPublic) {
+      this.players = this.players.filter((p) => p.chips > 0)
+    }
+
     this.initHand()
 
     this.players.forEach((p) => {
