@@ -57,6 +57,10 @@ function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 }
 
+function generatePublicId() {
+  return `P_${generateUniqueId()}`
+}
+
 function urlsFactory() {
   const host = window.location.hostname
   const pageProtocol = window.location.protocol
@@ -131,6 +135,7 @@ async function copyToClipboard(text) {
 
 export {
   generateUniqueId,
+  generatePublicId,
   generateSecretCode,
   simbolConverter,
   letterToSymbol,

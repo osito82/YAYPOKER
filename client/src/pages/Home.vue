@@ -181,10 +181,10 @@
           class="flex flex-col sm:flex-row gap-6 justify-center items-center"
         >
           <router-link
-            to="/new"
+            to="/public"
             class="w-full sm:w-auto px-10 py-5 bg-yellow-500 text-black font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 hover:shadow-[0_10px_40px_rgba(234,179,8,0.3)] active:scale-95 flex items-center justify-center gap-3"
           >
-            {{ $t('hero.create') }}
+            {{ $t('pages.lobby_home.public_tables_title') }}
             <svg
               class="w-5 h-5"
               fill="none"
@@ -195,9 +195,22 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="3"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+              ></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="3"
+                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               ></path>
             </svg>
+          </router-link>
+
+          <router-link
+            to="/new"
+            class="w-full sm:w-auto px-10 py-5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-bold uppercase tracking-widest text-sm rounded-xl transition-all hover:bg-gray-200 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20 active:scale-95"
+          >
+            {{ $t('hero.create') }}
           </router-link>
 
           <router-link
@@ -437,10 +450,10 @@
 
           <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             <router-link
-              to="/lobby"
+              to="/public"
               class="px-10 py-5 bg-black text-white font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 active:scale-95 text-center"
             >
-              {{ $t('pages.home.final_cta.create') }}
+              {{ $t('nav.play') }}
             </router-link>
             <router-link
               to="/lobby"

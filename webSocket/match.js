@@ -32,6 +32,8 @@ class Match extends EventEmitter {
     super()
     this.torneoId = torneoId
     this.gameId = gameId
+    // Mesa pública: Cualquier ID que empiece por P_ activa el comportamiento público
+    this.isPublic = torneoId.startsWith('P_')
     this.handCount = 0
     this.currentHandId = null
 
@@ -255,13 +257,22 @@ class Match extends EventEmitter {
 
     // Si el juego aún no ha sido iniciado formalmente
     if (!this.stepChecker.checkStep('startGame')) {
-      // Solo el host puede iniciar el juego la primera vez
-      if (thisSocket.id && this.hostId && thisSocket.id !== this.hostId) {
+      // Solo el host puede iniciar el juego la primera vez (excepto en mesas públicas)
+      const isHost =
+        thisSocket.id && this.hostId && thisSocket.id === this.hostId
+      if (!this.isPublic && !isHost) {
         this.communicator.msgBuilder('lobbyError', 'private', null, {
           displayMsg: 'Only the host can start the game.',
         })
         this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
+      }
+
+      // PUBLIC TABLES: Mark all connected players as started automatically
+      if (this.isPublic) {
+        this.players.forEach((p) => {
+          if (p.connected) p.setStarted(true)
+        })
       }
 
       // BOT SPAWN LOGIC

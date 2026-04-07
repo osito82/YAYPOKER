@@ -93,8 +93,51 @@
           </button>
         </div>
 
-        <!-- MODE: Selection (Home /) -->
-        <template v-if="!isCreating">
+        <!-- MODE: Public Game (/public) -->
+        <div v-if="isPublic" class="space-y-6">
+          <div class="text-center">
+            <h1 class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic">
+              {{ $t('pages.lobby_home.public_tables_title') || 'Public Tables' }}
+            </h1>
+            <p class="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-widest mt-2">
+              {{ $t('pages.lobby_home.public_tables_desc') || 'Join a table instantly and practice with others' }}
+            </p>
+          </div>
+
+          <div class="space-y-4">
+            <label class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2">
+              {{ $t('pages.lobby_home.setup_label') }}
+            </label>
+            <input
+              v-model="playerName"
+              v-focus
+              class="shadow-inner appearance-none border border-gray-300 dark:border-white/10 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-white dark:bg-black/40 leading-tight focus:outline-none focus:border-blue-500 transition-colors text-lg font-medium placeholder:text-gray-400 dark:placeholder:text-gray-600"
+              type="text"
+              :placeholder="$t('pages.lobby_home.setup_name_placeholder')"
+            />
+            
+            <label class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2">
+              {{ $t('pages.lobby_home.setup_label_pin') }}
+            </label>
+            <input
+              v-model="secretCode"
+              class="shadow-inner appearance-none border border-gray-300 dark:border-white/10 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-white dark:bg-black/40 leading-tight focus:outline-none focus:border-blue-500 transition-colors text-lg font-mono placeholder:text-gray-400 dark:placeholder:text-gray-600"
+              maxlength="4"
+              :placeholder="$t('pages.lobby_home.pin_placeholder')"
+              @input="secretCode = secretCode.replace(/\D/g, '')"
+            />
+          </div>
+
+          <button
+            @click="joinPublicGame"
+            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-4 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-base"
+          >
+            {{ $t('pages.lobby_home.play_now_btn') || 'Play Now' }}
+          </button>
+        </div>
+
+        <!-- MODE: Selection (Home /lobby) -->
+        <template v-else-if="!isCreating">
           <form
             :id="`join-game-form-section-${templateSuffix}`"
             @submit.prevent="joinGame"
@@ -227,7 +270,7 @@
           </form>
         </template>
 
-        <!-- MODE: New Game Created (/newgame) -->
+        <!-- MODE: New Game Created (/new) -->
         <div
           v-else
           :id="`create-game-success-view-${templateSuffix}`"
@@ -364,6 +407,7 @@ import QRCodeVue3 from 'qrcode-vue3'
 import Logo from '../components/Logo.vue'
 import {
   generateUniqueId,
+  generatePublicId,
   generateSecretCode,
   urlsFactory,
   copyToClipboard as copyToClipboardUtil,
@@ -386,6 +430,7 @@ const defaultSecret = ref('')
 const joinCode = ref('')
 const generatedCode = ref('')
 const isCreating = ref(false)
+const isPublic = ref(false)
 const copyStatus = ref('Copy Code')
 
 const templateSuffix = computed(() => {
@@ -486,34 +531,37 @@ const generatedBoxPadding = computed(() => {
   }
 })
 
-// Invitation URL for others (redirects to Lobby with joinCode parameter)
-
 const checkRouteState = () => {
-  if (route.name === 'lobby.new' || route.path === '/newgame') {
+  if (route.name === 'lobby.new' || route.path === '/new') {
     isCreating.value = true
+    isPublic.value = false
     if (!generatedCode.value) {
       generatedCode.value = generateUniqueId()
     }
     if (!defaultSecret.value) {
       defaultSecret.value = generateSecretCode()
     }
-    // Don't clear secretCode here if it was persisted
-  } else if (route.name === 'game.join' || route.query.joinCode) {
+  } else if (route.name === 'lobby.public' || route.path === '/public') {
     isCreating.value = false
+    isPublic.value = true
+    generatedCode.value = ''
+    defaultSecret.value = ''
+  } else if (route.name === 'game.join' || route.query.joinCode || route.params.gameCode) {
+    isCreating.value = false
+    isPublic.value = false
     joinCode.value = (
       route.params.gameCode ||
       route.query.joinCode ||
       ''
     ).toUpperCase()
     if (route.query.playerName) playerName.value = route.query.playerName
-    // Pre-fill secret if provided in path, otherwise keep persisted
     if (route.params.secretCode) secretCode.value = route.params.secretCode
     defaultSecret.value = ''
   } else {
     isCreating.value = false
+    isPublic.value = false
     generatedCode.value = ''
     defaultSecret.value = ''
-    // Keep persisted playerName and secretCode
   }
 }
 
@@ -527,13 +575,13 @@ watch(
     route.params.gameCode,
     route.params.secretCode,
     route.query.joinCode,
+    route.path,
   ],
   () => {
     checkRouteState()
   },
 )
 
-// Invitation URL for others (redirects to /join/:gameCode)
 const shareUrl = computed(() => {
   const urls = urlsFactory()
   const code = isCreating.value ? generatedCode.value : joinCode.value
@@ -542,7 +590,6 @@ const shareUrl = computed(() => {
   return `${urls.url}/join/${code}`
 })
 
-// Join Logic
 const isGameCodeValid = computed(() => {
   const gameCodeRegex = /^[A-Z0-9]{5}-[A-Z0-9]{5}$/
   return gameCodeRegex.test(joinCode.value.toUpperCase())
@@ -558,7 +605,7 @@ const isValidJoin = computed(() => {
 
 const joinGame = () => {
   if (isValidJoin.value) {
-    pokerStore.clearError() // Clear any previous error before trying again
+    pokerStore.clearError()
     router.push({
       name: 'game.play',
       params: {
@@ -570,7 +617,49 @@ const joinGame = () => {
   }
 }
 
-// Create Logic
+const joinPublicGame = async () => {
+  if (!playerName.value || !playerName.value.trim()) {
+    const el = document.getElementById(`player-name-input-field-${templateSuffix.value}`)
+    if (el) el.focus()
+    return
+  }
+
+  const finalSecret =
+    secretCode.value && secretCode.value.length === 4 
+      ? secretCode.value 
+      : generateSecretCode()
+
+  pokerStore.clearError()
+  
+  try {
+    const urls = urlsFactory()
+    // Consultamos al servidor cuál es la mejor mesa pública disponible
+    const response = await fetch(`${urls.serverHttp}/api/public-table`)
+    const data = await response.json()
+    const targetCode = data.torneoId || generatePublicId()
+
+    router.push({
+      name: 'game.play',
+      params: {
+        gameCode: targetCode,
+        secretCode: finalSecret,
+      },
+      query: { playerName: playerName.value.trim() },
+    })
+  } catch (error) {
+    console.error('LobbyHome - Error fetching public table:', error)
+    // Fallback en caso de error de red
+    router.push({
+      name: 'game.play',
+      params: {
+        gameCode: generatePublicId(),
+        secretCode: finalSecret,
+      },
+      query: { playerName: playerName.value.trim() },
+    })
+  }
+}
+
 const goToCreate = () => {
   router.push({ name: 'lobby.new' })
 }

@@ -38,6 +38,7 @@
     "min_players_warning": "Se necesitan al menos 2 jugadores para empezar el juego",
     "start_game": "Repartir Primera Mano",
     "waiting_for_host": "Esperando al Anfitrión...",
+    "public_table_waiting": "Mesa Pública: El juego comenzará automáticamente con 2 o más jugadores...",
     "copyright": "© 2026 {brand} Engineering",
     "brand": "YayPoker"
   },
@@ -282,6 +283,10 @@
       "setup_label": "Configura Tu Nombre",
       "setup_label_pin": "Configura Tu PIN Secreto",
       "setup_table_code": "Escriba el número de Mesa",
+      "public_tables_title": "Mesas Públicas",
+      "public_tables_desc": "Únete a una mesa al instante y practica con otros",
+      "play_now_btn": "Jugar Ahora",
+      "or_separator": "O BIEN",
       "setup_name_placeholder": "Ej: Osito",
       "start_btn": "Empezar a Jugar",
       "back_to_lobby": "← Volver al Lobby",

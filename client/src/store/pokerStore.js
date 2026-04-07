@@ -95,6 +95,13 @@ export const usePokerStore = defineStore('pokerStore', () => {
         stepChecker.value = gameData.stepChecker
       }
 
+      // Update torneoId from any message that carries it
+      if (gameData.torneoId) {
+        torneoId.value = gameData.torneoId
+      } else if (gameData.data?.torneoId) {
+        torneoId.value = gameData.data.torneoId
+      }
+
       // Update game started state based on server stepChecker
       if (gameData.stepChecker?.startGame) {
         isGameStarted.value = true
@@ -229,6 +236,9 @@ export const usePokerStore = defineStore('pokerStore', () => {
           }
         } else {
           myInfo.value.id = gameData.data?.id
+          if (gameData.torneoId) {
+            torneoId.value = gameData.torneoId
+          }
           lastError.value = null
         }
       } else if (gameData.action === 'oddsUpdate') {
@@ -390,3 +400,4 @@ export const usePokerStore = defineStore('pokerStore', () => {
     clearError,
   }
 })
+

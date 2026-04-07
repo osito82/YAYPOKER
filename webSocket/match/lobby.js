@@ -316,11 +316,10 @@ class MatchLobby {
       hostId: this.match.hostId,
     })
 
-    Socket.sendToPlayer(
-      this.match.torneoId,
-      player.secretCode,
-      this.communicator.getMsg(),
-    )
+    const msg = this.communicator.getMsg()
+    msg.torneoId = this.match.torneoId // <--- Forzarlo aquí para asegurar visibilidad
+
+    Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
 
     if (existingPlayerIndex !== -1) {
       this.match.comms.sendOdds(player)
@@ -332,6 +331,15 @@ class MatchLobby {
       !this.stepChecker.checkStep('blindsBetting')
     ) {
       this.stepChecker.grantStep('signUp')
+
+      // AUTO-START for public matches
+      if (this.match.isPublic && !this.stepChecker.checkStep('startGame')) {
+        setTimeout(() => {
+          if (!this.stepChecker.checkStep('startGame')) {
+            this.match.startGame()
+          }
+        }, 3000)
+      }
     }
   }
 

@@ -120,6 +120,26 @@ watch(
   { immediate: true, deep: true },
 )
 
+// Update URL if torneoId changes (e.g., from 'PUBLIC' to 'P_XXXXX')
+watch(
+  () => pokerStore.torneoId,
+  (newTorneoId) => {
+    const currentCode = route.params.gameCode
+    if (newTorneoId && newTorneoId !== currentCode) {
+      console.log(`Game - URL Sync: Changing ${currentCode} -> ${newTorneoId}`)
+      router.replace({
+        name: 'game.play',
+        params: {
+          ...route.params,
+          gameCode: newTorneoId,
+        },
+        query: route.query,
+      })
+    }
+  },
+  { immediate: true },
+)
+
 const connectionOptions = {
   gameCode,
   playerName: playerName.value,

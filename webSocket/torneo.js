@@ -45,6 +45,28 @@ class Torneo {
     return this.torneos.has(idTorneo)
   }
 
+  static findAvailablePublicMatch() {
+    const allMatches = Array.from(this.torneos.values()).map((matchData) =>
+      Array.isArray(matchData) ? matchData[0] : matchData,
+    )
+
+    const publicMatches = allMatches.filter(
+      (m) => m && m.torneoId && m.torneoId.startsWith('P_') && m.players.length < 10,
+    )
+
+    if (publicMatches.length === 0) return null
+
+    // Prioridad 1: Mesas en lobby (no empezadas) con más gente
+    const waiting = publicMatches
+      .filter((m) => !m.stepChecker.checkStep('startGame'))
+      .sort((a, b) => b.players.length - a.players.length)
+
+    if (waiting.length > 0) return waiting[0]
+
+    // Prioridad 2: Mesas ya empezadas con más gente
+    return publicMatches.sort((a, b) => b.players.length - a.players.length)[0]
+  }
+
   static removeInactiveMatches(maxIdleTimeMs = 3600000) {
     // 1 hora por defecto
     const now = Date.now()

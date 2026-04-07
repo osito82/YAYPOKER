@@ -143,7 +143,22 @@ const actionHandlers = {
 wss.on('connection', (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1))
 
-  const torneoId = urlParams.get('gameCode') ?? generateUniqueId()
+  let torneoId = urlParams.get('gameCode')
+
+  // LÓGICA DE MESAS PÚBLICAS: Maximizar agrupación
+  if (torneoId && torneoId.startsWith('P_')) {
+    const availablePublicMatch = Torneo.findAvailablePublicMatch()
+
+    // Si ya existe una mesa pública disponible, nos unimos a esa obligatoriamente
+    if (availablePublicMatch && availablePublicMatch.torneoId !== torneoId) {
+      console.log(
+        `[LOBBY] REDIRECTING player from requested ${torneoId} to active match ${availablePublicMatch.torneoId} (Players: ${availablePublicMatch.players.length})`,
+      )
+      torneoId = availablePublicMatch.torneoId
+    }
+  } else if (!torneoId) {
+    torneoId = generateUniqueId()
+  }
 
   const playerName = urlParams.get('playerName') ?? randomName()
 
@@ -152,6 +167,7 @@ wss.on('connection', (ws, req) => {
   const thisSocket = {
     id: socketId(),
     name: playerName,
+    torneoId,
     secretCode,
     socket: ws,
   }
@@ -165,9 +181,11 @@ wss.on('connection', (ws, req) => {
   // Intentar obtener el match existente o crear uno nuevo
   let match = Torneo.getMatch(torneoId)
   if (!match) {
+    const Match = require('./match')
     const newSocketId = socketId()
     match = new Match(torneoId, newSocketId)
-    Torneo.addMatch(match, torneoId)
+    Torneo.addMatch(match, torneoId) // REGISTRO INMEDIATO
+
     log
       .Template({
         name: 'brakets',
@@ -331,6 +349,15 @@ app.get('/status', (req, res) => {
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' })
+})
+
+app.get('/api/public-table', (req, res) => {
+  const availableMatch = Torneo.findAvailablePublicMatch()
+  if (availableMatch) {
+    return res.json({ torneoId: availableMatch.torneoId })
+  }
+  const { generatePublicId } = require('./utils')
+  return res.json({ torneoId: generatePublicId() })
 })
 
 app.get('/verify/:torneoId/:code', (req, res) => {

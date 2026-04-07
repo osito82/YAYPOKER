@@ -417,6 +417,7 @@ const props = defineProps({
 const responsive = useResponsiveStore()
 const pokerStore = usePokerStore()
 const isHost = computed(() => props.myId === props.hostId)
+const isPublicTable = computed(() => props.gameCode.startsWith('P_'))
 const copyStatus = ref('')
 const botCount = ref(0)
 const initialStack = ref(1000)
