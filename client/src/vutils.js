@@ -93,11 +93,7 @@ function urlsFactory() {
   }
 
   const server = buildUrl(wsProtocol, wsHost, wsPort)
-  const serverHttp = buildUrl(
-    pageProtocol.replace(':', ''),
-    wsHost,
-    wsPort,
-  )
+  const serverHttp = buildUrl(pageProtocol.replace(':', ''), wsHost, wsPort)
   const url = buildUrl(clientProtocol, clientHost, clientPort)
 
   console.log({ server, serverHttp, url }, '--------URLs Generadas')

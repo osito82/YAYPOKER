@@ -12,10 +12,10 @@ describe('Public Table Auto-fold Tests', () => {
   beforeAll(() => {
     // Clear Torneo state
     Torneo.getTorneos().clear()
-    
+
     // Set manageable nextRound for test
     TIMEOUTS.nextRound = 500
-    
+
     return new Promise((resolve) => {
       server.listen(0, () => {
         port = server.address().port
@@ -44,15 +44,20 @@ describe('Public Table Auto-fold Tests', () => {
       try {
         const msg = JSON.parse(data.toString())
         responses.push(msg)
-        
+
         // Auto-reply to nextRound to keep the game moving
         const action = msg.message?.action
-        if (action === 'winner' || action === 'showDown' || action === 'tournamentWinner' || action === 'gameRestarted') {
-            setTimeout(() => {
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({ action: 'nextRound' }))
-                }
-            }, 100)
+        if (
+          action === 'winner' ||
+          action === 'showDown' ||
+          action === 'tournamentWinner' ||
+          action === 'gameRestarted'
+        ) {
+          setTimeout(() => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ action: 'nextRound' }))
+            }
+          }, 100)
         }
       } catch (e) {}
     })
@@ -85,41 +90,37 @@ describe('Public Table Auto-fold Tests', () => {
 
   it('First player should be disconnected after 2 consecutive autofolds', async () => {
     const gameCode = 'P_AUTO_' + Math.random().toString(36).substring(7)
-    
+
     // No manual actions, just let them autofold
     const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
     const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
 
     await Promise.all([
       new Promise((r) => alice.ws.on('open', r)),
-      new Promise((r) => bob.ws.on('open', r))
+      new Promise((r) => bob.ws.on('open', r)),
     ])
 
     alice.ws.send(JSON.stringify(MOCK_ACTIONS.SIGN_UP(1000)))
     bob.ws.send(JSON.stringify(MOCK_ACTIONS.SIGN_UP(1000)))
 
-    await Promise.all([
-      alice.waitAction('signUp'),
-      bob.waitAction('signUp')
-    ])
+    await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
 
     console.log('Match started. Letting Alice autofold twice...')
 
     // Alice joins first, so she will act first in Hand 1 and Hand 3.
     // Bob will act first in Hand 2.
-    
+
     // We just wait for Alice to receive the 'disconnected' message
     const disconnectMsg = await alice.waitAction('disconnected', 120000)
     expect(disconnectMsg.message.data.reason).toBe('abandoned')
     console.log('Alice received disconnected message.')
-    
+
     // Verify socket is closed
     await new Promise((resolve) => {
-        if (alice.ws.readyState === WebSocket.CLOSED) resolve()
-        else alice.ws.on('close', resolve)
+      if (alice.ws.readyState === WebSocket.CLOSED) resolve()
+      else alice.ws.on('close', resolve)
     })
     expect(alice.ws.readyState).toBe(WebSocket.CLOSED)
     console.log('Alice socket closed successfully.')
-
   }, 150000)
 })

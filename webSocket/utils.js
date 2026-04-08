@@ -240,4 +240,3 @@ module.exports = {
   flatToGetSymbolsArray,
   singleSymbolsToNumsArray,
 }
-

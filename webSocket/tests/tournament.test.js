@@ -173,10 +173,10 @@ describe('Tournament Emulation Test (M1DQF-E23ML)', () => {
 
     // Pre-flop: Order is Memo (Button), Jorgelo (SB), Rojo (BB)
     await memo.waitAction('bettingCore-firstBetting')
-    memo.send(MOCK_ACTIONS.CALL) 
+    memo.send(MOCK_ACTIONS.CALL)
     await jorgelo.waitAction('bettingCore-firstBetting')
     jorgelo.send(MOCK_ACTIONS.RISE(440))
-    
+
     // Server logic asks players in 'sorted' order: [Memo, Jorgelo, Rojo]
     // After Jorgelo raises, Memo is asked next because he is first in 'sorted' and hasn't matched the raise.
     await memo.waitAction('bettingCore-firstBetting')
@@ -197,7 +197,7 @@ describe('Tournament Emulation Test (M1DQF-E23ML)', () => {
     rojo.send(MOCK_ACTIONS.CHECK)
     await memo.waitAction('bettingCore-turnBetting')
     memo.send(MOCK_ACTIONS.BET(25))
-    
+
     // Server logic asks players in 'sorted' order: [Rojo, Memo, Jorgelo]
     // After Memo bets, Rojo is asked next to match the bet.
     await rojo.waitAction('bettingCore-turnBetting')

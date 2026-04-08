@@ -34,7 +34,7 @@ class Match extends EventEmitter {
     this.gameId = gameId
     // Mesa pública: Cualquier ID que empiece por P_ activa el comportamiento público
     this.isPublic = torneoId.startsWith('P_')
-    
+
     this.handCount = 0
     this.currentHandId = null
 

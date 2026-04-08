@@ -21,7 +21,9 @@ class MatchActions {
   }
 
   getMinPlayers = () => {
-    return this.isPublic() ? GAME_RULES.MIN_PLAYERS_PUBLIC : GAME_RULES.MIN_PLAYERS
+    return this.isPublic()
+      ? GAME_RULES.MIN_PLAYERS_PUBLIC
+      : GAME_RULES.MIN_PLAYERS
   }
 
   resetConsecutiveAutofolds = (player) => {
@@ -32,7 +34,11 @@ class MatchActions {
     if (!player) return
     player.setConnected(false)
     this.log
-      .Template({ name: 'brakets', title: 'MATCH:PLAYER_ABANDONED', date: true })
+      .Template({
+        name: 'brakets',
+        title: 'MATCH:PLAYER_ABANDONED',
+        date: true,
+      })
       .R({
         torneoId: this.match.torneoId,
         playerName: player.name,
@@ -568,7 +574,11 @@ class MatchActions {
 
     if (p1Bet > 0 && p2Bet > 0) {
       this.log
-        .Template({ name: 'brakets', title: 'MATCH:BLINDS_COMPLETED', date: true })
+        .Template({
+          name: 'brakets',
+          title: 'MATCH:BLINDS_COMPLETED',
+          date: true,
+        })
         .R({
           torneoId: this.match.torneoId,
           handId: this.match.currentHandId,
@@ -597,7 +607,11 @@ class MatchActions {
         if (p.lastAction !== 'Out') p.setLastAction('')
 
         this.log
-          .Template({ name: 'brakets', title: isRefresh ? 'MATCH:REFRESH_BLINDS' : 'MATCH:ASK_BLINDS', date: true })
+          .Template({
+            name: 'brakets',
+            title: isRefresh ? 'MATCH:REFRESH_BLINDS' : 'MATCH:ASK_BLINDS',
+            date: true,
+          })
           .R({
             torneoId: this.match.torneoId,
             handId: this.match.currentHandId,
@@ -610,7 +624,10 @@ class MatchActions {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
           blindAmount,
         })
-        Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+        Socket.broadcastToTorneo(
+          this.match.torneoId,
+          this.communicator.getMsg(),
+        )
 
         this.communicator.msgBuilder(`askForBlindBets`, 'private', p, {
           id: p.id,
@@ -785,7 +802,11 @@ class MatchActions {
 
     winnersInfo.forEach((winner, index) => {
       this.log
-        .Template({ name: 'brakets', title: `MATCH:POT_${index}_WINNER`, date: true })
+        .Template({
+          name: 'brakets',
+          title: `MATCH:POT_${index}_WINNER`,
+          date: true,
+        })
         .R({
           torneoId: this.match.torneoId,
           handId: this.match.currentHandId,

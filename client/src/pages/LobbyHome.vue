@@ -96,16 +96,27 @@
         <!-- MODE: Public Game (/public) -->
         <div v-if="isPublic" class="space-y-6">
           <div class="text-center">
-            <h1 class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic">
-              {{ $t('pages.lobby_home.public_tables_title') || 'Public Tables' }}
+            <h1
+              class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic"
+            >
+              {{
+                $t('pages.lobby_home.public_tables_title') || 'Public Tables'
+              }}
             </h1>
-            <p class="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-widest mt-2">
-              {{ $t('pages.lobby_home.public_tables_desc') || 'Join a table instantly and practice with others' }}
+            <p
+              class="text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-widest mt-2"
+            >
+              {{
+                $t('pages.lobby_home.public_tables_desc') ||
+                'Join a table instantly and practice with others'
+              }}
             </p>
           </div>
 
           <div class="space-y-4">
-            <label class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2">
+            <label
+              class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2"
+            >
               {{ $t('pages.lobby_home.setup_label') }}
             </label>
             <input
@@ -115,8 +126,10 @@
               type="text"
               :placeholder="$t('pages.lobby_home.setup_name_placeholder')"
             />
-            
-            <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest text-center italic mt-2">
+
+            <p
+              class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest text-center italic mt-2"
+            >
               A secure PIN will be generated automatically for your session.
             </p>
           </div>
@@ -540,7 +553,11 @@ const checkRouteState = () => {
     isPublic.value = true
     generatedCode.value = ''
     defaultSecret.value = ''
-  } else if (route.name === 'game.join' || route.query.joinCode || route.params.gameCode) {
+  } else if (
+    route.name === 'game.join' ||
+    route.query.joinCode ||
+    route.params.gameCode
+  ) {
     isCreating.value = false
     isPublic.value = false
     joinCode.value = (
@@ -613,7 +630,9 @@ const joinGame = () => {
 
 const joinPublicGame = async () => {
   if (!playerName.value || !playerName.value.trim()) {
-    const el = document.getElementById(`player-name-input-field-${templateSuffix.value}`)
+    const el = document.getElementById(
+      `player-name-input-field-${templateSuffix.value}`,
+    )
     if (el) el.focus()
     return
   }
@@ -622,7 +641,7 @@ const joinPublicGame = async () => {
   const finalSecret = uuidv4()
 
   pokerStore.clearError()
-  
+
   try {
     const urls = urlsFactory()
     // Consultamos al servidor cuál es la mejor mesa pública disponible

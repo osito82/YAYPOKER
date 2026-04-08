@@ -89,9 +89,15 @@ describe('ActionBar.vue', () => {
     })
     await flushPromises()
 
-    const foldBtn = wrapper.findAll('button').find((b) => b.text().includes('Fold'))
-    const checkBtn = wrapper.findAll('button').find((b) => b.text().includes('Check'))
-    const callBtn = wrapper.findAll('button').find((b) => b.text().includes('Call'))
+    const foldBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Fold'))
+    const checkBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Check'))
+    const callBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Call'))
 
     expect(foldBtn.element.disabled).toBe(true)
     expect(checkBtn.element.disabled).toBe(true)
@@ -105,7 +111,9 @@ describe('ActionBar.vue', () => {
     })
     await flushPromises()
 
-    const raiseBtn = wrapper.findAll('button').find((b) => b.text().includes('Raise'))
+    const raiseBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Raise'))
     expect(raiseBtn.element.disabled).toBe(true)
   })
 
@@ -119,7 +127,9 @@ describe('ActionBar.vue', () => {
     // Simulate prop update (simulating slider movement)
     await wrapper.setProps({ betAmount: 40 })
 
-    const raiseBtn = wrapper.findAll('button').find((b) => b.text().includes('Raise'))
+    const raiseBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Raise'))
     expect(raiseBtn.element.disabled).toBe(false)
   })
 
@@ -130,7 +140,9 @@ describe('ActionBar.vue', () => {
     })
     await flushPromises()
 
-    let raiseBtn = wrapper.findAll('button').find((b) => b.text().includes('Raise'))
+    let raiseBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Raise'))
     expect(raiseBtn.element.disabled).toBe(false)
 
     await wrapper.setProps({ betAmount: 20 })
@@ -146,7 +158,9 @@ describe('ActionBar.vue', () => {
     })
     await flushPromises()
 
-    const raiseBtn = wrapper.findAll('button').find((b) => b.text().includes('Raise'))
+    const raiseBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Raise'))
     // Should be disabled because player has no other choice to raise
     expect(raiseBtn.element.disabled).toBe(true)
   })
@@ -158,7 +172,9 @@ describe('ActionBar.vue', () => {
     })
     await flushPromises()
 
-    const foldBtn = wrapper.findAll('button').find((b) => b.text().includes('Fold'))
+    const foldBtn = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('Fold'))
     await foldBtn.trigger('click')
 
     expect(wrapper.emitted()).toHaveProperty('action')
