@@ -2,8 +2,7 @@ const isTest = process.env.NODE_ENV === 'test'
 
 const TIMEOUTS = {
   autofold: isTest ? 5000 : 300000, // 5s in test, else 5 minutes
-  autofoldPublic: isTest ? 5000 : 60000, // 5s in test, else 1 minute    
-  //autofoldPublic: 30000, // 30 seconds
+  autofoldPublic: isTest ? 5000:30000, // 30 seconds
   fast: isTest ? 10 : 100, // 10ms in test, else 100ms
   standard: isTest ? 50 : 500, // 50ms in test, else 500ms
   runout: isTest ? 100 : 2000, // 100ms in test, else 2 seconds
