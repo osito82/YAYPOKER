@@ -234,9 +234,12 @@ class MatchLobby {
     const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
     if (foundPlayer) foundPlayer.setStarted(true)
 
-    const allStarted = this.match.players.every((p) => p.isStarted)
-    if (allStarted && this.match.players.length >= GAME_RULES.MIN_PLAYERS) {
-      this.match.startGame(thisSocket)
+    // AUTO-START solo para mesas públicas cuando todos están listos
+    if (this.match.isPublic) {
+      const allStarted = this.match.players.every((p) => p.isStarted)
+      if (allStarted && this.match.players.length >= GAME_RULES.MIN_PLAYERS) {
+        this.match.startGame(thisSocket)
+      }
     }
   }
 

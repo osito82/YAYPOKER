@@ -89,7 +89,7 @@ let timeInterval = null
 const handleLogoClick = () => {
   let msg = t('game.leave_confirm')
   if (!pokerStore.getIsPublic) {
-    msg += t('game.leave_private_hint', { code: gameCode })
+    msg += t('game.leave_private_hint', { code: secretCode })
   }
 
   if (confirm(msg)) {
