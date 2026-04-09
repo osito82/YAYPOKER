@@ -56,8 +56,11 @@ export function useActionBar(props, emit) {
     const hasActionOption =
       props.options.includes('bet') || props.options.includes('raise')
     if (!hasActionOption) return true
-    if (isSliderDisabled.value) return true
-    return props.betAmount <= props.minBet && props.betAmount < props.maxBet
+
+    // If forced All-In (minBet === maxBet), the action is allowed
+    if (props.minBet >= props.maxBet) return false
+
+    return props.betAmount < props.minBet
   })
 
   const activePlayerName = computed(() => {

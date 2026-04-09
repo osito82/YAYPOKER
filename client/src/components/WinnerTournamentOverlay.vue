@@ -98,7 +98,7 @@
         <!-- Winner Card -->
         <div
           :id="'winner-tournament-card-' + templateSuffix"
-          class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-7 sm:p-8 mb-5 relative overflow-hidden animate-fade-up animation-delay-500"
+          class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-7 sm:p-8 mb-5 relative overflow-visible animate-fade-up animation-delay-500"
         >
           <div
             :id="'winner-tournament-card-accent-' + templateSuffix"
@@ -119,7 +119,7 @@
           </p>
           <h2
             :id="'winner-tournament-name-text-' + templateSuffix"
-            class="winner-name font-bebas text-5xl sm:text-6xl tracking-[2px] leading-tight text-[#F5F0E8] py-1 mb-4 relative z-10 break-words overflow-visible"
+            class="winner-name whitespace-normal font-bebas text-5xl sm:text-6xl tracking-[2px] leading-tight text-[#F5F0E8] py-1 mb-4 relative z-10 break-words overflow-visible"
           >
             {{ winnerName.toUpperCase() }}
           </h2>

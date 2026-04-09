@@ -190,12 +190,15 @@ const blindInfo = computed(() => {
 
 const minBet = computed(() => {
   const isRaiseAction = options.value.includes('raise')
+  const bigBlind = pokerStore.bigBlind || 20
   const baseMin = isRaiseAction
     ? currentMaxBetOnTable.value + lastRaiseAmount.value
     : currentMaxBetOnTable.value > 0
-      ? currentMaxBetOnTable.value + 20
-      : 20
+      ? currentMaxBetOnTable.value + bigBlind
+      : bigBlind
 
+  // If player has fewer chips than the required minimum, 
+  // their minimum (and maximum) bet is their total stack (All-In).
   return Math.min(baseMin, maxBet.value)
 })
 
