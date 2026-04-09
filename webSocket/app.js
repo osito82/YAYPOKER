@@ -143,7 +143,22 @@ const actionHandlers = {
 wss.on('connection', (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1))
 
-  const torneoId = urlParams.get('gameCode') ?? generateUniqueId()
+  let torneoId = urlParams.get('gameCode')
+
+  // LÓGICA DE MESAS PÚBLICAS: Maximizar agrupación
+  if (torneoId && torneoId.startsWith('P_')) {
+    const availablePublicMatch = Torneo.findAvailablePublicMatch()
+
+    // Si ya existe una mesa pública disponible, nos unimos a esa obligatoriamente
+    if (availablePublicMatch && availablePublicMatch.torneoId !== torneoId) {
+      console.log(
+        `[LOBBY] REDIRECTING player from requested ${torneoId} to active match ${availablePublicMatch.torneoId} (Players: ${availablePublicMatch.players.length})`,
+      )
+      torneoId = availablePublicMatch.torneoId
+    }
+  } else if (!torneoId) {
+    torneoId = generateUniqueId()
+  }
 
   const playerName = urlParams.get('playerName') ?? randomName()
 
@@ -152,6 +167,7 @@ wss.on('connection', (ws, req) => {
   const thisSocket = {
     id: socketId(),
     name: playerName,
+    torneoId,
     secretCode,
     socket: ws,
   }
@@ -165,9 +181,11 @@ wss.on('connection', (ws, req) => {
   // Intentar obtener el match existente o crear uno nuevo
   let match = Torneo.getMatch(torneoId)
   if (!match) {
+    const Match = require('./match')
     const newSocketId = socketId()
     match = new Match(torneoId, newSocketId)
-    Torneo.addMatch(match, torneoId)
+    Torneo.addMatch(match, torneoId) // REGISTRO INMEDIATO
+
     log
       .Template({
         name: 'brakets',
@@ -182,25 +200,6 @@ wss.on('connection', (ws, req) => {
     if (data) {
       try {
         jsonData = JSON.parse(data)
-
-        // LOG DE EMERGENCIA: Ver qué llega realmente
-        if (jsonData.action === 'startGame') {
-          console.log('------------------------------------------')
-          console.log('[DEBUG] RECEIVED startGame from client')
-          console.log(
-            '[DEBUG] Full Payload:',
-            JSON.stringify(jsonData, null, 2),
-          )
-          console.log('------------------------------------------')
-        }
-
-        log
-          .Template({
-            name: 'brakets',
-            title: `INCOMING:${jsonData.action?.toUpperCase()}`,
-            date: true,
-          })
-          .R({ from: playerName })
       } catch (error) {
         log
           .Template({
@@ -271,7 +270,12 @@ wss.on('connection', (ws, req) => {
       .R({ playerName })
     try {
       if (match) {
-        match.lobby.pause(thisSocket)
+        // En mesas públicas, el jugador se va inmediatamente
+        if (match.isPublic) {
+          match.lobby.playerLeave(thisSocket)
+        } else {
+          match.lobby.pause(thisSocket)
+        }
       }
     } catch (error) {
       log
@@ -331,6 +335,15 @@ app.get('/status', (req, res) => {
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy' })
+})
+
+app.get('/api/public-table', (req, res) => {
+  const availableMatch = Torneo.findAvailablePublicMatch()
+  if (availableMatch) {
+    return res.json({ torneoId: availableMatch.torneoId })
+  }
+  const { generatePublicId } = require('./utils')
+  return res.json({ torneoId: generatePublicId() })
 })
 
 app.get('/verify/:torneoId/:code', (req, res) => {

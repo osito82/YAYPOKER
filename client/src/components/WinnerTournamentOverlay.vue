@@ -84,7 +84,7 @@
             YAY Poker · {{ $t('tournament.finished') }}
           </p>
           <h1
-            class="title-main font-bebas text-7xl sm:text-8xl leading-[0.95] tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent"
+            class="title-main font-bebas text-7xl sm:text-8xl leading-tight tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent py-1"
           >
             {{ $t('tournament.champion') }}
           </h1>
@@ -98,7 +98,7 @@
         <!-- Winner Card -->
         <div
           :id="'winner-tournament-card-' + templateSuffix"
-          class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-7 sm:p-8 mb-5 relative overflow-hidden animate-fade-up animation-delay-500"
+          class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-6 sm:p-8 mb-5 relative overflow-visible min-h-fit animate-fade-up animation-delay-500"
         >
           <div
             :id="'winner-tournament-card-accent-' + templateSuffix"
@@ -106,20 +106,20 @@
           ></div>
           <div
             :id="'winner-tournament-card-bg-icon-' + templateSuffix"
-            class="absolute -top-5 -right-2 text-[120px] text-black/25 rotate-[-15deg] select-none"
+            class="absolute -top-5 -right-2 text-[120px] text-black/25 rotate-[-15deg] select-none pointer-events-none"
           >
             ♠
           </div>
 
           <p
             :id="'winner-tournament-label-' + templateSuffix"
-            class="winner-label font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853] mb-1.5"
+            class="winner-label font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853] mb-2"
           >
             {{ $t('tournament.winner') }}
           </p>
           <h2
             :id="'winner-tournament-name-text-' + templateSuffix"
-            class="winner-name font-bebas text-5xl sm:text-6xl tracking-[2px] leading-[1.15] text-[#F5F0E8] mb-4 relative z-10 break-words overflow-visible"
+            class="winner-name font-bebas text-5xl sm:text-7xl tracking-[2px] leading-[1.1] text-[#F5F0E8] mb-6 relative z-10 break-words"
           >
             {{ winnerName.toUpperCase() }}
           </h2>
@@ -310,10 +310,12 @@
 <script setup>
 import { computed, ref, onUnmounted, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 
 const { t, locale } = useI18n()
+const router = useRouter()
 const responsive = useResponsiveStore()
 const templateSuffix = computed(() => responsive.templateSuffix || 'Default')
 
@@ -406,10 +408,14 @@ const stopTimer = () => {
 }
 
 const handleClose = () => {
-  emit('close')
+  // Mostrar mensaje de confirmación antes de salir
+  const hasSaved = confirm(t('tournament.save_cert_warning'))
+  if (!hasSaved) return
+
   isVisible.value = false
   setTimeout(() => {
     pokerStore.clearWinnerInfo()
+    router.push('/')
   }, 500)
 }
 
@@ -427,20 +433,16 @@ const copyTorneoId = () => {
 
 const winnerName = computed(() => {
   if (!props.winnerInfo) return 'Champion'
-  return (
-    props.winnerInfo.winner?.name ||
-    props.winnerInfo.winners?.[0]?.name ||
-    'Champion'
-  )
+  // El servidor envía la info en data.winner para winnerTournament, 
+  // o a veces pokerStore pone el objeto data directamente.
+  const w = props.winnerInfo.winner || (props.winnerInfo.winners ? props.winnerInfo.winners[0] : props.winnerInfo)
+  return w?.name || 'Champion'
 })
 
 const totalAmount = computed(() => {
   if (!props.winnerInfo) return 0
-  return (
-    props.winnerInfo.winner?.amount ||
-    props.winnerInfo.winners?.[0]?.amount ||
-    0
-  )
+  const w = props.winnerInfo.winner || (props.winnerInfo.winners ? props.winnerInfo.winners[0] : props.winnerInfo)
+  return w?.amount || 0
 })
 
 watch(

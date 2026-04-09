@@ -23,6 +23,10 @@ function generateUniqueId() {
   return `${randomStr()}-${randomStr()}`
 }
 
+function generatePublicId() {
+  return `P_${generateUniqueId()}`
+}
+
 function socketId() {
   return uuidv4()
 }
@@ -217,6 +221,7 @@ module.exports = {
   compareArraysNoOrder,
   highestCardNumberFromArray,
   generateUniqueId,
+  generatePublicId,
   socketId,
   generateSecretCode,
   randomName,

@@ -48,7 +48,9 @@ export function useActionBar(props, emit) {
 
   const isSliderDisabled = computed(() => {
     if (!props.isMyTurn) return true
-    return props.maxBet <= props.minBet
+    // El slider solo se bloquea si el jugador ya no tiene más fichas para agregar
+    // (es decir, ya puso todo lo que tenía o su stack es 0)
+    return props.balance <= 0
   })
 
   const isRaiseActionDisabled = computed(() => {
@@ -56,8 +58,14 @@ export function useActionBar(props, emit) {
     const hasActionOption =
       props.options.includes('bet') || props.options.includes('raise')
     if (!hasActionOption) return true
-    if (isSliderDisabled.value) return true
-    return props.betAmount <= props.minBet && props.betAmount < props.maxBet
+
+    // El botón solo se activa si el monto seleccionado es mayor a la apuesta más alta en la mesa
+    // (es decir, una subida real) Y además cumple con el mínimo legal (o es All-In)
+    const tableHighestBet = pokerStore.getCurrentHighestBet || 0
+    const isIncrease = props.betAmount > tableHighestBet
+    const isLegalAmount = props.betAmount >= props.minBet
+
+    return !(isIncrease && isLegalAmount)
   })
 
   const activePlayerName = computed(() => {

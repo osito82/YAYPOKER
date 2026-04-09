@@ -587,7 +587,7 @@ describe('Poker Game Integration Tests', () => {
     // Alice: As (0), Ac (2)
     // Bob: Ks (1), Qh (3)
     // Board: Kc (4), Qd (5), 3h (6), 4h (7), 5h (8)
-    vi.spyOn(Deck, 'shuffleDeck').mockReturnValue([
+    vi.spyOn(Deck, 'shuffleDeck').mockImplementation(() => [
       'As',
       'Ks',
       'Ac',
@@ -691,7 +691,7 @@ describe('Poker Game Integration Tests', () => {
       'Jh',
       'Qs',
     ]
-    vi.spyOn(Deck, 'shuffleDeck').mockReturnValue(mockedDeck)
+    vi.spyOn(Deck, 'shuffleDeck').mockImplementation(() => [...mockedDeck])
 
     const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
     const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
@@ -940,7 +940,7 @@ describe('Poker Game Integration Tests', () => {
       '3s', // River
       // puedes agregar más cartas si tu Deck.shuffleDeck devuelve más de 9, pero no se usan
     ]
-    vi.spyOn(Deck, 'shuffleDeck').mockReturnValue(mockedDeck)
+    vi.spyOn(Deck, 'shuffleDeck').mockImplementation(() => [...mockedDeck])
 
     const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
     const bob = createClient(MOCK_PLAYERS.BOB, gameCode)

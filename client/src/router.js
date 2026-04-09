@@ -17,6 +17,11 @@ const routes = [
     component: LobbyHome,
   },
   {
+    name: 'lobby.public',
+    path: '/public',
+    component: LobbyHome,
+  },
+  {
     name: 'lobby.new',
     path: '/new',
     component: LobbyHome,
@@ -30,7 +35,7 @@ const routes = [
   },
   {
     name: 'game.play',
-    path: '/play/:gameCode([A-Za-z0-9]{5}-[A-Za-z0-9]{5})/:secretCode(\\d{4})',
+    path: '/play/:gameCode/:secretCode',
     component: Game,
     props: (route) => ({
       gameCode: route.params.gameCode,

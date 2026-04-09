@@ -12,91 +12,6 @@ class MatchLobby {
     this.stepChecker = context.stepChecker
   }
 
-  playerReady(thisSocket) {
-    const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
-    if (foundPlayer) {
-      foundPlayer.setStarted(true)
-
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'LOBBY:PLAYER_READY',
-          date: true,
-        })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          player: foundPlayer.name,
-          playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
-          dealerCards: this.match.cardsDealer,
-        })
-
-      this.communicator.msgBuilder('playerReady', 'public', foundPlayer, {
-        displayMsg: `${foundPlayer.name} is ready!`,
-      })
-      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
-    }
-  }
-
-  forceStartGame(thisSocket) {
-    // Solo el host puede forzar el inicio
-    if (thisSocket.id !== this.match.hostId) {
-      this.communicator.msgBuilder('lobbyError', 'private', null, {
-        displayMsg: 'Only the host can start the game.',
-      })
-      this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
-      return
-    }
-
-    // 🔥 Forzar a todos los jugadores conectados a estar listos
-    this.match.players.forEach((p) => {
-      if (p.connected) p.setStarted(true)
-    })
-
-    const readyPlayers = this.match.getStartedPlayers(true)
-
-    if (readyPlayers.length < GAME_RULES.MIN_PLAYERS) {
-      const connectedCount = this.match.getConnectedPlayers().length
-
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'ERROR:START_FAILED',
-          date: true,
-        })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          reason: 'Not enough ready players',
-          readyCount: readyPlayers.length,
-          connectedCount,
-          dealerCards: this.match.cardsDealer,
-        })
-
-      this.communicator.msgBuilder('lobbyError', 'public', null, {
-        displayMsg: `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected to start...`,
-        readyPlayers: readyPlayers.length,
-        connectedPlayers: connectedCount,
-      })
-      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
-      return
-    }
-
-    this.log
-      .Template({ name: 'brakets', title: 'LOBBY:GAME_STARTING', date: true })
-      .R({
-        torneoId: this.match.torneoId,
-        handId: this.match.currentHandId,
-        readyPlayers: readyPlayers.map((p) => p.name),
-        dealerCards: this.match.cardsDealer,
-      })
-
-    this.noMorePlayers()
-    this.stepChecker.grantStep('signUp')
-    this.emitter.emit('START_GAME', thisSocket)
-  }
-
   signUp(data, thisSocket) {
     this.match.lastActivity = Date.now()
     const {
@@ -107,8 +22,15 @@ class MatchLobby {
 
     const finalRequestedName = data.name || thisSocketName
 
+    this.log
+      .Template({ name: 'brakets', title: 'LOBBY:SIGNUP_ATTEMPT', date: true })
+      .R({
+        playerName: finalRequestedName,
+        torneoId: this.match.torneoId,
+        socketId: thisSocketId,
+      })
+
     // ✅ VALIDAR INTENTO DE RECONEXIÓN CON NOMBRE EXISTENTE PERO PIN INCORRECTO
-    // Si el nombre ya está en el juego, pero el PIN no coincide, es un intento fallido de reconexión.
     const playerWithSameName = this.match.players.find(
       (p) => p.name === finalRequestedName,
     )
@@ -117,50 +39,31 @@ class MatchLobby {
       playerWithSameName &&
       playerWithSameName.secretCode !== thisSecretCode
     ) {
-      // Si el juego ya empezó, ignoramos silenciosamente (Requerido por test T0006)
       if (!this.match.acceptingPlayers) {
-        this.log.R({
-          msg: `[LOBBY] SILENT IGNORE: ${finalRequestedName} tried to reconnect with wrong PIN during game`,
-          torneo: this.match.torneoId,
-        })
+        // T0006: Ignorar silenciosamente durante el juego
         return
       }
-      // Si estamos en el lobby, permitiremos que el flujo continúe para que se le asigne un nombre nuevo (ej: Alice-1)
     }
 
-    // Buscar jugador existente por secretCode
     const existingPlayerIndex = this.match.players.findIndex(
       (s) => s.secretCode === thisSecretCode,
     )
 
-    // ✅ VALIDAR COLISIÓN DE CÓDIGO SECRETO (PIN)
     let player
+
     if (existingPlayerIndex !== -1) {
-      const existingPlayer = this.match.players[existingPlayerIndex]
+      player = this.match.players[existingPlayerIndex]
 
-      // Si el código existe pero el nombre NO coincide, es una colisión de PIN
-      // (Otro jugador ya está usando este número secreto)
-      if (existingPlayer.name !== finalRequestedName) {
-        this.log.R({
-          msg: `[LOBBY] PIN COLLISION: ${finalRequestedName} tried to use PIN ${thisSecretCode} already owned by ${existingPlayer.name}`,
-          torneo: this.match.torneoId,
-        })
-
+      if (player.name !== finalRequestedName) {
         this.communicator.msgBuilder('signUp', 'private', null, {
-          displayMsg:
-            'This PIN is already in use by another player. Please go back and choose a different 4-digit code.',
+          displayMsg: 'This PIN is already in use by another player.',
           errorType: 'PIN_COLLISION',
         })
-        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
+        this.dealer.talkToSocketById(thisSocketId, this.communicator.getMsg())
         return
       }
 
-      // ✅ LÓGICA DE RE-CONEXIÓN (Mismo código, mismo nombre)
-      player = this.match.players[existingPlayerIndex]
       const oldId = player.id
-
-      if (oldId === thisSocketId && player.connected) return
-
       player.id = thisSocketId
       player.setConnected(true)
 
@@ -169,7 +72,6 @@ class MatchLobby {
       }
       this.dealer.updatePlayerId(oldId, thisSocketId)
 
-      // Si el host se reconecta, restaurar su ID
       if (this.match.hostId === oldId) {
         this.match.hostId = thisSocketId
       }
@@ -180,45 +82,23 @@ class MatchLobby {
         this.match.pauseTimeouts.delete(player.name)
       }
 
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'LOBBY:PLAYER_RECONNECTED',
-          date: true,
-        })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          name: player.name,
-          id: player.id,
-          playerCards: player.cards,
-          playerSecret: player.secretCode,
-          dealerCards: this.match.cardsDealer,
-          chips: player.chips,
-        })
-
-      // Verificar si el juego estaba pausado por falta de jugadores y continuar si es necesario
       const stillPaused = this.match.players.some((p) => !p.connected)
       if (!stillPaused && this.stepChecker.checkStep('pause')) {
         this.stepChecker.revokeStep('pause')
         this.emitter.emit('CONTINUE', thisSocket)
       }
 
-      // SALIR AQUÍ: No queremos que la reconexión ejecute lógica de "nuevo jugador"
       this.communicator.msgBuilder('signUp', 'private', player, {
         method: 'signUp',
         id: thisSocketId,
         hostId: this.match.hostId,
-        gameId: this.match.gameId,
       })
-
       Socket.sendToPlayer(
         this.match.torneoId,
         player.secretCode,
         this.communicator.getMsg(),
       )
 
-      // ✅ NOTIFICAR A TODOS: Importante para que el lobby vea que el jugador está "Online" de nuevo
       this.communicator.msgBuilder('signUp', 'public', player, {
         msg: `${player.name} reconnected.`,
         hostId: this.match.hostId,
@@ -226,43 +106,34 @@ class MatchLobby {
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
       this.match.comms.sendOdds(player)
-
-      // 🔥 RE-NOTIFICAR TURNO SI ES NECESARIO
-      if (this.match.activePlayerId === player.id) {
-        setTimeout(() => {
-          if (this.match.activePlayerId === player.id) {
-            this.match.actions.sendCurrentPrompt(player)
-          }
-        }, 500)
-      }
-
+      this.match.actions.sendCurrentPrompt(player)
       return
     } else {
-      // 🆕 LÓGICA DE NUEVO JUGADOR
-      if (this.match.players.length >= GAME_RULES.MAX_PLAYERS) {
+      const maxPlayers = this.match.isPublic
+        ? GAME_RULES.MAX_PLAYERS_PUBLIC
+        : GAME_RULES.MAX_PLAYERS
+      if (this.match.players.length >= maxPlayers) {
         this.communicator.msgBuilder('signUp', 'private', null, {
-          displayMsg: `Table is full (max ${GAME_RULES.MAX_PLAYERS} players).`,
+          displayMsg: `Table is full (max ${maxPlayers} players).`,
         })
-        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
+        this.dealer.talkToSocketById(thisSocketId, this.communicator.getMsg())
         return
       }
 
-      if (!this.match.acceptingPlayers) {
+      if (!this.match.acceptingPlayers && !this.match.isPublic) {
         this.communicator.msgBuilder('signUp', 'private', null, {
           displayMsg: 'Game in progress. Please wait for next round.',
         })
-        this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
+        this.dealer.talkToSocketById(thisSocketId, this.communicator.getMsg())
         return
       }
 
-      let finalName = data.name || thisSocketName
+      let finalName = finalRequestedName
       let counter = 1
       while (this.match.players.some((p) => p.name === finalName)) {
-        finalName = `${data.name || thisSocketName}-${counter}`
+        finalName = `${finalRequestedName}-${counter}`
         counter++
       }
-
-      thisSocket.name = finalName
 
       const playerNumber = this.match.players.length + 1
       player = new Player(
@@ -275,72 +146,78 @@ class MatchLobby {
         playerNumber,
       )
       player.setConnected(true)
+
+      // Solo reseteamos si es pública Y no hay absolutamente nadie en la lista (limpieza inicial)
+      // O si la mesa se quedó "atascada" sin jugadores reales.
+      if (this.match.isPublic && this.match.players.length === 0) {
+        this.log.R({
+          msg: `[LOBBY] Initializing empty public match for: ${player.name}`,
+        })
+        this.stepChecker.revokeStep('startGame')
+        this.match.acceptingPlayers = true
+      }
+
+      // Si la mesa ya está en juego y es pública, este jugador espera a la siguiente mano
+      if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
+        player.setStarted(false)
+      }
+
       this.match.players.push(player)
 
-      // Si es el primer jugador, es el host
       if (this.match.players.length === 1) {
         this.match.hostId = thisSocketId
       }
 
-      if (this.match.players.length >= GAME_RULES.MAX_PLAYERS) {
-        this.noMorePlayers()
-      }
+      this.communicator.msgBuilder('signUp', 'public', player, {
+        msg: `Welcome ${player.name}!`,
+        hostId: this.match.hostId,
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
 
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'LOBBY:PLAYER_JOIN',
-          date: true,
-        })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          name: player.name,
-          playerSecret: player.secretCode,
-          dealerCards: this.match.cardsDealer,
-          chips: player.chips,
-          num: playerNumber,
-          isHost: this.match.hostId === thisSocketId,
-        })
+      this.communicator.msgBuilder('signUp', 'private', player, {
+        method: 'signUp',
+        id: thisSocketId,
+        hostId: this.match.hostId,
+      })
+      Socket.sendToPlayer(
+        this.match.torneoId,
+        player.secretCode,
+        this.communicator.getMsg(),
+      )
     }
 
-    this.communicator.msgBuilder('signUp', 'public', player, {
-      msg: `Welcome ${player.name}!`,
-      hostId: this.match.hostId,
-    })
-    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
-
-    this.communicator.msgBuilder('signUp', 'private', player, {
-      method: 'signUp',
-      id: thisSocketId,
-      hostId: this.match.hostId,
-    })
-
-    Socket.sendToPlayer(
-      this.match.torneoId,
-      player.secretCode,
-      this.communicator.getMsg(),
-    )
-
-    if (existingPlayerIndex !== -1) {
-      this.match.comms.sendOdds(player)
+    // 🔥 PUBLIC AUTO-START
+    if (this.match.isPublic) {
+      this.handlePublicAutoStart()
     }
+  }
 
+  handlePublicAutoStart() {
     const connectedPlayers = this.match.getConnectedPlayers()
     if (
-      connectedPlayers.length >= GAME_RULES.MIN_PLAYERS &&
+      connectedPlayers.length >= GAME_RULES.MIN_PLAYERS_PUBLIC &&
       !this.stepChecker.checkStep('blindsBetting')
     ) {
-      this.stepChecker.grantStep('signUp')
+      if (!this.stepChecker.checkStep('startGame')) {
+        if (this.match.publicAutoStartTimer)
+          clearTimeout(this.match.publicAutoStartTimer)
+        this.match.publicAutoStartTimer = setTimeout(() => {
+          this.match.publicAutoStartTimer = null
+          if (!this.stepChecker.checkStep('startGame')) {
+            const hostSocket = Socket.getSocket(
+              this.match.torneoId,
+              this.match.hostId,
+            )
+            this.match.startGame(hostSocket || { id: this.match.hostId })
+          }
+        }, 3000)
+      }
     }
   }
 
   noMorePlayers() {
-    if (!this.match.acceptingPlayers) {
-      return
-    }
+    if (!this.match.acceptingPlayers) return
     this.match.acceptingPlayers = false
-
     this.log
       .Template({
         name: 'brakets',
@@ -349,40 +226,32 @@ class MatchLobby {
       })
       .R({
         torneoId: this.match.torneoId,
-        handId: this.match.currentHandId,
         gameId: this.match.gameId,
-        dealerCards: this.match.cardsDealer,
       })
+  }
 
-    this.communicator.msgBuilder('noMorePlayers', 'public', null, {
-      displayMsg: 'Registration closed. Game in progress.',
-    })
+  playerReady(thisSocket) {
+    const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
+    if (foundPlayer) foundPlayer.setStarted(true)
 
-    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+    // AUTO-START solo para mesas públicas cuando todos están listos
+    if (this.match.isPublic) {
+      const allStarted = this.match.players.every((p) => p.isStarted)
+      if (allStarted && this.match.players.length >= GAME_RULES.MIN_PLAYERS) {
+        this.match.startGame(thisSocket)
+      }
+    }
   }
 
   pause(thisSocket) {
-    const time = TIMEOUTS.pause
-    const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
-    const foundPlayer = this.match.players.find((p) => p.id === socketId)
+    const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
     if (foundPlayer) {
       foundPlayer.setConnected(false)
-      this.match.actions.clearAutofold()
+      const time = TIMEOUTS.pause
       this.stepChecker.grantStep('pause')
-      this.log
-        .Template({ name: 'brakets', title: 'LOBBY:PLAYER_PAUSED', date: true })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          player: foundPlayer.name,
-          playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
-          dealerCards: this.match.cardsDealer,
-          reason: 'Disconnected',
-        })
 
-      this.communicator.msgBuilder('pause', 'public', foundPlayer, {
-        displayMsg: `${foundPlayer.name} disconnected. Waiting ${time / 1000} seconds for reconnection...`,
+      this.communicator.msgBuilder('playerPaused', 'public', foundPlayer, {
+        displayMsg: `${foundPlayer.name} disconnected. Match paused for ${time / 1000}s`,
         timeout: time / 1000,
       })
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
@@ -404,35 +273,36 @@ class MatchLobby {
     const index = this.match.players.findIndex((p) => p.id === socketId)
     if (index !== -1) {
       const playerLeaving = this.match.players[index]
+
+      // Si es una mesa pública y hay juego en curso, forzamos fold
+      if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
+        if (!playerLeaving.folded) {
+          // Si era su turno, el fold disparará el CONTINUE
+          // Si no, simplemente lo marcamos como fold para que el dealer lo ignore
+          if (this.match.activePlayerId === playerLeaving.id) {
+            this.match.actions.fold({ id: playerLeaving.id })
+          } else {
+            playerLeaving.setFolded(true)
+            this.match.playersFold.push(playerLeaving.name)
+            this.dealer.setPlayerActed(playerLeaving.id)
+          }
+        }
+      }
+
       this.communicator.msgBuilder('playerLeave', 'public', playerLeaving, {
         displayMsg: `${playerLeaving.name} has left the game.`,
       })
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'LOBBY:PLAYER_LEAVE',
-          date: true,
-        })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          player: playerLeaving.name,
-          playerCards: playerLeaving.cards,
-          playerSecret: playerLeaving.secretCode,
-          dealerCards: this.match.cardsDealer,
-        })
+
       if (this.match.activePlayerId === playerLeaving.id) {
         this.match.activePlayerId = null
         this.match.actions.clearAutofold()
       }
 
-      // Si el que se va es el host, asignar nuevo host
       if (this.match.hostId === playerLeaving.id) {
         this.match.hostId = null
         this.match.players.splice(index, 1)
         if (this.match.players.length > 0) {
-          // Asignar al siguiente jugador conectado como host
           const nextHost = this.match.players.find((p) => p.connected)
           if (nextHost) {
             this.match.hostId = nextHost.id
@@ -449,11 +319,27 @@ class MatchLobby {
       } else {
         this.match.players.splice(index, 1)
       }
+
+      if (this.match.isPublic && this.match.publicAutoStartTimer) {
+        const connectedPlayers = this.match.getConnectedPlayers()
+        if (connectedPlayers.length < GAME_RULES.MIN_PLAYERS_PUBLIC) {
+          clearTimeout(this.match.publicAutoStartTimer)
+          this.match.publicAutoStartTimer = null
+        }
+      }
+
+      // Si la mesa es pública y no quedan jugadores, la eliminamos del Torneo para que se limpie de memoria
+      // y permita crear una nueva instancia fresca si alguien vuelve a entrar.
+      if (this.match.isPublic && this.match.players.length === 0) {
+        const Torneo = require('../torneo')
+        Torneo.getTorneos().delete(this.match.torneoId)
+        this.log.R({
+          msg: `[LOBBY] Public match ${this.match.torneoId} deleted (empty).`,
+        })
+      }
     }
     const stillPaused = this.match.players.some((p) => !p.connected)
-    if (!stillPaused) {
-      this.stepChecker.revokeStep('pause')
-    }
+    if (!stillPaused) this.stepChecker.revokeStep('pause')
     this.emitter.emit('CONTINUE', thisSocket)
   }
 }

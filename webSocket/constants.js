@@ -1,7 +1,8 @@
 const isTest = process.env.NODE_ENV === 'test'
 
 const TIMEOUTS = {
-  autofold: isTest ? 1000 : 600000, // 1s in test, else 10 minutes
+  autofold: isTest ? 5000 : 300000, // 5s in test, else 5 minutes
+  autofoldPublic: isTest ? 5000 : 30000, // 30 seconds
   fast: isTest ? 10 : 100, // 10ms in test, else 100ms
   standard: isTest ? 50 : 500, // 50ms in test, else 500ms
   runout: isTest ? 100 : 2000, // 100ms in test, else 2 seconds
@@ -13,6 +14,8 @@ const TIMEOUTS = {
 const GAME_RULES = {
   MIN_PLAYERS: 2,
   MAX_PLAYERS: 10,
+  MIN_PLAYERS_PUBLIC: 2,
+  MAX_PLAYERS_PUBLIC: 5,
   MAX_NUMBER_BOTS: parseInt(process.env.MAX_NUMBER_BOTS) || 9,
   DEFAULT_SMALL_BLIND: 10,
   DEFAULT_BIG_BLIND: 20,
@@ -21,6 +24,7 @@ const GAME_RULES = {
   BLIND_INCREASE_PERCENTAGE: 1.25,
   HAND_ID_PREFIX: 'h',
   INITIAL_CARDS_PER_PLAYER: 2,
+  MAX_CONSECUTIVE_AUTOFOLDS: 2,
   CHIPS_VALIDATION: {
     MIN: 0,
   },

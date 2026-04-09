@@ -162,27 +162,29 @@ describe('Tournament Emulation Test (M1DQF-E23ML)', () => {
 
     memo.send({ action: 'nextRound' })
     jorgelo.send({ action: 'nextRound' })
-    mocket.send({ action: 'nextRound' })
     rojo.send({ action: 'nextRound' })
 
     await jorgelo.waitAction('askForBlindBets')
-    jorgelo.send(MOCK_ACTIONS.SMALL_BLIND(10))
+    jorgelo.send(MOCK_ACTIONS.SMALL_BLIND(13))
     await rojo.waitAction('askForBlindBets')
-    rojo.send(MOCK_ACTIONS.BIG_BLIND(20))
+    rojo.send(MOCK_ACTIONS.BIG_BLIND(25))
 
     await jorgelo.waitAction('dealtPrivateCards')
 
-    await rojo.waitAction('bettingCore-firstBetting')
-    rojo.send(MOCK_ACTIONS.CHECK)
+    // Pre-flop: Order is Memo (Button), Jorgelo (SB), Rojo (BB)
     await memo.waitAction('bettingCore-firstBetting')
     memo.send(MOCK_ACTIONS.CALL)
     await jorgelo.waitAction('bettingCore-firstBetting')
     jorgelo.send(MOCK_ACTIONS.RISE(440))
-    await rojo.waitAction('bettingCore-firstBetting')
-    rojo.send(MOCK_ACTIONS.CALL)
+
+    // Server logic asks players in 'sorted' order: [Memo, Jorgelo, Rojo]
+    // After Jorgelo raises, Memo is asked next because he is first in 'sorted' and hasn't matched the raise.
     await memo.waitAction('bettingCore-firstBetting')
     memo.send(MOCK_ACTIONS.CALL)
+    await rojo.waitAction('bettingCore-firstBetting')
+    rojo.send(MOCK_ACTIONS.CALL)
 
+    // Flop: Order is Rojo, Memo, Jorgelo (Server logic skips first player)
     await rojo.waitAction('bettingCore-flopBetting')
     rojo.send(MOCK_ACTIONS.CHECK)
     await memo.waitAction('bettingCore-flopBetting')
@@ -190,15 +192,20 @@ describe('Tournament Emulation Test (M1DQF-E23ML)', () => {
     await jorgelo.waitAction('bettingCore-flopBetting')
     jorgelo.send(MOCK_ACTIONS.CHECK)
 
+    // Turn: Order is Rojo, Memo, Jorgelo
     await rojo.waitAction('bettingCore-turnBetting')
     rojo.send(MOCK_ACTIONS.CHECK)
     await memo.waitAction('bettingCore-turnBetting')
     memo.send(MOCK_ACTIONS.BET(25))
+
+    // Server logic asks players in 'sorted' order: [Rojo, Memo, Jorgelo]
+    // After Memo bets, Rojo is asked next to match the bet.
     await rojo.waitAction('bettingCore-turnBetting')
     rojo.send(MOCK_ACTIONS.CALL)
     await jorgelo.waitAction('bettingCore-turnBetting')
     jorgelo.send(MOCK_ACTIONS.CALL)
 
+    // River: Order is Rojo, Memo, Jorgelo
     await rojo.waitAction('bettingCore-riverBetting')
     rojo.send(MOCK_ACTIONS.CHECK)
     await memo.waitAction('bettingCore-riverBetting')

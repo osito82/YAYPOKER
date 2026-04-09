@@ -117,6 +117,15 @@
           </div>
 
           <router-link
+            :id="`nav-create-btn-${templateSuffix}`"
+            to="/new"
+            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
+          >
+            {{ $t('hero.create') }}
+          </router-link>
+
+          <router-link
+            :id="`nav-join-btn-${templateSuffix}`"
             to="/lobby"
             class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
           >
@@ -124,7 +133,8 @@
           </router-link>
 
           <router-link
-            to="/new"
+            :id="`nav-play-btn-${templateSuffix}`"
+            to="/public"
             class="group relative px-6 py-2.5 bg-yellow-500 text-black text-[12px] font-black uppercase tracking-[0.15em] rounded-full overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] active:scale-95"
           >
             <span class="relative z-10">{{ $t('nav.play') }}</span>
@@ -181,10 +191,11 @@
           class="flex flex-col sm:flex-row gap-6 justify-center items-center"
         >
           <router-link
-            to="/new"
+            :id="`hero-public-btn-${templateSuffix}`"
+            to="/public"
             class="w-full sm:w-auto px-10 py-5 bg-yellow-500 text-black font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 hover:shadow-[0_10px_40px_rgba(234,179,8,0.3)] active:scale-95 flex items-center justify-center gap-3"
           >
-            {{ $t('hero.create') }}
+            {{ $t('nav.play') }}
             <svg
               class="w-5 h-5"
               fill="none"
@@ -195,12 +206,27 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="3"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
+                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+              ></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="3"
+                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               ></path>
             </svg>
           </router-link>
 
           <router-link
+            :id="`hero-create-btn-${templateSuffix}`"
+            to="/new"
+            class="w-full sm:w-auto px-10 py-5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-bold uppercase tracking-widest text-sm rounded-xl transition-all hover:bg-gray-200 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20 active:scale-95"
+          >
+            {{ $t('hero.create') }}
+          </router-link>
+
+          <router-link
+            :id="`hero-join-btn-${templateSuffix}`"
             to="/lobby"
             class="w-full sm:w-auto px-10 py-5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white font-bold uppercase tracking-widest text-sm rounded-xl transition-all hover:bg-gray-200 dark:hover:bg-white/10 hover:border-gray-300 dark:hover:border-white/20 active:scale-95"
           >
@@ -311,14 +337,21 @@
 
           <div class="grid sm:grid-cols-2 gap-4">
             <div
-              v-for="(feat, idx) in ['money', 'setup', 'private', 'responsive']"
+              v-for="(feat, idx) in [
+                'money',
+                'setup',
+                'private',
+                'public',
+                'responsive',
+              ]"
               :key="feat"
               class="p-8 rounded-2xl border border-gray-200 dark:border-white/5 bg-white dark:bg-[#030712] hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-all group shadow-sm dark:shadow-none"
               :class="idx === 0 ? 'sm:col-span-2 sm:p-10' : ''"
             >
               <div
-                class="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 flex items-center justify-center mb-6 group-hover:bg-yellow-500 group-hover:text-black transition-all"
+                class="w-10 h-10 rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 flex items-center justify-center mb-6 group-hover:bg-yellow-500 group-hover:text-black dark:group-hover:text-black transition-all"
               >
+                <!-- ICON: Chips/Simulation -->
                 <svg
                   v-if="feat === 'money'"
                   class="w-5 h-5"
@@ -333,6 +366,7 @@
                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   ></path>
                 </svg>
+                <!-- ICON: Lightning/Dealer -->
                 <svg
                   v-if="feat === 'setup'"
                   class="w-5 h-5"
@@ -347,6 +381,7 @@
                     d="M13 10V3L4 14h7v7l9-11h-7z"
                   ></path>
                 </svg>
+                <!-- ICON: Users/Private -->
                 <svg
                   v-if="feat === 'private'"
                   class="w-5 h-5"
@@ -358,9 +393,25 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                   ></path>
                 </svg>
+                <!-- ICON: Globe/Public -->
+                <svg
+                  v-if="feat === 'public'"
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                  ></path>
+                </svg>
+                <!-- ICON: Responsive -->
                 <svg
                   v-if="feat === 'responsive'"
                   class="w-5 h-5"
@@ -372,7 +423,7 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
                   ></path>
                 </svg>
               </div>
@@ -437,12 +488,21 @@
 
           <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
             <router-link
-              to="/lobby"
+              :id="`final-cta-public-btn-${templateSuffix}`"
+              to="/public"
               class="px-10 py-5 bg-black text-white font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 active:scale-95 text-center"
+            >
+              {{ $t('nav.play') }}
+            </router-link>
+            <router-link
+              :id="`final-cta-create-btn-${templateSuffix}`"
+              to="/new"
+              class="px-10 py-5 bg-transparent border-2 border-black text-black font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:bg-black hover:text-white active:scale-95 text-center"
             >
               {{ $t('pages.home.final_cta.create') }}
             </router-link>
             <router-link
+              :id="`final-cta-join-btn-${templateSuffix}`"
               to="/lobby"
               class="px-10 py-5 bg-transparent border-2 border-black text-black font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:bg-black hover:text-white active:scale-95 text-center"
             >

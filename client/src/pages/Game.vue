@@ -26,6 +26,7 @@
     :betAmount="betAmount"
     :minBet="minBet"
     :maxBet="maxBet"
+    :sliderMin="callLevel"
     :pot="pokerStore.getPot"
     :communityCards="pokerStore.getCommunityCards"
     :activePlayerId="pokerStore.getActivePlayerId"
@@ -36,6 +37,7 @@
     @setQuickBet="setQuickBet"
     @update:betAmount="(val) => (betAmount = val)"
     @sendMessage="sendMessage"
+    @goHome="handleLogoClick"
   />
 </template>
 
@@ -49,6 +51,7 @@ import {
   defineAsyncComponent,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import useWebSocket from '../use/useSockets'
@@ -73,6 +76,7 @@ const props = defineProps({
   isGuest: { type: Boolean, default: false },
 })
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const pokerStore = usePokerStore()
@@ -82,6 +86,18 @@ const secretCode = route.params.secretCode
 
 const serverTime = ref(new Date().toLocaleTimeString())
 let timeInterval = null
+
+const handleLogoClick = () => {
+  let msg = t('game.leave_confirm')
+  if (!pokerStore.getIsPublic) {
+    msg += t('game.leave_private_hint', { code: secretCode })
+  }
+
+  if (confirm(msg)) {
+    disconnectSocket() // Desconexión inmediata y explícita
+    router.push('/')
+  }
+}
 
 // Select template based on screen size
 const activeTemplate = computed(() => {
@@ -120,6 +136,26 @@ watch(
   { immediate: true, deep: true },
 )
 
+// Update URL if torneoId changes (e.g., from 'PUBLIC' to 'P_XXXXX')
+watch(
+  () => pokerStore.torneoId,
+  (newTorneoId) => {
+    const currentCode = route.params.gameCode
+    if (newTorneoId && newTorneoId !== currentCode) {
+      console.log(`Game - URL Sync: Changing ${currentCode} -> ${newTorneoId}`)
+      router.replace({
+        name: 'game.play',
+        params: {
+          ...route.params,
+          gameCode: newTorneoId,
+        },
+        query: route.query,
+      })
+    }
+  },
+  { immediate: true },
+)
+
 const connectionOptions = {
   gameCode,
   playerName: playerName.value,
@@ -151,6 +187,15 @@ const isMyTurn = computed(
 const options = computed(() =>
   props.isGuest ? [] : pokerStore.getBettingOptions || [],
 )
+
+const callLevel = computed(() => {
+  const tableMax = currentMaxBetOnTable.value || 0
+  const myAlreadyBet = myPlayer.value?.currentBet || 0
+  const myTotal = maxBet.value || 0
+  // The level we start at is the table's highest bet, but we can't exceed our total chips
+  return Math.min(tableMax, myTotal)
+})
+
 const canBlind = computed(
   () => !props.isGuest && isMyTurn.value && options.value.includes('blind'),
 )
@@ -169,13 +214,16 @@ const blindInfo = computed(() => {
 })
 
 const minBet = computed(() => {
-  const isRaiseAction = options.value.includes('raise')
-  const baseMin = isRaiseAction
-    ? currentMaxBetOnTable.value + lastRaiseAmount.value
-    : currentMaxBetOnTable.value > 0
-      ? currentMaxBetOnTable.value + 20
-      : 20
+  const isRaiseAction = options.value.includes('raise') || options.value.includes('bet')
+  const bigBlind = pokerStore.bigBlind || 20
+  
+  let baseMin = bigBlind
+  if (currentMaxBetOnTable.value > 0) {
+    baseMin = currentMaxBetOnTable.value + lastRaiseAmount.value
+  }
 
+  // If player has fewer chips than the required minimum, 
+  // their minimum (and maximum) bet is their total stack (All-In).
   return Math.min(baseMin, maxBet.value)
 })
 
@@ -185,7 +233,7 @@ const maxBet = computed(() => {
   return stack + alreadyBet
 })
 
-const betAmount = ref(minBet.value)
+const betAmount = ref(0)
 
 // ACTIONS & WATCHERS
 const setQuickBet = (m) => {
@@ -217,16 +265,18 @@ watch(
 
 watch(isMyTurn, (newVal) => {
   if (newVal) {
-    betAmount.value = minBet.value
+    // Start exactly at current call level
+    betAmount.value = callLevel.value
   }
 })
 
-watch([minBet, maxBet], ([newMin, newMax]) => {
+watch([callLevel, maxBet], ([newMin, newMax]) => {
   if (isMyTurn.value) {
     if (betAmount.value < newMin) betAmount.value = newMin
     if (betAmount.value > newMax) betAmount.value = newMax
   }
 })
+
 
 function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')

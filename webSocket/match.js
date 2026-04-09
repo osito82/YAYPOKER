@@ -32,14 +32,17 @@ class Match extends EventEmitter {
     super()
     this.torneoId = torneoId
     this.gameId = gameId
+    // Mesa pública: Cualquier ID que empiece por P_ activa el comportamiento público
+    this.isPublic = torneoId.startsWith('P_')
+
     this.handCount = 0
     this.currentHandId = null
 
     // Blinds management
     this.blindLevel = 1
-    this.smallBlind = GAME_RULES.DEFAULT_SMALL_BLIND
-    this.bigBlind = GAME_RULES.DEFAULT_BIG_BLIND
-    this.ante = GAME_RULES.DEFAULT_ANTE
+    this.smallBlind = this.isPublic ? 0 : GAME_RULES.DEFAULT_SMALL_BLIND
+    this.bigBlind = this.isPublic ? 0 : GAME_RULES.DEFAULT_BIG_BLIND
+    this.ante = this.isPublic ? 0 : GAME_RULES.DEFAULT_ANTE
 
     this.initialStack = 1000 // Default initial stack
 
@@ -47,7 +50,9 @@ class Match extends EventEmitter {
     this.acceptingPlayers = true
     this.pauseTimeouts = new Map()
     this.autofoldTimer = null
-    this.autofoldDuration = TIMEOUTS.autofold
+    this.autofoldDuration = this.isPublic
+      ? TIMEOUTS.autofoldPublic
+      : TIMEOUTS.autofold
 
     this.playersFold = []
     this.pot = 0
@@ -98,17 +103,15 @@ class Match extends EventEmitter {
             port: SERVER_CONFIG.PORT,
           }),
         })
-      } catch (e) {
-        this.log.R({ error: '[BOT_API] ERROR', msg: e.message })
+      } catch (error) {
+        console.error('Error spawning bot:', error)
       }
     }
-
-    setTimeout(() => {
-      this.isSpawningBots = false
-    }, 10000)
   }
 
   increaseBlinds() {
+    if (this.isPublic) return
+
     this.blindLevel++
     this.smallBlind = Math.ceil(
       this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
@@ -147,25 +150,20 @@ class Match extends EventEmitter {
   }
 
   initHand() {
-    this.handCount++
-    this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}${this.handCount}`
-    const initialDeck = Deck.shuffleDeck(
-      Deck.cards,
-      DECK_CONSTANTS.SHUFFLE_TIMES,
-    )
-    this.shuffledDeck = initialDeck
+    this.deck = Deck.shuffleDeck(Deck.cards)
+    this.cardsDealer = []
+    this.playersFold = []
+    this.isRunout = false
 
+    this.stepChecker = new StepChecker()
     this.dealer = new Dealer(
       this.gameId,
       this.players,
-      initialDeck,
+      this.deck,
       this.torneoId,
       this.pot,
-      [], // Start with empty array for dealer cards
+      this.cardsDealer,
     )
-    this.cardsDealer = this.dealer.getDealerCards() // Reference the dealer's array
-
-    this.stepChecker = new StepChecker(this.gameId)
 
     this.communicator = new Communicator(
       this.gameId,
@@ -255,8 +253,10 @@ class Match extends EventEmitter {
 
     // Si el juego aún no ha sido iniciado formalmente
     if (!this.stepChecker.checkStep('startGame')) {
-      // Solo el host puede iniciar el juego la primera vez
-      if (thisSocket.id && this.hostId && thisSocket.id !== this.hostId) {
+      // Solo el host puede iniciar el juego la primera vez (excepto en mesas públicas)
+      const isHost =
+        thisSocket.id && this.hostId && thisSocket.id === this.hostId
+      if (!this.isPublic && !isHost) {
         this.communicator.msgBuilder('lobbyError', 'private', null, {
           displayMsg: 'Only the host can start the game.',
         })
@@ -264,17 +264,42 @@ class Match extends EventEmitter {
         return
       }
 
-      // BOT SPAWN LOGIC
-      if (data.bots && Number(data.bots) > 0) {
-        let count = Number(data.bots)
-        const currentPlayers = this.getConnectedPlayers().length
-        const availableSlots = Math.max(0, GAME_RULES.MAX_PLAYERS - currentPlayers)
-        const botLimit = Math.min(GAME_RULES.MAX_NUMBER_BOTS, availableSlots)
+      // PUBLIC TABLES: Mark all connected players as started automatically
+      if (this.isPublic) {
+        this.players.forEach((p) => {
+          if (p.connected) p.setStarted(true)
+        })
+      }
 
+      // Validar mínimo de jugadores
+      const connectedPlayers = this.getConnectedPlayers()
+      const minRequired = this.isPublic
+        ? GAME_RULES.MIN_PLAYERS_PUBLIC
+        : GAME_RULES.MIN_PLAYERS
+
+      if (connectedPlayers.length < minRequired) {
+        if (!this.isSpawningBots) {
+          this.communicator.msgBuilder('lobbyError', 'public', null, {
+            errorType: 'WAITING_PLAYERS',
+            displayMsg: `Waiting for at least ${minRequired} players to be connected (current: ${connectedPlayers.length})...`,
+          })
+          Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+          
+          // Re-intentar automáticamente en 2 segundos para ver si ya entró alguien más
+          setTimeout(() => this.startGame(thisSocket, data), 2000)
+        } else {
+          setTimeout(() => this.startGame(thisSocket, data), 1000)
+        }
+        return
+      }
+
+      // Spawn bots if requested
+      const botLimit = GAME_RULES.MAX_PLAYERS - connectedPlayers.length
+      if (data.bots > 0 && !this.isSpawningBots) {
+        let count = Number(data.bots)
         if (count > botLimit) {
           this.log.R({
-            msg: `[BOT_API] WARNING: Requested ${count} bots, but only ${botLimit} are allowed. Adjusting.`,
-            torneo: this.torneoId,
+            msg: `[BOT_API] Bot request reduced from ${count} to ${botLimit}`,
           })
           count = botLimit
         }
@@ -287,43 +312,10 @@ class Match extends EventEmitter {
         return
       }
 
-      if (this.isSpawningBots) {
-        const connectedCount = this.getConnectedPlayers().length
-        if (connectedCount < GAME_RULES.MIN_PLAYERS) {
-          setTimeout(() => this.startGame(thisSocket, data), 1500)
-          return
-        }
-      }
-
-      // INITIAL STACK LOGIC
-      if (data.initialStack && Number(data.initialStack) > 0) {
-        const stack = Number(data.initialStack)
-        this.players.forEach((p) => {
-          p.chips = stack
-        })
-        this.log.R({
-          msg: `[MATCH] SET INITIAL STACK TO ${stack}`,
-          torneo: this.torneoId,
-        })
-      }
-
-      // 🔥 Forzar a todos los jugadores conectados a estar listos
+      // Mark everyone as started if not already
       this.players.forEach((p) => {
         if (p.connected) p.setStarted(true)
       })
-
-      const connectedPlayers = this.getConnectedPlayers()
-      if (connectedPlayers.length < GAME_RULES.MIN_PLAYERS) {
-        if (!this.isSpawningBots) {
-          this.communicator.msgBuilder('lobbyError', 'public', null, {
-            displayMsg: `Waiting for at least ${GAME_RULES.MIN_PLAYERS} players to be connected (current: ${connectedPlayers.length})...`,
-          })
-          Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-        } else {
-          setTimeout(() => this.startGame(thisSocket, data), 1000)
-        }
-        return
-      }
 
       // Al empezar el juego, cerramos el registro
       this.lobby.noMorePlayers()
@@ -387,15 +379,7 @@ class Match extends EventEmitter {
       return this.continue(thisSocket)
     }
     if (!this.stepChecker.checkStep('winner')) {
-      const { WinnerCore } = require('./winnerCore')
-      const winnerData = WinnerCore.Winner(this.dealer.getFinalHands())
-      if (
-        !winnerData ||
-        (Array.isArray(winnerData) && winnerData.length === 0)
-      ) {
-        return this.continue(thisSocket)
-      }
-      this.actions.winner(winnerData)
+      this.actions.winner()
       return
     }
   }
@@ -409,7 +393,24 @@ class Match extends EventEmitter {
     )
 
     if (playersWithChips.length < GAME_RULES.MIN_PLAYERS) {
-      this.log.R({ info: 'Tournament finished. No more rounds.' })
+      this.log.R({
+        info: `Tournament finished. ${this.isPublic ? 'Resetting public table.' : 'No more rounds.'}`,
+      })
+
+      if (this.isPublic) {
+        // En mesas públicas, si el torneo termina, reseteamos para que nuevos jugadores puedan entrar
+        this.stepChecker.revokeStep('startGame')
+        this.acceptingPlayers = true
+        // Limpiamos jugadores sin fichas o desconectados para dejar espacio
+        this.players = this.players.filter((p) => p.chips > 0 && p.connected)
+        
+        // Informamos a los que se quedan que estamos en modo lobby esperando
+        this.communicator.msgBuilder('lobby', 'public', null, {
+          displayMsg: 'Tournament finished. Waiting for new players...',
+        })
+        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+        return
+      }
       return
     }
     this.restartMatch()
@@ -432,44 +433,25 @@ class Match extends EventEmitter {
         dealerCards: this.cardsDealer,
       })
 
-    this.pot = 0
-    this.playersFold = []
-    this.activePlayerId = null
-    this.isRunout = false
+    // Rotate players
+    this.players.push(this.players.shift())
+
+    // Remove busted players (only in private matches/tournaments)
+    if (!this.isPublic) {
+      this.players = this.players.filter((p) => p.chips > 0)
+    }
+
+    this.initHand()
 
     this.players.forEach((p) => {
-      p.gameId = this.gameId
+      p.setFolded(false)
+      p.setAllIn(false)
+      p.setLastAction('')
+      p.setStarted(p.connected)
       p.cards = []
       p.currentBet = 0
       p.handContribution = 0
-      p.folded = p.chips <= 0
-      p.lastAction = p.chips <= 0 ? 'Out' : ''
-      p.isAllIn = false
-      p.setStarted(p.connected && p.chips > 0)
-      p.setCurrentPrize({})
     })
-
-    const Deck = require('./deck')
-    this.shuffledDeck =
-      customDeck || Deck.shuffleDeck(Deck.cards, DECK_CONSTANTS.SHUFFLE_TIMES)
-    this.dealer.gameId = this.gameId
-    this.dealer.deck = this.shuffledDeck
-    this.dealer.cardsDealer = []
-    this.cardsDealer = this.dealer.getDealerCards()
-    this.dealer.pot = 0
-    this.dealer.clearActedPlayers()
-    this.dealer.setCurrentHighestBet(0)
-    this.dealer.setLastRaiseAmount(0)
-    this.dealer.setLastRaiser(null)
-
-    this.communicator.gameId = this.gameId
-    const shouldRotate = this.stepChecker.checkStep('winner')
-    this.stepChecker.reset()
-    this.stepChecker.gameFlow.gameId = this.gameId
-
-    if (this.players.length > 1 && shouldRotate) {
-      this.players.push(this.players.shift())
-    }
 
     this.communicator.msgBuilder('gameRestarted', 'public', null, {
       displayMsg: 'New hand starting...',

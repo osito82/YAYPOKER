@@ -35,6 +35,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const lobbyTimer = ref(null)
   const hostId = ref(null)
   const isGameStarted = ref(false)
+  const torneoId = ref(null)
+  const isPublic = ref(false)
   const stepChecker = ref({})
   const lastError = ref(null)
 
@@ -65,6 +67,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const getLobbyTimer = computed(() => lobbyTimer.value)
   const getHostId = computed(() => hostId.value)
   const getIsGameStarted = computed(() => isGameStarted.value)
+  const getTorneoId = computed(() => torneoId.value)
+  const getIsPublic = computed(() => isPublic.value)
   const getStepChecker = computed(() => stepChecker.value || {})
   const getLastError = computed(() => lastError.value)
 
@@ -93,6 +97,19 @@ export const usePokerStore = defineStore('pokerStore', () => {
       // Update stepChecker
       if (gameData.stepChecker) {
         stepChecker.value = gameData.stepChecker
+      }
+
+      // Update torneoId from any message that carries it
+      if (gameData.torneoId) {
+        torneoId.value = gameData.torneoId
+      } else if (gameData.data?.torneoId) {
+        torneoId.value = gameData.data.torneoId
+      }
+
+      if (gameData.isPublic !== undefined) {
+        isPublic.value = !!gameData.isPublic
+      } else if (torneoId.value?.startsWith('P_')) {
+        isPublic.value = true
       }
 
       // Update game started state based on server stepChecker
@@ -229,6 +246,9 @@ export const usePokerStore = defineStore('pokerStore', () => {
           }
         } else {
           myInfo.value.id = gameData.data?.id
+          if (gameData.torneoId) {
+            torneoId.value = gameData.torneoId
+          }
           lastError.value = null
         }
       } else if (gameData.action === 'oddsUpdate') {
@@ -245,7 +265,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
         bettingOptions.value = []
         autofoldStartTime.value = null
 
-        const currentWinnerData = gameData.data || gameData
+        const currentWinnerData = winnerInfo.value
         const timeoutDuration =
           gameData.action === 'winnerTournament' ||
           gameData.method === 'winnerTournament' ||
@@ -278,6 +298,13 @@ export const usePokerStore = defineStore('pokerStore', () => {
           gameData.action,
         )
       ) {
+        if (gameData.data?.totalBet !== undefined) {
+          currentHighestBet.value = Math.max(
+            currentHighestBet.value,
+            gameData.data.totalBet,
+          )
+        }
+
         // Only clear if this message doesn't have new turn info
         // (Action confirmations usually don't, but let's be safe)
         if (!gameData.data?.messageForId && !gameData.data?.id) {
@@ -315,14 +342,19 @@ export const usePokerStore = defineStore('pokerStore', () => {
     gameCredentials.value.gameCode = gameCode
     gameCredentials.value.secretCode = secretCode
 
-    // Persist credentials (but not the gameCode as it's session-specific)
-    localStorage.setItem(
-      'poker-credentials',
-      JSON.stringify({
-        playerName,
-        secretCode,
-      }),
-    )
+    // Persist credentials only for private tables (but not the gameCode as it's session-specific)
+    const isPublicCode =
+      gameCode && (gameCode.startsWith('P_') || gameCode === 'PUBLIC')
+
+    if (gameCode && !isPublicCode) {
+      localStorage.setItem(
+        'poker-credentials',
+        JSON.stringify({
+          playerName,
+          secretCode,
+        }),
+      )
+    }
   }
 
   function clearError() {
@@ -352,6 +384,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     lobbyTimer,
     hostId,
     isGameStarted,
+    torneoId,
+    isPublic,
     smallBlind,
     bigBlind,
     ante,
@@ -379,6 +413,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     getLobbyTimer,
     getHostId,
     getIsGameStarted,
+    getTorneoId,
+    getIsPublic,
     getStepChecker,
     getLastError,
 

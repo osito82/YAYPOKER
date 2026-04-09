@@ -21,6 +21,14 @@
       id="primary-game-view-TemplateXSmall"
       class="flex flex-col min-w-0 relative flex-none"
     >
+      <!-- Small Logo/Home Button for Mobile -->
+      <div 
+        class="absolute top-3 left-3 z-[100] w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform cursor-pointer"
+        @click="$emit('goHome')"
+      >
+        <span class="text-black font-black text-sm italic">Y</span>
+      </div>
+
       <main
         id="poker-table-viewport-TemplateXSmall"
         class="flex-none h-auto overflow-hidden bg-gray-100 dark:bg-transparent dark:bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
@@ -57,6 +65,7 @@
         :betAmount="betAmount"
         :minBet="minBet"
         :maxBet="maxBet"
+        :sliderMin="sliderMin"
         :playerCards="myPlayer?.cards || []"
         @action="(a) => $emit('action', a)"
         @setQuickBet="(m) => $emit('setQuickBet', m)"
@@ -113,6 +122,7 @@ defineProps({
   betAmount: Number,
   minBet: Number,
   maxBet: Number,
+  sliderMin: Number,
   pot: Number,
   communityCards: Array,
   activePlayerId: String,
@@ -121,5 +131,5 @@ defineProps({
   winnerInfo: Object,
 })
 
-defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
+defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])
 </script>

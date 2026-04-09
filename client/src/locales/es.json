@@ -2,16 +2,16 @@
   "nav": {
     "how": "Cómo funciona",
     "features": "Características",
-    "join": "Unirse a Mesa",
-    "play": "Jugar ahora"
+    "join": "Unirse a Mesa Privada",
+    "play": "Jugar Ahora"
   },
   "hero": {
     "badge": "Gratis · Sin cuenta · Funciona en cualquier dispositivo",
     "headline": "Juega Poker, {br} {like_pro} {br} GRATIS.",
     "like_pro": "como un pro...",
-    "sub": "Crea una mesa privada en segundos, comparte el enlace y reparte cartas con tus amigos, dondequiera que estén. Sin descargas. Sin dinero real. Solo el juego.",
-    "create": "Crear una Mesa",
-    "browse": "Unirse a Mesa",
+    "sub": "Reúne a tu grupo para la partida perfecta. Nosotros ponemos el dealer virtual y las cartas; tú pones la competencia. ¿Quieres mejorar tu estrategia? Entra en una Mesa Pública y juega con entusiastas de todo el mundo.",
+    "create": "Iniciar Mesa Privada",
+    "browse": "Unirse a Mesa Privada",
     "social": "Jugado por {count} esta semana",
     "thousands": "miles de grupos",
     "scroll": "Bajar"
@@ -38,6 +38,11 @@
     "min_players_warning": "Se necesitan al menos 2 jugadores para empezar el juego",
     "start_game": "Repartir Primera Mano",
     "waiting_for_host": "Esperando al Anfitrión...",
+    "public_waiting_players": "Esperando Jugadores...",
+    "public_starting_soon": "Comenzando pronto...",
+    "public_min_players_hint": "Las mesas públicas inician automáticamente con al menos 2 jugadores.",
+    "public_auto_start_hint": "La partida comenzará en unos segundos.",
+    "public_badge": "Mesa Pública",
     "copyright": "© 2026 {brand} Engineering",
     "brand": "YayPoker"
   },
@@ -84,7 +89,9 @@
     "log_live": "En Vivo",
     "system_ready": "SISTEMA_LISTO: Esperando eventos de juego... 📡",
     "your_turn": "ES TU TURNO",
-    "waiting_others": "Esperando a otros..."
+    "waiting_others": "Esperando a otros...",
+    "leave_confirm": "¿Estás seguro de que quieres abandonar el juego?",
+    "leave_private_hint": "\n\nImportante: Recuerda tu Código de Mesa Privada para volver a unirte luego: {code}"
   },
   "winner": {
     "wins": "¡Gana!",
@@ -116,6 +123,7 @@
     "copied": "✓ OK",
     "verify_link": "Verificar Certificado en {url}",
     "back_to_lobby": "Volver al Lobby ({count}s)",
+    "save_cert_warning": "Importante: ¡Guarda la URL de tu certificado o toma una captura antes de salir! Es tu única prueba de victoria. ¿Ya lo guardaste y quieres salir?",
     "system_footer": "YAY Poker · SISTEMA DE CERTIFICACIÓN OFICIAL · v1.0"
   },
   "form": {
@@ -128,36 +136,38 @@
   "pages": {
     "home": {
       "how": {
-        "label": "Cómo funciona",
-        "headline": "De cero a All-in{br}en menos de un minuto.",
-        "step1_title": "Crea tu mesa",
-        "step1_body": "Pulsa el botón, elige un alias — tu mesa privada ya está lista. Sin formularios, sin contraseñas, sin fricciones.",
-        "step2_title": "Comparte el enlace",
-        "step2_body": "Copia el código de la sala y envíalo por WhatsApp, Discord o donde sea que se reúna tu grupo.",
-        "step3_title": "Juega tu mano",
-        "step3_body": "Las cartas se reparten solas. Las fichas son virtuales. El salseo es muy real."
+        "label": "La Experiencia",
+        "headline": "Tu sala privada,{br}gestionada por nuestro dealer.",
+        "step1_title": "Lanza tu Mesa",
+        "step1_body": "Crea un espacio privado en un clic. Sin registros ni complicaciones — un entorno virtual profesional listo para tu grupo.",
+        "step2_title": "Reúne al Grupo",
+        "step2_body": "Comparte tu enlace único. Nosotros gestionamos el mazo, el dealer y el pozo para que tú te centres en los faroles y la diversión.",
+        "step3_title": "O Juega en Público",
+        "step3_body": "¿No tienes grupo hoy? Usa nuestras Mesas Públicas para practicar tu estrategia y jugar contra otros entusiastas al instante."
       },
       "features": {
-        "label": "Características",
-        "headline": "Todo lo que necesitas.{br}Nada de lo que te sobra.",
-        "money_title": "Sin dinero real — nunca",
-        "money_body": "En YayPoker solo jugamos con fichas virtuales. ¿Quieres hacer una apuesta paralela con tus amigos? Eso es cosa vuestra. Nosotros solo ponemos la mesa.",
-        "setup_title": "Configuración instantánea",
-        "setup_body": "Sin instalaciones. Sin registros. Abre el enlace y ya estás en la mesa.",
-        "private_title": "Privado por defecto",
-        "private_body": "Las mesas son solo por invitación. Sin extraños en tu partida.",
-        "responsive_title": "Cualquier pantalla y lugar",
-        "responsive_body": "Totalmente adaptado: móvil, tablet, portátil. Todos a la mesa, estén donde estén."
+        "label": "El Mazo",
+        "headline": "Herramientas profesionales{br}para tu noche de poker.",
+        "money_title": "Fichas 100% Virtuales",
+        "money_body": "YayPoker es pura simulación. Proporcionamos las fichas, la mesa y la lógica del dealer. No hay dinero real involucrado.",
+        "setup_title": "Dealer Instantáneo",
+        "setup_body": "Sin descargas ni registros. Tu dealer virtual está listo en el momento en que abres el enlace.",
+        "private_title": "Privacidad Total",
+        "private_body": "Las mesas privadas son tu espacio personal. Sin extraños, solo las personas que tú decidas invitar a tu partida.",
+        "public_title": "Práctica Pública",
+        "public_body": "Mesas abiertas 24/7. Ideales para probar nuevas estrategias o jugar una mano rápida cuando tus amigos no están disponibles.",
+        "responsive_title": "Juega donde sea",
+        "responsive_body": "Interfaz totalmente adaptada. Todos se unen a la misma mesa, ya sea desde móvil, tablet o PC."
       },
       "quote": {
         "text": "\"Lo mejor de una noche de póker nunca fueron las cartas. Fueron las historias que contaste después.\"",
         "attribution": "YayPoker — construido para los momentos entre manos"
       },
       "final_cta": {
-        "label": "¿Listo?",
-        "headline": "Empieza tu mesa.{br}Reparte la primera mano.",
-        "create": "Crear una Mesa",
-        "join": "Unirse a Mesa"
+        "label": "¿Repartimos?",
+        "headline": "Inicia tu mesa privada.{br}Invita a tus amigos ahora.",
+        "create": "Iniciar Mesa Privada",
+        "join": "Unirse a Privada"
       }
     },
     "about": {
@@ -234,7 +244,7 @@
       "section2_content": "YayPoker está diseñado para el entretenimiento \"sano\" y familiar. Está diseñado para facilitar juegos entre amigos, familiares y comunidades establecidas en un entorno privado.",
       "section3_title": "3. Uso de Apodos",
       "section3_content": "Eres responsable del apodo que elijas. Si bien no recopilamos tu identidad real, esperamos que todos los jugadores mantengan un ambiente respetuoso y familiar. Nos reservamos el derecho de terminar cualquier sesión de juego que viole el espíritu del juego \"sano\".",
-      "section4_title": "4. Sin Garantía",
+      "section4_title": "4. No Garantía",
       "section4_content": "Este servicio se proporciona \"tal cual\" y \"según disponibilidad\" sin garantías de ningún tipo. No somos responsables de ningún problema de conexión, pérdida de fichas virtuales o interrupciones en el juego.",
       "section5_title": "5. Acuerdos Paralelos",
       "section5_content": "Cualquier arreglo o apuesta paralela realizada entre jugadores fuera del sistema de fichas virtuales de YayPoker es estrictamente entre esas personas. YayPoker no respalda, facilita ni se hace responsable de ningún acuerdo externo.",
@@ -267,26 +277,31 @@
       "subtitle": "Texas Hold'em {span}",
       "subtitle_span": "Lobby",
       "join_table": "Unirse a {span}",
-      "join_table_span": "Mesa",
-      "join_existing": "Unirse a {span} Existente",
-      "join_existing_span": "Mesa",
+      "join_table_span": "Mesa Privada",
+      "join_existing": "Unirse a {span}",
+      "join_existing_span": "Mesa Privada Existente",
       "your_info": "Tu información",
       "name_placeholder": "Ingresa Tu Nombre",
       "pin_placeholder": "Inventa un PIN de 4 Dígitos",
       "format_tooltip": "Formato: XXXXX-XXXXX",
       "join_btn": "Unirse",
       "format_error": "El formato debe ser XXXXX-XXXXX",
-      "new_game": "Nuevo {span}",
-      "new_game_span": "Juego",
-      "table_code_label": "Tu Código de Mesa",
+      "new_game": "Iniciar {span}",
+      "new_game_span": "Mesa Privada",
+      "table_code_label": "Tu Código de Mesa Privada",
       "setup_label": "Configura Tu Nombre",
       "setup_label_pin": "Configura Tu PIN Secreto",
       "setup_table_code": "Escriba el número de Mesa",
+      "public_tables_title": "Mesas Públicas",
+      "public_tables_desc": "Únete a una mesa al instante y practica con otros",
+      "play_now_btn": "Jugar Ahora",
+      "or_separator": "O BIEN",
       "setup_name_placeholder": "Ej: Osito",
       "start_btn": "Empezar a Jugar",
       "back_to_lobby": "← Volver al Lobby",
       "footer": "© 2026 {span}. Todas las fichas son virtuales.",
-      "brand": "YayPoker"
+      "brand": "YayPoker",
+      "back_to_home": "Ir a Inicio"
     }
   }
 }

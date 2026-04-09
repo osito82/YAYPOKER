@@ -2,18 +2,16 @@
   "nav": {
     "how": "How it works",
     "features": "Features",
-    "join": "Join a Table",
-    "play": "Play now"
+    "join": "Join Private Table",
+    "play": "Play Now"
   },
   "hero": {
     "badge": "Free to play · No account needed · Works on any device",
-
     "headline": "Play Poker, {br} {like_pro} {br} FREE.",
     "like_pro": "like a pro...",
-
-    "sub": "Spin up a private table in seconds, share a link, and deal with your friends — wherever they are. No app downloads. No real money. Just the game.",
-    "create": "Create a Table",
-    "browse": "Join a Table",
+    "sub": "Gather your crew for the ultimate home game. We provide the automated virtual dealer and cards; you bring the competition. Need to sharpen your skills? Jump into a Public Table and play with anyone, anywhere.",
+    "create": "Start Private Table",
+    "browse": "Join Private Table",
     "social": "Played by {count} this week",
     "thousands": "thousands of crews",
     "scroll": "Scroll"
@@ -40,6 +38,11 @@
     "min_players_warning": "Need at least 2 players to start the match",
     "start_game": "Deal First Hand",
     "waiting_for_host": "Waiting for Host to Start...",
+    "public_waiting_players": "Waiting for Players...",
+    "public_starting_soon": "Starting Soon...",
+    "public_min_players_hint": "Public tables start automatically with at least 2 players.",
+    "public_auto_start_hint": "Match will start in a few seconds.",
+    "public_badge": "Public Table",
     "copyright": "© 2026 {brand} Engineering",
     "brand": "YayPoker"
   },
@@ -86,7 +89,9 @@
     "log_live": "Live",
     "system_ready": "SYSTEM_READY: Waiting for game events... 📡",
     "your_turn": "IT'S YOUR TURN",
-    "waiting_others": "Waiting for others..."
+    "waiting_others": "Waiting for others...",
+    "leave_confirm": "Are you sure you want to leave the game?",
+    "leave_private_hint": "\n\nImportant: Remember your Private Table Code to rejoin later: {code}"
   },
   "winner": {
     "wins": "Wins!",
@@ -118,6 +123,7 @@
     "copied": "✓ OK",
     "verify_link": "Verify Certificate at {url}",
     "back_to_lobby": "Back to Lobby ({count}s)",
+    "save_cert_warning": "Important: Save your certificate URL or take a screenshot before leaving. It is your only proof of victory! Have you saved it and want to leave?",
     "system_footer": "YAY Poker · OFFICIAL CERTIFICATION SYSTEM · v1.0"
   },
   "form": {
@@ -130,36 +136,38 @@
   "pages": {
     "home": {
       "how": {
-        "label": "How it works",
-        "headline": "From zero to all-in{br}in under a minute.",
-        "step1_title": "Create your table",
-        "step1_body": "Hit the button, choose an alias — your private table is live. No forms, no passwords, no friction.",
-        "step2_title": "Share the link",
-        "step2_body": "Copy the room code and drop it on WhatsApp, Discord, or wherever your crew hangs out.",
-        "step3_title": "Play your hand",
-        "step3_body": "Cards are dealt automatically. Chips are virtual. The trash talk is very much real."
+        "label": "The Experience",
+        "headline": "Your private poker room,{br}managed by our dealer.",
+        "step1_title": "Launch Your Table",
+        "step1_body": "Spin up a private space in one click. No registration, no overhead — just a professional virtual environment ready for your crew.",
+        "step2_title": "Gather the Crew",
+        "step2_body": "Share your unique link. We handle the deck, the dealer, and the pot, so you can focus on the bluffs and the banter.",
+        "step3_title": "Or Go Public",
+        "step3_body": "Don't have a group ready? Use our Public Tables to practice your strategy and play against other enthusiasts instantly."
       },
       "features": {
-        "label": "Features",
-        "headline": "Everything you need.{br}Nothing you don't.",
-        "money_title": "No real money — ever",
-        "money_body": "YayPoker deals in virtual chips only. Want to make it interesting with a side bet between friends? That's your business. We just run the table.",
-        "setup_title": "Instant setup",
-        "setup_body": "No install. No sign-up. Open the link and you're at the table.",
-        "private_title": "Private by default",
-        "private_body": "Tables are invite-only. No strangers at your game.",
-        "responsive_title": "Any screen, any place",
-        "responsive_body": "Fully responsive — phone, tablet, laptop. Everyone at the table, wherever they are."
+        "label": "The Deck",
+        "headline": "Professional tools for{br}your digital poker night.",
+        "money_title": "Purely Virtual Chips",
+        "money_body": "YayPoker is a pure simulation. We provide the chips, the table, and the dealer logic. No real currency is ever involved.",
+        "setup_title": "Instant Dealer",
+        "setup_body": "No downloads or sign-ups. Your virtual dealer is ready the moment you open the link.",
+        "private_title": "Invite-Only Privacy",
+        "private_body": "Private tables are your personal safe space. No strangers, just the people you invite to your game.",
+        "public_title": "Public Practice",
+        "public_body": "Open tables available 24/7. Perfect for testing new strategies or playing a quick hand when your friends are busy.",
+        "responsive_title": "Play Anywhere",
+        "responsive_body": "Fully responsive interface. Everyone joins the same table, whether on phone, tablet, or desktop."
       },
       "quote": {
         "text": "\"The best part of poker night was never the cards. It was the stories you told after.\"",
         "attribution": "YayPoker — built for the moments between the hands"
       },
       "final_cta": {
-        "label": "Ready?",
-        "headline": "Start your table.{br}Deal the first hand.",
-        "create": "Create a Table",
-        "join": "Join a Table"
+        "label": "Ready to deal?",
+        "headline": "Start your private table.{br}Invite your friends now.",
+        "create": "Start Private Table",
+        "join": "Join Private Table"
       }
     },
     "about": {
@@ -269,21 +277,25 @@
       "subtitle": "Texas Hold'em {span}",
       "subtitle_span": "Lobby",
       "join_table": "Join {span}",
-      "join_table_span": "Table",
-      "join_existing": "Join Existing {span}",
-      "join_existing_span": "Table",
+      "join_table_span": "Private Table",
+      "join_existing": "Join {span}",
+      "join_existing_span": "Existing Private Table",
       "name_placeholder": "Enter Your Name",
       "pin_placeholder": "Invent 4-Digit Pin",
       "format_tooltip": "Format: XXXXX-XXXXX",
       "join_btn": "Join",
       "format_error": "Format must be XXXXX-XXXXX",
-      "new_game": "New {span}",
-      "new_game_span": "Game",
-      "table_code_label": "Your Table Code",
+      "new_game": "Start {span}",
+      "new_game_span": "Private Table",
+      "table_code_label": "Your Private Table Code",
       "setup_label": "Set Your Display Name",
       "setup_label_pin": "Set Your your secret PIN",
       "setup_name_placeholder": "Ex: Osito",
       "setup_table_code": "Enter your Table Code",
+      "public_tables_title": "Public Tables",
+      "public_tables_desc": "Join a table instantly and practice with others",
+      "play_now_btn": "Play Now",
+      "or_separator": "OR",
       "start_btn": "Start Playing",
       "back_to_lobby": "← Back to Lobby",
       "footer": "© 2026 {span}. All chips are virtual.",

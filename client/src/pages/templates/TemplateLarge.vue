@@ -15,7 +15,8 @@
       >
         <div
           id="header-logo-wrapper-TemplateLarge"
-          class="header-logo-wrap shrink-0"
+          class="header-logo-wrap shrink-0 cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
+          @click="$emit('goHome')"
         >
           <span
             id="header-logo-text-TemplateLarge"
@@ -208,6 +209,7 @@
         :betAmount="betAmount"
         :minBet="minBet"
         :maxBet="maxBet"
+        :sliderMin="sliderMin"
         :playerCards="myPlayer?.cards || []"
         @action="(a) => $emit('action', a)"
         @setQuickBet="(m) => $emit('setQuickBet', m)"
@@ -242,6 +244,7 @@ defineProps({
   betAmount: Number,
   minBet: Number,
   maxBet: Number,
+  sliderMin: Number,
   pot: Number,
   communityCards: Array,
   activePlayerId: String,
@@ -250,7 +253,7 @@ defineProps({
   winnerInfo: Object,
 })
 
-defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
+defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])
 </script>
 
 <style scoped>
