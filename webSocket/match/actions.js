@@ -351,7 +351,10 @@ class MatchActions {
 
     if (type === 'setRise') {
       const myRaiseAmount = amount - currentMaxBet
-      if (myRaiseAmount < lastRaise && !foundPlayer.isAllIn) {
+      // Poker Rule: If a player goes All-In for less than the minimum raise, it's still allowed.
+      const isForcedAllIn = amount >= (foundPlayer.chips + foundPlayer.currentBet)
+
+      if (myRaiseAmount < lastRaise && !isForcedAllIn) {
         this.log
           .Template({
             name: 'brakets',
@@ -386,36 +389,41 @@ class MatchActions {
     }
 
     if (type === 'setRise' && amount <= currentMaxBet) {
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'ERROR:RAISE_REJECTED',
-          date: true,
+      // Si es un All-In por debajo del Call, realmente debería ser un Call o un Fold, 
+      // pero si el cliente manda setRise por error en All-In, lo validamos.
+      const isForcedAllIn = amount >= (foundPlayer.chips + foundPlayer.currentBet)
+
+      if (!isForcedAllIn) {
+        this.log
+          .Template({
+            name: 'brakets',
+            title: 'ERROR:RAISE_REJECTED',
+            date: true,
+            displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
+          })
+          .R({
+            torneoId: this.match.torneoId,
+            handId: this.match.currentHandId,
+            player: foundPlayer.name,
+            playerCards: foundPlayer.cards,
+            playerSecret: foundPlayer.secretCode,
+            dealerCards: this.match.cardsDealer,
+            amount,
+            currentMax: currentMaxBet,
+            reason: 'Raise must be higher than current highest bet',
+          })
+
+        this.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
+          reason: 'minimum raise',
           displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
         })
-        .R({
-          torneoId: this.match.torneoId,
-          handId: this.match.currentHandId,
-          player: foundPlayer.name,
-          playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
-          dealerCards: this.match.cardsDealer,
-          amount,
-          currentMax: currentMaxBet,
-          reason: 'Raise must be higher than current highest bet',
-        })
-
-      this.communicator.msgBuilder('actionRejected', 'private', foundPlayer, {
-        reason: 'minimum raise',
-        displayMsg: `Raise invalid: must be higher than ${currentMaxBet}.`,
-      })
-      Socket.sendToPlayer(
-        this.match.torneoId,
-        foundPlayer.secretCode,
-        this.communicator.getMsg(),
-      )
-
-      return
+        Socket.sendToPlayer(
+          this.match.torneoId,
+          foundPlayer.secretCode,
+          this.communicator.getMsg(),
+        )
+        return
+      }
     }
 
     this.resetConsecutiveAutofolds(foundPlayer)
@@ -1021,7 +1029,8 @@ class MatchActions {
           playerSecret: p.secretCode,
           dealerCards: this.match.cardsDealer,
           options: opts,
-          maxBet,
+          maxBetOnTable: maxBet,
+          playerMaxPotential: p.chips + p.getCurrentBet(),
           playerBet: p.getCurrentBet(),
           playerChips: p.chips,
           actedPlayers: actedPlayers.map(

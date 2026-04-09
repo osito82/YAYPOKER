@@ -10,6 +10,7 @@
     :betAmount="betAmount"
     :minBet="minBet"
     :maxBet="maxBet"
+    :sliderMin="sliderMin"
     :playerCards="playerCards"
     @action="(a) => $emit('action', a)"
     @update:betAmount="(val) => $emit('update:betAmount', val)"
@@ -35,6 +36,7 @@ defineProps({
   betAmount: { type: Number, default: 0 },
   minBet: { type: Number, default: 0 },
   maxBet: { type: Number, default: 0 },
+  sliderMin: { type: Number, default: 0 },
   playerCards: { type: Array, default: () => [] },
 })
 

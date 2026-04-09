@@ -133,6 +133,7 @@
             :betAmount="betAmount"
             :minBet="minBet"
             :maxBet="maxBet"
+            :sliderMin="sliderMin"
             :playerCards="myPlayer?.cards || []"
             @action="(a) => $emit('action', a)"
             @setQuickBet="(m) => $emit('setQuickBet', m)"
@@ -190,6 +191,7 @@ defineProps({
   betAmount: Number,
   minBet: Number,
   maxBet: Number,
+  sliderMin: Number,
   pot: Number,
   communityCards: Array,
   activePlayerId: String,

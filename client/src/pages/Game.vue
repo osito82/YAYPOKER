@@ -26,6 +26,7 @@
     :betAmount="betAmount"
     :minBet="minBet"
     :maxBet="maxBet"
+    :sliderMin="callLevel"
     :pot="pokerStore.getPot"
     :communityCards="pokerStore.getCommunityCards"
     :activePlayerId="pokerStore.getActivePlayerId"
@@ -186,6 +187,13 @@ const isMyTurn = computed(
 const options = computed(() =>
   props.isGuest ? [] : pokerStore.getBettingOptions || [],
 )
+
+const callLevel = computed(() => {
+  const tableMax = currentMaxBetOnTable.value || 0
+  const myTotal = maxBet.value || 0
+  return Math.min(tableMax, myTotal)
+})
+
 const canBlind = computed(
   () => !props.isGuest && isMyTurn.value && options.value.includes('blind'),
 )
@@ -256,7 +264,15 @@ watch(
 watch(isMyTurn, (newVal) => {
   if (newVal) {
     // Start at current max bet level (Call level)
-    betAmount.value = Math.min(currentMaxBetOnTable.value, maxBet.value)
+    const callLevel = Math.min(currentMaxBetOnTable.value, maxBet.value)
+    
+    // Si la única opción de subir es ir All-In (porque el stack no da para el mínimo legal),
+    // posicionamos el selector en el All-In para habilitar el botón de Raise/All-In.
+    if (options.value.includes('raise') && minBet.value === maxBet.value && maxBet.value > callLevel) {
+      betAmount.value = maxBet.value
+    } else {
+      betAmount.value = callLevel
+    }
   }
 })
 

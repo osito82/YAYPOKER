@@ -9,7 +9,7 @@
       :id="`hud-betting-slider-input-${templateSuffix}`"
       type="range"
       v-model.number="betProxy"
-      :min="minBet"
+      :min="sliderMin"
       :max="maxBet"
       :disabled="isSliderDisabled"
       class="slider-input flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
@@ -41,6 +41,7 @@ const props = defineProps({
   betAmount: Number,
   minBet: Number,
   maxBet: Number,
+  sliderMin: Number,
   isSliderDisabled: Boolean,
   templateSuffix: String,
 })

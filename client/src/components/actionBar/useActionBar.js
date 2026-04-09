@@ -48,7 +48,9 @@ export function useActionBar(props, emit) {
 
   const isSliderDisabled = computed(() => {
     if (!props.isMyTurn) return true
-    return props.maxBet <= props.minBet
+    // El slider solo se bloquea si el jugador ya no tiene más fichas para agregar
+    // (es decir, ya puso todo lo que tenía o su stack es 0)
+    return props.balance <= 0
   })
 
   const isRaiseActionDisabled = computed(() => {

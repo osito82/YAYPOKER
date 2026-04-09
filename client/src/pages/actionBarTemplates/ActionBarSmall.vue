@@ -38,6 +38,7 @@
             :betAmount="betAmount"
             :minBet="minBet"
             :maxBet="maxBet"
+            :sliderMin="sliderMin"
             :isSliderDisabled="isSliderDisabled"
             :templateSuffix="templateSuffix"
             @update:betAmount="(val) => $emit('update:betAmount', val)"
@@ -92,6 +93,7 @@ const props = defineProps({
   betAmount: Number,
   minBet: Number,
   maxBet: Number,
+  sliderMin: Number,
   playerCards: Array,
 })
 

@@ -298,6 +298,13 @@ export const usePokerStore = defineStore('pokerStore', () => {
           gameData.action,
         )
       ) {
+        if (gameData.data?.totalBet !== undefined) {
+          currentHighestBet.value = Math.max(
+            currentHighestBet.value,
+            gameData.data.totalBet,
+          )
+        }
+
         // Only clear if this message doesn't have new turn info
         // (Action confirmations usually don't, but let's be safe)
         if (!gameData.data?.messageForId && !gameData.data?.id) {
