@@ -381,7 +381,7 @@
             @click="cancelCreate"
             class="w-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-[12px] font-black uppercase tracking-[0.2em] transition-colors"
           >
-            {{ $t('pages.lobby_home.back_to_lobby') }}
+            {{ $t('tournament.back_to_home') }}
           </button>
         </div>
       </div>
@@ -676,7 +676,7 @@ const goToCreate = () => {
 }
 
 const cancelCreate = () => {
-  router.push({ name: 'lobby.home' })
+  router.push({ name: 'landing' })
 }
 
 const copyToClipboard = async () => {
