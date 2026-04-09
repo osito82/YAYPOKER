@@ -98,7 +98,7 @@
         <!-- Winner Card -->
         <div
           :id="'winner-tournament-card-' + templateSuffix"
-          class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-7 sm:p-8 mb-5 relative overflow-visible animate-fade-up animation-delay-500"
+          class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-6 sm:p-8 mb-5 relative overflow-visible min-h-fit animate-fade-up animation-delay-500"
         >
           <div
             :id="'winner-tournament-card-accent-' + templateSuffix"
@@ -106,20 +106,20 @@
           ></div>
           <div
             :id="'winner-tournament-card-bg-icon-' + templateSuffix"
-            class="absolute -top-5 -right-2 text-[120px] text-black/25 rotate-[-15deg] select-none"
+            class="absolute -top-5 -right-2 text-[120px] text-black/25 rotate-[-15deg] select-none pointer-events-none"
           >
             ♠
           </div>
 
           <p
             :id="'winner-tournament-label-' + templateSuffix"
-            class="winner-label font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853] mb-1.5"
+            class="winner-label font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853] mb-2"
           >
             {{ $t('tournament.winner') }}
           </p>
           <h2
             :id="'winner-tournament-name-text-' + templateSuffix"
-            class="winner-name whitespace-normal font-bebas text-5xl sm:text-6xl tracking-[2px] leading-tight text-[#F5F0E8] py-1 mb-4 relative z-10 break-words overflow-visible"
+            class="winner-name font-bebas text-5xl sm:text-7xl tracking-[2px] leading-[1.1] text-[#F5F0E8] mb-6 relative z-10 break-words"
           >
             {{ winnerName.toUpperCase() }}
           </h2>

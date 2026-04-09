@@ -15,7 +15,8 @@
       >
         <div
           id="header-logo-wrapper-TemplateLarge"
-          class="header-logo-wrap shrink-0"
+          class="header-logo-wrap shrink-0 cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
+          @click="$emit('goHome')"
         >
           <span
             id="header-logo-text-TemplateLarge"
@@ -250,7 +251,7 @@ defineProps({
   winnerInfo: Object,
 })
 
-defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
+defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])
 </script>
 
 <style scoped>

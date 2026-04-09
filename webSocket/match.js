@@ -284,6 +284,9 @@ class Match extends EventEmitter {
             displayMsg: `Waiting for at least ${minRequired} players to be connected (current: ${connectedPlayers.length})...`,
           })
           Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+          
+          // Re-intentar automáticamente en 2 segundos para ver si ya entró alguien más
+          setTimeout(() => this.startGame(thisSocket, data), 2000)
         } else {
           setTimeout(() => this.startGame(thisSocket, data), 1000)
         }

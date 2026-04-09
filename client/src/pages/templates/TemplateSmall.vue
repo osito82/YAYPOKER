@@ -15,7 +15,8 @@
       >
         <div
           id="logo-icon-wrapper-TemplateSmall"
-          class="w-6 h-6 bg-yellow-500 rounded flex items-center justify-center shadow-[0_0_10px_rgba(234,179,8,0.3)] shrink-0"
+          class="w-6 h-6 bg-yellow-500 rounded flex items-center justify-center shadow-[0_0_10px_rgba(234,179,8,0.3)] shrink-0 cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
+          @click="$emit('goHome')"
         >
           <span
             id="logo-text-icon-TemplateSmall"
@@ -197,5 +198,5 @@ defineProps({
   winnerInfo: Object,
 })
 
-defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage'])
+defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])
 </script>

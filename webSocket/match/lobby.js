@@ -324,6 +324,16 @@ class MatchLobby {
           this.match.publicAutoStartTimer = null
         }
       }
+
+      // Si la mesa es pública y no quedan jugadores, la eliminamos del Torneo para que se limpie de memoria
+      // y permita crear una nueva instancia fresca si alguien vuelve a entrar.
+      if (this.match.isPublic && this.match.players.length === 0) {
+        const Torneo = require('../torneo')
+        Torneo.getTorneos().delete(this.match.torneoId)
+        this.log.R({
+          msg: `[LOBBY] Public match ${this.match.torneoId} deleted (empty).`,
+        })
+      }
     }
     const stillPaused = this.match.players.some((p) => !p.connected)
     if (!stillPaused) this.stepChecker.revokeStep('pause')

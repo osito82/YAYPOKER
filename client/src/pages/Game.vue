@@ -36,6 +36,7 @@
     @setQuickBet="setQuickBet"
     @update:betAmount="(val) => (betAmount = val)"
     @sendMessage="sendMessage"
+    @goHome="handleLogoClick"
   />
 </template>
 
@@ -49,6 +50,7 @@ import {
   defineAsyncComponent,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import useWebSocket from '../use/useSockets'
@@ -73,6 +75,7 @@ const props = defineProps({
   isGuest: { type: Boolean, default: false },
 })
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const pokerStore = usePokerStore()
@@ -82,6 +85,17 @@ const secretCode = route.params.secretCode
 
 const serverTime = ref(new Date().toLocaleTimeString())
 let timeInterval = null
+
+const handleLogoClick = () => {
+  let msg = t('game.leave_confirm')
+  if (!pokerStore.getIsPublic) {
+    msg += t('game.leave_private_hint', { code: gameCode })
+  }
+
+  if (confirm(msg)) {
+    router.push('/')
+  }
+}
 
 // Select template based on screen size
 const activeTemplate = computed(() => {
@@ -208,7 +222,7 @@ const maxBet = computed(() => {
   return stack + alreadyBet
 })
 
-const betAmount = ref(minBet.value)
+const betAmount = ref(0)
 
 // ACTIONS & WATCHERS
 const setQuickBet = (m) => {
@@ -240,16 +254,17 @@ watch(
 
 watch(isMyTurn, (newVal) => {
   if (newVal) {
-    betAmount.value = minBet.value
+    // Start at current max bet level (Call level)
+    betAmount.value = Math.min(currentMaxBetOnTable.value, maxBet.value)
   }
 })
 
 watch([minBet, maxBet], ([newMin, newMax]) => {
   if (isMyTurn.value) {
-    if (betAmount.value < newMin) betAmount.value = newMin
     if (betAmount.value > newMax) betAmount.value = newMax
   }
 })
+
 
 function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')

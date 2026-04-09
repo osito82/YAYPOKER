@@ -89,7 +89,9 @@
     "log_live": "En Vivo",
     "system_ready": "SISTEMA_LISTO: Esperando eventos de juego... 📡",
     "your_turn": "ES TU TURNO",
-    "waiting_others": "Esperando a otros..."
+    "waiting_others": "Esperando a otros...",
+    "leave_confirm": "¿Estás seguro de que quieres abandonar el juego?",
+    "leave_private_hint": "\n\nImportante: Recuerda tu Código de Mesa Privada para volver a unirte luego: {code}"
   },
   "winner": {
     "wins": "¡Gana!",

@@ -89,7 +89,9 @@
     "log_live": "Live",
     "system_ready": "SYSTEM_READY: Waiting for game events... 📡",
     "your_turn": "IT'S YOUR TURN",
-    "waiting_others": "Waiting for others..."
+    "waiting_others": "Waiting for others...",
+    "leave_confirm": "Are you sure you want to leave the game?",
+    "leave_private_hint": "\n\nImportant: Remember your Private Table Code to rejoin later: {code}"
   },
   "winner": {
     "wins": "Wins!",

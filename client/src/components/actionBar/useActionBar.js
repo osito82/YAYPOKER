@@ -57,10 +57,13 @@ export function useActionBar(props, emit) {
       props.options.includes('bet') || props.options.includes('raise')
     if (!hasActionOption) return true
 
-    // If forced All-In (minBet === maxBet), the action is allowed
-    if (props.minBet >= props.maxBet) return false
+    // El botón solo se activa si el monto seleccionado es mayor a la apuesta más alta en la mesa
+    // (es decir, una subida real) Y además cumple con el mínimo legal (o es All-In)
+    const tableHighestBet = pokerStore.getCurrentHighestBet || 0
+    const isIncrease = props.betAmount > tableHighestBet
+    const isLegalAmount = props.betAmount >= props.minBet
 
-    return props.betAmount < props.minBet
+    return !(isIncrease && isLegalAmount)
   })
 
   const activePlayerName = computed(() => {
