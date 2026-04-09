@@ -791,6 +791,11 @@ class MatchActions {
       setTimeout(() => {
         this.emitter.emit('NEXT_ROUND')
       }, TIMEOUTS.nextRound)
+    } else if (this.isPublic()) {
+      // En mesas públicas, siempre intentamos ir a la siguiente ronda (que reseteará si el torneo terminó)
+      setTimeout(() => {
+        this.emitter.emit('NEXT_ROUND')
+      }, TIMEOUTS.nextRound)
     }
   }
 

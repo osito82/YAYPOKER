@@ -103,7 +103,49 @@
           :id="`lobby-error-display-box-${templateSuffix}`"
           class="flex flex-col items-center gap-4 mb-6 animate-fade-in w-full px-6"
         >
+          <!-- Friendly Waiting Message for Public Tables -->
           <div
+            v-if="isPublicTable && lastError.errorType === 'WAITING_PLAYERS'"
+            class="bg-blue-500/10 border border-blue-500/30 p-8 rounded-2xl w-full text-center relative overflow-hidden"
+          >
+            <div
+              class="absolute top-0 right-0 p-4 text-4xl font-black opacity-[0.03] select-none"
+            >
+              ♠
+            </div>
+            <div
+              class="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20 animate-pulse"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-7 w-7 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2.5"
+                  d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <h3
+              class="text-blue-600 dark:text-blue-400 font-black uppercase tracking-[0.2em] mb-3 text-sm"
+            >
+              {{ $t('lobby.public_waiting_players') }}
+            </h3>
+            <p
+              class="text-gray-600 dark:text-gray-400 text-xs font-bold uppercase tracking-widest opacity-80"
+            >
+              {{ $t('lobby.public_min_players_hint') }}
+            </p>
+          </div>
+
+          <!-- Real Error Message -->
+          <div
+            v-else
             class="bg-red-500/10 border border-red-500/30 p-6 rounded-2xl w-full text-center"
           >
             <div
@@ -137,6 +179,7 @@
           </div>
 
           <button
+            v-if="!isPublicTable || lastError.errorType !== 'WAITING_PLAYERS'"
             @click="handleErrorBack"
             class="bg-gray-200 dark:bg-white/5 hover:bg-gray-300 dark:hover:bg-white/10 text-gray-900 dark:text-white font-black py-3 px-8 rounded-xl border border-gray-300 dark:border-white/10 transition-all uppercase tracking-widest text-[10px]"
           >

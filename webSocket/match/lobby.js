@@ -147,6 +147,16 @@ class MatchLobby {
       )
       player.setConnected(true)
 
+      // Solo reseteamos si es pública Y no hay absolutamente nadie en la lista (limpieza inicial)
+      // O si la mesa se quedó "atascada" sin jugadores reales.
+      if (this.match.isPublic && this.match.players.length === 0) {
+        this.log.R({
+          msg: `[LOBBY] Initializing empty public match for: ${player.name}`,
+        })
+        this.stepChecker.revokeStep('startGame')
+        this.match.acceptingPlayers = true
+      }
+
       // Si la mesa ya está en juego y es pública, este jugador espera a la siguiente mano
       if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
         player.setStarted(false)

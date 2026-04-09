@@ -408,8 +408,9 @@ const stopTimer = () => {
 }
 
 const handleClose = () => {
-  // Mostrar mensaje de advertencia antes de salir
-  alert(t('tournament.save_cert_warning'))
+  // Mostrar mensaje de confirmación antes de salir
+  const hasSaved = confirm(t('tournament.save_cert_warning'))
+  if (!hasSaved) return
 
   isVisible.value = false
   setTimeout(() => {

@@ -278,6 +278,7 @@ class Match extends EventEmitter {
       if (connectedPlayers.length < minRequired) {
         if (!this.isSpawningBots) {
           this.communicator.msgBuilder('lobbyError', 'public', null, {
+            errorType: 'WAITING_PLAYERS',
             displayMsg: `Waiting for at least ${minRequired} players to be connected (current: ${connectedPlayers.length})...`,
           })
           Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
@@ -387,7 +388,18 @@ class Match extends EventEmitter {
     )
 
     if (playersWithChips.length < GAME_RULES.MIN_PLAYERS) {
-      this.log.R({ info: 'Tournament finished. No more rounds.' })
+      this.log.R({
+        info: `Tournament finished. ${this.isPublic ? 'Resetting public table.' : 'No more rounds.'}`,
+      })
+
+      if (this.isPublic) {
+        // En mesas públicas, si el torneo termina, reseteamos para que nuevos jugadores puedan entrar
+        this.stepChecker.revokeStep('startGame')
+        this.acceptingPlayers = true
+        // Limpiamos jugadores sin fichas o desconectados para dejar espacio
+        this.players = this.players.filter((p) => p.chips > 0 && p.connected)
+        return
+      }
       return
     }
     this.restartMatch()
