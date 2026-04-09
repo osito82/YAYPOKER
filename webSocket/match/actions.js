@@ -715,11 +715,22 @@ class MatchActions {
       }
     }
 
-    // Map winners to include handName for compatibility with tests
-    winnersInfo = winnersInfo.map((w) => ({
-      ...w,
-      handName: w.pokerHand || 'High Card',
-    }))
+    // NORMALIZE: Ensure each entry has playerId and other expected fields
+    // This handles cases where a Player object was passed directly
+    const currentPot = this.dealer.getPot()
+    winnersInfo = winnersInfo.map((w) => {
+      const isPlayerObject = typeof w.getPlayerId === 'function'
+      const pId = isPlayerObject ? w.id : (w.playerId || w.id)
+      
+      return {
+        name: w.name,
+        playerId: pId,
+        pokerHand: isPlayerObject ? 'High Card' : (w.pokerHand || 'High Card'),
+        prizeRank: isPlayerObject ? 10 : (w.prizeRank || 10),
+        handName: isPlayerObject ? 'High Card' : (w.pokerHand || 'High Card'),
+        amount: w.amount || (winnersInfo.length === 1 ? currentPot : Math.floor(currentPot / winnersInfo.length))
+      }
+    })
 
     const finalHands = this.dealer.getFinalHands()
     const pot = this.dealer.getPot()
@@ -834,6 +845,7 @@ class MatchActions {
     const winnerForCert = {
       ...winnerData,
       secretCode: realPlayer ? realPlayer.secretCode : '0000',
+      amount: realPlayer ? realPlayer.chips : (winnerData.amount || 0),
     }
 
     this.log

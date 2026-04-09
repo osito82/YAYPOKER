@@ -110,6 +110,8 @@ class Match extends EventEmitter {
   }
 
   increaseBlinds() {
+    if (this.isPublic) return
+
     this.blindLevel++
     this.smallBlind = Math.ceil(
       this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
@@ -398,6 +400,12 @@ class Match extends EventEmitter {
         this.acceptingPlayers = true
         // Limpiamos jugadores sin fichas o desconectados para dejar espacio
         this.players = this.players.filter((p) => p.chips > 0 && p.connected)
+        
+        // Informamos a los que se quedan que estamos en modo lobby esperando
+        this.communicator.msgBuilder('lobby', 'public', null, {
+          displayMsg: 'Tournament finished. Waiting for new players...',
+        })
+        Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
         return
       }
       return
@@ -438,6 +446,8 @@ class Match extends EventEmitter {
       p.setLastAction('')
       p.setStarted(p.connected)
       p.cards = []
+      p.currentBet = 0
+      p.handContribution = 0
     })
 
     this.communicator.msgBuilder('gameRestarted', 'public', null, {
