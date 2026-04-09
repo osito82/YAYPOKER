@@ -94,7 +94,7 @@
         </div>
 
         <!-- MODE: Public Game (/public) -->
-        <div v-if="isPublic" class="space-y-6">
+        <form v-if="isPublic" @submit.prevent="joinPublicGame" class="space-y-6">
           <div class="text-center">
             <h1
               class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic"
@@ -135,12 +135,13 @@
           </div>
 
           <button
-            @click="joinPublicGame"
-            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-4 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-base"
+            type="submit"
+            :disabled="!playerName || !playerName.trim()"
+            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-4 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-base"
           >
             {{ $t('pages.lobby_home.play_now_btn') || 'Play Now' }}
           </button>
-        </div>
+        </form>
 
         <!-- MODE: Selection (Home /lobby) -->
         <template v-else-if="!isCreating">
