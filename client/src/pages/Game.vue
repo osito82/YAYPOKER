@@ -190,7 +190,9 @@ const options = computed(() =>
 
 const callLevel = computed(() => {
   const tableMax = currentMaxBetOnTable.value || 0
+  const myAlreadyBet = myPlayer.value?.currentBet || 0
   const myTotal = maxBet.value || 0
+  // The level we start at is the table's highest bet, but we can't exceed our total chips
   return Math.min(tableMax, myTotal)
 })
 
@@ -212,13 +214,13 @@ const blindInfo = computed(() => {
 })
 
 const minBet = computed(() => {
-  const isRaiseAction = options.value.includes('raise')
+  const isRaiseAction = options.value.includes('raise') || options.value.includes('bet')
   const bigBlind = pokerStore.bigBlind || 20
-  const baseMin = isRaiseAction
-    ? currentMaxBetOnTable.value + lastRaiseAmount.value
-    : currentMaxBetOnTable.value > 0
-      ? currentMaxBetOnTable.value + bigBlind
-      : bigBlind
+  
+  let baseMin = bigBlind
+  if (currentMaxBetOnTable.value > 0) {
+    baseMin = currentMaxBetOnTable.value + lastRaiseAmount.value
+  }
 
   // If player has fewer chips than the required minimum, 
   // their minimum (and maximum) bet is their total stack (All-In).
@@ -263,21 +265,14 @@ watch(
 
 watch(isMyTurn, (newVal) => {
   if (newVal) {
-    // Start at current max bet level (Call level)
-    const callLevel = Math.min(currentMaxBetOnTable.value, maxBet.value)
-    
-    // Si la única opción de subir es ir All-In (porque el stack no da para el mínimo legal),
-    // posicionamos el selector en el All-In para habilitar el botón de Raise/All-In.
-    if (options.value.includes('raise') && minBet.value === maxBet.value && maxBet.value > callLevel) {
-      betAmount.value = maxBet.value
-    } else {
-      betAmount.value = callLevel
-    }
+    // Start exactly at current call level
+    betAmount.value = callLevel.value
   }
 })
 
-watch([minBet, maxBet], ([newMin, newMax]) => {
+watch([callLevel, maxBet], ([newMin, newMax]) => {
   if (isMyTurn.value) {
+    if (betAmount.value < newMin) betAmount.value = newMin
     if (betAmount.value > newMax) betAmount.value = newMax
   }
 })

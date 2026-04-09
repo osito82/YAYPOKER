@@ -11,6 +11,7 @@
       v-model.number="betProxy"
       :min="sliderMin"
       :max="maxBet"
+      :step="5"
       :disabled="isSliderDisabled"
       class="slider-input flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
     />
