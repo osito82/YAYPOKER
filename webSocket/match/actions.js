@@ -261,7 +261,7 @@ class MatchActions {
     if (!foundPlayer) return
 
     const currentMaxBet = this.dealer.getCurrentHighestBet()
-    const amountAdded = currentMaxBet - foundPlayer.getCurrentBet()
+    let amountAdded = currentMaxBet - foundPlayer.getCurrentBet()
 
     if (amountAdded <= 0) {
       return this.setCheck(thisSocket)
@@ -273,10 +273,14 @@ class MatchActions {
       this.match.lobby.noMorePlayers()
     }
 
+    const currentBetBefore = foundPlayer.getCurrentBet()
     const success = foundPlayer.setTotalBet(currentMaxBet)
     if (!success) return
 
     this.match.activePlayerId = null
+    const currentBetAfter = foundPlayer.getCurrentBet()
+    amountAdded = currentBetAfter - currentBetBefore
+
     this.dealer.setPlayerActed(foundPlayer.id)
     this.dealer.setPot(amountAdded)
 
@@ -925,6 +929,7 @@ class MatchActions {
 
         this.communicator.msgBuilder('runout', 'public', null, {
           displayMsg: 'All-in runout! Dealing remaining cards...',
+          pot: this.dealer.getPot(),
         })
         Socket.broadcastToTorneo(
           this.match.torneoId,
