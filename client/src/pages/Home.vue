@@ -117,6 +117,14 @@
           </div>
 
           <router-link
+            :id="`nav-create-btn-${templateSuffix}`"
+            to="/new"
+            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
+          >
+            {{ $t('hero.create') }}
+          </router-link>
+
+          <router-link
             :id="`nav-join-btn-${templateSuffix}`"
             to="/lobby"
             class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
@@ -125,16 +133,8 @@
           </router-link>
 
           <router-link
-            :id="`nav-public-btn-${templateSuffix}`"
-            to="/public"
-            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
-          >
-            {{ $t('pages.lobby_home.public_tables_title') }}
-          </router-link>
-
-          <router-link
             :id="`nav-play-btn-${templateSuffix}`"
-            to="/new"
+            to="/public"
             class="group relative px-6 py-2.5 bg-yellow-500 text-black text-[12px] font-black uppercase tracking-[0.15em] rounded-full overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] active:scale-95"
           >
             <span class="relative z-10">{{ $t('nav.play') }}</span>
@@ -195,7 +195,7 @@
             to="/public"
             class="w-full sm:w-auto px-10 py-5 bg-yellow-500 text-black font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 hover:shadow-[0_10px_40px_rgba(234,179,8,0.3)] active:scale-95 flex items-center justify-center gap-3"
           >
-            {{ $t('pages.lobby_home.public_tables_title') }}
+            {{ $t('nav.play') }}
             <svg
               class="w-5 h-5"
               fill="none"
@@ -492,7 +492,7 @@
               to="/public"
               class="px-10 py-5 bg-black text-white font-black uppercase tracking-widest text-sm rounded-xl transition-all hover:scale-105 active:scale-95 text-center"
             >
-              {{ $t('pages.lobby_home.public_tables_title') }}
+              {{ $t('nav.play') }}
             </router-link>
             <router-link
               :id="`final-cta-create-btn-${templateSuffix}`"

@@ -2,15 +2,13 @@
   "nav": {
     "how": "How it works",
     "features": "Features",
-    "join": "Join a Table",
-    "play": "Play now"
+    "join": "Join Private Table",
+    "play": "Play Now"
   },
   "hero": {
     "badge": "Free to play · No account needed · Works on any device",
-
     "headline": "Play Poker, {br} {like_pro} {br} FREE.",
     "like_pro": "like a pro...",
-
     "sub": "Gather your crew for the ultimate home game. We provide the automated virtual dealer and cards; you bring the competition. Need to sharpen your skills? Jump into a Public Table and play with anyone, anywhere.",
     "create": "Start Private Table",
     "browse": "Join Private Table",
@@ -124,8 +122,7 @@
     "verify_link": "Verify Certificate at {url}",
     "back_to_lobby": "Back to Lobby ({count}s)",
     "save_cert_warning": "Important: Save your certificate URL or take a screenshot before leaving. It is your only proof of victory! Have you saved it and want to leave?",
-    "system_footer": "YAY Poker · OFFICIAL CERTIFICATION SYSTEM · v1.0",
-    "back_to_home" : "Back to Home"
+    "system_footer": "YAY Poker · OFFICIAL CERTIFICATION SYSTEM · v1.0"
   },
   "form": {
     "name": "Name:",
@@ -167,7 +164,7 @@
       "final_cta": {
         "label": "Ready to deal?",
         "headline": "Start your private table.{br}Invite your friends now.",
-        "create": "Create Private Table",
+        "create": "Start Private Table",
         "join": "Join Private Table"
       }
     },
@@ -278,22 +275,22 @@
       "subtitle": "Texas Hold'em {span}",
       "subtitle_span": "Lobby",
       "join_table": "Join {span}",
-      "join_table_span": "Table",
-      "join_existing": "Join Existing {span}",
-      "join_existing_span": "Table",
+      "join_table_span": "Private Table",
+      "join_existing": "Join {span}",
+      "join_existing_span": "Existing Private Table",
       "name_placeholder": "Enter Your Name",
       "pin_placeholder": "Invent 4-Digit Pin",
       "format_tooltip": "Format: XXXXX-XXXXX",
       "join_btn": "Join",
       "format_error": "Format must be XXXXX-XXXXX",
-      "new_game": "New {span}",
-      "new_game_span": "Game",
-      "table_code_label": "Your Table Code",
+      "new_game": "Start {span}",
+      "new_game_span": "Private Table",
+      "table_code_label": "Your Private Table Code",
       "setup_label": "Set Your Display Name",
       "setup_label_pin": "Set Your your secret PIN",
       "setup_name_placeholder": "Ex: Osito",
       "setup_table_code": "Enter your Table Code",
-      "public_tables_title": "Public Table",
+      "public_tables_title": "Public Tables",
       "public_tables_desc": "Join a table instantly and practice with others",
       "play_now_btn": "Play Now",
       "or_separator": "OR",
