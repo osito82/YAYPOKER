@@ -433,20 +433,16 @@ const copyTorneoId = () => {
 
 const winnerName = computed(() => {
   if (!props.winnerInfo) return 'Champion'
-  return (
-    props.winnerInfo.winner?.name ||
-    props.winnerInfo.winners?.[0]?.name ||
-    'Champion'
-  )
+  // El servidor envía la info en data.winner para winnerTournament, 
+  // o a veces pokerStore pone el objeto data directamente.
+  const w = props.winnerInfo.winner || (props.winnerInfo.winners ? props.winnerInfo.winners[0] : props.winnerInfo)
+  return w?.name || 'Champion'
 })
 
 const totalAmount = computed(() => {
   if (!props.winnerInfo) return 0
-  return (
-    props.winnerInfo.winner?.amount ||
-    props.winnerInfo.winners?.[0]?.amount ||
-    0
-  )
+  const w = props.winnerInfo.winner || (props.winnerInfo.winners ? props.winnerInfo.winners[0] : props.winnerInfo)
+  return w?.amount || 0
 })
 
 watch(

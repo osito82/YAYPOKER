@@ -265,7 +265,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
         bettingOptions.value = []
         autofoldStartTime.value = null
 
-        const currentWinnerData = gameData.data || gameData
+        const currentWinnerData = winnerInfo.value
         const timeoutDuration =
           gameData.action === 'winnerTournament' ||
           gameData.method === 'winnerTournament' ||
