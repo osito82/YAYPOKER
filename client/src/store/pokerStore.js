@@ -335,14 +335,19 @@ export const usePokerStore = defineStore('pokerStore', () => {
     gameCredentials.value.gameCode = gameCode
     gameCredentials.value.secretCode = secretCode
 
-    // Persist credentials (but not the gameCode as it's session-specific)
-    localStorage.setItem(
-      'poker-credentials',
-      JSON.stringify({
-        playerName,
-        secretCode,
-      }),
-    )
+    // Persist credentials only for private tables (but not the gameCode as it's session-specific)
+    const isPublicCode =
+      gameCode && (gameCode.startsWith('P_') || gameCode === 'PUBLIC')
+
+    if (gameCode && !isPublicCode) {
+      localStorage.setItem(
+        'poker-credentials',
+        JSON.stringify({
+          playerName,
+          secretCode,
+        }),
+      )
+    }
   }
 
   function clearError() {
