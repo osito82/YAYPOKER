@@ -310,10 +310,12 @@
 <script setup>
 import { computed, ref, onUnmounted, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 
 const { t, locale } = useI18n()
+const router = useRouter()
 const responsive = useResponsiveStore()
 const templateSuffix = computed(() => responsive.templateSuffix || 'Default')
 
@@ -406,10 +408,13 @@ const stopTimer = () => {
 }
 
 const handleClose = () => {
-  emit('close')
+  // Mostrar mensaje de advertencia antes de salir
+  alert(t('tournament.save_cert_warning'))
+
   isVisible.value = false
   setTimeout(() => {
     pokerStore.clearWinnerInfo()
+    router.push('/')
   }, 500)
 }
 

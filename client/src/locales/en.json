@@ -123,6 +123,7 @@
     "copied": "✓ OK",
     "verify_link": "Verify Certificate at {url}",
     "back_to_lobby": "Back to Lobby ({count}s)",
+    "save_cert_warning": "Important: Save your certificate URL or take a screenshot before leaving. It is your only proof of victory!",
     "system_footer": "YAY Poker · OFFICIAL CERTIFICATION SYSTEM · v1.0"
   },
   "form": {

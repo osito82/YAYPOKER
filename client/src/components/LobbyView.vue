@@ -26,6 +26,7 @@
           class="flex flex-col items-center gap-4 mb-4"
         >
           <div
+            v-if="!isPublicTable"
             :id="`qr-code-container-${templateSuffix}`"
             class="bg-white p-3 rounded-2xl shadow-2xl border-4 border-yellow-500/20 group hover:border-yellow-500/40 transition-all duration-500"
           >

@@ -854,7 +854,7 @@ class MatchActions {
 
     this.communicator.msgBuilder('winnerTournament', 'public', null, {
       method: 'winnerTournament',
-      displayMsg: `🏆 ${winnerForCert.name} wins the tournament!`,
+      displayMsg: `${winnerForCert.name} wins the tournament!`,
       winner: winnerForCert,
       isTournamentWinner: true,
       certificate: {
