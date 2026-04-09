@@ -12,9 +12,12 @@ export default function useWebSocket(url, options) {
   const socket = ref(null)
   const reconnectTimeout = ref(null)
   const isManuallyClosed = ref(false)
+  const isDestroyed = ref(false) // Flag definitivo
   const pokerStore = usePokerStore()
 
   const connectSocket = () => {
+    if (isDestroyed.value) return // No conectar si ya se destruyó
+
     if (
       socket.value &&
       (socket.value.readyState === WebSocket.OPEN ||
@@ -27,6 +30,10 @@ export default function useWebSocket(url, options) {
     socket.value = new WebSocket(socketUrl)
 
     socket.value.addEventListener('open', () => {
+      if (isDestroyed.value) {
+        socket.value.close()
+        return
+      }
       console.log('Conexión establecida')
       pokerStore.setConnected(true)
       if (reconnectTimeout.value) {
@@ -41,6 +48,7 @@ export default function useWebSocket(url, options) {
     })
 
     socket.value.addEventListener('message', (event) => {
+      if (isDestroyed.value) return
       pokerStore.setSocketMessage(event.data)
     })
 
@@ -48,7 +56,7 @@ export default function useWebSocket(url, options) {
       console.log('Conexión cerrada')
       pokerStore.setConnected(false)
 
-      if (!isManuallyClosed.value) {
+      if (!isManuallyClosed.value && !isDestroyed.value) {
         attemptReconnect()
       }
     })
@@ -56,28 +64,29 @@ export default function useWebSocket(url, options) {
     socket.value.addEventListener('error', (error) => {
       console.error('Error en la conexión del socket:', error)
       pokerStore.setConnected(false)
-      // The close event will follow and trigger reconnection if needed
     })
   }
 
   const attemptReconnect = () => {
-    if (reconnectTimeout.value) return
+    if (reconnectTimeout.value || isDestroyed.value) return
 
     console.log('Intentando reconectar en 3 segundos...')
     reconnectTimeout.value = setTimeout(() => {
       reconnectTimeout.value = null
-      connectSocket()
+      if (!isDestroyed.value) connectSocket()
     }, 3000)
   }
 
   const disconnectSocket = () => {
     isManuallyClosed.value = true
+    isDestroyed.value = true // Marcar como destruido permanentemente
     if (reconnectTimeout.value) {
       clearTimeout(reconnectTimeout.value)
       reconnectTimeout.value = null
     }
     if (socket.value) {
       socket.value.close()
+      socket.value = null
     }
     pokerStore.setConnected(false)
   }

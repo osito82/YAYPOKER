@@ -93,6 +93,7 @@ const handleLogoClick = () => {
   }
 
   if (confirm(msg)) {
+    disconnectSocket() // Desconexión inmediata y explícita
     router.push('/')
   }
 }
