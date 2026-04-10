@@ -284,7 +284,7 @@ class Match extends EventEmitter {
             displayMsg: `Waiting for at least ${minRequired} players to be connected (current: ${connectedPlayers.length})...`,
           })
           Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-          
+
           // Re-intentar automáticamente en 2 segundos para ver si ya entró alguien más
           setTimeout(() => this.startGame(thisSocket, data), 2000)
         } else {
@@ -401,9 +401,7 @@ class Match extends EventEmitter {
     const connected = this.getConnectedPlayers()
     if (connected.length === 0 && this.isPublic) return // No loggear si no hay nadie
 
-    const playersWithChips = connected.filter(
-      (p) => p.chips > 0,
-    )
+    const playersWithChips = connected.filter((p) => p.chips > 0)
 
     if (playersWithChips.length < GAME_RULES.MIN_PLAYERS) {
       this.log.R({
@@ -412,20 +410,25 @@ class Match extends EventEmitter {
 
       if (this.isPublic) {
         const connectedPlayers = this.getConnectedPlayers()
-        
+
         if (connectedPlayers.length <= 1) {
           // Si solo queda uno o ninguno, destruimos el torneo y forzamos salida al lobby
           const Torneo = require('./torneo')
-          
+
           if (connectedPlayers.length === 1) {
             const lastPlayer = connectedPlayers[0]
             this.communicator.msgBuilder('forceLobby', 'private', lastPlayer, {
-              displayMsg: 'Tournament finished. You are the only player left. Returning to lobby...',
-              reason: 'TOURNAMENT_END_SINGLE'
+              displayMsg:
+                'Tournament finished. You are the only player left. Returning to lobby...',
+              reason: 'TOURNAMENT_END_SINGLE',
             })
-            Socket.sendToPlayer(this.torneoId, lastPlayer.secretCode, this.communicator.getMsg())
+            Socket.sendToPlayer(
+              this.torneoId,
+              lastPlayer.secretCode,
+              this.communicator.getMsg(),
+            )
           }
-          
+
           Torneo.getTorneos().delete(this.torneoId)
           return
         }
@@ -434,7 +437,7 @@ class Match extends EventEmitter {
         this.stepChecker.revokeStep('startGame')
         this.acceptingPlayers = true
         this.players = this.players.filter((p) => p.chips > 0 && p.connected)
-        
+
         this.communicator.msgBuilder('lobby', 'public', null, {
           displayMsg: 'Tournament finished. Waiting for new players...',
         })

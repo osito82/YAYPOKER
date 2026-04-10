@@ -141,6 +141,14 @@
           >
             {{ $t('pages.lobby_home.play_now_btn') || 'Play Now' }}
           </button>
+
+          <button
+            type="button"
+            @click="router.push('/lobby')"
+            class="w-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-[12px] font-black uppercase tracking-[0.2em] transition-colors"
+          >
+            {{ $t('lobby.back_to_selection') }}
+          </button>
         </form>
 
         <!-- MODE: Selection (Home /lobby) -->
@@ -274,6 +282,14 @@
                 </p>
               </div>
             </div>
+
+            <button
+              type="button"
+              @click="router.push('/')"
+              class="w-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-[12px] font-black uppercase tracking-[0.2em] transition-colors"
+            >
+              {{ $t('tournament.back_to_home') }}
+            </button>
           </form>
         </template>
 
@@ -382,7 +398,7 @@
             @click="cancelCreate"
             class="w-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-[12px] font-black uppercase tracking-[0.2em] transition-colors"
           >
-            {{ $t('tournament.back_to_home') }}
+            {{ $t('lobby.back_to_selection') }}
           </button>
         </div>
       </div>
@@ -677,7 +693,7 @@ const goToCreate = () => {
 }
 
 const cancelCreate = () => {
-  router.push({ name: 'landing' })
+  router.push('/lobby')
 }
 
 const copyToClipboard = async () => {

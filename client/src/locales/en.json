@@ -44,7 +44,13 @@
     "public_auto_start_hint": "Match will start in a few seconds.",
     "public_badge": "Public Table",
     "copyright": "© 2026 {brand} Engineering",
-    "brand": "YayPoker"
+    "brand": "YayPoker",
+    "back_to_home": "Back to Home",
+    "back_to_selection": "Back to Selection",
+    "back_to_public": "Back to Public Tables",
+    "back_to_create": "Back to Create Table",
+    "back_to_join": "Back to Join Table",
+    "back_to_private": "Back to Private Setup"
   },
   "footer": {
     "disclaimer": "YayPoker is a free social game. No real money changes hands on this platform. Virtual chips have no monetary value. Side arrangements between players are solely their responsibility.",
@@ -124,6 +130,7 @@
     "verify_link": "Verify Certificate at {url}",
     "back_to_lobby": "Back to Lobby ({count}s)",
     "save_cert_warning": "Important: Save your certificate URL or take a screenshot before leaving. It is your only proof of victory! Have you saved it and want to leave?",
+    "back_to_home": "Back to Home",
     "system_footer": "YAY Poker · OFFICIAL CERTIFICATION SYSTEM · v1.0"
   },
   "form": {

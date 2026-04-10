@@ -474,18 +474,37 @@
     </div>
 
     <!-- Footer Attribution -->
-    <p
-      :id="`lobby-copyright-footer-${templateSuffix}`"
-      class="mt-10 text-gray-400 dark:text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]"
-      v-html="
-        $t('lobby.copyright', {
-          brand:
-            '<span class=\'text-yellow-600/50 dark:text-yellow-500/50\'>' +
-            $t('lobby.brand') +
-            '</span>',
-        })
-      "
-    ></p>
+    <div
+      :id="`lobby-footer-container-${templateSuffix}`"
+      class="flex flex-col items-center gap-4 mt-10"
+    >
+      <button
+        :id="`lobby-leave-game-button-${templateSuffix}`"
+        @click="emit('goBack')"
+        class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white text-[11px] font-black uppercase tracking-[0.2em] transition-colors border-b border-transparent hover:border-current"
+      >
+        {{
+          isPublicTable
+            ? $t('lobby.back_to_public')
+            : isHost
+              ? $t('lobby.back_to_create')
+              : $t('lobby.back_to_join')
+        }}
+      </button>
+
+      <p
+        :id="`lobby-copyright-footer-${templateSuffix}`"
+        class="text-gray-400 dark:text-gray-600 text-[10px] font-black uppercase tracking-[0.3em]"
+        v-html="
+          $t('lobby.copyright', {
+            brand:
+              '<span class=\'text-yellow-600/50 dark:text-yellow-500/50\'>' +
+              $t('lobby.brand') +
+              '</span>',
+          })
+        "
+      ></p>
+    </div>
   </div>
 </template>
 

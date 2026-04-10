@@ -26,12 +26,16 @@ class MatchLobby {
       if (this.match.publicCleanupTimer) {
         clearTimeout(this.match.publicCleanupTimer)
         this.match.publicCleanupTimer = null
-        this.log.R({ msg: `[LOBBY] Public match ${this.match.torneoId} cleanup cancelled (player joined).` })
+        this.log.R({
+          msg: `[LOBBY] Public match ${this.match.torneoId} cleanup cancelled (player joined).`,
+        })
       }
       if (this.match.publicEmptyTimer) {
         clearTimeout(this.match.publicEmptyTimer)
         this.match.publicEmptyTimer = null
-        this.log.R({ msg: `[LOBBY] Public match ${this.match.torneoId} empty-cleanup cancelled (player joined).` })
+        this.log.R({
+          msg: `[LOBBY] Public match ${this.match.torneoId} empty-cleanup cancelled (player joined).`,
+        })
       }
     }
 
@@ -106,17 +110,13 @@ class MatchLobby {
         id: thisSocketId,
         hostId: this.match.hostId,
       })
-      
+
       const msg = this.communicator.getMsg()
       msg.players = this.match.players.map((p) => p.toJson())
       msg.pot = this.dealer.getPot()
       msg.dealerCards = this.dealer.getDealerCards()
 
-      Socket.sendToPlayer(
-        this.match.torneoId,
-        player.secretCode,
-        msg
-      )
+      Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
 
       this.communicator.msgBuilder('signUp', 'public', player, {
         msg: `${player.name} reconnected.`,
@@ -170,7 +170,10 @@ class MatchLobby {
 
       // Solo reseteamos si es pública Y no hay absolutamente nadie conectado (limpieza inicial)
       // O si la mesa se quedó "atascada" sin jugadores reales.
-      if (this.match.isPublic && this.match.getConnectedPlayers().length === 0) {
+      if (
+        this.match.isPublic &&
+        this.match.getConnectedPlayers().length === 0
+      ) {
         this.log
           .Template({ name: 'brakets', title: 'LOBBY:PUBLIC_INIT', date: true })
           .R({
@@ -213,11 +216,7 @@ class MatchLobby {
       msg.pot = this.dealer.getPot()
       msg.dealerCards = this.dealer.getDealerCards()
 
-      Socket.sendToPlayer(
-        this.match.torneoId,
-        player.secretCode,
-        msg
-      )
+      Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
     }
 
     // 🔥 PUBLIC AUTO-START
@@ -370,53 +369,79 @@ class MatchLobby {
 
         if (connectedPlayers.length === 0) {
           // Si la mesa quedó vacía, damos un margen antes de borrarla
-          if (this.match.publicEmptyTimer) clearTimeout(this.match.publicEmptyTimer)
-          
+          if (this.match.publicEmptyTimer)
+            clearTimeout(this.match.publicEmptyTimer)
+
           this.match.publicEmptyTimer = setTimeout(() => {
             const currentConnected = this.match.getConnectedPlayers()
             if (currentConnected.length === 0) {
               Torneo.getTorneos().delete(this.match.torneoId)
               this.log
-                .Template({ name: 'brakets', title: 'LOBBY:PUBLIC_DELETED', date: true })
+                .Template({
+                  name: 'brakets',
+                  title: 'LOBBY:PUBLIC_DELETED',
+                  date: true,
+                })
                 .R({
                   torneoId: this.match.torneoId,
                   reason: 'Empty grace period expired',
-                  duration: `${TIMEOUTS.publicEmptyGrace / 1000}s`
+                  duration: `${TIMEOUTS.publicEmptyGrace / 1000}s`,
                 })
             }
             this.match.publicEmptyTimer = null
           }, TIMEOUTS.publicEmptyGrace)
-          
+
           this.log
-            .Template({ name: 'brakets', title: 'LOBBY:PUBLIC_CLEANUP_START', date: true })
+            .Template({
+              name: 'brakets',
+              title: 'LOBBY:PUBLIC_CLEANUP_START',
+              date: true,
+            })
             .R({
               torneoId: this.match.torneoId,
               msg: 'Public match is empty. Starting cleanup timer.',
-              duration: `${TIMEOUTS.publicEmptyGrace / 1000}s`
+              duration: `${TIMEOUTS.publicEmptyGrace / 1000}s`,
             })
-
-        } else if (connectedPlayers.length === 1 && this.stepChecker.checkStep('startGame')) {
+        } else if (
+          connectedPlayers.length === 1 &&
+          this.stepChecker.checkStep('startGame')
+        ) {
           // Si solo queda uno Y la partida ya había empezado, damos un margen de gracia
-          if (this.match.publicCleanupTimer) clearTimeout(this.match.publicCleanupTimer)
-          
+          if (this.match.publicCleanupTimer)
+            clearTimeout(this.match.publicCleanupTimer)
+
           this.match.publicCleanupTimer = setTimeout(() => {
             const currentConnected = this.match.getConnectedPlayers()
             if (currentConnected.length === 1) {
               const lastPlayer = currentConnected[0]
-              this.communicator.msgBuilder('forceLobby', 'private', lastPlayer, {
-                displayMsg: 'Match closed: Not enough players. Returning to lobby...',
-                reason: 'SINGLE_PLAYER_TIMEOUT'
-              })
-              Socket.sendToPlayer(this.match.torneoId, lastPlayer.secretCode, this.communicator.getMsg())
-              
+              this.communicator.msgBuilder(
+                'forceLobby',
+                'private',
+                lastPlayer,
+                {
+                  displayMsg:
+                    'Match closed: Not enough players. Returning to lobby...',
+                  reason: 'SINGLE_PLAYER_TIMEOUT',
+                },
+              )
+              Socket.sendToPlayer(
+                this.match.torneoId,
+                lastPlayer.secretCode,
+                this.communicator.getMsg(),
+              )
+
               Torneo.getTorneos().delete(this.match.torneoId)
               this.log
-                .Template({ name: 'brakets', title: 'LOBBY:PUBLIC_CLOSED', date: true })
+                .Template({
+                  name: 'brakets',
+                  title: 'LOBBY:PUBLIC_CLOSED',
+                  date: true,
+                })
                 .R({
                   torneoId: this.match.torneoId,
                   lastPlayer: lastPlayer.name,
                   reason: 'Single player timeout',
-                  duration: `${TIMEOUTS.publicSingleGrace / 1000}s`
+                  duration: `${TIMEOUTS.publicSingleGrace / 1000}s`,
                 })
             }
             this.match.publicCleanupTimer = null

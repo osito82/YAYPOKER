@@ -352,7 +352,7 @@ class MatchActions {
     if (type === 'setRise') {
       const myRaiseAmount = amount - currentMaxBet
       // Poker Rule: If a player goes All-In for less than the minimum raise, it's still allowed.
-      const isForcedAllIn = amount >= (foundPlayer.chips + foundPlayer.currentBet)
+      const isForcedAllIn = amount >= foundPlayer.chips + foundPlayer.currentBet
 
       if (myRaiseAmount < lastRaise && !isForcedAllIn) {
         this.log
@@ -389,9 +389,9 @@ class MatchActions {
     }
 
     if (type === 'setRise' && amount <= currentMaxBet) {
-      // Si es un All-In por debajo del Call, realmente debería ser un Call o un Fold, 
+      // Si es un All-In por debajo del Call, realmente debería ser un Call o un Fold,
       // pero si el cliente manda setRise por error en All-In, lo validamos.
-      const isForcedAllIn = amount >= (foundPlayer.chips + foundPlayer.currentBet)
+      const isForcedAllIn = amount >= foundPlayer.chips + foundPlayer.currentBet
 
       if (!isForcedAllIn) {
         this.log
@@ -732,15 +732,19 @@ class MatchActions {
     const currentPot = this.dealer.getPot()
     winnersInfo = winnersInfo.map((w) => {
       const isPlayerObject = typeof w.getPlayerId === 'function'
-      const pId = isPlayerObject ? w.id : (w.playerId || w.id)
-      
+      const pId = isPlayerObject ? w.id : w.playerId || w.id
+
       return {
         name: w.name,
         playerId: pId,
-        pokerHand: isPlayerObject ? 'High Card' : (w.pokerHand || 'High Card'),
-        prizeRank: isPlayerObject ? 10 : (w.prizeRank || 10),
-        handName: isPlayerObject ? 'High Card' : (w.pokerHand || 'High Card'),
-        amount: w.amount || (winnersInfo.length === 1 ? currentPot : Math.floor(currentPot / winnersInfo.length))
+        pokerHand: isPlayerObject ? 'High Card' : w.pokerHand || 'High Card',
+        prizeRank: isPlayerObject ? 10 : w.prizeRank || 10,
+        handName: isPlayerObject ? 'High Card' : w.pokerHand || 'High Card',
+        amount:
+          w.amount ||
+          (winnersInfo.length === 1
+            ? currentPot
+            : Math.floor(currentPot / winnersInfo.length)),
       }
     })
 
@@ -857,7 +861,7 @@ class MatchActions {
     const winnerForCert = {
       ...winnerData,
       secretCode: realPlayer ? realPlayer.secretCode : '0000',
-      amount: realPlayer ? realPlayer.chips : (winnerData.amount || 0),
+      amount: realPlayer ? realPlayer.chips : winnerData.amount || 0,
     }
 
     this.log
