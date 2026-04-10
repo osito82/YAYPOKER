@@ -36,7 +36,7 @@ class Match extends EventEmitter {
     this.isPublic = torneoId.startsWith('P_')
 
     this.handCount = 0
-    this.currentHandId = null
+    this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}0`
 
     // Blinds management
     this.blindLevel = 1
@@ -317,6 +317,9 @@ class Match extends EventEmitter {
         if (p.connected) p.setStarted(true)
       })
 
+      // RE-SYNC: Asegurar que el dealer tiene la lista de jugadores actualizada
+      this.dealer.players = this.players
+
       // Al empezar el juego, cerramos el registro
       this.lobby.noMorePlayers()
       this.stepChecker.grantStep('startGame')
@@ -324,8 +327,15 @@ class Match extends EventEmitter {
 
     if (!this.stepChecker.checkStep('blindsBetting'))
       return this.actions.askForBlindBets(thisSocket)
-    if (!this.stepChecker.checkStep('dealtPrivateCards'))
+    if (!this.stepChecker.checkStep('dealtPrivateCards')) {
+      // Final check for public tables: ensure everyone connected is marked as started before the deal
+      if (this.isPublic) {
+        this.players.forEach((p) => {
+          if (p.connected) p.setStarted(true)
+        })
+      }
       return this.actions.dealtPrivateCards(thisSocket)
+    }
     if (!this.stepChecker.checkStep('firstBetting'))
       return this.actions.bettingCore(thisSocket, 'firstBetting')
     if (!this.stepChecker.checkStep('flop_Dealer_Hand')) {
@@ -388,7 +398,10 @@ class Match extends EventEmitter {
     if (!this.waitingForNextRound) return
     this.waitingForNextRound = false
 
-    const playersWithChips = this.getConnectedPlayers().filter(
+    const connected = this.getConnectedPlayers()
+    if (connected.length === 0 && this.isPublic) return // No loggear si no hay nadie
+
+    const playersWithChips = connected.filter(
       (p) => p.chips > 0,
     )
 
@@ -398,13 +411,30 @@ class Match extends EventEmitter {
       })
 
       if (this.isPublic) {
-        // En mesas públicas, si el torneo termina, reseteamos para que nuevos jugadores puedan entrar
+        const connectedPlayers = this.getConnectedPlayers()
+        
+        if (connectedPlayers.length <= 1) {
+          // Si solo queda uno o ninguno, destruimos el torneo y forzamos salida al lobby
+          const Torneo = require('./torneo')
+          
+          if (connectedPlayers.length === 1) {
+            const lastPlayer = connectedPlayers[0]
+            this.communicator.msgBuilder('forceLobby', 'private', lastPlayer, {
+              displayMsg: 'Tournament finished. You are the only player left. Returning to lobby...',
+              reason: 'TOURNAMENT_END_SINGLE'
+            })
+            Socket.sendToPlayer(this.torneoId, lastPlayer.secretCode, this.communicator.getMsg())
+          }
+          
+          Torneo.getTorneos().delete(this.torneoId)
+          return
+        }
+
+        // Si quedan varios pero el torneo terminó (ej: todos menos 2 perdieron fichas)
         this.stepChecker.revokeStep('startGame')
         this.acceptingPlayers = true
-        // Limpiamos jugadores sin fichas o desconectados para dejar espacio
         this.players = this.players.filter((p) => p.chips > 0 && p.connected)
         
-        // Informamos a los que se quedan que estamos en modo lobby esperando
         this.communicator.msgBuilder('lobby', 'public', null, {
           displayMsg: 'Tournament finished. Waiting for new players...',
         })
@@ -438,7 +468,9 @@ class Match extends EventEmitter {
 
     // Remove busted players (only in private matches/tournaments)
     if (!this.isPublic) {
-      this.players = this.players.filter((p) => p.chips > 0)
+      const activePlayers = this.players.filter((p) => p.chips > 0)
+      this.players.length = 0
+      this.players.push(...activePlayers)
     }
 
     this.initHand()

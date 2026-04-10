@@ -9,6 +9,8 @@ const TIMEOUTS = {
   pause: isTest ? 1000 : 60000, // 3s in test, else 1 minute
   nextRound: isTest ? 500 : 5000, // 500ms in test, else 5 seconds
   collectChips: isTest ? 100 : 1500, // 100ms in test, else 1.5 seconds
+  publicEmptyGrace: isTest ? 1000 : 30000, // 30 seconds
+  publicSingleGrace: isTest ? 1000 : 15000, // 15 seconds
 }
 
 const GAME_RULES = {

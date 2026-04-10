@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import router from '../router'
 
 export const usePokerStore = defineStore('pokerStore', () => {
   // State
@@ -189,6 +190,12 @@ export const usePokerStore = defineStore('pokerStore', () => {
           }
           return p
         })
+
+        // AUTO-RECOVERY: If we refresh/update and there's less than 2 players in a public table,
+        // force back to lobby state unless it's explicitly started
+        if (isPublic.value && players.value.length < 2) {
+          isGameStarted.value = false
+        }
       }
 
       // Update Table State
@@ -316,6 +323,12 @@ export const usePokerStore = defineStore('pokerStore', () => {
           activePlayerId.value = gameData.data.messageForId || gameData.data.id
           if (gameData.data.action) bettingOptions.value = gameData.data.action
         }
+      } else if (gameData.action === 'forceLobby') {
+        const isCurrentlyPublic = isPublic.value
+        isGameStarted.value = false
+        torneoId.value = null
+        winnerInfo.value = null
+        router.push(isCurrentlyPublic ? '/public' : '/')
       } else if (gameData.action === 'gameRestarted') {
         // Clear board and pot for new hand
         communityCards.value = []

@@ -22,6 +22,19 @@ class MatchLobby {
 
     const finalRequestedName = data.name || thisSocketName
 
+    if (this.match.isPublic) {
+      if (this.match.publicCleanupTimer) {
+        clearTimeout(this.match.publicCleanupTimer)
+        this.match.publicCleanupTimer = null
+        this.log.R({ msg: `[LOBBY] Public match ${this.match.torneoId} cleanup cancelled (player joined).` })
+      }
+      if (this.match.publicEmptyTimer) {
+        clearTimeout(this.match.publicEmptyTimer)
+        this.match.publicEmptyTimer = null
+        this.log.R({ msg: `[LOBBY] Public match ${this.match.torneoId} empty-cleanup cancelled (player joined).` })
+      }
+    }
+
     this.log
       .Template({ name: 'brakets', title: 'LOBBY:SIGNUP_ATTEMPT', date: true })
       .R({
@@ -93,17 +106,25 @@ class MatchLobby {
         id: thisSocketId,
         hostId: this.match.hostId,
       })
+      
+      const msg = this.communicator.getMsg()
+      msg.players = this.match.players.map((p) => p.toJson())
+      msg.pot = this.dealer.getPot()
+      msg.dealerCards = this.dealer.getDealerCards()
+
       Socket.sendToPlayer(
         this.match.torneoId,
         player.secretCode,
-        this.communicator.getMsg(),
+        msg
       )
 
       this.communicator.msgBuilder('signUp', 'public', player, {
         msg: `${player.name} reconnected.`,
         hostId: this.match.hostId,
       })
-      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+      const publicMsg = this.communicator.getMsg()
+      publicMsg.players = this.match.players.map((p) => p.toJson())
+      Socket.broadcastToTorneo(this.match.torneoId, publicMsg)
 
       this.match.comms.sendOdds(player)
       this.match.actions.sendCurrentPrompt(player)
@@ -147,14 +168,20 @@ class MatchLobby {
       )
       player.setConnected(true)
 
-      // Solo reseteamos si es pública Y no hay absolutamente nadie en la lista (limpieza inicial)
+      // Solo reseteamos si es pública Y no hay absolutamente nadie conectado (limpieza inicial)
       // O si la mesa se quedó "atascada" sin jugadores reales.
-      if (this.match.isPublic && this.match.players.length === 0) {
-        this.log.R({
-          msg: `[LOBBY] Initializing empty public match for: ${player.name}`,
-        })
+      if (this.match.isPublic && this.match.getConnectedPlayers().length === 0) {
+        this.log
+          .Template({ name: 'brakets', title: 'LOBBY:PUBLIC_INIT', date: true })
+          .R({
+            torneoId: this.match.torneoId,
+            player: player.name,
+            msg: 'Initializing empty public match',
+          })
         this.stepChecker.revokeStep('startGame')
         this.match.acceptingPlayers = true
+        this.match.players.length = 0 // ✅ MANTENER REFERENCIA
+        this.match.playersFold.length = 0 // ✅ MANTENER REFERENCIA
       }
 
       // Si la mesa ya está en juego y es pública, este jugador espera a la siguiente mano
@@ -172,17 +199,24 @@ class MatchLobby {
         msg: `Welcome ${player.name}!`,
         hostId: this.match.hostId,
       })
-      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+      const publicMsg = this.communicator.getMsg()
+      publicMsg.players = this.match.players.map((p) => p.toJson())
+      Socket.broadcastToTorneo(this.match.torneoId, publicMsg)
 
       this.communicator.msgBuilder('signUp', 'private', player, {
         method: 'signUp',
         id: thisSocketId,
         hostId: this.match.hostId,
       })
+      const msg = this.communicator.getMsg()
+      msg.players = this.match.players.map((p) => p.toJson())
+      msg.pot = this.dealer.getPot()
+      msg.dealerCards = this.dealer.getDealerCards()
+
       Socket.sendToPlayer(
         this.match.torneoId,
         player.secretCode,
-        this.communicator.getMsg(),
+        msg
       )
     }
 
@@ -330,12 +364,64 @@ class MatchLobby {
 
       // Si la mesa es pública y no quedan jugadores, la eliminamos del Torneo para que se limpie de memoria
       // y permita crear una nueva instancia fresca si alguien vuelve a entrar.
-      if (this.match.isPublic && this.match.players.length === 0) {
+      if (this.match.isPublic) {
         const Torneo = require('../torneo')
-        Torneo.getTorneos().delete(this.match.torneoId)
-        this.log.R({
-          msg: `[LOBBY] Public match ${this.match.torneoId} deleted (empty).`,
-        })
+        const connectedPlayers = this.match.getConnectedPlayers()
+
+        if (connectedPlayers.length === 0) {
+          // Si la mesa quedó vacía, damos un margen antes de borrarla
+          if (this.match.publicEmptyTimer) clearTimeout(this.match.publicEmptyTimer)
+          
+          this.match.publicEmptyTimer = setTimeout(() => {
+            const currentConnected = this.match.getConnectedPlayers()
+            if (currentConnected.length === 0) {
+              Torneo.getTorneos().delete(this.match.torneoId)
+              this.log
+                .Template({ name: 'brakets', title: 'LOBBY:PUBLIC_DELETED', date: true })
+                .R({
+                  torneoId: this.match.torneoId,
+                  reason: 'Empty grace period expired',
+                  duration: `${TIMEOUTS.publicEmptyGrace / 1000}s`
+                })
+            }
+            this.match.publicEmptyTimer = null
+          }, TIMEOUTS.publicEmptyGrace)
+          
+          this.log
+            .Template({ name: 'brakets', title: 'LOBBY:PUBLIC_CLEANUP_START', date: true })
+            .R({
+              torneoId: this.match.torneoId,
+              msg: 'Public match is empty. Starting cleanup timer.',
+              duration: `${TIMEOUTS.publicEmptyGrace / 1000}s`
+            })
+
+        } else if (connectedPlayers.length === 1 && this.stepChecker.checkStep('startGame')) {
+          // Si solo queda uno Y la partida ya había empezado, damos un margen de gracia
+          if (this.match.publicCleanupTimer) clearTimeout(this.match.publicCleanupTimer)
+          
+          this.match.publicCleanupTimer = setTimeout(() => {
+            const currentConnected = this.match.getConnectedPlayers()
+            if (currentConnected.length === 1) {
+              const lastPlayer = currentConnected[0]
+              this.communicator.msgBuilder('forceLobby', 'private', lastPlayer, {
+                displayMsg: 'Match closed: Not enough players. Returning to lobby...',
+                reason: 'SINGLE_PLAYER_TIMEOUT'
+              })
+              Socket.sendToPlayer(this.match.torneoId, lastPlayer.secretCode, this.communicator.getMsg())
+              
+              Torneo.getTorneos().delete(this.match.torneoId)
+              this.log
+                .Template({ name: 'brakets', title: 'LOBBY:PUBLIC_CLOSED', date: true })
+                .R({
+                  torneoId: this.match.torneoId,
+                  lastPlayer: lastPlayer.name,
+                  reason: 'Single player timeout',
+                  duration: `${TIMEOUTS.publicSingleGrace / 1000}s`
+                })
+            }
+            this.match.publicCleanupTimer = null
+          }, TIMEOUTS.publicSingleGrace)
+        }
       }
     }
     const stillPaused = this.match.players.some((p) => !p.connected)

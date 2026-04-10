@@ -217,7 +217,7 @@ class Dealer {
 
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
-        if (player.connected && !player.folded) {
+        if (player.connected && !player.folded && player.isStarted) {
           const cardToDeal = this.deck.shift()
           if (cardToDeal) player.setCard(cardToDeal)
         }
