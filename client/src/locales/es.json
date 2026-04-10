@@ -44,7 +44,13 @@
     "public_auto_start_hint": "La partida comenzará en unos segundos.",
     "public_badge": "Mesa Pública",
     "copyright": "© 2026 {brand} Engineering",
-    "brand": "YayPoker"
+    "brand": "YayPoker",
+    "back_to_home": "Volver al Inicio",
+    "back_to_selection": "Volver a Selección",
+    "back_to_public": "Volver a Mesas Públicas",
+    "back_to_create": "Volver a Crear Mesa",
+    "back_to_join": "Volver a Unirse a Mesa",
+    "back_to_private": "Volver a Mesa Privada"
   },
   "footer": {
     "disclaimer": "YayPoker es un juego social gratuito. No se intercambia dinero real en esta plataforma. Los chips virtuales no tienen valor monetario. Los acuerdos entre jugadores son responsabilidad de ellos.",
@@ -124,6 +130,7 @@
     "verify_link": "Verificar Certificado en {url}",
     "back_to_lobby": "Volver al Lobby ({count}s)",
     "save_cert_warning": "Importante: ¡Guarda la URL de tu certificado o toma una captura antes de salir! Es tu única prueba de victoria. ¿Ya lo guardaste y quieres salir?",
+    "back_to_home": "Volver al Inicio",
     "system_footer": "YAY Poker · SISTEMA DE CERTIFICACIÓN OFICIAL · v1.0"
   },
   "form": {

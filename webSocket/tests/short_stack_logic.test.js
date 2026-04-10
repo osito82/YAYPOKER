@@ -69,9 +69,12 @@ describe('Short Stack Raise Logic Test (Machox Scenario)', () => {
 
   it('Should allow a short stack to "Raise" All-In even if below standard minimum raise', async () => {
     const gameCode = 'P_SHORT_RAISE_' + Date.now()
-    
+
     const macho = createClient({ name: 'Macho', secretCode: '1111' }, gameCode)
-    const machox = createClient({ name: 'Machox', secretCode: '2222' }, gameCode)
+    const machox = createClient(
+      { name: 'Machox', secretCode: '2222' },
+      gameCode,
+    )
 
     await Promise.all([
       new Promise((r) => macho.ws.on('open', r)),
@@ -88,24 +91,40 @@ describe('Short Stack Raise Logic Test (Machox Scenario)', () => {
     await macho.waitAction('dealtPrivateCards')
 
     // 3. Macho sube a 965 (dejándose 35)
-    await macho.waitAction('bettingCore-firstBetting', 5000, r => r.message.data.displayMsg.includes('Macho'))
+    await macho.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Macho'),
+    )
     macho.send({ action: 'setBet', chipsToBet: 965 })
-    
+
     // 4. Esperar el turno de Machox
-    // Machox tiene 1000. El Call es 965. 
+    // Machox tiene 1000. El Call es 965.
     // La subida mínima normal sería 965 + (965-0) = 1930.
     // Pero Machox solo tiene 1000. El servidor DEBE permitirle hacer "Raise" All-In a 1000.
-    const machoxTurn = await machox.waitAction('bettingCore-firstBetting', 5000, r => r.message.data.displayMsg.includes('Machox'))
-    
+    const machoxTurn = await machox.waitAction(
+      'bettingCore-firstBetting',
+      5000,
+      (r) => r.message.data.displayMsg.includes('Machox'),
+    )
+
     expect(machoxTurn.message.data.action).toContain('raise')
-    
+
     // Machox intenta subir a 1000 (su All-In)
     machox.send({ action: 'setRise', chipsToRiseBet: 1000 })
 
-    // 5. Verificar que el servidor lo acepta y el pozo es correcto (965 + 1000 = 1965)
-    const runoutMsg = await macho.waitAction('runout')
-    expect(runoutMsg.message.data.pot).toBe(1965)
+    // 5. Macho debe igualar los 35 restantes para cerrar la acción
+    // Usamos un timeout más corto para adelantarnos al autofold
+    await macho.waitAction('bettingCore-firstBetting', 2000, (r) =>
+      r.message.data.displayMsg.includes('Macho'),
+    )
+    macho.send({ action: 'setCall' })
 
-    console.log('Test Passed: Short stack raise accepted and pot correctly calculated.')
+    // 6. Verificar que el servidor lo acepta y el pozo es correcto (1000 + 1000 = 2000)
+    // En el caso de All-In de ambos, el servidor dispara el runout
+    const runoutMsg = await macho.waitAction('runout', 5000)
+    expect(runoutMsg.message.data.pot).toBe(2000)
+
+    console.log(
+      'Test Passed: Short stack raise accepted and betting round closed.',
+    )
   }, 40000)
 })

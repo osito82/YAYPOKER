@@ -69,7 +69,7 @@ describe('All-In Chip Conservation Test (Realistic Scenario)', () => {
 
   it('Should conserve total chips on short stack all-in call (multi-street)', async () => {
     const gameCode = 'P_TEST_ALLIN_' + Date.now()
-    
+
     const big = createClient({ name: 'BigStack', secretCode: '1111' }, gameCode)
     const short = createClient({ name: 'Shorty', secretCode: '2222' }, gameCode)
 
@@ -89,11 +89,15 @@ describe('All-In Chip Conservation Test (Realistic Scenario)', () => {
 
     // 3. Primera calle (Pre-flop): Apuesta pequeña
     // Esperar turno de BigStack
-    await big.waitAction('bettingCore-firstBetting', 5000, r => r.message.data.displayMsg.includes('BigStack'))
+    await big.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('BigStack'),
+    )
     big.send({ action: 'setBet', chipsToBet: 21 })
-    
+
     // Esperar turno de Shorty
-    await short.waitAction('bettingCore-firstBetting', 5000, r => r.message.data.displayMsg.includes('Shorty'))
+    await short.waitAction('bettingCore-firstBetting', 5000, (r) =>
+      r.message.data.displayMsg.includes('Shorty'),
+    )
     short.send({ action: 'setCall' })
 
     // Esperar a que se reparta el Flop
@@ -102,18 +106,26 @@ describe('All-In Chip Conservation Test (Realistic Scenario)', () => {
     // 4. Segunda calle (Flop): All-In masivo
     // Esperar turno de BigStack o Shorty según quién actúe primero (rota el dealer)
     try {
-        await big.waitAction('bettingCore-flopBetting', 3000, r => r.message.data.displayMsg.includes('BigStack'))
-        big.send({ action: 'setBet', chipsToBet: 1946 })
-        
-        await short.waitAction('bettingCore-flopBetting', 3000, r => r.message.data.displayMsg.includes('Shorty'))
-        short.send({ action: 'setCall' })
-    } catch(e) {
-        // Si no es el turno de BigStack, intentar al revés
-        await short.waitAction('bettingCore-flopBetting', 3000, r => r.message.data.displayMsg.includes('Shorty'))
-        short.send({ action: 'setBet', chipsToBet: 12 })
-        
-        await big.waitAction('bettingCore-flopBetting', 3000, r => r.message.data.displayMsg.includes('BigStack'))
-        big.send({ action: 'setCall' })
+      await big.waitAction('bettingCore-flopBetting', 3000, (r) =>
+        r.message.data.displayMsg.includes('BigStack'),
+      )
+      big.send({ action: 'setBet', chipsToBet: 1946 })
+
+      await short.waitAction('bettingCore-flopBetting', 3000, (r) =>
+        r.message.data.displayMsg.includes('Shorty'),
+      )
+      short.send({ action: 'setCall' })
+    } catch (e) {
+      // Si no es el turno de BigStack, intentar al revés
+      await short.waitAction('bettingCore-flopBetting', 3000, (r) =>
+        r.message.data.displayMsg.includes('Shorty'),
+      )
+      short.send({ action: 'setBet', chipsToBet: 12 })
+
+      await big.waitAction('bettingCore-flopBetting', 3000, (r) =>
+        r.message.data.displayMsg.includes('BigStack'),
+      )
+      big.send({ action: 'setCall' })
     }
 
     // 5. Runout y Resultado Final
@@ -124,7 +136,9 @@ describe('All-In Chip Conservation Test (Realistic Scenario)', () => {
     const chipsWon = tournamentResult.message.data.winner.amount
     const totalTableChips = 1967 + 33 // 2000
 
-    console.log(`Final Result: Winner got ${chipsWon} chips. Total table was ${totalTableChips}`)
+    console.log(
+      `Final Result: Winner got ${chipsWon} chips. Total table was ${totalTableChips}`,
+    )
 
     // El ganador NO puede tener más de lo que había en la mesa
     expect(chipsWon).toBeLessThanOrEqual(totalTableChips)

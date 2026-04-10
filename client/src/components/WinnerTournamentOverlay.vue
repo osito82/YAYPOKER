@@ -284,7 +284,7 @@
             target="_blank"
             class="verify-btn block w-full p-4 text-center bg-gradient-to-br from-[#D4A853]/15 to-[#D4A853]/08 border border-[#D4A853]/35 rounded-xl text-[#F5D78E] font-mono text-xs tracking-[2px] uppercase transition-all hover:bg-[#D4A853]/25 hover:border-[#D4A853] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(212,168,83,0.15)]"
           >
-            → {{ $t('tournament.verify_link', { url: 'deush.poker/verify' }) }}
+            → {{ $t('tournament.verify_link', { url: 'yaypoker.com/verify' }) }}
           </router-link>
         </div>
 

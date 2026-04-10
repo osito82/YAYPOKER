@@ -293,11 +293,14 @@ const startGame = (data = {}) => {
 }
 
 const handleGoBack = () => {
-  router.push({
-    name: 'game.join',
-    params: { gameCode },
-    query: { joinCode: gameCode },
-  })
+  disconnectSocket()
+  if (pokerStore.getIsPublic) {
+    router.push('/public')
+  } else if (pokerStore.getHostId === pokerStore.myInfo.id) {
+    router.push('/new')
+  } else {
+    router.push('/lobby')
+  }
 }
 
 const sendAction = (action) => {

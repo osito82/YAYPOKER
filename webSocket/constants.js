@@ -2,13 +2,15 @@ const isTest = process.env.NODE_ENV === 'test'
 
 const TIMEOUTS = {
   autofold: isTest ? 5000 : 300000, // 5s in test, else 5 minutes
-  autofoldPublic: isTest ? 5000 : 30000, // 30 seconds
+  autofoldPublic: isTest ? 5000 : 45000, // 45 seconds
   fast: isTest ? 10 : 100, // 10ms in test, else 100ms
   standard: isTest ? 50 : 500, // 50ms in test, else 500ms
   runout: isTest ? 100 : 2000, // 100ms in test, else 2 seconds
   pause: isTest ? 1000 : 60000, // 3s in test, else 1 minute
   nextRound: isTest ? 500 : 5000, // 500ms in test, else 5 seconds
   collectChips: isTest ? 100 : 1500, // 100ms in test, else 1.5 seconds
+  publicEmptyGrace: isTest ? 1000 : 30000, // 30 seconds
+  publicSingleGrace: isTest ? 1000 : 15000, // 15 seconds
 }
 
 const GAME_RULES = {
