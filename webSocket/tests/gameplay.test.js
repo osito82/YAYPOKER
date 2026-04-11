@@ -1094,9 +1094,9 @@ describe('Poker Game Integration Tests', () => {
       r.message.data?.displayMsg?.includes('Bob'),
     )
 
-    // The server should trigger autofold for Bob after ~1s
+    // The server should trigger autofold for Bob after ~7s (TIMEOUTS.autofold)
     // Then Alice should be the winner
-    const winnerMsg = await alice.waitAction('winner', 10000)
+    const winnerMsg = await alice.waitAction('winner', 15000)
     expect(winnerMsg.message.data.winners[0].name).toBe('Alice')
     expect(winnerMsg.message.data.isFold).toBe(true)
 
