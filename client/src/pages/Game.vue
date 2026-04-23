@@ -84,12 +84,21 @@ const responsive = useResponsiveStore()
 const gameCode = route.params.gameCode || 'default_Torneo'
 const secretCode = route.params.secretCode
 
+const isPublic = computed(() => {
+  return (
+    gameCode &&
+    (gameCode.startsWith('P_') ||
+      gameCode === 'PUBLIC' ||
+      pokerStore.torneoId?.startsWith('P_'))
+  )
+})
+
 const serverTime = ref(new Date().toLocaleTimeString())
 let timeInterval = null
 
 const handleLogoClick = () => {
   let msg = t('game.leave_confirm')
-  if (!pokerStore.getIsPublic) {
+  if (!isPublic.value) {
     msg += t('game.leave_private_hint', { code: secretCode })
   }
 
@@ -115,7 +124,11 @@ const activeTemplate = computed(() => {
 
 // Logic for name/uuid generation
 const playerName = ref(
-  route.query.playerName || pokerStore.gameCredentials.playerName || 'Guest',
+  route.query.playerName ||
+    (isPublic.value
+      ? pokerStore.publicCredentials.playerName
+      : pokerStore.privateCredentials.playerName) ||
+    'Guest',
 )
 
 if (props.isGuest) {

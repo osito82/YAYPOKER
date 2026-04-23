@@ -448,14 +448,30 @@ const vFocus = {
 }
 
 // State
-const playerName = ref(pokerStore.gameCredentials.playerName || '')
-const secretCode = ref(pokerStore.gameCredentials.secretCode || '')
+const playerName = ref('')
+const secretCode = ref('')
 const defaultSecret = ref('')
 const joinCode = ref('')
 const generatedCode = ref('')
 const isCreating = ref(false)
 const isPublic = ref(false)
 const copyStatus = ref('Copy Code')
+
+// Watch for mode changes to load appropriate credentials
+watch(
+  () => isPublic.value,
+  (newIsPublic) => {
+    // Only auto-fill if the user hasn't typed anything yet or if it matches the current stored values
+    if (newIsPublic) {
+      playerName.value = pokerStore.publicCredentials.playerName || ''
+      secretCode.value = ''
+    } else {
+      playerName.value = pokerStore.privateCredentials.playerName || ''
+      secretCode.value = pokerStore.privateCredentials.secretCode || ''
+    }
+  },
+  { immediate: true },
+)
 
 const templateSuffix = computed(() => {
   switch (responsive.screenSize) {
