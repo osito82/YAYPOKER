@@ -74,7 +74,7 @@
           <span
             :id="'seat-name-' + playerName + '-' + responsive.templateSuffix"
             class="text-lg font-black text-white truncate leading-tight"
-            >{{ playerName }}</span
+            >{{ cleanName }}</span
           >
         </div>
         <div
@@ -175,13 +175,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import Card from './Card.vue'
 import CardBack from './CardBack.vue'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { cleanPlayerName } from '../vutils'
 
 const responsive = useResponsiveStore()
 
-defineProps({
+const props = defineProps({
   playerName: { type: String, default: 'Guest' },
   playerChips: { type: Number, default: 0 },
   playerBet: { type: Number, default: 0 },
@@ -192,6 +194,8 @@ defineProps({
   isActive: { type: Boolean, default: false },
   playerNumber: { type: Number, default: 0 }, // ✅ AGREGADO
 })
+
+const cleanName = computed(() => cleanPlayerName(props.playerName))
 </script>
 
 <style scoped>

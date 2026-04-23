@@ -313,6 +313,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { cleanPlayerName } from '../vutils'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -436,7 +437,7 @@ const winnerName = computed(() => {
   // El servidor envía la info en data.winner para winnerTournament, 
   // o a veces pokerStore pone el objeto data directamente.
   const w = props.winnerInfo.winner || (props.winnerInfo.winners ? props.winnerInfo.winners[0] : props.winnerInfo)
-  return w?.name || 'Champion'
+  return cleanPlayerName(w?.name || 'Champion')
 })
 
 const totalAmount = computed(() => {

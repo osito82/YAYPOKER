@@ -19,6 +19,7 @@ const GAME_RULES = {
   MIN_PLAYERS_PUBLIC: 2,
   MAX_PLAYERS_PUBLIC: 5,
   MAX_NUMBER_BOTS: parseInt(process.env.MAX_NUMBER_BOTS) || 9,
+  BOT_DISCONNECT_THRESHOLD: 4, // Bots leave when this many players are at the table
   DEFAULT_SMALL_BLIND: 10,
   DEFAULT_BIG_BLIND: 20,
   DEFAULT_ANTE: 0,

@@ -261,7 +261,7 @@
                     : 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-white/5'
                 "
               >
-                {{ player.name.charAt(0).toUpperCase() }}
+                {{ cleanPlayerName(player.name).charAt(0).toUpperCase() }}
               </div>
               <div
                 :id="`player-name-labels-${player.id}-${templateSuffix}`"
@@ -276,7 +276,7 @@
                       : 'text-gray-700 dark:text-gray-300'
                   "
                 >
-                  {{ player.name }}
+                  {{ cleanPlayerName(player.name) }}
                   <span
                     v-if="player.id === myId"
                     class="text-[10px] text-yellow-600 dark:text-yellow-500/50 ml-1 font-black"
@@ -512,7 +512,11 @@
 import { computed, ref } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { usePokerStore } from '../store/pokerStore'
-import { urlsFactory, copyToClipboard as copyToClipboardUtil } from '../vutils'
+import {
+  urlsFactory,
+  copyToClipboard as copyToClipboardUtil,
+  cleanPlayerName,
+} from '../vutils'
 import Logo from './Logo.vue'
 import qrCode from './qrCode.vue'
 

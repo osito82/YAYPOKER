@@ -115,7 +115,7 @@
               >
                 {{
                   winners.length > 1
-                    ? $t('winner.player_hand', { name: winner.name })
+                    ? $t('winner.player_hand', { name: cleanPlayerName(winner.name) })
                     : $t('winner.winning_hand')
                 }}
               </span>
@@ -201,7 +201,7 @@
             >
               <div class="flex-1 min-w-0">
                 <div class="text-sm font-bold text-[#F5F0E8] truncate">
-                  {{ player.name }}
+                  {{ cleanPlayerName(player.name) }}
                 </div>
                 <div
                   class="text-[9px] font-mono uppercase text-[#9E9080] tracking-wider"
@@ -297,6 +297,7 @@ import Card from './Card.vue'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { useI18n } from 'vue-i18n'
+import { cleanPlayerName } from '../vutils'
 
 const { t } = useI18n()
 const responsive = useResponsiveStore()
@@ -363,7 +364,7 @@ const winners = computed(() => {
 })
 
 const winnerNames = computed(() => {
-  return winners.value.map((w) => w.name).join(' & ')
+  return winners.value.map((w) => cleanPlayerName(w.name)).join(' & ')
 })
 
 const totalAmount = computed(() => {

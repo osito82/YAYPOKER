@@ -219,9 +219,58 @@ class MatchLobby {
       Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
     }
 
-    // 🔥 PUBLIC AUTO-START
+    // 🔥 PUBLIC AUTO-START & BOT MANAGEMENT
     if (this.match.isPublic) {
+      this.handlePublicBots()
       this.handlePublicAutoStart()
+    }
+  }
+
+  handlePublicBots() {
+    if (!this.match.isPublic) return
+
+    const connectedHumans = this.match.players.filter(
+      (p) => p.connected && !p.isBot,
+    )
+    const connectedBots = this.match.players.filter(
+      (p) => p.connected && p.isBot,
+    )
+
+    // 1. Spawning logic: If only 1 human is left alone, bring a companion bot
+    if (
+      connectedHumans.length === 1 &&
+      connectedBots.length === 0 &&
+      !this.match.isSpawningBots
+    ) {
+      this.log.R({
+        msg: `[BOT_API] Human left alone in public match. Spawning companion bot.`,
+        torneo: this.match.torneoId,
+      })
+      this.match.spawnBots(1).then(() => {
+        this.match.isSpawningBots = false
+      })
+    }
+
+    // 2. Disconnect logic: If threshold reached, remove bots to make space for humans
+    if (
+      this.match.players.length >= GAME_RULES.BOT_DISCONNECT_THRESHOLD &&
+      connectedBots.length > 0
+    ) {
+      const botToLeave = connectedBots[0]
+      this.log.R({
+        msg: `[BOT_API] Bot ${botToLeave.name} disconnecting (player count: ${this.match.players.length})`,
+        torneo: this.match.torneoId,
+      })
+
+      const botSocketWrapper = Socket.getSocket(
+        this.match.torneoId,
+        botToLeave.id,
+      )
+      if (botSocketWrapper && botSocketWrapper.socket) {
+        botSocketWrapper.socket.close()
+      } else {
+        this.playerLeave(botToLeave.id)
+      }
     }
   }
 
@@ -366,6 +415,9 @@ class MatchLobby {
       if (this.match.isPublic) {
         const Torneo = require('../torneo')
         const connectedPlayers = this.match.getConnectedPlayers()
+
+        // GESTIÓN DE BOTS TRAS SALIDA
+        this.handlePublicBots()
 
         if (connectedPlayers.length === 0) {
           // Si la mesa quedó vacía, damos un margen antes de borrarla

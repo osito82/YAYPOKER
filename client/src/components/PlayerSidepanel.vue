@@ -79,7 +79,7 @@
                   ),
                 }"
               >
-                {{ player.name }}
+                {{ cleanPlayerName(player.name) }}
               </span>
               <div
                 :id="`player-item-connectivity-dot-${player.id}-${templateSuffix}`"
@@ -322,6 +322,7 @@
 import { ref, computed, watch } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { usePokerStore } from '../store/pokerStore'
+import { cleanPlayerName } from '../vutils'
 import Card from './Card.vue'
 
 const responsive = useResponsiveStore()

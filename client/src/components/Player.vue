@@ -13,13 +13,13 @@
         :id="'player-avatar-circle-' + responsive.templateSuffix"
         class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center text-2xl font-bold mb-1 border-2 border-gray-400"
       >
-        {{ playerName.charAt(0).toUpperCase() }}
+        {{ cleanName.charAt(0).toUpperCase() }}
       </div>
       <div
         :id="'player-name-text-' + responsive.templateSuffix"
         class="font-bold text-base truncate w-full text-center"
       >
-        {{ playerName }}
+        {{ cleanName }}
       </div>
     </div>
 
@@ -99,13 +99,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import Card from '../components/Card.vue'
 import CardBack from '../components/CardBack.vue'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { cleanPlayerName } from '../vutils'
 
 const responsive = useResponsiveStore()
 
-defineProps({
+const props = defineProps({
   playerName: { type: String, default: 'Player' },
   playerChips: { type: Number, default: 0 },
   playerBet: { type: Number, default: 0 },
@@ -117,6 +119,8 @@ defineProps({
   showCards: { type: Boolean, default: false },
   isActive: { type: Boolean, default: false }, // New prop to highlight active player
 })
+
+const cleanName = computed(() => cleanPlayerName(props.playerName))
 </script>
 
 <style scoped></style>

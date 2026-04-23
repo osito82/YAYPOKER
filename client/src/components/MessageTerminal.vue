@@ -1,26 +1,28 @@
 <template>
   <div
-    id="message-terminal"
+    :id="'message-terminal-' + templateSuffix"
     class="w-full h-full transition-colors duration-300"
   >
     <div
-      id="terminal-container"
+      :id="'terminal-container-' + templateSuffix"
       class="w-full h-full flex flex-col overflow-hidden bg-white/90 dark:bg-[#020402]/85 backdrop-blur-xl"
     >
       <!-- Terminal header bar -->
       <div
+        :id="'terminal-header-' + templateSuffix"
         class="flex items-center gap-2 px-4 py-2 shrink-0 bg-gray-100/50 dark:bg-black/40 border-b border-gray-200 dark:border-white/5"
       >
-        <div class="flex gap-1.5">
+        <div :id="'terminal-window-controls-' + templateSuffix" class="flex gap-1.5">
           <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
           <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
           <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
         </div>
         <span
+          :id="'terminal-title-' + templateSuffix"
           class="text-[9px] font-mono font-bold text-gray-400 dark:text-white/20 uppercase tracking-widest ml-2"
           >Game Log</span
         >
-        <div class="ml-auto flex items-center gap-1">
+        <div :id="'terminal-live-badge-' + templateSuffix" class="ml-auto flex items-center gap-1">
           <div
             class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
           ></div>
@@ -34,6 +36,7 @@
       <!-- Terminal body -->
       <div
         ref="logContainer"
+        :id="'terminal-body-scroller-' + templateSuffix"
         class="flex-grow overflow-y-auto p-4 lg:p-6 font-mono text-xs lg:text-sm space-y-1.5 scrollbar-thin dark:scrollbar-thumb-white/20 scrollbar-thumb-gray-300 scroll-smooth"
       >
         <TransitionGroup
@@ -44,21 +47,27 @@
           <div
             v-for="log in logs"
             :key="log.id"
+            :id="'terminal-log-item-' + log.id + '-' + templateSuffix"
             class="flex gap-2 items-start leading-tight py-0.5 border-b border-gray-100 dark:border-white/[0.02] last:border-0"
           >
             <span
+              :id="'terminal-log-time-' + log.id + '-' + templateSuffix"
               class="text-yellow-600 dark:text-yellow-500/50 font-bold shrink-0 text-[10px] mt-0.5"
               >[{{ formatTime(log.id) }}]</span
             >
             <span
+              :id="'terminal-log-arrow-' + log.id + '-' + templateSuffix"
               class="text-yellow-600 dark:text-yellow-400 font-black shrink-0"
               >»</span
             >
-            <div class="flex flex-wrap gap-1 items-center">
-              <span class="text-lg leading-none shrink-0">{{
+            <div :id="'terminal-log-content-' + log.id + '-' + templateSuffix" class="flex flex-wrap gap-1 items-center">
+              <span
+                :id="'terminal-log-emoji-' + log.id + '-' + templateSuffix"
+                class="text-lg leading-none shrink-0">{{
                 getEmoji(log)
               }}</span>
               <span
+                :id="'terminal-log-text-' + log.id + '-' + templateSuffix"
                 class="font-bold tracking-tight break-words transition-colors"
                 :class="[
                   log.type === 'private'
@@ -66,7 +75,7 @@
                     : 'text-gray-800 dark:text-gray-100',
                 ]"
               >
-                {{ log.text }}
+                {{ cleanText(log.text) }}
               </span>
             </div>
           </div>
@@ -75,6 +84,7 @@
         <!-- Empty State -->
         <div
           v-if="logs.length === 0"
+          :id="'terminal-empty-state-' + templateSuffix"
           class="text-gray-400 dark:text-gray-600 font-bold italic animate-pulse flex items-center gap-2"
         >
           <span class="text-yellow-600 dark:text-yellow-400">»</span>
@@ -82,14 +92,22 @@
         </div>
 
         <!-- Bottom anchor for auto-scroll -->
-        <div ref="bottomAnchor" class="h-px w-full"></div>
+        <div ref="bottomAnchor" :id="'terminal-scroll-anchor-' + templateSuffix" class="h-px w-full"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick, onMounted, computed } from 'vue'
+import { useResponsiveStore } from '../store/responsiveStore'
+import { cleanPlayerName } from '../vutils'
+
+const responsive = useResponsiveStore()
+const templateSuffix = computed(() => {
+  const size = responsive.screenSize
+  return 'Template' + size.charAt(0).toUpperCase() + size.slice(1)
+})
 
 const props = defineProps({
   logs: {
@@ -109,6 +127,12 @@ const formatTime = (timestamp) => {
     second: '2-digit',
     hour12: false,
   })
+}
+
+const cleanText = (text) => {
+  if (!text) return ''
+  // Strip _Bot or _ia (case insensitive) and replace underscores with spaces
+  return text.replace(/(_Bot|_ia)/gi, '').replace(/_+/g, ' ').trim()
 }
 
 const getEmoji = (log) => {

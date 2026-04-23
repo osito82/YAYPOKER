@@ -4,6 +4,12 @@ function generateUniqueId() {
   return `${randomStr()}-${randomStr()}`
 }
 
+function cleanPlayerName(name) {
+  if (!name) return ''
+  // Strip _Bot or _ia (case insensitive) and any trailing numbers/underscores if they follow
+  return name.replace(/(_Bot|_ia)/gi, '').replace(/_+/g, ' ').trim()
+}
+
 const simbolConverter = (simbol) => {
   const number = {}
 
@@ -139,4 +145,5 @@ export {
   whatColor,
   urlsFactory,
   copyToClipboard,
+  cleanPlayerName
 }

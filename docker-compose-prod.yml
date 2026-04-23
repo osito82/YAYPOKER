@@ -48,7 +48,7 @@ services:
     environment:
       - PORT=8886
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - OLLAMA_URL=http://host.docker.internal:11434
+      - OLLAMA_URL=73.7.52.167:11434
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
