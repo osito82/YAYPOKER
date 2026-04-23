@@ -7,13 +7,29 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const socketMessage = ref(null)
   const connected = ref(false)
 
-  const savedCredentials = JSON.parse(
-    localStorage.getItem('poker-credentials') || '{}',
+  // Separate credentials for public and private tables
+  const savedPrivate = JSON.parse(
+    localStorage.getItem('poker-private-credentials') ||
+      localStorage.getItem('poker-credentials') ||
+      '{}',
   )
+  const savedPublic = JSON.parse(
+    localStorage.getItem('poker-public-credentials') || '{}',
+  )
+
+  const privateCredentials = ref({
+    playerName: savedPrivate.playerName || '',
+    secretCode: savedPrivate.secretCode || '',
+  })
+
+  const publicCredentials = ref({
+    playerName: savedPublic.playerName || '',
+  })
+
   const gameCredentials = ref({
-    secretCode: savedCredentials.secretCode || '',
+    secretCode: '',
     gameCode: '',
-    playerName: savedCredentials.playerName || '',
+    playerName: '',
   })
   const players = ref([])
   const communityCards = ref([])
@@ -355,18 +371,23 @@ export const usePokerStore = defineStore('pokerStore', () => {
     gameCredentials.value.gameCode = gameCode
     gameCredentials.value.secretCode = secretCode
 
-    // Persist credentials only for private tables (but not the gameCode as it's session-specific)
     const isPublicCode =
       gameCode && (gameCode.startsWith('P_') || gameCode === 'PUBLIC')
 
-    if (gameCode && !isPublicCode) {
+    if (isPublicCode) {
+      publicCredentials.value = { playerName }
       localStorage.setItem(
-        'poker-credentials',
-        JSON.stringify({
-          playerName,
-          secretCode,
-        }),
+        'poker-public-credentials',
+        JSON.stringify(publicCredentials.value),
       )
+    } else {
+      privateCredentials.value = { playerName, secretCode }
+      localStorage.setItem(
+        'poker-private-credentials',
+        JSON.stringify(privateCredentials.value),
+      )
+      // Cleanup old key if it exists
+      localStorage.removeItem('poker-credentials')
     }
   }
 
@@ -379,6 +400,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
     socketMessage,
     connected,
     gameCredentials,
+    privateCredentials,
+    publicCredentials,
     players,
     communityCards,
     pot,
