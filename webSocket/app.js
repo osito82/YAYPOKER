@@ -42,25 +42,48 @@ const WinnerCertificate = require('./winnerCertificate')
 
 const startTime = new Date()
 
-// Global error handlers to prevent server crashes
+// Global error handlers to prevent server crashes and log explosions
+let isLoggingError = false
 process.on('uncaughtException', (error) => {
-  log
-    .Template({
-      name: 'brakets',
-      title: 'SERVER:UNCAUGHT_EXCEPTION',
-      date: true,
-    })
-    .R({ error: error.message, stack: error.stack })
+  if (isLoggingError) {
+    if (error.code === 'EIO') process.exit(1)
+    return
+  }
+  isLoggingError = true
+  try {
+    log
+      .Template({
+        name: 'brakets',
+        title: 'SERVER:UNCAUGHT_EXCEPTION',
+        date: true,
+      })
+      .R({ error: error.message, stack: error.stack })
+
+    // Si el error es EIO (I/O error, terminal cerrada), forzar salida para evitar bucles
+    if (error.code === 'EIO') process.exit(1)
+  } catch (err) {
+    process.exit(1)
+  } finally {
+    isLoggingError = false
+  }
 })
 
 process.on('unhandledRejection', (reason, promise) => {
-  log
-    .Template({
-      name: 'brakets',
-      title: 'SERVER:UNHANDLED_REJECTION',
-      date: true,
-    })
-    .R({ reason: reason?.message || reason, stack: reason?.stack })
+  if (isLoggingError) return
+  isLoggingError = true
+  try {
+    log
+      .Template({
+        name: 'brakets',
+        title: 'SERVER:UNHANDLED_REJECTION',
+        date: true,
+      })
+      .R({ reason: reason?.message || reason, stack: reason?.stack })
+  } catch (err) {
+    // ignore
+  } finally {
+    isLoggingError = false
+  }
 })
 
 // Periodic garbage collector for inactive/abandoned matches

@@ -8,10 +8,9 @@ const logDir = path.join(__dirname, '../Logs')
 
 // Winston para WebSocket
 const transportWS = new DailyRotateFile({
-  filename: path.join(logDir, 'webSocket-%DATE%.log'),
+  filename: path.join(logDir, 'webSocket', 'webSocket-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
   zippedArchive: true,
-  maxSize: '20m',
   maxFiles: '14d',
 })
 
@@ -25,10 +24,9 @@ const winstonLogger = winston.createLogger({
 
 // Winston para Client (Logs enviados vía WS)
 const transportClient = new DailyRotateFile({
-  filename: path.join(logDir, 'client-%DATE%.log'),
+  filename: path.join(logDir, 'client', 'client-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
   zippedArchive: true,
-  maxSize: '20m',
   maxFiles: '14d',
 })
 

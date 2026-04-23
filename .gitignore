@@ -1,4 +1,6 @@
 node_modules/
 *.zip
-Logs/
+Logs/*
 secure/*
+*.tar.gz
+

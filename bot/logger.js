@@ -8,10 +8,9 @@ const logDir = path.join(__dirname, "../Logs");
 
 // Configurar Winston para el bot
 const transport = new DailyRotateFile({
-  filename: path.join(logDir, "bot-%DATE%.log"),
+  filename: path.join(logDir, "bot", "bot-%DATE%.log"),
   datePattern: "YYYY-MM-DD",
   zippedArchive: true,
-  maxSize: "20m",
   maxFiles: "14d",
 });
 
