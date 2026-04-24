@@ -320,7 +320,7 @@ class MatchActions {
     this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
   }
 
-  setBet = (thisSocket, chipsToBet, type = 'setBet') => {
+  setBet = (thisSocket, chipsToBet, type = 'setBet', isBlind = false) => {
     if (
       !this.match.activePlayerId ||
       this.match.activePlayerId !== thisSocket.id
@@ -460,7 +460,9 @@ class MatchActions {
         this.dealer.clearActedPlayers()
       }
 
-      this.dealer.setPlayerActed(foundPlayer.id)
+      if (!isBlind) {
+        this.dealer.setPlayerActed(foundPlayer.id)
+      }
 
       this.log
         .Template({
@@ -952,9 +954,7 @@ class MatchActions {
 
     let sorted = []
     const allPlayers = this.match.players
-    if (this.isPublic()) {
-      sorted = [...allPlayers]
-    } else if (bettingFor === 'firstBetting') {
+    if (bettingFor === 'firstBetting') {
       if (allPlayers.length === 2) {
         sorted = [...allPlayers]
       } else {

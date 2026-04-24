@@ -152,7 +152,7 @@ const actionHandlers = {
   [ACTIONS.RAISE]: (match, socket, data) =>
     match.actions.setRise(socket, data.chipsToRiseBet),
   [ACTIONS.BLIND]: (match, socket, data) =>
-    match.actions.setBet(socket, data.blindAmount),
+    match.actions.setBet(socket, data.blindAmount, 'setBet', true),
   [ACTIONS.CALL]: (match, socket) => match.actions.setCall(socket),
   [ACTIONS.CHECK]: (match, socket) => match.actions.setCheck(socket),
   [ACTIONS.DEALT_PRIVATE_CARDS]: (match, socket) =>

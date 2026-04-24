@@ -314,12 +314,23 @@ class MatchLobby {
 
   playerReady(thisSocket) {
     const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
-    if (foundPlayer) foundPlayer.setStarted(true)
+    if (foundPlayer) {
+      // Si la mesa es pública y ya empezó el juego, el jugador debe esperar a la siguiente mano
+      if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
+        foundPlayer.setStarted(false)
+      } else {
+        foundPlayer.setStarted(true)
+      }
+    }
 
     // AUTO-START solo para mesas públicas cuando todos están listos
     if (this.match.isPublic) {
       const allStarted = this.match.players.every((p) => p.isStarted)
-      if (allStarted && this.match.players.length >= GAME_RULES.MIN_PLAYERS) {
+      if (
+        allStarted &&
+        this.match.players.length >= GAME_RULES.MIN_PLAYERS &&
+        !this.stepChecker.checkStep('startGame')
+      ) {
         this.match.startGame(thisSocket)
       }
     }

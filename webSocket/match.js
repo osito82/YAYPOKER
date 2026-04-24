@@ -407,11 +407,17 @@ class Match extends EventEmitter {
 
       if (this.isPublic) {
         // En mesas públicas, siempre intentamos volver al estado de lobby en lugar de cerrar la mesa
-        this.stepChecker.revokeStep('startGame')
         this.acceptingPlayers = true
         
-        // Mantener solo a los que tienen fichas y están conectados
-        this.players = this.players.filter((p) => p.chips > 0 && p.connected)
+        // Mantener solo a los que tienen fichas y están conectados, preservando la referencia del array
+        const remainingPlayers = this.players.filter((p) => p.chips > 0 && p.connected)
+        this.players.length = 0
+        this.players.push(...remainingPlayers)
+
+        // Resetear el estado completo de la mano
+        this.handCount = 0
+        this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}0`
+        this.initHand() 
 
         this.communicator.msgBuilder('lobby', 'public', null, {
           displayMsg: 'Tournament finished. Waiting for new players...',
