@@ -32,7 +32,13 @@ describe('All-In Chip Conservation Test (Realistic Scenario)', () => {
 
     const responses = []
     ws.on('message', (data) => {
-      responses.push(JSON.parse(data.toString()))
+      const r = JSON.parse(data.toString())
+      responses.push(r)
+
+      // Auto-responder para ciegas
+      if (r.message?.action === 'askForBlindBets' && r.message?.data?.displayMsg.includes(name)) {
+        ws.send(JSON.stringify({ action: 'setBet', chipsToBet: r.message.data.blindAmount }))
+      }
     })
 
     const waitAction = (action, timeout = 5000, filterFn = null) => {
@@ -83,8 +89,8 @@ describe('All-In Chip Conservation Test (Realistic Scenario)', () => {
     short.send({ action: 'signUp', totalChips: 33, isReady: true })
     await Promise.all([big.waitAction('signUp'), short.waitAction('signUp')])
 
-    // 2. Iniciar
-    big.send({ action: 'startGame' })
+    // 2. Iniciar con ciegas en 0 para mantener la compatibilidad con el escenario original
+    big.send({ action: 'startGame', smallBlind: 0, bigBlind: 0, ante: 0 })
     await big.waitAction('dealtPrivateCards')
 
     // 3. Primera calle (Pre-flop): Apuesta pequeña

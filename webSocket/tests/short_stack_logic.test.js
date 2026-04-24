@@ -33,7 +33,13 @@ describe('Short Stack Raise Logic Test (Machox Scenario)', () => {
 
     const responses = []
     ws.on('message', (data) => {
-      responses.push(JSON.parse(data.toString()))
+      const r = JSON.parse(data.toString())
+      responses.push(r)
+
+      // Auto-responder para ciegas
+      if (r.message?.action === 'askForBlindBets' && r.message?.data?.displayMsg.includes(name)) {
+        ws.send(JSON.stringify({ action: 'setBet', chipsToBet: r.message.data.blindAmount }))
+      }
     })
 
     const waitAction = (action, timeout = 10000, filterFn = null) => {
@@ -82,11 +88,12 @@ describe('Short Stack Raise Logic Test (Machox Scenario)', () => {
     machox.send({ action: 'signUp', totalChips: 1000, isReady: true })
     await Promise.all([macho.waitAction('signUp'), machox.waitAction('signUp')])
 
-    // 2. Iniciar y esperar cartas
-    macho.send({ action: 'startGame' })
+    // 2. Iniciar y esperar cartas con ciegas en 0
+    macho.send({ action: 'startGame', smallBlind: 0, bigBlind: 0, ante: 0 })
     await macho.waitAction('dealtPrivateCards')
 
-    // 3. Lógica de respuesta automática para manejar turnos dinámicos
+    // 3. Lógica de respuesta automática: Ya manejada en createClient para lo básico.
+    // Pero este test tiene lógica de apuesta específica, así que la agregamos al vuelo:
     const players = [macho, machox]
     players.forEach(p => {
         p.ws.on('message', (data) => {
@@ -96,16 +103,12 @@ describe('Short Stack Raise Logic Test (Machox Scenario)', () => {
             
             if (action.startsWith('bettingCore') && msg.includes(p.name)) {
                 if (p.name === 'Macho') {
-                    // Macho apuesta 965 si es su turno
-                    // Pero solo si no ha apostado ya (evitar bucle)
                     if (r.message.data.playerBet < 965) {
                         p.send({ action: 'setBet', chipsToBet: 965 })
                     } else {
-                        // Si ya apostó y le toca otra vez (después del raise de machox), hace Call
                         p.send({ action: 'setCall' })
                     }
                 } else if (p.name === 'Machox') {
-                    // Machox intenta subir a 1000 (su All-In)
                     p.send({ action: 'setRise', chipsToRiseBet: 1000 })
                 }
             }

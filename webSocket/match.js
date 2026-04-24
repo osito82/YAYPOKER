@@ -248,6 +248,11 @@ class Match extends EventEmitter {
   async startGame(thisSocket = {}, data = {}) {
     if (this.stepChecker.checkStep('pause')) return
 
+    // Allow overriding blinds in the first hand
+    if (data.smallBlind !== undefined) this.smallBlind = Number(data.smallBlind)
+    if (data.bigBlind !== undefined) this.bigBlind = Number(data.bigBlind)
+    if (data.ante !== undefined) this.ante = Number(data.ante)
+
     // Si el juego aún no ha sido iniciado formalmente
     if (!this.stepChecker.checkStep('startGame')) {
       // Solo el host puede iniciar el juego la primera vez (excepto en mesas públicas)

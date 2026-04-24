@@ -460,9 +460,7 @@ class MatchActions {
         this.dealer.clearActedPlayers()
       }
 
-      if (!isBlind) {
-        this.dealer.setPlayerActed(foundPlayer.id)
-      }
+      this.dealer.setPlayerActed(foundPlayer.id)
 
       this.log
         .Template({
@@ -581,7 +579,7 @@ class MatchActions {
     const p1Bet = p1.getCurrentBet()
     const p2Bet = p2.getCurrentBet()
 
-    if (p1Bet > 0 && p2Bet > 0) {
+    if (p1Bet >= this.match.smallBlind && p2Bet >= this.match.bigBlind) {
       this.log
         .Template({
           name: 'brakets',
@@ -595,6 +593,7 @@ class MatchActions {
           dealerCards: this.match.cardsDealer,
         })
       this.match.activePlayerId = null
+      this.dealer.clearActedPlayers() // Asegurar que BB tenga opción después
       this.stepChecker.grantStep('blindsBetting')
       this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
     } else {
