@@ -27,10 +27,16 @@ class PokerBot {
   constructor(config) {
     this.gameCode = config.gameCode;
     this.playerName = config.playerName;
-    this.provider = config.provider || "ollama";
+    this.provider = config.provider || process.env.DEFAULT_AI_PROVIDER || "ollama";
+    if (this.provider === "openllama") this.provider = "ollama"; // Normalización
     this.modelName =
       config.model ||
-      (this.provider === "gemini" ? "gemini-1.5-flash" : "llama3.2");
+      process.env.DEFAULT_AI_MODEL ||
+      (this.provider === "gemini"
+        ? "gemini-1.5-flash"
+        : this.provider === "deepseek"
+          ? "deepseek-chat"
+          : "llama3.2");
 
     this.secretCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     this.serverUrl = `ws://${config.server || "localhost"}:${config.port || "8888"}/?gameCode=${this.gameCode}&playerName=${this.playerName}&secretCode=${this.secretCode}`;
@@ -46,12 +52,21 @@ class PokerBot {
   }
 
   initIA() {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (this.provider === "gemini" && apiKey) {
-      const genAI = new GoogleGenerativeAI(apiKey);
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (this.provider === "gemini" && geminiKey) {
+      const genAI = new GoogleGenerativeAI(geminiKey);
       this.geminiModel = genAI.getGenerativeModel({ model: this.modelName });
       log
         .Template({ name: "brakets", title: "IA:GEMINI_INIT", date: true })
+        .R({ bot: this.playerName, model: this.modelName });
+    }
+
+    if (this.provider === "deepseek") {
+      this.deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+      this.deepseekBaseUrl =
+        process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
+      log
+        .Template({ name: "brakets", title: "IA:DEEPSEEK_INIT", date: true })
         .R({ bot: this.playerName, model: this.modelName });
     }
   }
@@ -240,13 +255,38 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
       if (this.provider === "gemini" && this.geminiModel) {
         const result = await this.geminiModel.generateContent(prompt);
         aiText = (await result.response).text();
-      } else if (ollamaClient) {
+      } else if (this.provider === "deepseek" && this.deepseekApiKey) {
+        const response = await fetch(
+          `${this.deepseekBaseUrl}/chat/completions`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${this.deepseekApiKey}`,
+            },
+            body: JSON.stringify({
+              model: this.modelName,
+              messages: [
+                { role: "system", content: "You are a professional poker bot." },
+                { role: "user", content: prompt },
+              ],
+              stream: false,
+            }),
+          },
+        );
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message || "DeepSeek Error");
+        aiText = data.choices[0].message.content;
+      } else if (this.provider === "ollama" && ollamaClient) {
         const response = await ollamaClient.generate({
           model: this.modelName,
           prompt,
           stream: false,
         });
         aiText = response.response;
+      } else {
+        // Fallback genérico si el proveedor elegido no está disponible
+        throw new Error(`Provider ${this.provider} is not properly configured.`);
       }
       decision = this.safeParseJSON(aiText);
     } catch (e) {
@@ -313,8 +353,22 @@ app.post("/spawn", (req, res) => {
   res.json({ message: `Spawned ${playerName}` });
 });
 
-app.listen(PORT, () =>
+app.listen(PORT, () => {
   log
     .Template({ name: "brakets", title: "SERVICE:READY", date: true })
-    .R({ port: PORT }),
-);
+    .R({ port: PORT });
+
+  // Soporte para CLI: Permitir spawnear un bot directamente si se pasan argumentos
+  const args = process.argv.slice(2).reduce((acc, arg) => {
+    const [key, value] = arg.replace("--", "").split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
+
+  if (args.gameCode && args.playerName) {
+    log
+      .Template({ name: "brakets", title: "SERVICE:CLI_SPAWN", date: true })
+      .R({ gameCode: args.gameCode, bot: args.playerName });
+    new PokerBot(args);
+  }
+});
