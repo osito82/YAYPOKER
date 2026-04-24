@@ -40,9 +40,9 @@ class Match extends EventEmitter {
 
     // Blinds management
     this.blindLevel = 1
-    this.smallBlind = this.isPublic ? 0 : GAME_RULES.DEFAULT_SMALL_BLIND
-    this.bigBlind = this.isPublic ? 0 : GAME_RULES.DEFAULT_BIG_BLIND
-    this.ante = this.isPublic ? 0 : GAME_RULES.DEFAULT_ANTE
+    this.smallBlind = GAME_RULES.DEFAULT_SMALL_BLIND
+    this.bigBlind = GAME_RULES.DEFAULT_BIG_BLIND
+    this.ante = GAME_RULES.DEFAULT_ANTE
 
     this.initialStack = 1000 // Default initial stack
 
@@ -109,8 +109,6 @@ class Match extends EventEmitter {
   }
 
   increaseBlinds() {
-    if (this.isPublic) return
-
     this.blindLevel++
     this.smallBlind = Math.ceil(
       this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
@@ -408,39 +406,23 @@ class Match extends EventEmitter {
       })
 
       if (this.isPublic) {
-        const connectedPlayers = this.getConnectedPlayers()
-
-        if (connectedPlayers.length <= 1) {
-          // Si solo queda uno o ninguno, destruimos el torneo y forzamos salida al lobby
-          const Torneo = require('./torneo')
-
-          if (connectedPlayers.length === 1) {
-            const lastPlayer = connectedPlayers[0]
-            this.communicator.msgBuilder('forceLobby', 'private', lastPlayer, {
-              displayMsg:
-                'Tournament finished. You are the only player left. Returning to lobby...',
-              reason: 'TOURNAMENT_END_SINGLE',
-            })
-            Socket.sendToPlayer(
-              this.torneoId,
-              lastPlayer.secretCode,
-              this.communicator.getMsg(),
-            )
-          }
-
-          Torneo.getTorneos().delete(this.torneoId)
-          return
-        }
-
-        // Si quedan varios pero el torneo terminó (ej: todos menos 2 perdieron fichas)
+        // En mesas públicas, siempre intentamos volver al estado de lobby en lugar de cerrar la mesa
         this.stepChecker.revokeStep('startGame')
         this.acceptingPlayers = true
+        
+        // Mantener solo a los que tienen fichas y están conectados
         this.players = this.players.filter((p) => p.chips > 0 && p.connected)
 
         this.communicator.msgBuilder('lobby', 'public', null, {
           displayMsg: 'Tournament finished. Waiting for new players...',
         })
         Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+        
+        // Si hay humanos, activar la lógica de bots y auto-start por si acaso
+        if (this.players.some(p => !p.isBot)) {
+           this.lobby.handlePublicBots()
+           this.lobby.handlePublicAutoStart()
+        }
         return
       }
       return
@@ -468,12 +450,10 @@ class Match extends EventEmitter {
     // Rotate players
     this.players.push(this.players.shift())
 
-    // Remove busted players (only in private matches/tournaments)
-    if (!this.isPublic) {
-      const activePlayers = this.players.filter((p) => p.chips > 0)
-      this.players.length = 0
-      this.players.push(...activePlayers)
-    }
+    // Remove busted players
+    const activePlayers = this.players.filter((p) => p.chips > 0)
+    this.players.length = 0
+    this.players.push(...activePlayers)
 
     this.initHand()
 

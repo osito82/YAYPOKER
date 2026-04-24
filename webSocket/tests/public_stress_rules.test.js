@@ -33,7 +33,27 @@ describe('Public Table: Rules & Money Integrity Test', () => {
 
     const responses = []
     ws.on('message', (data) => {
-      responses.push(JSON.parse(data.toString()))
+      const r = JSON.parse(data.toString())
+      responses.push(r)
+
+      const action = r.message?.action || r.message?.method || ''
+      const msg = r.message?.data?.displayMsg || ''
+
+      // Auto-responder para que el test fluya
+      // 1. Ciegas (Privado o Público con mención)
+      if (action === 'askForBlindBets') {
+        const isMyTurn = r.message?.data?.id === ws._id_for_test || msg.includes(name)
+        if (isMyTurn && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ action: 'setBet', chipsToBet: r.message.data.blindAmount }))
+        }
+      }
+
+      // 2. Betting Core (Turnos de apuesta)
+      if (action.startsWith('bettingCore') && msg.includes(name)) {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ action: 'setBet', chipsToBet: 1000 }))
+        }
+      }
     })
 
     const waitAction = (action, timeout = 10000, filterFn = null) => {
@@ -80,26 +100,18 @@ describe('Public Table: Rules & Money Integrity Test', () => {
 
     // 2. Todos hacen SignUp
     playerObjects.forEach(p => p.send({ action: 'signUp', totalChips: 1000, isReady: true }))
-    await Promise.all(playerObjects.map(p => p.waitAction('signUp')))
+    await Promise.all(playerObjects.map(async (p) => {
+        const signUpResponse = await p.waitAction('signUp')
+        // Capturamos el ID asignado por el servidor
+        p.ws._id_for_test = signUpResponse.message.data.id
+    }))
 
     // 3. Esperar a que empiece la partida (Auto-start)
     // El servidor enviará dealtPrivateCards cuando los 4 estén listos
     await playerObjects[0].waitAction('dealtPrivateCards', 15000)
 
-    // 4. LÓGICA DE APUESTA AGRESIVA: Todos van All-In inmediatamente
-    playerObjects.forEach(p => {
-        p.ws.on('message', (data) => {
-            const r = JSON.parse(data.toString())
-            const action = r.message?.action || ''
-            const msg = r.message?.data?.displayMsg || ''
-            
-            if (action.startsWith('bettingCore') && msg.includes(p.name)) {
-                // Si es mi turno, pongo mis 1000 fichas
-                p.send({ action: 'setBet', chipsToBet: 1000 })
-            }
-        })
-    })
-
+    // 4. LÓGICA DE APUESTA: Manejada automáticamente por createClient
+    
     // 5. Esperar al ganador del torneo
     const tournamentWinner = await playerObjects[0].waitAction('winnerTournament', 20000)
     

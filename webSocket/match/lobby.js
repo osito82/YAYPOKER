@@ -359,14 +359,15 @@ class MatchLobby {
       // Si es una mesa pública y hay juego en curso, forzamos fold
       if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
         if (!playerLeaving.folded) {
-          // Si era su turno, el fold disparará el CONTINUE
-          // Si no, simplemente lo marcamos como fold para que el dealer lo ignore
           if (this.match.activePlayerId === playerLeaving.id) {
-            this.match.actions.fold({ id: playerLeaving.id })
+            // Si era su turno, el fold disparará el CONTINUE correctamente
+            this.match.actions.fold({ id: playerLeaving.id }, true)
           } else {
+            // Si no era su turno, marcamos fold silenciosamente para que el dealer lo ignore
             playerLeaving.setFolded(true)
             this.match.playersFold.push(playerLeaving.name)
             this.dealer.setPlayerActed(playerLeaving.id)
+            this.match.comms.sendOdds()
           }
         }
       }

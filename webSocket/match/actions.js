@@ -573,11 +573,6 @@ class MatchActions {
       return
     }
 
-    if (this.isPublic()) {
-      this.stepChecker.grantStep('blindsBetting')
-      return this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
-    }
-
     const p1 = activePlayers[0]
     const p2 = activePlayers[1]
 
