@@ -54,7 +54,6 @@ Crea una nueva instancia de un bot y la conecta a una partida vía WebSocket.
 {
   "gameCode": "ABCDE-12345",
   "playerName": "Osito_Bot",
-  "provider": "openllama",
   "server": "localhost",
   "port": "8888"
 }

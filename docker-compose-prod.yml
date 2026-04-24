@@ -49,6 +49,10 @@ services:
       - PORT=8886
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OLLAMA_URL=73.7.52.167:11434
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - DEEPSEEK_BASE_URL=https://api.deepseek.com
+      - DEFAULT_AI_PROVIDER=deepseek
+      - DEFAULT_AI_MODEL=deepseek-chat
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

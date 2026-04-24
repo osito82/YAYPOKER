@@ -98,7 +98,6 @@ class Match extends EventEmitter {
           body: JSON.stringify({
             gameCode: this.torneoId,
             playerName: botName,
-            provider: 'ollama',
             server: SERVER_CONFIG.BASE_URL,
             port: SERVER_CONFIG.PORT,
           }),
