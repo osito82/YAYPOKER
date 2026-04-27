@@ -161,10 +161,13 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.PLAYER_READY)
     bob.send(MOCK_ACTIONS.PLAYER_READY)
     charlie.send(MOCK_ACTIONS.PLAYER_READY)
+    
+    // RE-SYNC: En mesas privadas, isStarted se activa al llamar a startGame
+    // si los jugadores ya están en la mesa.
     alice.send(MOCK_ACTIONS.START_GAME)
 
     // Wait for blinds - only Alice and Bob should be asked in this setup
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('askForBlindBets', 10000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
     alice.send(MOCK_ACTIONS.SMALL_BLIND(10))

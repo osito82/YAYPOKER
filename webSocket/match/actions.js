@@ -451,17 +451,17 @@ class MatchActions {
 
       foundPlayer.setLastAction(actionType)
       this.dealer.setPot(addedChips)
+if (currentBetAfter > previousMaxBet) {
+  const raiseAmount = currentBetAfter - previousMaxBet
+  this.dealer.setCurrentHighestBet(currentBetAfter)
+  this.dealer.setLastRaiseAmount(raiseAmount)
+  this.dealer.setLastRaiser(foundPlayer.id)
+  this.dealer.clearActedPlayers()
+}
 
-      if (currentBetAfter > previousMaxBet) {
-        const raiseAmount = currentBetAfter - previousMaxBet
-        this.dealer.setCurrentHighestBet(currentBetAfter)
-        this.dealer.setLastRaiseAmount(raiseAmount)
-        this.dealer.setLastRaiser(foundPlayer.id)
-        this.dealer.clearActedPlayers()
-      }
-
-      this.dealer.setPlayerActed(foundPlayer.id)
-
+if (!isBlind) {
+  this.dealer.setPlayerActed(foundPlayer.id)
+}
       this.log
         .Template({
           name: 'brakets',

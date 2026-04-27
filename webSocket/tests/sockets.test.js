@@ -26,7 +26,7 @@ describe('Socket Manager', () => {
     Socket.addSocket(socket1, torneoId)
     const sockets = Socket.getSocketsByTorneo(torneoId)
     expect(sockets.size).toBe(1)
-    expect(sockets.get('1111')).toEqual(socket1)
+    expect(sockets.get('1')).toEqual(socket1)
   })
 
   it('should replace socket on reconnection', () => {
@@ -41,7 +41,8 @@ describe('Socket Manager', () => {
 
     const sockets = Socket.getSocketsByTorneo(torneoId)
     expect(sockets.size).toBe(1)
-    expect(sockets.get('1111')).toEqual(socket1New)
+    expect(sockets.get('3')).toEqual(socket1New)
+    expect(sockets.has('1')).toBe(false)
   })
 
   it('should remove a socket', () => {
@@ -51,8 +52,8 @@ describe('Socket Manager', () => {
 
     const sockets = Socket.getSocketsByTorneo(torneoId)
     expect(sockets.size).toBe(1)
-    expect(sockets.get('2222')).toEqual(socket2)
-    expect(sockets.has('1111')).toBe(false)
+    expect(sockets.get('2')).toEqual(socket2)
+    expect(sockets.has('1')).toBe(false)
   })
 
   it('should check if a socket exists', () => {

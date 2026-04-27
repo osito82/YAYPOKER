@@ -1,7 +1,7 @@
 const log = require('./logger')
 
 class Socket {
-  static torneoSockets = new Map() // Map<idTorneo, Map<secretCode, socket>>
+  static torneoSockets = new Map() // Map<idTorneo, Map<socketId, socketWrapper>>
   static log = log
 
   static addSocket(socket, idTorneo) {
@@ -13,13 +13,23 @@ class Socket {
 
     const torneoSockets = this.torneoSockets.get(idTorneo)
 
-    if (torneoSockets.has(secretCode)) {
-      torneoSockets.set(secretCode, socket)
-      this.log
-        .Template({ name: 'brakets', title: 'SERVER:RECONNECTED', date: true })
-        .R({ playerName: name, id, torneo: idTorneo, secretCode })
-    } else {
-      torneoSockets.set(secretCode, socket)
+    // Handle re-connections based on secretCode: 
+    // If a socket already exists with the same secretCode, we remove it to make way for the new one.
+    // This allows the player to "take over" their previous session.
+    for (const [existingId, existingSocket] of torneoSockets.entries()) {
+      if (existingSocket.secretCode === secretCode) {
+        torneoSockets.delete(existingId)
+        this.log
+          .Template({ name: 'brakets', title: 'SERVER:RECONNECTED', date: true })
+          .R({ playerName: name, id, torneo: idTorneo, secretCode, replacedId: existingId })
+        break
+      }
+    }
+
+    torneoSockets.set(id, socket)
+    
+    // If not a reconnection, it's a new connection
+    if (!this.log.lastTitle?.includes('RECONNECTED')) {
       this.log
         .Template({
           name: 'brakets',
@@ -32,8 +42,8 @@ class Socket {
 
   static removeSocket(socket, idTorneo) {
     const torneoSockets = this.torneoSockets.get(idTorneo)
-    if (torneoSockets?.has(socket.secretCode)) {
-      torneoSockets.delete(socket.secretCode)
+    if (torneoSockets?.has(socket.id)) {
+      torneoSockets.delete(socket.id)
       this.log
         .Template({
           name: 'brakets',
@@ -66,28 +76,26 @@ class Socket {
   static getSocket(idTorneo, id) {
     const torneoSockets = this.torneoSockets.get(idTorneo)
     if (!torneoSockets) return null
-
-    for (const socket of torneoSockets.values()) {
-      if (socket.id === id) return socket
-    }
-    return null
+    return torneoSockets.get(id) || null
   }
 
   static socketExists(idTorneo, id) {
     const torneoSockets = this.torneoSockets.get(idTorneo)
-    if (!torneoSockets) return false
-
-    for (const socket of torneoSockets.values()) {
-      if (socket.id === id) return true
-    }
-    return false
+    return !!torneoSockets?.has(id)
   }
 
   static sendToPlayer(idTorneo, secretCode, data) {
     const torneoSockets = this.getSocketsByTorneo(idTorneo)
     if (!torneoSockets) return
 
-    const playerSocketWrapper = torneoSockets.get(secretCode)
+    // Find the socket by secretCode
+    let playerSocketWrapper = null
+    for (const socket of torneoSockets.values()) {
+      if (socket.secretCode === secretCode) {
+        playerSocketWrapper = socket
+        break
+      }
+    }
 
     if (
       playerSocketWrapper &&
@@ -99,16 +107,13 @@ class Socket {
   }
 
   static sendToSocketId(idTorneo, socketId, data) {
-    const torneoSockets = this.getSocketsByTorneo(idTorneo)
-    if (!torneoSockets) return
-
-    for (const socketWrapper of torneoSockets.values()) {
-      if (socketWrapper.id === socketId) {
-        if (socketWrapper.socket && socketWrapper.socket.readyState === 1) {
-          socketWrapper.socket.send(JSON.stringify({ message: data }))
-        }
-        break
-      }
+    const socketWrapper = this.getSocket(idTorneo, socketId)
+    if (
+      socketWrapper &&
+      socketWrapper.socket &&
+      socketWrapper.socket.readyState === 1
+    ) {
+      socketWrapper.socket.send(JSON.stringify({ message: data }))
     }
   }
 
