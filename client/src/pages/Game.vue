@@ -307,12 +307,16 @@ const startGame = (data = {}) => {
 
 const handleGoBack = () => {
   disconnectSocket()
-  if (pokerStore.getIsPublic) {
+  if (isPublic.value) {
     router.push('/public')
-  } else if (pokerStore.getHostId === pokerStore.myInfo.id) {
-    router.push('/new')
   } else {
-    router.push('/lobby')
+    // Si hay un PIN_COLLISION o queremos volver atrás en privada,
+    // mantenemos el código del torneo para que no tenga que volver a escribirlo.
+    router.push({
+      name: 'game.join',
+      params: { gameCode: gameCode },
+      query: { playerName: playerName.value }
+    })
   }
 }
 

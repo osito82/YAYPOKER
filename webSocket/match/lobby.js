@@ -47,7 +47,6 @@ class MatchLobby {
         socketId: thisSocketId,
       })
 
-    // ✅ VALIDAR INTENTO DE RECONEXIÓN CON NOMBRE EXISTENTE PERO PIN INCORRECTO
     const playerWithSameName = this.match.players.find(
       (p) => p.name === finalRequestedName,
     )
@@ -57,7 +56,6 @@ class MatchLobby {
       playerWithSameName.secretCode !== thisSecretCode
     ) {
       if (!this.match.acceptingPlayers) {
-        // T0006: Ignorar silenciosamente durante el juego
         return
       }
     }
@@ -168,8 +166,6 @@ class MatchLobby {
       )
       player.setConnected(true)
 
-      // Solo reseteamos si es pública Y no hay absolutamente nadie conectado (limpieza inicial)
-      // O si la mesa se quedó "atascada" sin jugadores reales.
       if (
         this.match.isPublic &&
         this.match.getConnectedPlayers().length === 0
@@ -183,11 +179,10 @@ class MatchLobby {
           })
         this.stepChecker.revokeStep('startGame')
         this.match.acceptingPlayers = true
-        this.match.players.length = 0 // ✅ MANTENER REFERENCIA
-        this.match.playersFold.length = 0 // ✅ MANTENER REFERENCIA
+        this.match.players.length = 0
+        this.match.playersFold.length = 0
       }
 
-      // Si la mesa ya está en juego y es pública, este jugador espera a la siguiente mano
       if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
         player.setStarted(false)
       }
@@ -219,7 +214,6 @@ class MatchLobby {
       Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
     }
 
-    // 🔥 PUBLIC AUTO-START & BOT MANAGEMENT
     if (this.match.isPublic) {
       this.handlePublicBots()
       this.handlePublicAutoStart()
@@ -236,7 +230,6 @@ class MatchLobby {
       (p) => p.connected && p.isBot,
     )
 
-    // 1. Spawning logic: If only 1 human is left alone, bring a companion bot
     if (
       connectedHumans.length === 1 &&
       connectedBots.length === 0 &&
@@ -251,7 +244,6 @@ class MatchLobby {
       })
     }
 
-    // 2. Disconnect logic: If threshold reached, remove bots to make space for humans
     if (
       this.match.players.length >= GAME_RULES.BOT_DISCONNECT_THRESHOLD &&
       connectedBots.length > 0
@@ -315,15 +307,19 @@ class MatchLobby {
   playerReady(thisSocket) {
     const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
     if (foundPlayer) {
-      // Si la mesa es pública y ya empezó el juego, el jugador debe esperar a la siguiente mano
-      if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
-        foundPlayer.setStarted(false)
+      if (this.match.isPublic) {
+        if (this.stepChecker.checkStep('startGame')) {
+          foundPlayer.setStarted(false)
+        } else {
+          foundPlayer.setStarted(true)
+        }
       } else {
-        foundPlayer.setStarted(true)
+        if (!this.stepChecker.checkStep('startGame')) {
+          foundPlayer.setStarted(false)
+        }
       }
     }
 
-    // AUTO-START solo para mesas públicas cuando todos están listos
     if (this.match.isPublic) {
       const allStarted = this.match.players.every((p) => p.isStarted)
       if (
@@ -340,20 +336,24 @@ class MatchLobby {
     const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
     if (foundPlayer) {
       foundPlayer.setConnected(false)
-      const time = TIMEOUTS.pause
-      this.stepChecker.grantStep('pause')
 
-      this.communicator.msgBuilder('playerPaused', 'public', foundPlayer, {
-        displayMsg: `${foundPlayer.name} disconnected. Match paused for ${time / 1000}s`,
-        timeout: time / 1000,
-      })
-      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+      // SOLO pausamos si el juego realmente ha empezado
+      if (this.stepChecker.checkStep('startGame')) {
+        const time = TIMEOUTS.pause
+        this.stepChecker.grantStep('pause')
 
-      const timeout = setTimeout(() => {
-        this.playerLeave(thisSocket)
-        this.match.pauseTimeouts.delete(foundPlayer.name)
-      }, time)
-      this.match.pauseTimeouts.set(foundPlayer.name, timeout)
+        this.communicator.msgBuilder('playerPaused', 'public', foundPlayer, {
+          displayMsg: `${foundPlayer.name} disconnected. Match paused for ${time / 1000}s`,
+          timeout: time / 1000,
+        })
+        Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+
+        const timeout = setTimeout(() => {
+          this.playerLeave(thisSocket)
+          this.match.pauseTimeouts.delete(foundPlayer.name)
+        }, time)
+        this.match.pauseTimeouts.set(foundPlayer.name, timeout)
+      }
     }
   }
 
@@ -367,14 +367,11 @@ class MatchLobby {
     if (index !== -1) {
       const playerLeaving = this.match.players[index]
 
-      // Si es una mesa pública y hay juego en curso, forzamos fold
       if (this.match.isPublic && this.stepChecker.checkStep('startGame')) {
         if (!playerLeaving.folded) {
           if (this.match.activePlayerId === playerLeaving.id) {
-            // Si era su turno, el fold disparará el CONTINUE correctamente
             this.match.actions.fold({ id: playerLeaving.id }, true)
           } else {
-            // Si no era su turno, marcamos fold silenciosamente para que el dealer lo ignore
             playerLeaving.setFolded(true)
             this.match.playersFold.push(playerLeaving.name)
             this.dealer.setPlayerActed(playerLeaving.id)
@@ -422,17 +419,13 @@ class MatchLobby {
         }
       }
 
-      // Si la mesa es pública y no quedan jugadores, la eliminamos del Torneo para que se limpie de memoria
-      // y permita crear una nueva instancia fresca si alguien vuelve a entrar.
       if (this.match.isPublic) {
         const Torneo = require('../torneo')
         const connectedPlayers = this.match.getConnectedPlayers()
 
-        // GESTIÓN DE BOTS TRAS SALIDA
         this.handlePublicBots()
 
         if (connectedPlayers.length === 0) {
-          // Si la mesa quedó vacía, damos un margen antes de borrarla
           if (this.match.publicEmptyTimer)
             clearTimeout(this.match.publicEmptyTimer)
 
@@ -470,7 +463,6 @@ class MatchLobby {
           connectedPlayers.length === 1 &&
           this.stepChecker.checkStep('startGame')
         ) {
-          // Si solo queda uno Y la partida ya había empezado, damos un margen de gracia
           if (this.match.publicCleanupTimer)
             clearTimeout(this.match.publicCleanupTimer)
 
@@ -515,7 +507,11 @@ class MatchLobby {
     }
     const stillPaused = this.match.players.some((p) => !p.connected)
     if (!stillPaused) this.stepChecker.revokeStep('pause')
-    this.emitter.emit('CONTINUE', thisSocket)
+
+    // SOLO emitimos CONTINUE si el juego está en marcha
+    if (this.stepChecker.checkStep('startGame')) {
+      this.emitter.emit('CONTINUE', thisSocket)
+    }
   }
 }
 

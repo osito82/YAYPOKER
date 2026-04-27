@@ -205,10 +205,6 @@ class Match extends EventEmitter {
       })
   }
 
-  /**
-   * Returns players who are currently in the hand (not folded) and were present when it started.
-   * Optionally filters by connection status.
-   */
   getActivePlayers(onlyConnected = true) {
     return this.players.filter((p) => {
       const base = p.isStarted && !p.folded
@@ -216,18 +212,12 @@ class Match extends EventEmitter {
     })
   }
 
-  /**
-   * Returns all players who were at the table when the current hand began.
-   */
   getStartedPlayers(onlyConnected = true) {
     return this.players.filter((p) => {
       return onlyConnected ? p.isStarted && p.connected : p.isStarted
     })
   }
 
-  /**
-   * Returns all currently connected players.
-   */
   getConnectedPlayers() {
     return this.players.filter((p) => p.connected)
   }
@@ -248,14 +238,11 @@ class Match extends EventEmitter {
   async startGame(thisSocket = {}, data = {}) {
     if (this.stepChecker.checkStep('pause')) return
 
-    // Allow overriding blinds in the first hand
     if (data.smallBlind !== undefined) this.smallBlind = Number(data.smallBlind)
     if (data.bigBlind !== undefined) this.bigBlind = Number(data.bigBlind)
     if (data.ante !== undefined) this.ante = Number(data.ante)
 
-    // Si el juego aún no ha sido iniciado formalmente
     if (!this.stepChecker.checkStep('startGame')) {
-      // Solo el host puede iniciar el juego la primera vez (excepto en mesas públicas)
       const isHost =
         thisSocket.id && this.hostId && thisSocket.id === this.hostId
       if (!this.isPublic && !isHost) {
@@ -266,14 +253,6 @@ class Match extends EventEmitter {
         return
       }
 
-      // PUBLIC TABLES: Mark all connected players as started automatically
-      if (this.isPublic) {
-        this.players.forEach((p) => {
-          if (p.connected) p.setStarted(true)
-        })
-      }
-
-      // Validar mínimo de jugadores
       const connectedPlayers = this.getConnectedPlayers()
       const minRequired = this.isPublic
         ? GAME_RULES.MIN_PLAYERS_PUBLIC
@@ -287,7 +266,6 @@ class Match extends EventEmitter {
           })
           Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
-          // Re-intentar automáticamente en 2 segundos para ver si ya entró alguien más
           setTimeout(() => this.startGame(thisSocket, data), 2000)
         } else {
           setTimeout(() => this.startGame(thisSocket, data), 1000)
@@ -295,7 +273,6 @@ class Match extends EventEmitter {
         return
       }
 
-      // Spawn bots if requested
       const botLimit = GAME_RULES.MAX_PLAYERS - connectedPlayers.length
       if (data.bots > 0 && !this.isSpawningBots) {
         let count = Number(data.bots)
@@ -314,15 +291,11 @@ class Match extends EventEmitter {
         return
       }
 
-      // Mark everyone as started if not already
       this.players.forEach((p) => {
         if (p.connected) p.setStarted(true)
       })
 
-      // RE-SYNC: Asegurar que el dealer tiene la lista de jugadores actualizada
       this.dealer.players = this.players
-
-      // Al empezar el juego, cerramos el registro
       this.lobby.noMorePlayers()
       this.stepChecker.grantStep('startGame')
     }
@@ -330,12 +303,9 @@ class Match extends EventEmitter {
     if (!this.stepChecker.checkStep('blindsBetting'))
       return this.actions.askForBlindBets(thisSocket)
     if (!this.stepChecker.checkStep('dealtPrivateCards')) {
-      // Final check for public tables: ensure everyone connected is marked as started before the deal
-      if (this.isPublic) {
-        this.players.forEach((p) => {
-          if (p.connected) p.setStarted(true)
-        })
-      }
+      this.players.forEach((p) => {
+        if (p.connected) p.setStarted(true)
+      })
       return this.actions.dealtPrivateCards(thisSocket)
     }
     if (!this.stepChecker.checkStep('firstBetting'))
@@ -401,7 +371,7 @@ class Match extends EventEmitter {
     this.waitingForNextRound = false
 
     const connected = this.getConnectedPlayers()
-    if (connected.length === 0 && this.isPublic) return // No loggear si no hay nadie
+    if (connected.length === 0 && this.isPublic) return
 
     const playersWithChips = connected.filter((p) => p.chips > 0)
 
@@ -410,16 +380,13 @@ class Match extends EventEmitter {
         info: `Tournament finished. ${this.isPublic ? 'Resetting public table.' : 'No more rounds.'}`,
       })
 
+      this.acceptingPlayers = true
+
       if (this.isPublic) {
-        // En mesas públicas, siempre intentamos volver al estado de lobby en lugar de cerrar la mesa
-        this.acceptingPlayers = true
-        
-        // Mantener solo a los que tienen fichas y están conectados, preservando la referencia del array
         const remainingPlayers = this.players.filter((p) => p.chips > 0 && p.connected)
         this.players.length = 0
         this.players.push(...remainingPlayers)
 
-        // Resetear el estado completo de la mano
         this.handCount = 0
         this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}0`
         this.initHand() 
@@ -429,7 +396,6 @@ class Match extends EventEmitter {
         })
         Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
         
-        // Si hay humanos, activar la lógica de bots y auto-start por si acaso
         if (this.players.some(p => !p.isBot)) {
            this.lobby.handlePublicBots()
            this.lobby.handlePublicAutoStart()
@@ -458,10 +424,8 @@ class Match extends EventEmitter {
         dealerCards: this.cardsDealer,
       })
 
-    // Rotate players
     this.players.push(this.players.shift())
 
-    // Remove busted players
     const activePlayers = this.players.filter((p) => p.chips > 0)
     this.players.length = 0
     this.players.push(...activePlayers)
