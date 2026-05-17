@@ -164,7 +164,7 @@
             >
               <h1
                 :id="`new-game-main-title-${templateSuffix}`"
-                class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic"
+                class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] sm:tracking-[0.4em] italic"
               >
                 <span
                   v-if="joinCode"
@@ -305,7 +305,7 @@
           >
             <h1
               :id="`new-game-main-title-${templateSuffix}`"
-              class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic"
+              class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] sm:tracking-[0.4em] italic"
               v-html="
                 $t('pages.lobby_home.new_game', {
                   span:
