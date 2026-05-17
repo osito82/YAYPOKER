@@ -22,7 +22,7 @@
       class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-gray-200 dark:border-white/5 bg-white/80 dark:bg-[#030712]/80 backdrop-blur-xl"
     >
       <div
-        class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center"
+        class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex justify-between items-center"
       >
         <Logo
           :id="`nav-logo-${templateSuffix}`"
@@ -44,14 +44,14 @@
           >
         </div>
 
-        <div class="flex items-center gap-4 sm:gap-8">
+        <div class="flex items-center gap-2 sm:gap-8">
           <!-- Theme & Language Switcher -->
           <div
-            class="flex items-center gap-3 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full px-3 py-1.5"
+            class="flex items-center gap-2 sm:gap-3 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-full px-2 sm:px-3 py-1 sm:py-1.5"
           >
             <!-- Language -->
             <div
-              class="flex gap-2 text-[10px] font-black uppercase tracking-widest border-r border-gray-300 dark:border-white/10 pr-3"
+              class="flex gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-r border-gray-300 dark:border-white/10 pr-2 sm:pr-3"
             >
               <button
                 @click="locale = 'en'"
@@ -86,7 +86,7 @@
               <svg
                 v-if="themeStore.theme === 'dark'"
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
+                class="h-3.5 w-3.5 sm:h-4 sm:w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -101,7 +101,7 @@
               <svg
                 v-else
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
+                class="h-3.5 w-3.5 sm:h-4 sm:w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -119,7 +119,7 @@
           <router-link
             :id="`nav-create-btn-${templateSuffix}`"
             to="/new"
-            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
+            class="hidden lg:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
           >
             {{ $t('hero.create') }}
           </router-link>
@@ -127,7 +127,7 @@
           <router-link
             :id="`nav-join-btn-${templateSuffix}`"
             to="/lobby"
-            class="hidden sm:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
+            class="hidden lg:block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40 hover:text-gray-600 dark:hover:text-white/80 transition-all"
           >
             {{ $t('nav.join') }}
           </router-link>
@@ -135,7 +135,7 @@
           <router-link
             :id="`nav-play-btn-${templateSuffix}`"
             to="/public"
-            class="group relative px-6 py-2.5 bg-yellow-500 text-black text-[12px] font-black uppercase tracking-[0.15em] rounded-full overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] active:scale-95"
+            class="group relative px-4 sm:px-6 py-2 sm:py-2.5 bg-yellow-500 text-black text-[10px] sm:text-[12px] font-black uppercase tracking-[0.15em] rounded-full overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(234,179,8,0.4)] active:scale-95"
           >
             <span class="relative z-10">{{ $t('nav.play') }}</span>
             <div
@@ -149,13 +149,13 @@
     <!-- ───────── HERO ───────── -->
     <header
       :id="`landing-hero-section-${templateSuffix}`"
-      class="relative pt-40 pb-20 px-6 min-h-[90vh] flex flex-col justify-center items-center text-center z-10"
+      class="relative pt-28 sm:pt-40 pb-16 sm:pb-20 px-6 min-h-[90vh] flex flex-col justify-center items-center text-center z-10"
     >
       <div class="max-w-5xl mx-auto">
         <!-- Eyebrow -->
         <div
           :id="`hero-eyebrow-badge-${templateSuffix}`"
-          class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-yellow-500/20 bg-yellow-500/5 text-yellow-600 dark:text-yellow-500/80 text-[10px] font-bold uppercase tracking-[0.2em] mb-12 animate-fade-in"
+          class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-yellow-500/20 bg-yellow-500/5 text-yellow-600 dark:text-yellow-500/80 text-[10px] font-bold uppercase tracking-[0.2em] mb-8 sm:mb-12 animate-fade-in"
         >
           <span
             class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"
@@ -166,7 +166,7 @@
         <!-- Headline -->
         <h1
           :id="`hero-headline-text-${templateSuffix}`"
-          class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.9] uppercase mb-8 text-gray-900 dark:text-white"
+          class="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.95] sm:leading-[0.9] uppercase mb-8 text-gray-900 dark:text-white"
         >
           <span class="block">{{ $t('hero.headline').split('{br}')[0] }}</span>
           <span
