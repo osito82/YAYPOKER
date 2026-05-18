@@ -56,6 +56,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const isPublic = ref(false)
   const stepChecker = ref({})
   const lastError = ref(null)
+  const lastVoiceMessage = ref(null)
 
   // Blinds state
   const smallBlind = ref(10)
@@ -339,6 +340,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
           activePlayerId.value = gameData.data.messageForId || gameData.data.id
           if (gameData.data.action) bettingOptions.value = gameData.data.action
         }
+      } else if (gameData.action === 'voiceMessage') {
+        lastVoiceMessage.value = { ...gameData.data, timestamp: Date.now() }
       } else if (gameData.action === 'forceLobby') {
         const isCurrentlyPublic = isPublic.value
         isGameStarted.value = false
@@ -427,6 +430,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     ante,
     blindLevel,
     blindsIncreasedFlag,
+    lastVoiceMessage,
 
     // Getters (computeds)
     getOdds,

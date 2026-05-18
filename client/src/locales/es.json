@@ -97,7 +97,8 @@
     "your_turn": "ES TU TURNO",
     "waiting_others": "Esperando a otros...",
     "leave_confirm": "¿Estás seguro de que quieres abandonar el juego?",
-    "leave_private_hint": "\n\nImportante: Recuerda tu Código de Mesa Privada para volver a unirte luego: {code}"
+    "leave_private_hint": "\n\nImportante: Recuerda tu Código de Mesa Privada para volver a unirte luego: {code}",
+    "voice_label": "Mantén para hablar"
   },
   "winner": {
     "wins": "¡Gana!",
@@ -249,7 +250,7 @@
       "section1_content": "Este sitio web es solo para fines de entretenimiento. No se puede depositar, ganar ni perder dinero real en esta plataforma. Todas las fichas utilizadas en el juego son virtuales y NO tienen valor monetario.",
       "section2_title": "2. Diversión Saludable y Familiar",
       "section2_content": "YayPoker está diseñado para el entretenimiento \"sano\" y familiar. Está diseñado para facilitar juegos entre amigos, familiares y comunidades establecidas en un entorno privado.",
-      "section3_title": "3. Uso de Apodos",
+      "section3_title": "3. Use de Apodos",
       "section3_content": "Eres responsable del apodo que elijas. Si bien no recopilamos tu identidad real, esperamos que todos los jugadores mantengan un ambiente respetuoso y familiar. Nos reservamos el derecho de terminar cualquier sesión de juego que viole el espíritu del juego \"sano\".",
       "section4_title": "4. No Garantía",
       "section4_content": "Este servicio se proporciona \"tal cual\" y \"según disponibilidad\" sin garantías de ningún tipo. No somos responsables de ningún problema de conexión, pérdida de fichas virtuales o interrupciones en el juego.",

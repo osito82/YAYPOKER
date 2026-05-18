@@ -51,6 +51,7 @@ const ACTIONS = {
   STATS: 'stats',
   CLOSE: 'close',
   SEND_MESSAGE: 'sendMessage',
+  VOICE_MESSAGE: 'voiceMessage',
   DEALT_PRIVATE_CARDS: 'dealtPrivateCards',
 }
 

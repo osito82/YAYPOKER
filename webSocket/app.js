@@ -134,6 +134,11 @@ const validateAction = (action, data) => {
         return 'Invalid message data'
       return null
     },
+    [ACTIONS.VOICE_MESSAGE]: () => {
+      if (!data.audioData || typeof data.audioData !== 'string')
+        return 'Invalid voice data'
+      return null
+    },
   }
 
   return rules[action] ? rules[action]() : null
@@ -145,6 +150,16 @@ const actionHandlers = {
   [ACTIONS.SIGN_UP]: (match, socket, data) => match.lobby.signUp(data, socket),
   [ACTIONS.SEND_MESSAGE]: (match, socket, data) =>
     match.comms.sendMessage(data),
+  [ACTIONS.VOICE_MESSAGE]: (match, socket, data) => {
+    Socket.broadcastToTorneo(match.torneoId, {
+      action: ACTIONS.VOICE_MESSAGE,
+      data: {
+        playerId: socket.id,
+        playerName: socket.name,
+        audioData: data.audioData,
+      },
+    })
+  },
   [ACTIONS.FOLD]: (match, socket) => match.actions.fold(socket),
   [ACTIONS.CLOSE]: (match, socket) => match.lobby.close(socket),
   [ACTIONS.SET_BET]: (match, socket, data) =>
