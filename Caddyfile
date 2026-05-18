@@ -1,8 +1,15 @@
-{
-    # Habilita el CA interno para certificados locales
-    local_certs
+# 🚀 PRODUCCIÓN OFICIAL (Puertos 80/443)
+yaypoker.com, www.yaypoker.com {
+    reverse_proxy client:80
 }
 
+# 🚀 PROD WEBSOCKET & API (Puerto 8888)
+# Agregamos los dominios oficiales para que Caddy les asigne SSL en este puerto
+yaypoker.com:8888, www.yaypoker.com:8888 {
+    reverse_proxy websocket:8888
+}
+
+# 🧪 ENTORNO DE PRUEBAS (DuckDNS)
 osongo.duckdns.org {
     reverse_proxy client:80
 }
@@ -11,8 +18,8 @@ osongo.duckdns.org:8888 {
     reverse_proxy websocket:8888
 }
 
+# 🏠 DESARROLLO LOCAL
 localhost, 127.0.0.1 {
-    # Genera un certificado auto-firmado de confianza local automática
     tls internal
     reverse_proxy client:80
 }
