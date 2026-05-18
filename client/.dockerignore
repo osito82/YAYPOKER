@@ -6,3 +6,5 @@ dist
 .vscode
 README.md
 Dockerfile
+.env
+node_modules

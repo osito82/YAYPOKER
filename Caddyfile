@@ -1,7 +1,23 @@
-yaypoker.com, www.yaypoker.com {
+{
+    # Habilita el CA interno para certificados locales
+    local_certs
+}
+
+osongo.duckdns.org {
     reverse_proxy client:80
 }
 
-ws.yaypoker.com {
+osongo.duckdns.org:8888 {
+    reverse_proxy websocket:8888
+}
+
+localhost, 127.0.0.1 {
+    # Genera un certificado auto-firmado de confianza local automática
+    tls internal
+    reverse_proxy client:80
+}
+
+localhost:8888 {
+    tls internal
     reverse_proxy websocket:8888
 }

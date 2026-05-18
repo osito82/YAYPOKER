@@ -1,14 +1,24 @@
 services:
+  proxy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8888:8888"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - client
+      - websocket
+
   client:
     build:
       context: ./client
-      args:
-        - VITE_WS_PORT=8888
-        - VITE_WS_URL=73.7.52.167
-        - VITE_BOTS=true
-        - VITE_MAX_NUMBER_BOTS=10
-    ports:
-      - "8080:80"
+    expose:
+      - "80"
     depends_on:
       - websocket
     volumes:
@@ -16,8 +26,8 @@ services:
 
   websocket:
     build: ./webSocket
-    ports:
-      - "8888:8888"
+    expose:
+      - "8888"
     environment:
       - PORT=8888
       - VITE_WS_URL=websocket
@@ -27,18 +37,22 @@ services:
     depends_on:
       - bot
     volumes:
-      - ./Logs:/Logs # <--- CORREGIDO: Coincide con ../Logs desde /app
+      - ./Logs:/Logs
 
   bot:
     build: ./bot
-    ports:
-      - "8886:8886"
+    expose:
+      - "8886"
     environment:
       - PORT=8886
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OLLAMA_URL=http://host.docker.internal:11434
+      - DEFAULT_AI_PROVIDER=ollama
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - ./Logs:/Logs # <--- CORREGIDO: Coincide con ../Logs desde /app
+      - ./Logs:/Logs
 
+volumes:
+  caddy_data:
+  caddy_config:

@@ -60,36 +60,38 @@
       >
         {{ options.includes('bet') ? $t('game.bet') : $t('game.raise') }}
       </button>
-
-      <!-- VOICE BUTTON -->
-      <button
-        v-if="!isMyTurn"
-        :id="`hud-voice-button-${templateSuffix}`"
-        @mousedown="voice?.startRecording"
-        @mouseup="voice?.stopRecording"
-        @mouseleave="voice?.stopRecording"
-        @touchstart.prevent="voice?.startRecording"
-        @touchend.prevent="voice?.stopRecording"
-        class="btn-voice w-11 lg:w-13 flex items-center justify-center rounded-xl transition-all duration-150 active:scale-90"
-        :class="{ 'animate-pulse bg-red-500/20 border-red-500/50': voice?.isRecording.value }"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
-          :class="voice?.isRecording.value ? 'text-red-500' : 'text-amber-500'"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-          />
-        </svg>
-      </button>
     </template>
+
+    <!-- VOICE BUTTON (ALWAYS PRESENT) -->
+    <button
+      :id="`hud-voice-button-${templateSuffix}`"
+      @mousedown="voice?.startRecording"
+      @mouseup="voice?.stopRecording"
+      @mouseleave="voice?.stopRecording"
+      @touchstart.prevent="voice?.startRecording"
+      @touchend.prevent="voice?.stopRecording"
+      class="btn-voice w-11 lg:w-13 flex items-center justify-center rounded-xl transition-all duration-150 active:scale-90"
+      :class="{
+        'animate-pulse bg-red-500/20 border-red-500/50':
+          voice?.isRecording.value,
+      }"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        :class="voice?.isRecording.value ? 'text-red-500' : 'text-amber-500'"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+        />
+      </svg>
+    </button>
   </div>
 </template>
 

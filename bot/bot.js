@@ -10,13 +10,17 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8886;
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
+const TESTING_URL = process.env.testingURL;
 
 let ollamaClient;
 try {
-  ollamaClient = new Ollama({ host: OLLAMA_URL });
+  // Si existe testingURL, la usamos (útil para pruebas externas con amigos)
+  // de lo contrario usamos la OLLAMA_URL estándar.
+  const host = TESTING_URL || OLLAMA_URL;
+  ollamaClient = new Ollama({ host });
   log
     .Template({ name: "brakets", title: "IA:OLLAMA_INIT", date: true })
-    .R({ url: OLLAMA_URL, msg: "Ready" });
+    .R({ url: host, msg: "Ready" });
 } catch (error) {
   log
     .Template({ name: "brakets", title: "ERROR:OLLAMA", date: true })
@@ -27,8 +31,17 @@ class PokerBot {
   constructor(config) {
     this.gameCode = config.gameCode;
     this.playerName = config.playerName;
-    this.provider = config.provider || process.env.DEFAULT_AI_PROVIDER || "ollama";
+
+    // Lógica de cambio automático de proveedor según entorno
+    // Local (dev/test) -> ollama | Prod -> deepseek
+    const isProduction = process.env.NODE_ENV === "production";
+    const defaultEnvProvider = isProduction ? "deepseek" : "ollama";
+
+    this.provider =
+      config.provider || process.env.DEFAULT_AI_PROVIDER || defaultEnvProvider;
+
     if (this.provider === "openllama") this.provider = "ollama"; // Normalización
+
     this.modelName =
       config.model ||
       process.env.DEFAULT_AI_MODEL ||

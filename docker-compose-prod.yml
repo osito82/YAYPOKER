@@ -46,6 +46,7 @@ services:
     build: ./bot
     restart: unless-stopped
     environment:
+      - NODE_ENV=production
       - PORT=8886
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OLLAMA_URL=73.7.52.167:11434

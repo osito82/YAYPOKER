@@ -8,8 +8,17 @@ export function useVoice(sendMessage) {
   const isPlaying = ref(false)
 
   const startRecording = async () => {
+    console.log('Attempting to start recording...')
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      const errorMsg = 'Microphone access is only available in secure contexts (HTTPS or localhost).'
+      console.error(errorMsg)
+      alert(errorMsg)
+      return
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      console.log('Microphone stream acquired.')
       const options = { mimeType: 'audio/webm;codecs=opus' }
       if (!MediaRecorder.isTypeSupported(options.mimeType)) {
         options.mimeType = 'audio/webm'
