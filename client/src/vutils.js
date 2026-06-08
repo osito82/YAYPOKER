@@ -1,6 +1,7 @@
 function generateUniqueId() {
   if (window.crypto && window.crypto.randomUUID) {
-    return crypto.randomUUID().substring(0, 9).toUpperCase()
+    const cleanUuid = crypto.randomUUID().replace(/-/g, '').toUpperCase()
+    return `${cleanUuid.substring(0, 5)}-${cleanUuid.substring(5, 10)}`
   }
   const randomStr = () =>
     Math.random().toString(36).substring(2, 7).toUpperCase()

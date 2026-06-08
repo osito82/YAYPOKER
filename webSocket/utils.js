@@ -20,7 +20,8 @@ const shuffle = (array) => {
 const crypto = require('crypto')
 
 function generateUniqueId() {
-  return uuidv4().substring(0, 8).toUpperCase()
+  const cleanUuid = uuidv4().replace(/-/g, '').toUpperCase()
+  return `${cleanUuid.substring(0, 5)}-${cleanUuid.substring(5, 10)}`
 }
 
 function generatePublicId() {
