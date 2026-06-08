@@ -55,8 +55,10 @@ import { useI18n } from 'vue-i18n'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import useWebSocket from '../use/useSockets'
+import { useVoice } from '../use/useVoice'
 import { urlsFactory } from '../vutils'
 import LobbyView from '../components/LobbyView.vue'
+import { provide } from 'vue' // Add provide
 
 // Async loading of templates for performance
 const TemplateXSmall = defineAsyncComponent(
@@ -180,6 +182,22 @@ const urls = urlsFactory()
 const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
   urls.server,
   connectionOptions,
+)
+
+// VOICE INTEGRATION
+const { isRecording, startRecording, stopRecording, addToQueue } = useVoice(sendMessage)
+
+provide('voice', { isRecording, startRecording, stopRecording })
+
+watch(
+  () => pokerStore.lastVoiceMessage,
+  (newVal) => {
+    if (newVal && newVal.audioData) {
+      if (newVal.playerId !== pokerStore.myInfo.id) {
+        addToQueue(newVal.audioData)
+      }
+    }
+  }
 )
 
 // COMPUTEDS
@@ -361,6 +379,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   disconnectSocket()
+  pokerStore.resetState()
   if (timeInterval) clearInterval(timeInterval)
 })
 </script>

@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const R = require('radash')
 const log = require('./logger')
+const { z } = require('zod')
 
 const http = require('http')
 const WebSocket = require('ws')
@@ -23,7 +24,17 @@ const app = express()
 
 // ✅ AGREGADO: Middleware de CORS quirúrgico para permitir peticiones desde el frontend
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost',
+    'https://yaypoker.com',
+    'https://www.yaypoker.com',
+    'http://osongo.duckdns.org',
+  ]
+  const origin = req.headers.origin
+  if (allowedOrigins.includes(origin) || !origin) {
+    res.header('Access-Control-Allow-Origin', origin || '*')
+  }
   res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   if (req.method === 'OPTIONS') {
@@ -99,44 +110,57 @@ setInterval(() => {
   }
 }, CLEANUP_CONFIG.GC_INTERVAL)
 
-// Validación de datos de entrada
+// Validación de datos de entrada estructurada con Zod
+const actionSchemas = {
+  [ACTIONS.SIGN_UP]: z
+    .object({
+      totalChips: z.coerce
+        .number()
+        .min(GAME_RULES.CHIPS_VALIDATION.MIN, 'Invalid chips amount'),
+    })
+    .passthrough(),
+  [ACTIONS.SET_BET]: z
+    .object({
+      chipsToBet: z.coerce.number().min(0, 'Invalid bet amount'),
+    })
+    .passthrough(),
+  [ACTIONS.RAISE]: z
+    .object({
+      chipsToRiseBet: z.coerce.number().min(0, 'Invalid rise amount'),
+    })
+    .passthrough(),
+  [ACTIONS.BLIND]: z
+    .object({
+      blindAmount: z.coerce.number().min(0, 'Invalid blind amount'),
+    })
+    .passthrough(),
+  [ACTIONS.SEND_MESSAGE]: z
+    .object({
+      targetPlayerId: z.string().min(1),
+      targetMessage: z.string(),
+    })
+    .passthrough(),
+  [ACTIONS.VOICE_MESSAGE]: z
+    .object({
+      audioData: z.string().min(1),
+    })
+    .passthrough(),
+}
+
 const validateAction = (action, data) => {
   if (!action) return 'Action is required'
-
-  const rules = {
-    [ACTIONS.SIGN_UP]: () => {
-      const chips = Number(data.totalChips)
-      if (isNaN(chips) || chips < GAME_RULES.CHIPS_VALIDATION.MIN)
-        return 'Invalid chips amount'
-      data.totalChips = chips // Sanitizar
-      return null
-    },
-    [ACTIONS.SET_BET]: () => {
-      const bet = Number(data.chipsToBet)
-      if (isNaN(bet) || bet < 0) return 'Invalid bet amount'
-      data.chipsToBet = bet // Sanitizar
-      return null
-    },
-    [ACTIONS.RAISE]: () => {
-      const rise = Number(data.chipsToRiseBet)
-      if (isNaN(rise) || rise < 0) return 'Invalid rise amount'
-      data.chipsToRiseBet = rise // Sanitizar
-      return null
-    },
-    [ACTIONS.BLIND]: () => {
-      const blind = Number(data.blindAmount)
-      if (isNaN(blind) || blind < 0) return 'Invalid blind amount'
-      data.blindAmount = blind // Sanitizar
-      return null
-    },
-    [ACTIONS.SEND_MESSAGE]: () => {
-      if (!data.targetPlayerId || typeof data.targetMessage !== 'string')
-        return 'Invalid message data'
-      return null
-    },
+  const schema = actionSchemas[action]
+  if (schema) {
+    const result = schema.safeParse(data)
+    if (!result.success) {
+      return result.error.issues
+        .map((e) => `${e.path.join('.')}: ${e.message}`)
+        .join(', ')
+    }
+    // Aplicar coerción de datos al objeto original para retrocompatibilidad
+    Object.assign(data, result.data)
   }
-
-  return rules[action] ? rules[action]() : null
+  return null
 }
 
 // Mapeo de acciones a manejadores para mejor organización
@@ -145,6 +169,16 @@ const actionHandlers = {
   [ACTIONS.SIGN_UP]: (match, socket, data) => match.lobby.signUp(data, socket),
   [ACTIONS.SEND_MESSAGE]: (match, socket, data) =>
     match.comms.sendMessage(data),
+  [ACTIONS.VOICE_MESSAGE]: (match, socket, data) => {
+    Socket.broadcastToTorneo(match.torneoId, {
+      action: ACTIONS.VOICE_MESSAGE,
+      data: {
+        playerId: socket.id,
+        playerName: socket.name,
+        audioData: data.audioData,
+      },
+    })
+  },
   [ACTIONS.FOLD]: (match, socket) => match.actions.fold(socket),
   [ACTIONS.CLOSE]: (match, socket) => match.lobby.close(socket),
   [ACTIONS.SET_BET]: (match, socket, data) =>

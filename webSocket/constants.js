@@ -51,6 +51,7 @@ const ACTIONS = {
   STATS: 'stats',
   CLOSE: 'close',
   SEND_MESSAGE: 'sendMessage',
+  VOICE_MESSAGE: 'voiceMessage',
   DEALT_PRIVATE_CARDS: 'dealtPrivateCards',
 }
 
@@ -71,7 +72,7 @@ const SERVER_CONFIG = {
   PORT: process.env.VITE_WS_PORT || '8888',
   PROTOCOL: 'http',
   BASE_URL: process.env.VITE_WS_URL || 'localhost',
-  BOT_SERVICE_URL: process.env.BOT_SERVICE_URL || 'http://73.7.52.167:8886',
+  BOT_SERVICE_URL: process.env.BOT_SERVICE_URL || 'http://localhost:8886',
 }
 
 const CLEANUP_CONFIG = {

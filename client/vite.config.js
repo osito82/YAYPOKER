@@ -4,7 +4,11 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   server: {
-    allowedHosts: true,
-    host: true, // Necessary to expose the server to the network
+    allowedHosts: ['osongo.duckdns.org', 'localhost', '127.0.0.1'],
+    host: true,
+    hmr: {
+      host: 'osongo.duckdns.org',
+      clientPort: 443,
+    },
   },
 })

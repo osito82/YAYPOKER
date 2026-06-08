@@ -56,6 +56,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   const isPublic = ref(false)
   const stepChecker = ref({})
   const lastError = ref(null)
+  const lastVoiceMessage = ref(null)
 
   // Blinds state
   const smallBlind = ref(10)
@@ -339,6 +340,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
           activePlayerId.value = gameData.data.messageForId || gameData.data.id
           if (gameData.data.action) bettingOptions.value = gameData.data.action
         }
+      } else if (gameData.action === 'voiceMessage') {
+        lastVoiceMessage.value = { ...gameData.data, timestamp: Date.now() }
       } else if (gameData.action === 'forceLobby') {
         const isCurrentlyPublic = isPublic.value
         isGameStarted.value = false
@@ -395,6 +398,30 @@ export const usePokerStore = defineStore('pokerStore', () => {
     lastError.value = null
   }
 
+  function resetState() {
+    isGameStarted.value = false
+    players.value = []
+    communityCards.value = []
+    pot.value = 0
+    pots.value = []
+    displayMsg.value = null
+    dealerLog.value = []
+    activePlayerId.value = null
+    bettingOptions.value = []
+    currentHighestBet.value = 0
+    lastRaiseAmount.value = 0
+    myInfo.value = { id: null, cards: [] }
+    winnerInfo.value = null
+    odds.value = { win: 0, tie: 0 }
+    autofoldStartTime.value = null
+    lobbyTimer.value = null
+    hostId.value = null
+    torneoId.value = null
+    stepChecker.value = {}
+    lastError.value = null
+    lastVoiceMessage.value = null
+  }
+
   return {
     // State (refs)
     socketMessage,
@@ -427,6 +454,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
     ante,
     blindLevel,
     blindsIncreasedFlag,
+    lastVoiceMessage,
 
     // Getters (computeds)
     getOdds,
@@ -460,5 +488,6 @@ export const usePokerStore = defineStore('pokerStore', () => {
     setGameCredentials,
     clearWinnerInfo,
     clearError,
+    resetState,
   }
 })

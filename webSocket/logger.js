@@ -6,13 +6,17 @@ const { PassThrough } = require('stream')
 
 const logDir = path.join(__dirname, '../Logs')
 
+const isTest = process.env.NODE_ENV === 'test'
+
 // Winston para WebSocket
-const transportWS = new DailyRotateFile({
-  filename: path.join(logDir, 'webSocket', 'webSocket-%DATE%.log'),
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxFiles: '14d',
-})
+const transportWS = isTest
+  ? new winston.transports.Console({ silent: true })
+  : new DailyRotateFile({
+      filename: path.join(logDir, 'webSocket', 'webSocket-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxFiles: '14d',
+    })
 
 const winstonLogger = winston.createLogger({
   format: winston.format.combine(
@@ -23,12 +27,14 @@ const winstonLogger = winston.createLogger({
 })
 
 // Winston para Client (Logs enviados vía WS)
-const transportClient = new DailyRotateFile({
-  filename: path.join(logDir, 'client', 'client-%DATE%.log'),
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxFiles: '14d',
-})
+const transportClient = isTest
+  ? new winston.transports.Console({ silent: true })
+  : new DailyRotateFile({
+      filename: path.join(logDir, 'client', 'client-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      zippedArchive: true,
+      maxFiles: '14d',
+    })
 
 const clientWinstonLogger = winston.createLogger({
   format: winston.format.combine(
@@ -53,6 +59,7 @@ logStream.on('data', (chunk) => {
   const message = chunk.toString().trim()
   if (message) {
     // Limpiar ANSI colors para el archivo de winston
+    // eslint-disable-next-line no-control-regex
     const cleanMsg = message.replace(/\x1b\[[0-9;]*m/g, '')
     winstonLogger.info(cleanMsg)
   }

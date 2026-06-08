@@ -8,12 +8,15 @@ describe('Utils Functions', () => {
     expect(shuffled.sort()).toEqual(arr.sort())
   })
 
-  it('generateUniqueId should call uuidv4', () => {
-    const mockUUID = '1234-5678'
-    const uuidSpy = vi.spyOn(utils, 'generateUniqueId')
-    utils.generateUniqueId()
-    expect(uuidSpy).toHaveBeenCalled()
-    uuidSpy.mockRestore()
+  it('generateUniqueId should return an 11-character string in the format XXXXX-XXXXX', () => {
+    const id = utils.generateUniqueId()
+
+    // Check exact length
+    expect(id.length).toBe(11)
+
+    // Check format: 5 alphanumeric characters, a hyphen, 5 alphanumeric characters
+    // Using hex pattern since we rely on UUID, but A-Z covers any future base36 swap
+    expect(id).toMatch(/^[A-Z0-9]{5}-[A-Z0-9]{5}$/)
   })
 
   it('cardsToNoSymbolValsArray should strip suits', () => {

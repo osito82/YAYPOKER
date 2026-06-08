@@ -76,8 +76,9 @@ class Match extends EventEmitter {
     this.on('RESTART_MATCH', (customDeck) => this.restartMatch(customDeck))
   }
 
-  async spawnBots(count) {
+  async spawnBots(count = 1, retryCount = 0) {
     if (count <= 0) return
+    if (process.env.NODE_ENV === 'test') return
     this.isSpawningBots = true
 
     this.log.R({
@@ -383,22 +384,24 @@ class Match extends EventEmitter {
       this.acceptingPlayers = true
 
       if (this.isPublic) {
-        const remainingPlayers = this.players.filter((p) => p.chips > 0 && p.connected)
+        const remainingPlayers = this.players.filter(
+          (p) => p.chips > 0 && p.connected,
+        )
         this.players.length = 0
         this.players.push(...remainingPlayers)
 
         this.handCount = 0
         this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}0`
-        this.initHand() 
+        this.initHand()
 
         this.communicator.msgBuilder('lobby', 'public', null, {
           displayMsg: 'Tournament finished. Waiting for new players...',
         })
         Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
-        
-        if (this.players.some(p => !p.isBot)) {
-           this.lobby.handlePublicBots()
-           this.lobby.handlePublicAutoStart()
+
+        if (this.players.some((p) => !p.isBot)) {
+          this.lobby.handlePublicBots()
+          this.lobby.handlePublicAutoStart()
         }
         return
       }

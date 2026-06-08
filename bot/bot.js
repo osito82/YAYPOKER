@@ -10,13 +10,17 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8886;
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
+const TESTING_URL = process.env.testingURL;
 
 let ollamaClient;
 try {
-  ollamaClient = new Ollama({ host: OLLAMA_URL });
+  // Si existe testingURL, la usamos (útil para pruebas externas con amigos)
+  // de lo contrario usamos la OLLAMA_URL estándar.
+  const host = TESTING_URL || OLLAMA_URL;
+  ollamaClient = new Ollama({ host });
   log
     .Template({ name: "brakets", title: "IA:OLLAMA_INIT", date: true })
-    .R({ url: OLLAMA_URL, msg: "Ready" });
+    .R({ url: host, msg: "Ready" });
 } catch (error) {
   log
     .Template({ name: "brakets", title: "ERROR:OLLAMA", date: true })
@@ -27,8 +31,17 @@ class PokerBot {
   constructor(config) {
     this.gameCode = config.gameCode;
     this.playerName = config.playerName;
-    this.provider = config.provider || process.env.DEFAULT_AI_PROVIDER || "ollama";
+
+    // Lógica de cambio automático de proveedor según entorno
+    // Local (dev/test) -> ollama | Prod -> deepseek
+    const isProduction = process.env.NODE_ENV === "production";
+    const defaultEnvProvider = isProduction ? "deepseek" : "ollama";
+
+    this.provider =
+      config.provider || process.env.DEFAULT_AI_PROVIDER || defaultEnvProvider;
+
     if (this.provider === "openllama") this.provider = "ollama"; // Normalización
+
     this.modelName =
       config.model ||
       process.env.DEFAULT_AI_MODEL ||
@@ -252,42 +265,50 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
     let decision = null;
     try {
       let aiText = "";
-      if (this.provider === "gemini" && this.geminiModel) {
-        const result = await this.geminiModel.generateContent(prompt);
-        aiText = (await result.response).text();
-      } else if (this.provider === "deepseek" && this.deepseekApiKey) {
-        const response = await fetch(
-          `${this.deepseekBaseUrl}/chat/completions`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${this.deepseekApiKey}`,
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("AI Request Timeout")), 10000)
+      );
+
+      const aiRequest = async () => {
+        if (this.provider === "gemini" && this.geminiModel) {
+          const result = await this.geminiModel.generateContent(prompt);
+          return (await result.response).text();
+        } else if (this.provider === "deepseek" && this.deepseekApiKey) {
+          const response = await fetch(
+            `${this.deepseekBaseUrl}/chat/completions`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.deepseekApiKey}`,
+              },
+              body: JSON.stringify({
+                model: this.modelName,
+                messages: [
+                  { role: "system", content: "You are a professional poker bot." },
+                  { role: "user", content: prompt },
+                ],
+                stream: false,
+              }),
             },
-            body: JSON.stringify({
-              model: this.modelName,
-              messages: [
-                { role: "system", content: "You are a professional poker bot." },
-                { role: "user", content: prompt },
-              ],
-              stream: false,
-            }),
-          },
-        );
-        const data = await response.json();
-        if (data.error) throw new Error(data.error.message || "DeepSeek Error");
-        aiText = data.choices[0].message.content;
-      } else if (this.provider === "ollama" && ollamaClient) {
-        const response = await ollamaClient.generate({
-          model: this.modelName,
-          prompt,
-          stream: false,
-        });
-        aiText = response.response;
-      } else {
-        // Fallback genérico si el proveedor elegido no está disponible
-        throw new Error(`Provider ${this.provider} is not properly configured.`);
-      }
+          );
+          const data = await response.json();
+          if (data.error) throw new Error(data.error.message || "DeepSeek Error");
+          return data.choices[0].message.content;
+        } else if (this.provider === "ollama" && ollamaClient) {
+          const response = await ollamaClient.generate({
+            model: this.modelName,
+            prompt,
+            stream: false,
+          });
+          return response.response;
+        } else {
+          throw new Error(`Provider ${this.provider} is not properly configured.`);
+        }
+      };
+
+      aiText = await Promise.race([aiRequest(), timeoutPromise]);
       decision = this.safeParseJSON(aiText);
     } catch (e) {
       log
@@ -332,10 +353,14 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
 
   safeParseJSON(text) {
     try {
-      const match = text.match(/\{.*\}/s);
-      return match ? JSON.parse(match[0]) : null;
+      return JSON.parse(text);
     } catch {
-      return null;
+      try {
+        const match = text.match(/\{[\s\S]*\}/);
+        return match ? JSON.parse(match[0]) : null;
+      } catch {
+        return null;
+      }
     }
   }
 }
