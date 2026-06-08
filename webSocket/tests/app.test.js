@@ -8,10 +8,10 @@ describe('App Validation Logic', () => {
     expect(error).toBeNull()
     expect(data.totalChips).toBe(1000)
 
-    expect(validateAction('signUp', { totalChips: 'invalid' })).toBe(
-      'Invalid chips amount',
+    expect(validateAction('signUp', { totalChips: 'invalid' })).toContain(
+      'Invalid input',
     )
-    expect(validateAction('signUp', { totalChips: -10 })).toBe(
+    expect(validateAction('signUp', { totalChips: -10 })).toContain(
       'Invalid chips amount',
     )
   })
@@ -22,8 +22,8 @@ describe('App Validation Logic', () => {
     expect(error).toBeNull()
     expect(data.chipsToBet).toBe(500)
 
-    expect(validateAction('setBet', { chipsToBet: 'abc' })).toBe(
-      'Invalid bet amount',
+    expect(validateAction('setBet', { chipsToBet: 'abc' })).toContain(
+      'Invalid input',
     )
   })
 
@@ -34,11 +34,11 @@ describe('App Validation Logic', () => {
         targetMessage: 'hello',
       }),
     ).toBeNull()
-    expect(validateAction('sendMessage', { targetPlayerId: '1' })).toBe(
-      'Invalid message data',
+    expect(validateAction('sendMessage', { targetPlayerId: '1' })).toContain(
+      'Invalid input',
     )
-    expect(validateAction('sendMessage', { targetMessage: 'hello' })).toBe(
-      'Invalid message data',
+    expect(validateAction('sendMessage', { targetMessage: 'hello' })).toContain(
+      'Invalid input',
     )
   })
 

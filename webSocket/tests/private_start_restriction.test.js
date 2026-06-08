@@ -59,7 +59,8 @@ describe('Private Match Start Restriction', () => {
     }
 
     const send = (actionPayload) => {
-      const data = typeof actionPayload === 'function' ? actionPayload() : actionPayload
+      const data =
+        typeof actionPayload === 'function' ? actionPayload() : actionPayload
       if (ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(data))
       } else {
@@ -72,7 +73,7 @@ describe('Private Match Start Restriction', () => {
 
   it('Should ONLY start when host triggers startGame, even if all players are ready', async () => {
     const gameCode = 'PRIV_START_' + Math.random().toString(36).substring(7)
-    
+
     // Alice is host (joined first)
     const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
     const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
@@ -90,40 +91,48 @@ describe('Private Match Start Restriction', () => {
     // 2. Both mark as ready
     alice.send(MOCK_ACTIONS.PLAYER_READY)
     bob.send(MOCK_ACTIONS.PLAYER_READY)
-    
+
     // Wait a bit to ensure NO auto-start happens
-    await new Promise(r => setTimeout(r, 1000))
-    
-    const dealtMsg = alice.responses.find(r => r.message?.action === 'dealtPrivateCards')
+    await new Promise((r) => setTimeout(r, 1000))
+
+    const dealtMsg = alice.responses.find(
+      (r) => r.message?.action === 'dealtPrivateCards',
+    )
     expect(dealtMsg).toBeUndefined()
-    
+
     // 3. Bob (non-host) tries to start the game
     bob.send(MOCK_ACTIONS.START_GAME)
-    
+
     // Bob should get a lobbyError saying only host can start
     const errorMsg = await bob.waitAction('lobbyError')
-    expect(errorMsg.message.data.displayMsg).toContain('Only the host can start')
-    
+    expect(errorMsg.message.data.displayMsg).toContain(
+      'Only the host can start',
+    )
+
     // Verify game STILL hasn't started
-    await new Promise(r => setTimeout(r, 500))
-    const dealtMsg2 = alice.responses.find(r => r.message?.action === 'dealtPrivateCards')
+    await new Promise((r) => setTimeout(r, 500))
+    const dealtMsg2 = alice.responses.find(
+      (r) => r.message?.action === 'dealtPrivateCards',
+    )
     expect(dealtMsg2).toBeUndefined()
 
     // 4. Alice (host) starts the game
     alice.send(MOCK_ACTIONS.START_GAME)
-    
+
     // In current logic, game asks for blinds BEFORE dealing private cards
     await alice.waitAction('askForBlindBets')
     alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    
+
     await bob.waitAction('askForBlindBets')
     bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     // Game should start now
     await alice.waitAction('dealtPrivateCards')
-    const dealtMsg3 = alice.responses.find(r => r.message?.action === 'dealtPrivateCards')
+    const dealtMsg3 = alice.responses.find(
+      (r) => r.message?.action === 'dealtPrivateCards',
+    )
     expect(dealtMsg3).toBeDefined()
-    
+
     console.log('Test Passed: Private match start restriction validated.')
   }, 20000)
 })

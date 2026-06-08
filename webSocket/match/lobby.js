@@ -346,7 +346,10 @@ class MatchLobby {
           displayMsg: `${foundPlayer.name} disconnected. Match paused for ${time / 1000}s`,
           timeout: time / 1000,
         })
-        Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+        Socket.broadcastToTorneo(
+          this.match.torneoId,
+          this.communicator.getMsg(),
+        )
 
         const timeout = setTimeout(() => {
           this.playerLeave(thisSocket)

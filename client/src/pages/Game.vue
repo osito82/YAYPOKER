@@ -379,6 +379,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   disconnectSocket()
+  pokerStore.resetState()
   if (timeInterval) clearInterval(timeInterval)
 })
 </script>

@@ -13,21 +13,31 @@ class Socket {
 
     const torneoSockets = this.torneoSockets.get(idTorneo)
 
-    // Handle re-connections based on secretCode: 
+    // Handle re-connections based on secretCode:
     // If a socket already exists with the same secretCode, we remove it to make way for the new one.
     // This allows the player to "take over" their previous session.
     for (const [existingId, existingSocket] of torneoSockets.entries()) {
       if (existingSocket.secretCode === secretCode) {
         torneoSockets.delete(existingId)
         this.log
-          .Template({ name: 'brakets', title: 'SERVER:RECONNECTED', date: true })
-          .R({ playerName: name, id, torneo: idTorneo, secretCode, replacedId: existingId })
+          .Template({
+            name: 'brakets',
+            title: 'SERVER:RECONNECTED',
+            date: true,
+          })
+          .R({
+            playerName: name,
+            id,
+            torneo: idTorneo,
+            secretCode,
+            replacedId: existingId,
+          })
         break
       }
     }
 
     torneoSockets.set(id, socket)
-    
+
     // If not a reconnection, it's a new connection
     if (!this.log.lastTitle?.includes('RECONNECTED')) {
       this.log

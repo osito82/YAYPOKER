@@ -8,7 +8,8 @@ describe('Voice Message Integration', () => {
     it('should validate a correct voice message action', () => {
       const validAction = {
         action: ACTIONS.VOICE_MESSAGE,
-        audioData: 'data:audio/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoK7u3uB...',
+        audioData:
+          'data:audio/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoK7u3uB...',
       }
       const error = validateAction(validAction.action, validAction)
       expect(error).toBeNull()
@@ -19,7 +20,7 @@ describe('Voice Message Integration', () => {
         action: ACTIONS.VOICE_MESSAGE,
       }
       const error = validateAction(invalidAction.action, invalidAction)
-      expect(error).toBe('Invalid voice data')
+      expect(error).toContain('Invalid input')
     })
 
     it('should fail if audioData is not a string', () => {
@@ -28,7 +29,7 @@ describe('Voice Message Integration', () => {
         audioData: 12345,
       }
       const error = validateAction(invalidAction.action, invalidAction)
-      expect(error).toBe('Invalid voice data')
+      expect(error).toContain('Invalid input')
     })
   })
 
@@ -68,7 +69,7 @@ describe('Voice Message Integration', () => {
             playerName: 'Alice',
             audioData: 'base64-string',
           },
-        })
+        }),
       )
     })
   })

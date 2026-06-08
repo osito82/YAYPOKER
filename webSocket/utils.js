@@ -17,10 +17,10 @@ const shuffle = (array) => {
   return arr
 }
 
+const crypto = require('crypto')
+
 function generateUniqueId() {
-  const randomStr = () =>
-    Math.random().toString(36).substring(2, 7).toUpperCase()
-  return `${randomStr()}-${randomStr()}`
+  return uuidv4().substring(0, 8).toUpperCase()
 }
 
 function generatePublicId() {
@@ -32,7 +32,7 @@ function socketId() {
 }
 
 function generateSecretCode() {
-  return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
+  return String(crypto.randomInt(1000, 10000)).padStart(4, '0')
 }
 
 ///[ 'Ks', '8c', 'Js', 'Td', 'Qc' ] =>  [ 'K', '8', 'J', 'T', 'Q' ]

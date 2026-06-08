@@ -42,9 +42,15 @@ describe('Public Table: Rules & Money Integrity Test', () => {
       // Auto-responder para que el test fluya
       // 1. Ciegas (Privado o Público con mención)
       if (action === 'askForBlindBets') {
-        const isMyTurn = r.message?.data?.id === ws._id_for_test || msg.includes(name)
+        const isMyTurn =
+          r.message?.data?.id === ws._id_for_test || msg.includes(name)
         if (isMyTurn && ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ action: 'setBet', chipsToBet: r.message.data.blindAmount }))
+          ws.send(
+            JSON.stringify({
+              action: 'setBet',
+              chipsToBet: r.message.data.blindAmount,
+            }),
+          )
         }
       }
 
@@ -79,7 +85,8 @@ describe('Public Table: Rules & Money Integrity Test', () => {
     }
 
     const send = (actionPayload) => {
-      if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(actionPayload))
+      if (ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify(actionPayload))
       else ws.once('open', () => ws.send(JSON.stringify(actionPayload)))
     }
 
@@ -96,35 +103,46 @@ describe('Public Table: Rules & Money Integrity Test', () => {
     for (let i = 1; i <= TOTAL_PLAYERS; i++) {
       playerObjects.push(createClient(`Player_${i}`, gameCode))
     }
-    await Promise.all(playerObjects.map(p => new Promise(r => p.ws.on('open', r))))
+    await Promise.all(
+      playerObjects.map((p) => new Promise((r) => p.ws.on('open', r))),
+    )
 
     // 2. Todos hacen SignUp
-    playerObjects.forEach(p => p.send({ action: 'signUp', totalChips: 1000, isReady: true }))
-    await Promise.all(playerObjects.map(async (p) => {
+    playerObjects.forEach((p) =>
+      p.send({ action: 'signUp', totalChips: 1000, isReady: true }),
+    )
+    await Promise.all(
+      playerObjects.map(async (p) => {
         const signUpResponse = await p.waitAction('signUp')
         // Capturamos el ID asignado por el servidor
         p.ws._id_for_test = signUpResponse.message.data.id
-    }))
+      }),
+    )
 
     // 3. Esperar a que empiece la partida (Auto-start)
     // El servidor enviará dealtPrivateCards cuando los 4 estén listos
     await playerObjects[0].waitAction('dealtPrivateCards', 15000)
 
     // 4. LÓGICA DE APUESTA: Manejada automáticamente por createClient
-    
+
     // 5. Esperar al ganador del torneo
-    const tournamentWinner = await playerObjects[0].waitAction('winnerTournament', 20000)
-    
+    const tournamentWinner = await playerObjects[0].waitAction(
+      'winnerTournament',
+      20000,
+    )
+
     // === VALIDACIÓN FINAL ===
     const winnerData = tournamentWinner.message.data.winner
     const totalMassInTable = TOTAL_PLAYERS * 1000 // 4000
-    
-    console.log(`Tournament Result: ${winnerData.name} won ${winnerData.amount} chips.`)
-    
+
+    console.log(
+      `Tournament Result: ${winnerData.name} won ${winnerData.amount} chips.`,
+    )
+
     // El ganador debe tener exactamente la suma de las fichas de todos
     expect(winnerData.amount).toBe(totalMassInTable)
     expect(winnerData.playerId).toBeDefined()
-    
+
     console.log('Final Validation: 100% Chip Conservation confirmed.')
   }, 50000)
 })

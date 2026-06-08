@@ -161,7 +161,7 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.PLAYER_READY)
     bob.send(MOCK_ACTIONS.PLAYER_READY)
     charlie.send(MOCK_ACTIONS.PLAYER_READY)
-    
+
     // RE-SYNC: En mesas privadas, isStarted se activa al llamar a startGame
     // si los jugadores ya están en la mesa.
     alice.send(MOCK_ACTIONS.START_GAME)

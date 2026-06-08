@@ -1,4 +1,7 @@
 function generateUniqueId() {
+  if (window.crypto && window.crypto.randomUUID) {
+    return crypto.randomUUID().substring(0, 9).toUpperCase()
+  }
   const randomStr = () =>
     Math.random().toString(36).substring(2, 7).toUpperCase()
   return `${randomStr()}-${randomStr()}`
@@ -60,6 +63,11 @@ const letterToNumber = (letter) => {
 }
 
 function generateSecretCode() {
+  if (window.crypto && window.crypto.getRandomValues) {
+    const array = new Uint32Array(1)
+    window.crypto.getRandomValues(array)
+    return String(array[0] % 10000).padStart(4, '0')
+  }
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 }
 

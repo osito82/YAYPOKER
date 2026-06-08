@@ -398,6 +398,30 @@ export const usePokerStore = defineStore('pokerStore', () => {
     lastError.value = null
   }
 
+  function resetState() {
+    isGameStarted.value = false
+    players.value = []
+    communityCards.value = []
+    pot.value = 0
+    pots.value = []
+    displayMsg.value = null
+    dealerLog.value = []
+    activePlayerId.value = null
+    bettingOptions.value = []
+    currentHighestBet.value = 0
+    lastRaiseAmount.value = 0
+    myInfo.value = { id: null, cards: [] }
+    winnerInfo.value = null
+    odds.value = { win: 0, tie: 0 }
+    autofoldStartTime.value = null
+    lobbyTimer.value = null
+    hostId.value = null
+    torneoId.value = null
+    stepChecker.value = {}
+    lastError.value = null
+    lastVoiceMessage.value = null
+  }
+
   return {
     // State (refs)
     socketMessage,
@@ -464,5 +488,6 @@ export const usePokerStore = defineStore('pokerStore', () => {
     setGameCredentials,
     clearWinnerInfo,
     clearError,
+    resetState,
   }
 })
