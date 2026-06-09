@@ -180,8 +180,7 @@
         <div
           v-if="
             player.currentBet > 0 ||
-            player.lastAction ||
-            (isShowDown && player.cards && player.cards.length > 0)
+            player.lastAction
           "
           :id="`player-item-activity-row-${player.id}-${templateSuffix}`"
           class="flex items-end justify-between gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-white/5"
@@ -191,43 +190,7 @@
             :id="`player-item-left-activity-${player.id}-${templateSuffix}`"
             class="flex flex-col flex-1 gap-3"
           >
-            <div
-              v-if="isShowDown && player.cards && player.cards.length > 0"
-              :id="`player-item-showdown-cards-${player.id}-${templateSuffix}`"
-              class="flex flex-col animate-in fade-in slide-in-from-left-2 duration-700"
-            >
-              <div
-                :id="`player-item-hand-name-wrapper-${player.id}-${templateSuffix}`"
-                class="flex items-center gap-2 mb-1.5"
-              >
-                <span
-                  :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`"
-                  class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest truncate leading-none"
-                >
-                  {{ formatHandName(getPlayerHandName(player)) }}
-                </span>
-                <span
-                  v-if="isPlayerWinner(player.id)"
-                  :id="`player-item-win-badge-${player.id}-${templateSuffix}`"
-                  class="px-1.5 py-0.5 rounded bg-emerald-500 text-[9px] font-black text-white dark:text-black uppercase leading-none"
-                  >Win</span
-                >
-              </div>
-              <div
-                :id="`player-item-cards-row-${player.id}-${templateSuffix}`"
-                class="flex gap-1.5"
-              >
-                <Card
-                  v-for="(card, idx) in player.cards"
-                  :key="idx"
-                  :id="`player-item-card-visual-${player.id}-${idx}-${templateSuffix}`"
-                  :numSymbol="card"
-                  size="small"
-                  :highlight="isCardWinning(player.id, card)"
-                  :percentage="55"
-                />
-              </div>
-            </div>
+
 
             <!-- Round Bet -->
             <div
@@ -395,14 +358,14 @@ const getPlayerCards = (player) => {
   // 2. Fallback: check winnerInfo.allHands (backend might send them here)
   if (winnerInfo.value?.allHands) {
     const hand = winnerInfo.value.allHands.find((h) => h.playerId === player.id)
-    if (hand && hand.cards && hand.cards.length > 0) return hand.cards
     if (hand && hand.privateCards && hand.privateCards.length > 0) return hand.privateCards
+    if (hand && hand.cards && hand.cards.length > 0) return hand.cards
   }
 
   // 3. Fallback: check winners array directly
   const winner = winners.value.find((w) => w.playerId === player.id)
-  if (winner && winner.cards && winner.cards.length > 0) return winner.cards
   if (winner && winner.privateCards && winner.privateCards.length > 0) return winner.privateCards
+  if (winner && winner.cards && winner.cards.length > 0) return winner.cards
 
   // 4. Fallback: check player.currentPrize
   if (player.currentPrize?.cards && player.currentPrize.cards.length > 0) return player.currentPrize.cards
