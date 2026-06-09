@@ -8,7 +8,7 @@ export function useActionBar(props, emit) {
   const progress = ref(100)
   let timerInterval = null
 
-  const chips = [
+  const baseChips = [
     { color: 'bg-slate-50', text: 'text-slate-900', value: 1, label: '1' },
     { color: 'bg-red-600', text: 'text-white', value: 5, label: '5' },
     { color: 'bg-blue-700', text: 'text-white', value: 10, label: '10' },
@@ -16,6 +16,18 @@ export function useActionBar(props, emit) {
     { color: 'bg-slate-500', text: 'text-white', value: 100, label: '100' },
     { color: 'bg-purple-700', text: 'text-white', value: 500, label: '500' },
   ]
+
+  const chips = computed(() => {
+    return baseChips.map((chip) => {
+      const isBlind = (props.options && props.options.includes('blind')) || props.canBlind === true
+      const exceedsBalance = chip.value > (props.balance || 0)
+      const isDisabled = !props.isMyTurn || isBlind || exceedsBalance
+      return {
+        ...chip,
+        disabled: isDisabled,
+      }
+    })
+  })
 
   const addChip = (value) => {
     const current = props.betAmount || props.minBet
@@ -48,6 +60,7 @@ export function useActionBar(props, emit) {
 
   const isSliderDisabled = computed(() => {
     if (!props.isMyTurn) return true
+    if (props.options?.includes('blind') || props.canBlind) return true
     // El slider solo se bloquea si el jugador ya no tiene más fichas para agregar
     // (es decir, ya puso todo lo que tenía o su stack es 0)
     return props.balance <= 0

@@ -140,11 +140,11 @@
                   >{{ $t('winner.hole_cards') }}</span
                 >
                 <div
-                  v-if="flattenCards(winner.playerCards).length > 0"
+                  v-if="getCardsToDisplay(winner).length > 0"
                   class="flex gap-1.5"
                 >
                   <Card
-                    v-for="(card, i) in flattenCards(winner.playerCards)"
+                    v-for="(card, i) in getCardsToDisplay(winner)"
                     :key="'hole-' + i"
                     size="small"
                     :numSymbol="card"
@@ -213,15 +213,9 @@
                 </div>
               </div>
               <div class="flex -space-x-4 opacity-90 scale-75 origin-right">
-                <template
-                  v-if="
-                    flattenCards(player.playerCards || player.show).length > 0
-                  "
-                >
+                <template v-if="getCardsToDisplay(player).length > 0">
                   <Card
-                    v-for="(c, idx) in flattenCards(
-                      player.playerCards || player.show,
-                    ).slice(0, 2)"
+                    v-for="(c, idx) in getCardsToDisplay(player).slice(0, 2)"
                     :key="idx"
                     size="small"
                     :numSymbol="c"
@@ -375,6 +369,11 @@ const flattenCards = (cards) => {
   if (!cards) return []
   if (typeof cards === 'string') return [cards]
   return cards.flat()
+}
+
+const getCardsToDisplay = (obj) => {
+  if (!obj) return []
+  return flattenCards(obj.cards || obj.privateCards || obj.playerCards || obj.show)
 }
 
 watch(
