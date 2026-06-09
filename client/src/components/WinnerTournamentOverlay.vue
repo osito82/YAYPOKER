@@ -180,6 +180,46 @@
               >
             </div>
           </div>
+
+          <!-- Final Winning Hand (if available) -->
+          <div
+            v-if="hasCardsToDisplay"
+            class="mt-8 pt-6 border-t border-[#D4A853]/20 flex flex-col items-center gap-6 sm:flex-row sm:justify-around relative z-10"
+          >
+            <!-- Hole Cards -->
+            <div class="flex flex-col items-center gap-2">
+              <span class="font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]">
+                {{ $t('winner.hole_cards') }}
+              </span>
+              <div v-if="getCardsToDisplay(winnerObj).length > 0" class="flex gap-1.5">
+                <Card
+                  v-for="(card, i) in getCardsToDisplay(winnerObj)"
+                  :key="'hole-' + i"
+                  size="small"
+                  :numSymbol="card"
+                />
+              </div>
+            </div>
+
+            <!-- Best Hand -->
+            <div v-if="getWinningCards(winnerObj).length > 0" class="flex flex-col items-center gap-2">
+              <span class="font-mono text-[9px] tracking-[2px] uppercase text-[#D4A853]/70">
+                {{ $t('winner.best_hand') }}
+              </span>
+              <div class="flex gap-1.5">
+                <Card
+                  v-for="(card, i) in getWinningCards(winnerObj)"
+                  :key="'card-' + i"
+                  size="small"
+                  :numSymbol="card"
+                  class="ring-1 ring-[#D4A853]/50 shadow-[0_0_15px_rgba(212,168,83,0.3)]"
+                />
+              </div>
+              <span v-if="winnerObj.handName" class="font-bebas text-lg text-[#F5F0E8] tracking-[1px] mt-1">
+                {{ winnerObj.handName }}
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Certificate Box -->
@@ -311,6 +351,7 @@
 import { computed, ref, onUnmounted, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import Card from './Card.vue'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { cleanPlayerName } from '../vutils'
@@ -432,18 +473,38 @@ const copyTorneoId = () => {
   })
 }
 
+const winnerObj = computed(() => {
+  if (!props.winnerInfo) return null
+  return props.winnerInfo.winner || (props.winnerInfo.winners ? props.winnerInfo.winners[0] : props.winnerInfo)
+})
+
 const winnerName = computed(() => {
-  if (!props.winnerInfo) return 'Champion'
-  // El servidor envía la info en data.winner para winnerTournament, 
-  // o a veces pokerStore pone el objeto data directamente.
-  const w = props.winnerInfo.winner || (props.winnerInfo.winners ? props.winnerInfo.winners[0] : props.winnerInfo)
-  return cleanPlayerName(w?.name || 'Champion')
+  return cleanPlayerName(winnerObj.value?.name || 'Champion')
 })
 
 const totalAmount = computed(() => {
-  if (!props.winnerInfo) return 0
-  const w = props.winnerInfo.winner || (props.winnerInfo.winners ? props.winnerInfo.winners[0] : props.winnerInfo)
-  return w?.amount || 0
+  return winnerObj.value?.amount || 0
+})
+
+const flattenCards = (cards) => {
+  if (!cards) return []
+  if (typeof cards === 'string') return [cards]
+  return cards.flat()
+}
+
+const getCardsToDisplay = (obj) => {
+  if (!obj) return []
+  return flattenCards(obj.cards || obj.privateCards || obj.playerCards || obj.show)
+}
+
+const getWinningCards = (obj) => {
+  if (!obj) return []
+  return flattenCards(obj.winningCards)
+}
+
+const hasCardsToDisplay = computed(() => {
+  if (!winnerObj.value) return false
+  return getCardsToDisplay(winnerObj.value).length > 0 || getWinningCards(winnerObj.value).length > 0
 })
 
 watch(
