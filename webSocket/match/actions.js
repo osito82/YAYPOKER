@@ -579,7 +579,10 @@ class MatchActions {
     const p1Bet = p1.getCurrentBet()
     const p2Bet = p2.getCurrentBet()
 
-    if (p1Bet >= this.match.smallBlind && p2Bet >= this.match.bigBlind) {
+    const p1Fulfilled = p1Bet >= this.match.smallBlind || p1.isAllIn
+    const p2Fulfilled = p2Bet >= this.match.bigBlind || p2.isAllIn
+
+    if (p1Fulfilled && p2Fulfilled) {
       this.log
         .Template({
           name: 'brakets',
@@ -598,9 +601,9 @@ class MatchActions {
       this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
     } else {
       let p = null
-      if (p1Bet === 0) {
+      if (!p1Fulfilled) {
         p = p1
-      } else if (p2Bet === 0) {
+      } else if (!p2Fulfilled) {
         p = p2
       }
 
