@@ -27,7 +27,7 @@
         :textColor="chip.text"
         :border="chip.border"
         :size="chipResponsiveSize"
-        :disabled="!isMyTurn || isSliderDisabled"
+        :disabled="chip.disabled || isSliderDisabled"
         @click="addChip(chip.value)"
       />
     </div>
