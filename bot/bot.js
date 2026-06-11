@@ -183,6 +183,20 @@ class PokerBot {
             await this.handleDecision(msg);
           }
         }
+
+        // Recuperación de errores del servidor (ej. Raise rechazado)
+        if (msg.action === "actionRejected" && msg.type === "private") {
+          log
+            .Template({ name: "brakets", title: "BOT:REJECTED", date: true })
+            .R({ bot: this.playerName, reason: msg.data?.reason });
+            
+          const currentHighestBet = Number(msg.currentHighestBet || 0);
+          const callAmount = Math.max(0, currentHighestBet - this.myCurrentBet);
+          
+          // Para destrabar el juego, hacemos la acción más conservadora y válida
+          const fallbackAction = callAmount > 0 ? "setCall" : "setCheck";
+          this.sendAction({ action: fallbackAction, chipsToCall: callAmount });
+        }
       } catch (err) {
         log
           .Template({ name: "brakets", title: "ERROR:MSG", date: true })
@@ -335,9 +349,10 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
       actionMsg.chipsToCall = callAmount;
     } else if (action === "raise") {
       actionMsg.action = "setRise";
+      const minRaise = Number(msg.lastRaiseAmount || 20); // Valor de subida mínima obligatoria
       actionMsg.chipsToRiseBet = Math.max(
         Number(decision.amount || 0),
-        currentHighestBet + 20,
+        currentHighestBet + minRaise,
       );
     } else {
       actionMsg.action = "setCheck";
