@@ -19,7 +19,7 @@ services:
       context: ./client
       args:
         - VITE_BOTS=true
-        - VITE_MAX_NUMBER_BOTS=10
+        - VITE_MAX_NUMBER_BOTS=4
     restart: unless-stopped
     expose:
       - "80"
@@ -39,7 +39,7 @@ services:
       - PORT=8888
       - VITE_WS_URL=websocket # Crucial para que el bot sepa a dónde conectarse internamente
       - VITE_WS_PORT=8888
-      - MAX_NUMBER_BOTS=10
+      - MAX_NUMBER_BOTS=4
       - BOT_SERVICE_URL=http://bot:8886
     depends_on:
       - bot
