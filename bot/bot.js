@@ -229,14 +229,17 @@ class PokerBot {
     const realEquity = (winChance + tieChance / 2) / 100;
 
     // Acción base por defecto
-    let baseAction =
-      callAmount === 0
-        ? allowedActions.includes("check")
-          ? "check"
-          : "call"
-        : allowedActions.includes("call")
-          ? "call"
-          : "fold";
+    let baseAction = "check";
+    if (callAmount === 0) {
+      baseAction = allowedActions.includes("check") ? "check" : "call";
+    } else {
+      // Si falla la IA y hay que pagar, usamos la equidad matemática para no ser siempre un "Call Station"
+      if (allowedActions.includes("call")) {
+        baseAction = realEquity > 0.35 ? "call" : "fold";
+      } else {
+        baseAction = "fold";
+      }
+    }
 
     log
       .Template({ name: "brakets", title: "BOT:DECIDING", date: true })
@@ -256,7 +259,7 @@ Allowed Actions: ${allowedActions.join(", ")}
 
 Strategy Rules:
 1. NEVER fold if "check" is an allowed action.
-2. If Equity < 0.2 and Call Amount > 15% of the Pot, consider folding.
+2. If Equity < 0.35 and Call Amount > 0, you SHOULD fold unless you want to bluff.
 3. Only "raise" if Equity > 0.6 or if you want to bluff.
 
 Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":number}
@@ -267,7 +270,7 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
       let aiText = "";
       
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("AI Request Timeout")), 10000)
+        setTimeout(() => reject(new Error("AI Request Timeout")), 25000)
       );
 
       const aiRequest = async () => {

@@ -86,11 +86,15 @@ class Match extends EventEmitter {
       torneo: this.torneoId,
     })
 
+    const usedNames = new Set(this.players.map(p => p.name))
+
     for (let i = 0; i < count; i++) {
-      const botName =
-        BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)] +
-        '_' +
-        Math.floor(Math.random() * 100)
+      const availableNames = BOT_NAMES.filter(name => !usedNames.has(name))
+      const botName = availableNames.length > 0
+        ? availableNames[Math.floor(Math.random() * availableNames.length)]
+        : `Bot_${Math.floor(Math.random() * 10000)}`
+      
+      usedNames.add(botName)
 
       try {
         await fetch(`${SERVER_CONFIG.BOT_SERVICE_URL}/spawn`, {
@@ -259,7 +263,10 @@ class Match extends EventEmitter {
         ? GAME_RULES.MIN_PLAYERS_PUBLIC
         : GAME_RULES.MIN_PLAYERS
 
-      if (connectedPlayers.length < minRequired) {
+      const botCountToSpawn = (data.bots && !this.isSpawningBots) ? Number(data.bots) : 0
+      const totalExpectedPlayers = connectedPlayers.length + botCountToSpawn
+
+      if (totalExpectedPlayers < minRequired) {
         if (!this.isSpawningBots) {
           this.communicator.msgBuilder('lobbyError', 'public', null, {
             errorType: 'WAITING_PLAYERS',

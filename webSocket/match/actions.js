@@ -813,12 +813,8 @@ class MatchActions {
       this.match.increaseBlinds()
     }
 
-    if (isFold && !isTournamentWinner) {
-      setTimeout(() => {
-        this.emitter.emit('NEXT_ROUND')
-      }, TIMEOUTS.nextRound)
-    } else if (this.isPublic()) {
-      // En mesas públicas, siempre intentamos ir a la siguiente ronda (que reseteará si el torneo terminó)
+    if (!isTournamentWinner) {
+      // Siempre intentamos ir a la siguiente ronda de forma automática, sea pública o privada
       setTimeout(() => {
         this.emitter.emit('NEXT_ROUND')
       }, TIMEOUTS.nextRound)
