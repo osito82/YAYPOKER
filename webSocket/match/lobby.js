@@ -356,6 +356,9 @@ class MatchLobby {
           this.match.pauseTimeouts.delete(foundPlayer.name)
         }, time)
         this.match.pauseTimeouts.set(foundPlayer.name, timeout)
+      } else {
+        // Si el juego no ha empezado, no hay por qué pausar, se va directo
+        this.playerLeave(thisSocket)
       }
     }
   }
@@ -412,6 +415,23 @@ class MatchLobby {
         }
       } else {
         this.match.players.splice(index, 1)
+      }
+
+      // Si no quedan humanos conectados (sin importar si es pública o privada),
+      // desconectamos a todos los bots para que no jueguen solos indefinidamente.
+      const connectedHumans = this.match.players.filter(p => p.connected && !p.isBot)
+      if (connectedHumans.length === 0) {
+        const connectedBots = this.match.players.filter(p => p.connected && p.isBot)
+        // Iteramos sobre una copia para no alterar el array mientras eliminamos
+        ;[...connectedBots].forEach(bot => {
+          const botSocketWrapper = Socket.getSocket(this.match.torneoId, bot.id)
+          if (botSocketWrapper && botSocketWrapper.socket) {
+            botSocketWrapper.socket.close()
+          } else {
+            const botIndex = this.match.players.findIndex(p => p.id === bot.id)
+            if (botIndex !== -1) this.match.players.splice(botIndex, 1)
+          }
+        })
       }
 
       if (this.match.isPublic && this.match.publicAutoStartTimer) {
@@ -514,6 +534,22 @@ class MatchLobby {
     // SOLO emitimos CONTINUE si el juego está en marcha
     if (this.stepChecker.checkStep('startGame')) {
       this.emitter.emit('CONTINUE', thisSocket)
+    }
+
+    // Limpieza final si la mesa quedó completamente vacía
+    if (this.match.players.length === 0) {
+      const Torneo = require('../torneo')
+      Torneo.getTorneos().delete(this.match.torneoId)
+      this.log
+        .Template({
+          name: 'brakets',
+          title: 'LOBBY:MATCH_DELETED',
+          date: true,
+        })
+        .R({
+          torneoId: this.match.torneoId,
+          reason: 'All players left',
+        })
     }
   }
 }
