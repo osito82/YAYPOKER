@@ -5,3 +5,8 @@ secure/*
 *.tar.gz
 
 readme.txt
+.env
+.env.*
+*.env
+*.pem
+*.key
