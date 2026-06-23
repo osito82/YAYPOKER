@@ -10,7 +10,7 @@
     <div
       v-if="winnerInfo && isVisible"
       :id="'winner-tournament-overlay-viewport-root-' + templateSuffix"
-      class="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 bg-[#060E07]/95 backdrop-blur-2xl overflow-hidden font-sans select-none"
+      class="fixed inset-0 z-[200] flex items-center justify-center p-2 sm:p-3 bg-[#060E07]/95 backdrop-blur-2xl overflow-hidden font-sans select-none"
     >
       <!-- Background Decorations -->
       <div class="absolute inset-0 pointer-events-none">
@@ -39,307 +39,207 @@
 
       <div
         :id="'winner-tournament-announcement-modal-container-' + templateSuffix"
-        class="relative w-full max-w-2xl max-h-[95vh] flex flex-col items-center gap-0 z-10 overflow-y-auto custom-scrollbar p-4 sm:p-8"
+        class="relative w-full max-w-3xl h-full flex flex-col items-center z-10 p-1 sm:p-2"
       >
-        <!-- Chip decoration -->
-        <div class="chip-deco flex gap-1.5 justify-center mb-6 animate-fade-up">
-          <div
-            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#2471A3]"
-          ></div>
-          <div
-            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#C0392B]"
-          ></div>
-          <div
-            class="chip w-5 h-5 rounded-full border-2 border-white/30 bg-[#D4A853]"
-          ></div>
-          <div
-            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#F5F0E8]"
-          ></div>
-          <div
-            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#C0392B]"
-          ></div>
-          <div
-            class="chip w-5 h-5 rounded-full border-2 border-white/20 bg-[#2471A3]"
-          ></div>
-        </div>
+        <div class="flex-1 w-full flex flex-col items-center gap-1 overflow-y-auto custom-scrollbar py-1">
 
-        <!-- Trophy -->
-        <div class="trophy-wrap relative mb-6 animate-trophy-drop">
-          <div
-            class="trophy-glow absolute -inset-8 bg-[radial-gradient(ellipse,rgba(212,168,83,0.35)_0%,transparent_70%)] animate-pulse-glow"
-          ></div>
-          <span
-            class="trophy-icon text-8xl sm:text-9xl relative z-10 drop-shadow-[0_0_20px_rgba(212,168,83,0.7)] animate-trophy-bounce"
-            >🏆</span
-          >
-        </div>
-
-        <!-- Title -->
-        <div
-          class="title-block text-center mb-8 animate-fade-up animation-delay-300"
-        >
-          <p
-            class="title-eyebrow font-mono text-[11px] tracking-[4px] uppercase text-[#D4A853] mb-2"
-          >
-            YAY Poker · {{ $t('tournament.finished') }}
-          </p>
-          <h1
-            class="title-main font-bebas text-7xl sm:text-8xl leading-tight tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent py-1"
-          >
-            {{ $t('tournament.champion') }}
-          </h1>
-          <p
-            class="title-sub font-bebas text-3xl sm:text-4xl tracking-[6px] text-[#F5F0E8] opacity-85 mt-1"
-          >
-            {{ $t('tournament.of_the_tournament') }}
-          </p>
-        </div>
-
-        <!-- Winner Card -->
-        <div
-          :id="'winner-tournament-card-' + templateSuffix"
-          class="winner-card w-full bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-2xl p-6 sm:p-8 mb-5 relative overflow-visible min-h-fit animate-fade-up animation-delay-500"
-        >
-          <div
-            :id="'winner-tournament-card-accent-' + templateSuffix"
-            class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4A853] to-transparent"
-          ></div>
-          <div
-            :id="'winner-tournament-card-bg-icon-' + templateSuffix"
-            class="absolute -top-5 -right-2 text-[120px] text-black/25 rotate-[-15deg] select-none pointer-events-none"
-          >
-            ♠
+          <!-- Trophy -->
+          <div class="trophy-wrap relative animate-trophy-drop shrink-0">
+            <div
+              class="trophy-glow absolute -inset-6 bg-[radial-gradient(ellipse,rgba(212,168,83,0.35)_0%,transparent_70%)] animate-pulse-glow"
+            ></div>
+            <span
+              class="trophy-icon text-5xl sm:text-6xl relative z-10 drop-shadow-[0_0_20px_rgba(212,168,83,0.7)] animate-trophy-bounce"
+              >🏆</span
+            >
           </div>
 
-          <p
-            :id="'winner-tournament-label-' + templateSuffix"
-            class="winner-label font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853] mb-2"
-          >
-            {{ $t('tournament.winner') }}
-          </p>
-          <h2
-            :id="'winner-tournament-name-text-' + templateSuffix"
-            class="winner-name font-bebas text-5xl sm:text-7xl tracking-[2px] leading-[1.1] text-[#F5F0E8] mb-6 relative z-10 break-words"
-          >
-            {{ winnerName.toUpperCase() }}
-          </h2>
-
-          <div
-            :id="'winner-tournament-stats-grid-' + templateSuffix"
-            class="winner-stats flex gap-6 flex-wrap relative z-10"
-          >
-            <div
-              :id="'winner-tournament-stat-chips-' + templateSuffix"
-              class="stat flex flex-col gap-0.5"
+          <!-- Title -->
+          <div class="title-block text-center animate-fade-up animation-delay-300 shrink-0">
+            <p class="font-mono text-[9px] tracking-[3px] uppercase text-[#D4A853]">
+              YAY Poker · {{ $t('tournament.finished') }}
+            </p>
+            <h1
+              class="font-bebas text-4xl sm:text-5xl leading-tight tracking-[2px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent"
             >
-              <span
-                :id="'winner-tournament-stat-chips-label-' + templateSuffix"
-                class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
-                >{{ $t('tournament.final_chips') }}</span
-              >
-              <span
-                :id="'winner-tournament-stat-chips-value-' + templateSuffix"
-                class="stat-value font-mono text-base text-[#F5D78E] font-medium"
-                >{{ totalAmount.toLocaleString() }}
-                {{ $t('lobby.chips').toLowerCase() }}</span
-              >
-            </div>
-            <div
-              :id="'winner-tournament-stat-id-' + templateSuffix"
-              class="stat flex flex-col gap-0.5"
-            >
-              <span
-                :id="'winner-tournament-stat-id-label-' + templateSuffix"
-                class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
-                >{{ $t('tournament.id') }}</span
-              >
-              <span
-                :id="'winner-tournament-stat-id-value-' + templateSuffix"
-                class="stat-value font-mono text-base text-[#F5D78E] font-medium"
-                >{{
-                  (certificate?.torneoId || pokerStore.torneoId || '').slice(
-                    0,
-                    8,
-                  )
-                }}...</span
-              >
-            </div>
-            <div
-              :id="'winner-tournament-stat-date-' + templateSuffix"
-              class="stat flex flex-col gap-0.5"
-            >
-              <span
-                :id="'winner-tournament-stat-date-label-' + templateSuffix"
-                class="stat-label font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]"
-                >{{ $t('tournament.date') }}</span
-              >
-              <span
-                :id="'winner-tournament-stat-date-value-' + templateSuffix"
-                class="stat-value font-mono text-base text-[#F5D78E] font-medium"
-                >{{ formattedDate }}</span
-              >
-            </div>
+              {{ $t('tournament.champion') }}
+            </h1>
+            <p class="font-bebas text-xl sm:text-2xl tracking-[4px] text-[#F5F0E8] opacity-85">
+              {{ $t('tournament.of_the_tournament') }}
+            </p>
           </div>
 
-          <!-- Final Winning Hand (if available) -->
+          <!-- Winner Card -->
           <div
-            v-if="hasCardsToDisplay"
-            class="mt-8 pt-6 border-t border-[#D4A853]/20 flex flex-col items-center gap-6 sm:flex-row sm:justify-around relative z-10"
+            :id="'winner-tournament-card-' + templateSuffix"
+            class="winner-card w-full max-w-lg bg-gradient-to-br from-[#1E3D20] to-[#142A16] border border-[#D4A853]/30 rounded-xl p-3 relative overflow-hidden animate-fade-up animation-delay-500 shrink-0"
           >
-            <!-- Hole Cards -->
-            <div class="flex flex-col items-center gap-2">
-              <span class="font-mono text-[9px] tracking-[2px] uppercase text-[#9E9080]">
-                {{ $t('winner.hole_cards') }}
+            <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D4A853] to-transparent"></div>
+
+            <div class="flex items-center justify-between gap-2 mb-1 relative z-10">
+              <span class="winner-label font-mono text-[8px] tracking-[2px] uppercase text-[#D4A853] shrink-0">
+                {{ $t('tournament.winner') }}
               </span>
-              <div v-if="getCardsToDisplay(winnerObj).length > 0" class="flex gap-1.5">
+              <span class="winner-name font-bebas text-xl sm:text-2xl tracking-[1px] text-[#F5F0E8] truncate relative z-10">
+                {{ winnerName.toUpperCase() }}
+              </span>
+            </div>
+
+            <!-- Stats row -->
+            <div class="flex items-center gap-3 text-[10px] font-mono text-[#9E9080] relative z-10">
+              <span class="text-[#F5D78E] font-medium">
+                {{ totalAmount.toLocaleString() }} {{ $t('lobby.chips').toLowerCase() }}
+              </span>
+              <span class="text-white/20">|</span>
+              <span>{{ (certificate?.torneoId || pokerStore.torneoId || '').slice(0, 8) }}...</span>
+              <span class="text-white/20">|</span>
+              <span>{{ formattedDate }}</span>
+            </div>
+
+            <!-- Final Winning Hand (if available) -->
+            <div v-if="hasCardsToDisplay" class="flex items-center justify-center gap-3 mt-2 pt-2 border-t border-[#D4A853]/20 relative z-10">
+              <div v-if="getCardsToDisplay(winnerObj).length > 0" class="flex gap-1">
                 <Card
                   v-for="(card, i) in getCardsToDisplay(winnerObj)"
                   :key="'hole-' + i"
-                  size="small"
+                  size="xsmall"
                   :numSymbol="card"
                 />
               </div>
-            </div>
-
-            <!-- Best Hand -->
-            <div v-if="getWinningCards(winnerObj).length > 0" class="flex flex-col items-center gap-2">
-              <span class="font-mono text-[9px] tracking-[2px] uppercase text-[#D4A853]/70">
-                {{ $t('winner.best_hand') }}
-              </span>
-              <div class="flex gap-1.5">
+              <div v-if="getWinningCards(winnerObj).length > 0" class="flex gap-1">
                 <Card
                   v-for="(card, i) in getWinningCards(winnerObj)"
                   :key="'card-' + i"
-                  size="small"
+                  size="xsmall"
                   :numSymbol="card"
-                  class="ring-1 ring-[#D4A853]/50 shadow-[0_0_15px_rgba(212,168,83,0.3)]"
+                  class="ring-1 ring-[#D4A853]/50 shadow-[0_0_8px_rgba(212,168,83,0.3)]"
                 />
               </div>
-              <span v-if="winnerObj.handName" class="font-bebas text-lg text-[#F5F0E8] tracking-[1px] mt-1">
+              <span v-if="winnerObj.handName" class="font-bebas text-sm text-[#F5F0E8] tracking-[0.5px]">
                 {{ winnerObj.handName }}
               </span>
             </div>
           </div>
-        </div>
 
-        <!-- Certificate Box -->
-        <div
-          :id="'winner-tournament-cert-box-' + templateSuffix"
-          class="cert-box w-full bg-[#060E07] border border-[#D4A853]/20 rounded-2xl p-7 sm:p-8 mb-5 relative animate-fade-up animation-delay-700"
-        >
+          <!-- Showdown - All Players -->
           <div
-            :id="'winner-tournament-cert-header-' + templateSuffix"
-            class="cert-header flex items-center justify-between mb-5"
+            v-if="allShowdownPlayers.length > 1"
+            class="w-full max-w-lg animate-fade-up animation-delay-600 shrink-0"
           >
-            <span
-              :id="'winner-tournament-cert-title-' + templateSuffix"
-              class="cert-title font-mono text-[10px] tracking-[3px] uppercase text-[#D4A853]"
-              >🎖 {{ $t('tournament.cert_code') }}</span
-            >
-            <div
-              :id="'winner-tournament-cert-badge-' + templateSuffix"
-              class="cert-badge flex items-center gap-1.5 px-2.5 py-1 bg-[#D4A853]/10 border border-[#D4A853]/25 rounded-full"
-            >
+            <div class="flex flex-col gap-1 max-h-[30vh] overflow-y-auto custom-scrollbar pr-1">
               <div
-                :id="'winner-tournament-cert-badge-dot-' + templateSuffix"
-                class="cert-badge-dot w-1.5 h-1.5 bg-[#D4A853] rounded-full animate-blink"
-              ></div>
-              <span
-                :id="'winner-tournament-cert-badge-text-' + templateSuffix"
-                class="cert-badge-text font-mono text-[9px] tracking-[1px] text-[#D4A853]"
-                >{{ $t('tournament.official') }}</span
+                v-for="(player, idx) in allShowdownPlayers"
+                :key="player.playerId || idx"
+                class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 border transition-colors"
+                :class="isWinner(player) ? 'bg-[#1E3D20] border-[#D4A853]/40' : 'bg-black/30 border-white/5'"
               >
-            </div>
-          </div>
-
-          <div
-            :id="'winner-tournament-cert-code-container-' + templateSuffix"
-            class="code-display flex items-center gap-3 mb-4"
-          >
-            <div
-              :id="'winner-tournament-cert-digits-row-' + templateSuffix"
-              class="code-digits flex gap-2"
-            >
-              <div
-                v-for="(digit, i) in codeDisplay"
-                :id="`winner-tournament-cert-digit-${i}-${templateSuffix}`"
-                :key="i"
-                class="code-digit w-14 h-18 bg-[#1E3D20] border-2 border-[#D4A853]/40 rounded-xl flex items-center justify-center font-bebas text-4xl text-[#F5D78E] relative overflow-hidden shadow-2xl animate-digit-reveal"
-                :style="{ animationDelay: `${0.8 + i * 0.15}s` }"
-              >
-                {{ digit }}
                 <div
-                  :id="`winner-tournament-cert-digit-gradient-${i}-${templateSuffix}`"
-                  class="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-white/5 to-transparent"
-                ></div>
+                  class="w-5 h-5 rounded flex items-center justify-center text-[8px] font-black shrink-0"
+                  :class="isWinner(player) ? 'bg-[#D4A853] text-black' : 'bg-white/10 text-white/50'"
+                >{{ idx + 1 }}</div>
+
+                <div class="min-w-0 flex-1">
+                  <div class="text-[10px] font-bold text-[#F5F0E8] truncate leading-tight"
+                    :class="{ 'text-[#F5D78E]': isWinner(player) }">
+                    {{ cleanPlayerName(player.name) }}
+                  </div>
+                  <div class="text-[7px] font-mono uppercase text-[#9E9080] tracking-wider leading-tight truncate">
+                    {{ formatHandName(player.pokerHand || player.handName || '') }}
+                  </div>
+                </div>
+
+                <div class="flex shrink-0">
+                  <Card
+                    v-for="(card, ci) in getCardsToDisplay(player).slice(0, 2)"
+                    :key="ci"
+                    size="small"
+                    :percentage="55"
+                    :numSymbol="card"
+                  />
+                </div>
+
+                <div v-if="isWinner(player) && player.amount" class="text-[10px] font-mono font-bold text-[#F5D78E] shrink-0 ml-1">
+                  +${{ player.amount.toLocaleString() }}
+                </div>
+                <div v-else-if="player.handContribution > 0" class="text-[8px] font-mono text-[#9E9080] shrink-0 ml-1">
+                  -${{ player.handContribution }}
+                </div>
               </div>
             </div>
           </div>
 
-          <p
-            :id="'winner-tournament-cert-description-' + templateSuffix"
-            class="code-info text-xs text-[#9E9080] leading-relaxed mb-6"
-          >
-            {{ $t('tournament.cert_desc') }}
-          </p>
-
+          <!-- Certificate Box -->
           <div
-            :id="'winner-tournament-torneo-id-row-' + templateSuffix"
-            class="torneo-row flex items-center justify-between p-3 px-4 bg-white/[0.03] border border-white/[0.06] rounded-lg"
+            :id="'winner-tournament-cert-box-' + templateSuffix"
+            class="cert-box w-full max-w-lg bg-[#060E07] border border-[#D4A853]/20 rounded-xl p-3 relative animate-fade-up animation-delay-700 shrink-0"
           >
-            <span
-              :id="'winner-tournament-torneo-id-label-' + templateSuffix"
-              class="torneo-id-label font-mono text-[10px] tracking-[2px] uppercase text-[#9E9080]"
-              >{{ $t('tournament.id') }}</span
-            >
-            <span
-              :id="'winner-tournament-torneo-id-value-' + templateSuffix"
-              class="torneo-id-value font-mono text-[12px] text-[#F5F0E8] mx-2 truncate"
-              >{{ certificate?.torneoId || pokerStore.torneoId }}</span
-            >
-            <button
-              :id="'winner-tournament-torneo-id-copy-btn-' + templateSuffix"
-              @click="copyTorneoId"
-              class="copy-btn bg-transparent border border-[#D4A853]/30 rounded-md text-[#D4A853] font-mono text-[10px] tracking-[1px] px-2.5 py-1 transition-all hover:bg-[#D4A853]/10 hover:border-[#D4A853] active:scale-95 shrink-0"
-            >
-              {{ copyStatus }}
-            </button>
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-[8px] tracking-[2px] uppercase text-[#D4A853]">
+                🎖 {{ $t('tournament.cert_code') }}
+              </span>
+              <div class="flex items-center gap-1 px-2 py-0.5 bg-[#D4A853]/10 border border-[#D4A853]/25 rounded-full">
+                <div class="w-1 h-1 bg-[#D4A853] rounded-full animate-blink"></div>
+                <span class="font-mono text-[7px] text-[#D4A853]">{{ $t('tournament.official') }}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 mb-2">
+              <div class="flex gap-1.5">
+                <div
+                  v-for="(digit, i) in codeDisplay"
+                  :key="i"
+                  class="code-digit w-9 h-11 bg-[#1E3D20] border border-[#D4A853]/40 rounded-lg flex items-center justify-center font-bebas text-xl text-[#F5D78E] relative overflow-hidden shadow-lg animate-digit-reveal"
+                  :style="{ animationDelay: `${0.5 + i * 0.1}s` }"
+                >
+                  {{ digit }}
+                  <div class="absolute top-0 left-0 right-0 h-[40%] bg-gradient-to-b from-white/5 to-transparent"></div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-[10px] text-[#9E9080] leading-relaxed mb-2">
+              {{ $t('tournament.cert_desc') }}
+            </p>
+
+            <div class="flex items-center justify-between p-2 bg-white/[0.03] border border-white/[0.06] rounded-lg">
+              <span class="font-mono text-[8px] tracking-[1px] uppercase text-[#9E9080]">{{ $t('tournament.id') }}</span>
+              <span class="font-mono text-[10px] text-[#F5F0E8] mx-2 truncate">{{ certificate?.torneoId || pokerStore.torneoId }}</span>
+              <button
+                @click="copyTorneoId"
+                class="bg-transparent border border-[#D4A853]/30 rounded-md text-[#D4A853] font-mono text-[8px] px-2 py-0.5 transition-all hover:bg-[#D4A853]/10 active:scale-95 shrink-0"
+              >
+                {{ copyStatus }}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Verify Link -->
-        <div
-          :id="'winner-tournament-verify-link-container-' + templateSuffix"
-          class="verify-link w-full animate-fade-up animation-delay-900"
-        >
-          <router-link
-            :id="'winner-tournament-verify-link-anchor-' + templateSuffix"
-            :to="{
-              name: 'verify',
-              params: {
-                torneoId: certificate?.torneoId || pokerStore.torneoId,
-                code: certificate?.code,
-              },
-            }"
-            target="_blank"
-            class="verify-btn block w-full p-4 text-center bg-gradient-to-br from-[#D4A853]/15 to-[#D4A853]/08 border border-[#D4A853]/35 rounded-xl text-[#F5D78E] font-mono text-xs tracking-[2px] uppercase transition-all hover:bg-[#D4A853]/25 hover:border-[#D4A853] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(212,168,83,0.15)]"
+          <!-- Verify Link -->
+          <div class="w-full max-w-lg animate-fade-up animation-delay-900 shrink-0">
+            <router-link
+              :to="{
+                name: 'verify',
+                params: {
+                  torneoId: certificate?.torneoId || pokerStore.torneoId,
+                  code: certificate?.code,
+                },
+              }"
+              target="_blank"
+              class="block w-full py-2 text-center bg-gradient-to-br from-[#D4A853]/15 to-[#D4A853]/08 border border-[#D4A853]/35 rounded-lg text-[#F5D78E] font-mono text-[10px] tracking-[1px] uppercase transition-all hover:bg-[#D4A853]/25 hover:border-[#D4A853] active:scale-[0.99]"
+            >
+              → {{ $t('tournament.verify_link', { url: 'yaypoker.com/verify' }) }}
+            </router-link>
+          </div>
+
+          <button
+            @click="handleClose"
+            class="w-full max-w-lg py-2 bg-transparent border border-[#D4A853]/20 hover:border-[#D4A853]/50 text-[#D4A853]/70 hover:text-[#D4A853] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all active:scale-95 animate-fade-up animation-delay-900 shrink-0"
           >
-            → {{ $t('tournament.verify_link', { url: 'yaypoker.com/verify' }) }}
-          </router-link>
+            {{ $t('tournament.back_to_lobby', { count: countdown }) }}
+          </button>
+
         </div>
 
-        <button
-          :id="'winner-tournament-close-action-btn-' + templateSuffix"
-          @click="handleClose"
-          class="mt-8 px-10 py-4 bg-transparent border-2 border-[#D4A853]/20 hover:border-[#D4A853]/50 text-[#D4A853]/70 hover:text-[#D4A853] rounded-full text-sm font-black uppercase tracking-[0.2em] transition-all hover:scale-105 active:scale-95"
-        >
-          {{ $t('tournament.back_to_lobby', { count: countdown }) }}
-        </button>
-
-        <div
-          :id="'winner-tournament-footer-summary-' + templateSuffix"
-          class="footer mt-8 text-center font-mono text-[10px] tracking-[2px] text-[#8A6A2A] opacity-60 animate-fade-up animation-delay-1100"
-        >
+        <div class="text-center font-mono text-[8px] text-[#8A6A2A] opacity-60 animate-fade-up animation-delay-1100 shrink-0">
           {{ $t('tournament.system_footer') }}
         </div>
       </div>
@@ -505,6 +405,36 @@ const getWinningCards = (obj) => {
 const hasCardsToDisplay = computed(() => {
   if (!winnerObj.value) return false
   return getCardsToDisplay(winnerObj.value).length > 0 || getWinningCards(winnerObj.value).length > 0
+})
+
+const tournamentWinnerIds = computed(() => {
+  if (!props.winnerInfo) return []
+  if (props.winnerInfo.winners) return props.winnerInfo.winners.map((w) => w.playerId)
+  if (props.winnerInfo.winner) return [props.winnerInfo.winner.playerId]
+  return []
+})
+
+const isWinner = (player) => tournamentWinnerIds.value.includes(player.playerId)
+
+const formatHandName = (name) => {
+  if (!name) return ''
+  return name.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()).trim()
+}
+
+const allShowdownPlayers = computed(() => {
+  let all = []
+  if (props.winnerInfo?.allHands) {
+    all = props.winnerInfo.allHands.filter((h) => h.lastAction !== 'Out')
+  } else {
+    all = pokerStore.getPlayers.filter((p) => !p.folded && p.isStarted)
+  }
+  all.sort((a, b) => {
+    const aWin = tournamentWinnerIds.value.includes(a.playerId || a.id) ? 0 : 1
+    const bWin = tournamentWinnerIds.value.includes(b.playerId || b.id) ? 0 : 1
+    if (aWin !== bWin) return aWin - bWin
+    return (a.prizeRank || 99) - (b.prizeRank || 99)
+  })
+  return all
 })
 
 watch(

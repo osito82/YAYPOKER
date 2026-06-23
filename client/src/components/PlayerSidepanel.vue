@@ -242,15 +242,15 @@
              </span>
               <span v-if="isPlayerWinner(player.id)" :id="`player-item-win-badge-${player.id}-${templateSuffix}`" class="px-1 py-0.5 rounded bg-emerald-500 text-[8px] font-black text-white dark:text-black uppercase leading-none">Win</span>
            </div>
-             <div :id="`player-item-cards-row-${player.id}-${templateSuffix}`" class="flex gap-1">
+             <div :id="`player-item-cards-row-${player.id}-${templateSuffix}`" class="flex gap-1.5">
               <Card
                 v-for="(card, idx) in getPlayerCards(player)"
                 :key="idx"
                 :id="`player-item-card-visual-${player.id}-${idx}-${templateSuffix}`"
                 :numSymbol="card"
-                size="xsmall"
+                size="small"
                 :highlight="isCardWinning(player.id, card)"
-                :percentage="45"
+                :percentage="55"
               />
            </div>
         </div>

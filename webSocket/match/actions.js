@@ -880,11 +880,14 @@ class MatchActions {
       totalPlayers,
     )
 
+    const finalHands = this.dealer.getFinalHands()
+
     this.communicator.msgBuilder('winnerTournament', 'public', null, {
       method: 'winnerTournament',
       displayMsg: `${winnerForCert.name} wins the tournament!`,
       winner: winnerForCert,
       isTournamentWinner: true,
+      allHands: finalHands,
       certificate: {
         code: certificate.code,
         torneoId: certificate.torneoId,
