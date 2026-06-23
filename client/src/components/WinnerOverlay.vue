@@ -261,7 +261,7 @@
             <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
               <div
                 class="h-full bg-gradient-to-r from-[#D4A853]/50 to-[#D4A853] transition-all duration-50 ease-linear"
-                :style="{ width: `${(countdown / 15) * 100}%` }"
+                :style="{ width: `${(countdown / 25) * 100}%` }"
               ></div>
             </div>
           </div>
@@ -304,24 +304,24 @@ const emit = defineEmits(['close'])
 
 const pokerStore = usePokerStore()
 const templateSuffix = computed(() => responsive.templateSuffix || 'Default')
-const countdown = ref(15)
+const countdown = ref(25)
 const isVisible = ref(true)
 const isWaiting = ref(false)
 let timer = null
 
 const startTimer = () => {
   stopTimer()
-  countdown.value = 15
+  countdown.value = 25
   isVisible.value = true
   isWaiting.value = false
   const startTime = Date.now()
 
   const tick = () => {
     const elapsed = Date.now() - startTime
-    const remaining = Math.max(0, Math.ceil((15000 - elapsed) / 1000))
+    const remaining = Math.max(0, Math.ceil((25000 - elapsed) / 1000))
     countdown.value = remaining
 
-    if (elapsed < 15000) {
+    if (elapsed < 25000) {
       const nextTick = 1000 - (elapsed % 1000)
       timer = setTimeout(tick, nextTick)
     } else {

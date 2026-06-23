@@ -65,8 +65,11 @@
           :isMyTurn="isMyTurn"
           :isSliderDisabled="isSliderDisabled"
           :isVertical="true"
+          :betAmount="betAmount"
+          :maxBet="maxBet"
           @addChip="addChip"
           @clearBet="clearBet"
+          @allIn="$emit('update:betAmount', maxBet)"
         />
       </div>
     </div>

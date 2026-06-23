@@ -1,12 +1,12 @@
 <template>
   <aside
     :id="'player-sidepanel-root-container-' + templateSuffix"
-    class="w-full lg:w-[350px] flex-1 lg:h-full bg-white/80 dark:bg-black/40 backdrop-blur-3xl border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-white/5 flex flex-col shrink-0 min-h-0 z-40 transition-colors duration-300"
+    class="w-full lg:w-[300px] flex-1 lg:h-full bg-white/80 dark:bg-black/40 backdrop-blur-3xl border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-white/5 flex flex-col shrink-0 min-h-0 z-40 transition-colors duration-300"
   >
     <!-- Sidepanel Header -->
     <div
       :id="'sidepanel-header-wrapper-' + templateSuffix"
-      class="py-2 px-4 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.01] flex items-center shrink-0"
+      class="py-1.5 px-3 border-b border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-white/[0.01] flex items-center shrink-0"
     >
       <h2
         :id="'sidepanel-main-heading-' + templateSuffix"
@@ -25,13 +25,13 @@
       name="player-list"
       tag="div"
       :id="'sidepanel-players-scroll-list-' + templateSuffix"
-      class="flex-1 overflow-y-auto p-3 flex flex-col gap-2 custom-scrollbar min-h-0"
+      class="flex-1 overflow-y-auto p-2 flex flex-col gap-1.5 custom-scrollbar min-h-0"
     >
       <div
         v-for="player in sortedPlayers"
         :key="player.id"
         :id="'player-item-card-' + player.id + '-' + templateSuffix"
-        class="group relative flex flex-col p-2.5 rounded-xl transition-all duration-1000 border border-transparent shadow-sm dark:shadow-none"
+        class="group relative flex flex-col p-2 rounded-xl transition-all duration-1000 border border-transparent shadow-sm dark:shadow-none"
         :class="[
           player.id === delayedActivePlayerId
             ? 'bg-yellow-500/10 dark:bg-yellow-500/20 border-yellow-500/30 dark:border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.15)] z-10'
@@ -43,7 +43,7 @@
         <!-- Player Info Header: Name & Stack -->
         <div
           :id="'player-item-info-wrapper-' + player.id + '-' + templateSuffix"
-          class="flex items-start justify-between gap-2 mb-1.5"
+          class="flex items-start justify-between gap-2 mb-1"
         >
           <div
             :id="`player-item-identity-wrapper-${player.id}-${templateSuffix}`"
@@ -74,7 +74,7 @@
                 :id="
                   'player-item-display-name-' + player.id + '-' + templateSuffix
                 "
-                class="font-black text-lg text-gray-900 dark:text-gray-100 truncate uppercase tracking-tight leading-none transition-colors"
+                class="font-black text-sm text-gray-900 dark:text-gray-100 truncate uppercase tracking-tight leading-none transition-colors"
                 :class="{
                   'text-yellow-600 dark:text-yellow-400':
                     player.id === delayedActivePlayerId,
@@ -97,81 +97,66 @@
             </div>
             <div
               :id="`player-item-action-label-wrapper-${player.id}-${templateSuffix}`"
-              class="h-4 flex items-center mt-1 ml-7"
+              class="flex items-center mt-0.5 ml-7"
             >
               <span
                 v-if="player.id === activePlayerId"
                 :id="`player-item-active-turn-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-500/80 leading-none"
+                class="text-[9px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-500/80 leading-none"
                 >Active Turn</span
               >
               <span
                 v-else-if="player.folded"
                 :id="`player-item-folded-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 leading-none"
+                class="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 leading-none"
                 >Folded</span
               >
             </div>
           </div>
 
-          <!-- Chips Display (Stack & Hand Accumulated) -->
+          <!-- Chips Display (Stack & Hand) - Compact inline -->
           <div
             :id="`player-item-chips-container-${player.id}-${templateSuffix}`"
-            class="flex gap-4 shrink-0"
+            class="flex gap-2 shrink-0 items-start"
           >
-            <!-- Hand Total (Accumulated) -->
-            <div
-              v-if="player.handContribution > 0"
-              :id="`player-item-bet-container-${player.id}-${templateSuffix}`"
-              class="flex flex-col items-end"
-            >
-              <span
-                :id="`player-item-bet-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black text-emerald-600 dark:text-emerald-500/70 uppercase tracking-tighter mb-1 leading-none"
-                >{{ $t('game.in_pot') }}</span
-              >
-              <div
-                :id="`player-item-bet-value-wrapper-${player.id}-${templateSuffix}`"
-                class="flex items-center gap-0.5"
-              >
-                <span
-                  :id="`player-item-bet-currency-${player.id}-${templateSuffix}`"
-                  class="text-xs text-emerald-600 dark:text-emerald-500 font-mono font-bold leading-none"
-                  >$</span
-                >
-                <span
-                  :id="`player-item-bet-amount-${player.id}-${templateSuffix}`"
-                  class="text-lg font-mono font-black text-emerald-700 dark:text-emerald-400 leading-none tracking-tight"
-                  >{{ player.handContribution }}</span
-                >
-              </div>
-            </div>
-
             <!-- Stack Display -->
             <div
               :id="`player-item-stack-container-${player.id}-${templateSuffix}`"
               class="flex flex-col items-end"
             >
-              <span
-                :id="`player-item-stack-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-tighter mb-1 leading-none"
-                >Stack</span
-              >
               <div
                 :id="`player-item-stack-value-wrapper-${player.id}-${templateSuffix}`"
-                class="flex items-center gap-0.5"
+                class="flex items-baseline gap-0.5"
               >
                 <span
                   :id="`player-item-stack-currency-${player.id}-${templateSuffix}`"
-                  class="text-sm text-yellow-600 dark:text-yellow-500 font-mono font-bold leading-none"
+                  class="text-[10px] text-yellow-600 dark:text-yellow-500 font-mono font-bold leading-none"
                   >$</span
                 >
                 <span
                   :id="`player-item-stack-amount-${player.id}-${templateSuffix}`"
-                  class="text-xl font-mono font-black text-gray-900 dark:text-white leading-none tracking-tight transition-colors"
+                  class="text-sm font-mono font-black text-gray-900 dark:text-white leading-none tracking-tight transition-colors"
                   >{{ player.chips }}</span
                 >
               </div>
+            </div>
+
+            <!-- Hand Total (Accumulated) - inline badge -->
+            <div
+              v-if="player.handContribution > 0"
+              :id="`player-item-bet-container-${player.id}-${templateSuffix}`"
+              class="flex items-baseline gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/15"
+            >
+              <span
+                :id="`player-item-bet-currency-${player.id}-${templateSuffix}`"
+                class="text-[9px] text-emerald-600 dark:text-emerald-500 font-mono font-bold leading-none"
+                >+$</span
+              >
+              <span
+                :id="`player-item-bet-amount-${player.id}-${templateSuffix}`"
+                class="text-[11px] font-mono font-black text-emerald-700 dark:text-emerald-400 leading-none tracking-tight"
+                >{{ player.handContribution }}</span
+              >
             </div>
           </div>
         </div>
@@ -183,29 +168,26 @@
             player.lastAction
           "
           :id="`player-item-activity-row-${player.id}-${templateSuffix}`"
-          class="flex items-end justify-between gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-white/5"
+          class="flex items-end justify-between gap-2 mt-1.5 pt-1.5 border-t border-gray-200 dark:border-white/5"
         >
-          <!-- LEFT COLUMN: Cards + Round Bet -->
+          <!-- LEFT COLUMN: Round Bet -->
           <div
             :id="`player-item-left-activity-${player.id}-${templateSuffix}`"
-            class="flex flex-col flex-1 gap-3"
+            class="flex flex-col flex-1"
           >
-
-
-            <!-- Round Bet -->
             <div
               v-if="player.currentBet > 0"
               :id="`player-item-live-bet-wrapper-${player.id}-${templateSuffix}`"
-              class="flex flex-col"
+              class="flex items-baseline gap-1"
             >
               <span
                 :id="`player-item-live-bet-label-${player.id}-${templateSuffix}`"
-                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1 leading-none"
+                class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider leading-none"
                 >Bet</span
               >
               <span
                 :id="`player-item-live-bet-amount-${player.id}-${templateSuffix}`"
-                class="text-lg font-mono font-black text-gray-700 dark:text-gray-300 leading-none tracking-tight transition-colors"
+                class="text-sm font-mono font-black text-gray-700 dark:text-gray-300 leading-none tracking-tight transition-colors"
                 >${{ player.currentBet }}</span
               >
             </div>
@@ -219,14 +201,14 @@
           >
             <span
               :id="`player-item-last-action-label-${player.id}-${templateSuffix}`"
-              class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 leading-none"
+                class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 leading-none"
               >{{ $t('game.last_action') }}</span
             >
             <Transition name="action-highlight" mode="out-in">
               <div
                 :key="player.lastAction"
                 :id="`player-item-action-badge-${player.id}-${templateSuffix}`"
-                class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 dark:border-white/5 bg-white dark:bg-white/[0.02]"
+                class="flex items-center gap-1.5 px-2 py-1 rounded-full border border-gray-200 dark:border-white/5 bg-white dark:bg-white/[0.02]"
                 :class="[
                   getActionBgColor(player.lastAction),
                   player.id === justActedPlayerId ? 'animate-action-flash' : '',
@@ -239,7 +221,7 @@
                 ></div>
                 <span
                   :id="`player-item-action-text-${player.id}-${templateSuffix}`"
-                  class="text-[10px] font-black uppercase tracking-widest leading-none mt-px"
+                  class="text-[9px] font-black uppercase tracking-widest leading-none mt-px"
                   :class="getActionTextColor(player.lastAction)"
                 >
                   {{ player.lastAction }}
@@ -252,24 +234,24 @@
         <div
           v-if="isShowDown && getPlayerCards(player).length > 0"
           :id="`player-item-showdown-cards-${player.id}-${templateSuffix}`"
-          class="flex flex-col mt-2 pt-2 border-t border-gray-200 dark:border-white/5 animate-in fade-in slide-in-from-left-2 duration-700"
+          class="flex flex-col mt-1.5 pt-1.5 border-t border-gray-200 dark:border-white/5 animate-in fade-in slide-in-from-left-2 duration-700"
         >
-           <div :id="`player-item-hand-name-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-2 mb-1.5">
-             <span :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`" class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest truncate leading-none">
+             <div :id="`player-item-hand-name-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-1.5 mb-1">
+              <span :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`" class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest truncate leading-none">
                {{ formatHandName(getPlayerHandName(player)) }}
              </span>
-             <span v-if="isPlayerWinner(player.id)" :id="`player-item-win-badge-${player.id}-${templateSuffix}`" class="px-1.5 py-0.5 rounded bg-emerald-500 text-[9px] font-black text-white dark:text-black uppercase leading-none">Win</span>
+              <span v-if="isPlayerWinner(player.id)" :id="`player-item-win-badge-${player.id}-${templateSuffix}`" class="px-1 py-0.5 rounded bg-emerald-500 text-[8px] font-black text-white dark:text-black uppercase leading-none">Win</span>
            </div>
-           <div :id="`player-item-cards-row-${player.id}-${templateSuffix}`" class="flex gap-1.5">
-             <Card
-               v-for="(card, idx) in getPlayerCards(player)"
-               :key="idx"
-               :id="`player-item-card-visual-${player.id}-${idx}-${templateSuffix}`"
-               :numSymbol="card"
-               size="small"
-               :highlight="isCardWinning(player.id, card)"
-               :percentage="55"
-             />
+             <div :id="`player-item-cards-row-${player.id}-${templateSuffix}`" class="flex gap-1">
+              <Card
+                v-for="(card, idx) in getPlayerCards(player)"
+                :key="idx"
+                :id="`player-item-card-visual-${player.id}-${idx}-${templateSuffix}`"
+                :numSymbol="card"
+                size="xsmall"
+                :highlight="isCardWinning(player.id, card)"
+                :percentage="45"
+              />
            </div>
         </div>
       </div>
@@ -278,7 +260,7 @@
     <!-- Sidepanel Footer -->
     <div
       :id="'sidepanel-footer-summary-wrapper-' + templateSuffix"
-      class="p-4 border-t border-gray-200 dark:border-white/5 shrink-0 bg-white dark:bg-black/70 transition-colors"
+      class="p-3 border-t border-gray-200 dark:border-white/5 shrink-0 bg-white dark:bg-black/70 transition-colors"
     >
       <div
         :id="`sidepanel-global-pot-row-${templateSuffix}`"

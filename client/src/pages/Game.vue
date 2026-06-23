@@ -1,4 +1,11 @@
 <template>
+  <LeaveGameModal
+    :visible="showLeaveModal"
+    :title="$t(isPublic ? 'game.leave_title_public' : 'game.leave_title_private')"
+    :message="$t(isPublic ? 'game.leave_msg_public' : 'game.leave_msg_private', { code: secretCode })"
+    @confirm="confirmLeave"
+    @cancel="showLeaveModal = false"
+  />
   <LobbyView
     v-if="!pokerStore.getIsGameStarted"
     :players="allPlayers"
@@ -31,6 +38,7 @@
     :communityCards="pokerStore.getCommunityCards"
     :activePlayerId="pokerStore.getActivePlayerId"
     :myPlayerId="pokerStore.myInfo.id"
+    :isGuest="props.isGuest"
     :logs="[...pokerStore.getDealerLog].reverse()"
     :winnerInfo="pokerStore.getWinnerInfo"
     @action="sendAction"
@@ -58,6 +66,7 @@ import useWebSocket from '../use/useSockets'
 import { useVoice } from '../use/useVoice'
 import { urlsFactory } from '../vutils'
 import LobbyView from '../components/LobbyView.vue'
+import LeaveGameModal from '../components/LeaveGameModal.vue'
 import { provide } from 'vue' // Add provide
 
 // Async loading of templates for performance
@@ -98,16 +107,16 @@ const isPublic = computed(() => {
 const serverTime = ref(new Date().toLocaleTimeString())
 let timeInterval = null
 
-const handleLogoClick = () => {
-  let msg = t('game.leave_confirm')
-  if (!isPublic.value) {
-    msg += t('game.leave_private_hint', { code: secretCode })
-  }
+const showLeaveModal = ref(false)
 
-  if (confirm(msg)) {
-    disconnectSocket() // Desconexión inmediata y explícita
-    router.push('/')
-  }
+const handleLogoClick = () => {
+  showLeaveModal.value = true
+}
+
+const confirmLeave = () => {
+  showLeaveModal.value = false
+  disconnectSocket()
+  router.push('/')
 }
 
 // Select template based on screen size

@@ -112,13 +112,18 @@
 
         <div
           id="player-profile-badge-TemplateLarge"
-          class="header-player-badge px-4 py-1 rounded-full shrink-0 border border-amber-200 dark:border-amber-500/20"
+          class="header-player-badge px-4 py-1 rounded-full shrink-0 border border-amber-200 dark:border-amber-500/20 flex items-center gap-2"
         >
           <span
             id="current-player-name-TemplateLarge"
             class="text-[11px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest"
             >{{ playerName }}</span
           >
+          <span
+            v-if="isGuest"
+            id="spectator-badge-TemplateLarge"
+            class="text-[8px] font-black text-gray-500 bg-gray-500/10 px-1.5 py-0.5 rounded uppercase tracking-widest"
+          >SPECTATOR</span>
         </div>
 
         <div
@@ -251,6 +256,7 @@ defineProps({
   myPlayerId: String,
   logs: Array,
   winnerInfo: Object,
+  isGuest: Boolean,
 })
 
 defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])
