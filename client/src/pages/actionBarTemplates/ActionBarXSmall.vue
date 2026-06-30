@@ -64,8 +64,11 @@
             :chipResponsiveSize="chipResponsiveSize"
             :isMyTurn="isMyTurn"
             :isSliderDisabled="isSliderDisabled"
+            :betAmount="betAmount"
+            :maxBet="maxBet"
             @addChip="addChip"
             @clearBet="clearBet"
+            @allIn="$emit('update:betAmount', maxBet)"
           />
         </div>
       </div>

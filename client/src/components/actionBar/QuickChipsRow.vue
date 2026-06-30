@@ -40,7 +40,22 @@
         isVertical ? 'w-full py-2' : 'h-8 lg:h-11 px-3',
       ]"
     >
-      {{ $t('game.clear') }}
+      {{ $t('game.min') }}
+    </button>
+    <button
+      @click="$emit('allIn')"
+      :disabled="!isMyTurn || isSliderDisabled"
+      :id="'hud-allin-button-' + templateSuffix"
+      :class="[
+        'font-black uppercase rounded-lg active:scale-95 transition-all disabled:opacity-20 disabled:pointer-events-none',
+        isVertical ? 'w-full py-2 text-[10px]' : 'h-8 lg:h-11 px-2 text-[9px]',
+        betAmount >= maxBet && maxBet > 0
+          ? 'bg-red-500/20 border border-red-500/40 text-red-400'
+          : 'bg-white/5 border border-white/10 text-amber-400',
+      ]"
+      :title="$t('game.allin_tooltip')"
+    >
+      ALL-IN
     </button>
   </div>
 </template>
@@ -56,9 +71,11 @@ defineProps({
   isMyTurn: Boolean,
   isSliderDisabled: Boolean,
   isVertical: Boolean,
+  betAmount: { type: Number, default: 0 },
+  maxBet: { type: Number, default: 0 },
 })
 
-const emit = defineEmits(['addChip', 'clearBet'])
+const emit = defineEmits(['addChip', 'clearBet', 'allIn'])
 
 const addChip = (value) => emit('addChip', value)
 const clearBet = () => emit('clearBet')

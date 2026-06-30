@@ -294,8 +294,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
           gameData.action === 'winnerTournament' ||
           gameData.method === 'winnerTournament' ||
           gameData.isTournamentWinner
-            ? 60000
-            : 15000
+            ? 120000
+            : 25000
 
         setTimeout(() => {
           if (winnerInfo.value === currentWinnerData) {

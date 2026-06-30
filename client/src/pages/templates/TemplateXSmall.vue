@@ -23,10 +23,19 @@
     >
       <!-- Small Logo/Home Button for Mobile -->
       <div 
-        class="absolute top-3 left-3 z-[100] w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform cursor-pointer"
-        @click="$emit('goHome')"
+        class="absolute top-3 left-3 z-[100] flex items-center gap-1"
       >
-        <span class="text-black font-black text-sm italic">Y</span>
+        <div 
+          class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform cursor-pointer"
+          @click="$emit('goHome')"
+        >
+          <span class="text-black font-black text-sm italic">Y</span>
+        </div>
+        <span
+          v-if="isGuest"
+          id="spectator-badge-TemplateXSmall"
+          class="text-[7px] font-black text-gray-400 bg-black/40 px-1.5 py-1 rounded uppercase tracking-widest"
+        >SPECTATOR</span>
       </div>
 
       <main
@@ -129,6 +138,7 @@ defineProps({
   myPlayerId: String,
   logs: Array,
   winnerInfo: Object,
+  isGuest: Boolean,
 })
 
 defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])

@@ -42,10 +42,7 @@ const routes = [
     name: 'game.play',
     path: '/play/:gameCode/:secretCode',
     component: Game,
-    props: (route) => ({
-      gameCode: route.params.gameCode,
-      secretCode: route.params.secretCode,
-    }),
+    props: { isGuest: false },
     meta: { title: 'Playing Poker | YayPoker' },
   },
   {

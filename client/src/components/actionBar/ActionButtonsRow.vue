@@ -6,8 +6,10 @@
     <template v-if="canBlind">
       <button
         :id="`hud-post-blind-button-${templateSuffix}`"
-        @click="$emit('action', 'blind')"
+        @click="handleAction('blind')"
+        :title="$t('game.blind_tooltip')"
         class="btn-blind flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm px-3 active:scale-95 transition-all duration-150"
+        :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'blind' }"
       >
         <template v-if="blindInfo">
           {{
@@ -24,37 +26,45 @@
     <template v-else>
       <button
         :id="`hud-fold-button-${templateSuffix}`"
-        @click="$emit('action', 'fold')"
+        @click="handleAction('fold')"
         :disabled="!isMyTurn || !options.includes('fold')"
+        :title="$t('game.fold_tooltip')"
         class="btn-fold flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
+        :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'fold' }"
       >
         {{ $t('game.fold') }}
       </button>
 
       <button
         :id="`hud-check-button-${templateSuffix}`"
-        @click="$emit('action', 'check')"
+        @click="handleAction('check')"
         :disabled="!isMyTurn || !options.includes('check')"
+        :title="$t('game.check_tooltip')"
         class="btn-check flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
+        :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'check' }"
       >
         {{ $t('game.check') }}
       </button>
 
       <button
         :id="`hud-call-button-${templateSuffix}`"
-        @click="$emit('action', 'call')"
+        @click="handleAction('call')"
         :disabled="!isMyTurn || !options.includes('call')"
+        :title="$t('game.call_tooltip')"
         class="btn-call flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
+        :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'call' }"
       >
         {{ $t('game.call') }}
       </button>
 
       <button
         :id="`hud-raise-bet-button-${templateSuffix}`"
-        @click="$emit('action', options.includes('bet') ? 'bet' : 'raise')"
+        @click="handleAction(options.includes('bet') ? 'bet' : 'raise')"
         :disabled="isRaiseActionDisabled"
+        :title="isRaiseActionDisabled ? $t('game.raise_disabled_tooltip') : (options.includes('bet') ? $t('game.bet_tooltip') : $t('game.raise_tooltip'))"
         class="btn-raise flex-[1.5] font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
         :class="[
+          { 'opacity-60 scale-[0.97]': pressedAction === 'bet' || pressedAction === 'raise' },
           pokerStore.blindsIncreasedFlag ? 'animate-pulse scale-105 z-10' : '',
         ]"
       >
@@ -96,11 +106,11 @@
 </template>
 
 <script setup>
-import { computed, inject } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { usePokerStore } from '../../store/pokerStore'
 import { useResponsiveStore } from '../../store/responsiveStore'
 
-defineProps({
+const props = defineProps({
   isMyTurn: Boolean,
   canBlind: Boolean,
   blindInfo: Object,
@@ -111,10 +121,17 @@ defineProps({
 const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
 const templateSuffix = computed(() => responsive.templateSuffix)
+const pressedAction = ref(null)
 
 const voice = inject('voice', null)
 
-defineEmits(['action'])
+const emit = defineEmits(['action'])
+
+const handleAction = (action) => {
+  pressedAction.value = action
+  emit('action', action)
+  setTimeout(() => { pressedAction.value = null }, 400)
+}
 </script>
 
 <style scoped>

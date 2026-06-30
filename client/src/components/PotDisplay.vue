@@ -104,6 +104,7 @@
           </span>
           <span
             :id="`pot-display-pot-value-${index}-${templateSuffix}`"
+            :title="index === 0 ? $t('game.main_pot_tooltip') : $t('game.side_pot_tooltip')"
             class="text-sm font-mono font-bold text-yellow-500/90 tracking-tighter"
           >
             ${{ p.amount }}
