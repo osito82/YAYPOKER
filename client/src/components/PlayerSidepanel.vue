@@ -31,244 +31,153 @@
         v-for="player in sortedPlayers"
         :key="player.id"
         :id="'player-item-card-' + player.id + '-' + templateSuffix"
-        class="group relative flex flex-col p-2 rounded-xl transition-all duration-1000 border border-transparent shadow-sm dark:shadow-none"
+        class="group relative flex flex-col rounded-xl transition-all duration-500 border overflow-hidden"
         :class="[
           player.id === delayedActivePlayerId
-            ? 'bg-yellow-500/10 dark:bg-yellow-500/20 border-yellow-500/30 dark:border-yellow-500/40 shadow-[0_0_30px_rgba(234,179,8,0.15)] z-10'
+            ? 'bg-yellow-500/10 dark:bg-yellow-500/15 border-yellow-500/30 dark:border-yellow-500/40 shadow-[0_0_20px_rgba(234,179,8,0.12)]'
             : isPlayerWinner(player.id)
-              ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-500/30 dark:border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.15)] z-10'
-              : 'bg-gray-50 dark:bg-white/[0.03] border-gray-100 dark:border-transparent hover:bg-gray-100 dark:hover:bg-white/[0.06]',
+              ? 'bg-emerald-500/10 dark:bg-emerald-500/15 border-emerald-500/30 dark:border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
+              : 'bg-gray-50 dark:bg-white/[0.03] border-gray-100 dark:border-white/5 hover:bg-gray-100 dark:hover:bg-white/[0.06]',
         ]"
       >
-        <!-- Player Info Header: Name & Stack -->
+        <!-- ROW 1: # · dot · nombre · nombre de mano -->
         <div
           :id="'player-item-info-wrapper-' + player.id + '-' + templateSuffix"
-          class="flex items-start justify-between gap-2 mb-1"
+          class="flex items-center gap-2 px-3 pt-2.5 pb-2 min-w-0"
         >
+          <!-- Seat badge -->
           <div
-            :id="`player-item-identity-wrapper-${player.id}-${templateSuffix}`"
-            class="flex flex-col min-w-0"
+            :id="`player-item-number-badge-${player.id}-${templateSuffix}`"
+            class="relative w-6 h-6 flex items-center justify-center rounded bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-white/10 text-[11px] font-black text-gray-500 dark:text-gray-400 shrink-0"
           >
+            {{ player.playerNumber || '?' }}
             <div
-              :id="`player-item-status-wrapper-${player.id}-${templateSuffix}`"
-              class="flex items-center gap-2"
-            >
-              <!-- Player Number Badge -->
-              <div
-                :id="`player-item-number-badge-${player.id}-${templateSuffix}`"
-                class="relative w-5 h-5 flex items-center justify-center rounded bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-white/10 text-[10px] font-black text-gray-500 dark:text-gray-400 shrink-0"
-              >
-                {{ player.playerNumber || '?' }}
-                <!-- Dealer Button (if your backend sends player.isDealer) -->
-                <div
-                  v-if="player.isDealer"
-                  class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-white text-black text-[7px] font-black rounded-full flex items-center justify-center border border-gray-300 shadow-sm"
-                >
-                  D
-                </div>
-              </div>
-
-              <div
-                v-if="player.id === delayedActivePlayerId"
-                :id="`player-item-active-pulse-${player.id}-${templateSuffix}`"
-                class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse shrink-0"
-              ></div>
-              <span
-                :id="
-                  'player-item-display-name-' + player.id + '-' + templateSuffix
-                "
-                class="font-black text-sm text-gray-900 dark:text-gray-100 truncate uppercase tracking-tight leading-none transition-colors"
-                :class="{
-                  'text-yellow-600 dark:text-yellow-400':
-                    player.id === delayedActivePlayerId,
-                  'text-emerald-600 dark:text-emerald-400': isPlayerWinner(
-                    player.id,
-                  ),
-                }"
-              >
-                {{ cleanPlayerName(player.name) }}
-              </span>
-              <div
-                :id="`player-item-connectivity-dot-${player.id}-${templateSuffix}`"
-                class="w-1.5 h-1.5 rounded-full shrink-0"
-                :class="
-                  player.isConnected
-                    ? 'bg-green-500'
-                    : 'bg-gray-400 dark:bg-gray-600'
-                "
-              ></div>
-            </div>
-            <div
-              :id="`player-item-action-label-wrapper-${player.id}-${templateSuffix}`"
-              class="flex items-center mt-0.5 ml-7"
-            >
-              <span
-                v-if="player.id === activePlayerId"
-                :id="`player-item-active-turn-label-${player.id}-${templateSuffix}`"
-                class="text-[9px] font-black uppercase tracking-widest text-yellow-600 dark:text-yellow-500/80 leading-none"
-                >Active Turn</span
-              >
-              <span
-                v-else-if="player.folded"
-                :id="`player-item-folded-label-${player.id}-${templateSuffix}`"
-                class="text-[9px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 leading-none"
-                >Folded</span
-              >
-            </div>
+              v-if="player.isDealer"
+              class="absolute -top-1 -right-1 w-3 h-3 bg-white text-black text-[7px] font-black rounded-full flex items-center justify-center border border-gray-300 shadow-sm"
+            >D</div>
           </div>
 
-          <!-- Chips Display (Stack & Hand) - Compact inline -->
+          <!-- Status dot -->
           <div
-            :id="`player-item-chips-container-${player.id}-${templateSuffix}`"
-            class="flex gap-2 shrink-0 items-start"
-          >
-            <!-- Stack Display -->
-            <div
-              :id="`player-item-stack-container-${player.id}-${templateSuffix}`"
-              class="flex flex-col items-end"
-            >
-              <div
-                :id="`player-item-stack-value-wrapper-${player.id}-${templateSuffix}`"
-                class="flex items-baseline gap-0.5"
-              >
-                <span
-                  :id="`player-item-stack-currency-${player.id}-${templateSuffix}`"
-                  class="text-[10px] text-yellow-600 dark:text-yellow-500 font-mono font-bold leading-none"
-                  >$</span
-                >
-                <span
-                  :id="`player-item-stack-amount-${player.id}-${templateSuffix}`"
-                  class="text-sm font-mono font-black text-gray-900 dark:text-white leading-none tracking-tight transition-colors"
-                  >{{ player.chips }}</span
-                >
-              </div>
-            </div>
+            :id="`player-item-status-dot-${player.id}-${templateSuffix}`"
+            class="w-1.5 h-1.5 rounded-full shrink-0 transition-colors"
+            :class="
+              player.id === delayedActivePlayerId
+                ? 'bg-yellow-500 animate-pulse'
+                : player.isConnected ? 'bg-green-500' : 'bg-gray-400 dark:bg-gray-600'
+            "
+          ></div>
 
-            <!-- Hand Total (Accumulated) - inline badge -->
+          <!-- Nombre -->
+          <span
+            :id="'player-item-display-name-' + player.id + '-' + templateSuffix"
+            class="font-black text-sm text-gray-900 dark:text-gray-100 truncate uppercase tracking-tight leading-none flex-1 min-w-0 transition-colors"
+            :class="{
+              'text-yellow-600 dark:text-yellow-400': player.id === delayedActivePlayerId,
+              'text-emerald-600 dark:text-emerald-400': isPlayerWinner(player.id),
+              'opacity-40': player.folded && player.id !== delayedActivePlayerId,
+            }"
+          >{{ cleanPlayerName(player.name) }}</span>
+
+          <!-- Nombre de mano (solo en showdown) -->
+          <span
+            v-if="isShowDown && getPlayerHandName(player)"
+            :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`"
+            class="text-[9px] font-black text-emerald-500 dark:text-emerald-400 uppercase tracking-wider leading-none shrink-0"
+          >{{ formatHandName(getPlayerHandName(player)) }}</span>
+        </div>
+
+        <!-- STACK BAR: delgada, con padding interno, integrada al card -->
+        <div class="w-full px-3 py-0.5">
+          <div
+            :id="`player-item-stack-bar-track-${player.id}-${templateSuffix}`"
+            class="w-full h-0.5 bg-gray-200 dark:bg-white/8 rounded-full overflow-hidden"
+          >
             <div
-              v-if="player.handContribution > 0"
-              :id="`player-item-bet-container-${player.id}-${templateSuffix}`"
-              class="flex items-baseline gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/15"
-            >
-              <span
-                :id="`player-item-bet-currency-${player.id}-${templateSuffix}`"
-                class="text-[9px] text-emerald-600 dark:text-emerald-500 font-mono font-bold leading-none"
-                >+$</span
-              >
-              <span
-                :id="`player-item-bet-amount-${player.id}-${templateSuffix}`"
-                class="text-[11px] font-mono font-black text-emerald-700 dark:text-emerald-400 leading-none tracking-tight"
-                >{{ player.handContribution }}</span
-              >
-            </div>
+              class="h-full rounded-full transition-all duration-700"
+              :style="{ width: getStackPercent(player) + '%' }"
+              :class="[
+                player.folded ? 'bg-gray-400/30 dark:bg-white/10' :
+                getStackPercent(player) > 60 ? 'bg-emerald-500/65' :
+                getStackPercent(player) > 30 ? 'bg-yellow-400/65' : 'bg-red-500/65'
+              ]"
+            ></div>
           </div>
         </div>
 
-        <!-- MAIN ACTIVITY ROW -->
+        <!-- ROW 2: cartas (solo showdown) + info en línea -->
         <div
-          v-if="player.currentBet > 0 || player.lastAction"
-          :id="`player-item-activity-row-${player.id}-${templateSuffix}`"
-          class="flex items-end justify-between gap-2 mt-1.5 pt-1.5 border-t border-gray-200 dark:border-white/5"
+          :id="`player-item-bottom-row-${player.id}-${templateSuffix}`"
+          class="flex items-center gap-2.5 px-3 py-2 min-w-0"
         >
-          <!-- LEFT COLUMN: Round Bet -->
+          <!-- Cartas: solo aparecen en showdown, sin placeholder -->
           <div
-            :id="`player-item-left-activity-${player.id}-${templateSuffix}`"
-            class="flex flex-col flex-1"
-          >
-            <div
-              v-if="player.currentBet > 0"
-              :id="`player-item-live-bet-wrapper-${player.id}-${templateSuffix}`"
-              class="flex items-baseline gap-1"
-            >
-              <span
-                :id="`player-item-live-bet-label-${player.id}-${templateSuffix}`"
-                class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-wider leading-none"
-                >Bet</span
-              >
-              <span
-                :id="`player-item-live-bet-amount-${player.id}-${templateSuffix}`"
-                class="text-sm font-mono font-black text-gray-700 dark:text-gray-300 leading-none tracking-tight transition-colors"
-                >${{ player.currentBet }}</span
-              >
-            </div>
-          </div>
-
-          <!-- RIGHT COLUMN: Last Action -->
-          <div
-            v-if="player.lastAction"
-            :id="`player-item-last-action-wrapper-${player.id}-${templateSuffix}`"
-            class="flex flex-col items-end shrink-0"
-          >
-            <span
-              :id="`player-item-last-action-label-${player.id}-${templateSuffix}`"
-              class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 leading-none"
-              >{{ $t('game.last_action') }}</span
-            >
-            <Transition name="action-highlight" mode="out-in">
-              <div
-                :key="player.lastAction"
-                :id="`player-item-action-badge-${player.id}-${templateSuffix}`"
-                class="flex items-center gap-1.5 px-2 py-1 rounded-full border border-gray-200 dark:border-white/5 bg-white dark:bg-white/[0.02]"
-                :class="[
-                  getActionBgColor(player.lastAction),
-                  player.id === justActedPlayerId ? 'animate-action-flash' : '',
-                ]"
-              >
-                <div
-                  :id="`player-item-action-dot-${player.id}-${templateSuffix}`"
-                  class="w-1.5 h-1.5 rounded-full"
-                  :class="getActionDotColor(player.lastAction)"
-                ></div>
-                <span
-                  :id="`player-item-action-text-${player.id}-${templateSuffix}`"
-                  class="text-[9px] font-black uppercase tracking-widest leading-none mt-px"
-                  :class="getActionTextColor(player.lastAction)"
-                >
-                  {{ player.lastAction }}
-                </span>
-              </div>
-            </Transition>
-          </div>
-        </div>
-        <!-- ROW 3: Showdown -->
-        <div
-          v-if="isShowDown && getPlayerCards(player).length > 0"
-          :id="`player-item-showdown-cards-${player.id}-${templateSuffix}`"
-          class="flex flex-col mt-1.5 pt-1.5 border-t border-gray-200 dark:border-white/5 animate-in fade-in slide-in-from-left-2 duration-700"
-        >
-          <div
-            :id="`player-item-hand-name-wrapper-${player.id}-${templateSuffix}`"
-            class="flex items-center gap-1.5 mb-1"
-          >
-            <span
-              :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`"
-              class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest truncate leading-none"
-            >
-              {{ formatHandName(getPlayerHandName(player)) }}
-            </span>
-            <span
-              v-if="isPlayerWinner(player.id)"
-              :id="`player-item-win-badge-${player.id}-${templateSuffix}`"
-              class="px-1 py-0.5 rounded bg-emerald-500 text-[8px] font-black text-white dark:text-black uppercase leading-none"
-              >Win</span
-            >
-          </div>
-          <div
+            v-if="isShowDown && getPlayerCards(player).length > 0"
             :id="`player-item-cards-row-${player.id}-${templateSuffix}`"
-            class="flex gap-1.5"
+            class="flex gap-1 shrink-0 animate-in fade-in duration-500"
           >
             <Card
-              v-for="(card, idx) in getPlayerCards(player)"
+              v-for="(card, idx) in getPlayerCards(player).slice(0, 2)"
               :key="idx"
               :id="`player-item-card-visual-${player.id}-${idx}-${templateSuffix}`"
               :numSymbol="card"
               size="small"
               :highlight="isCardWinning(player.id, card)"
-              :percentage="55"
+              :percentage="50"
             />
+          </div>
+
+          <!-- Info: fluye naturalmente a la derecha de las cartas, wrap horizontal -->
+          <div
+            :id="`player-item-chips-container-${player.id}-${templateSuffix}`"
+            class="flex flex-wrap items-center gap-x-2 gap-y-1 flex-1 min-w-0"
+          >
+            <!-- Chips -->
+            <div class="flex items-baseline gap-px">
+              <span class="text-xs text-yellow-600 dark:text-yellow-500 font-mono font-bold leading-none">$</span>
+              <span
+                :id="`player-item-stack-amount-${player.id}-${templateSuffix}`"
+                class="text-lg font-mono font-black text-gray-900 dark:text-white leading-none tracking-tight"
+                :class="{ 'opacity-40': player.folded }"
+              >{{ player.chips }}</span>
+            </div>
+
+            <!-- Bet badge -->
+            <span
+              v-if="player.currentBet > 0"
+              :id="`player-item-live-bet-badge-${player.id}-${templateSuffix}`"
+              class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded leading-none"
+            >+${{ player.currentBet }}</span>
+
+            <!-- Action badge -->
+            <Transition name="action-highlight" mode="out-in">
+              <div
+                v-if="player.lastAction"
+                :key="player.lastAction"
+                :id="`player-item-action-badge-${player.id}-${templateSuffix}`"
+                class="flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-black uppercase tracking-wide leading-none"
+                :class="[
+                  getActionBgColor(player.lastAction),
+                  getActionTextColor(player.lastAction),
+                  player.id === justActedPlayerId ? 'animate-action-flash' : '',
+                ]"
+              >
+                <div class="w-1.5 h-1.5 rounded-full shrink-0" :class="getActionDotColor(player.lastAction)"></div>
+                {{ player.lastAction }}
+              </div>
+            </Transition>
+
+            <!-- WIN badge (siempre al final del wrap) -->
+            <span
+              v-if="isPlayerWinner(player.id)"
+              :id="`player-item-win-badge-${player.id}-${templateSuffix}`"
+              class="px-2 py-0.5 rounded bg-emerald-500 text-xs font-black text-white uppercase leading-none"
+            >WIN</span>
           </div>
         </div>
       </div>
+
+
     </TransitionGroup>
 
     <!-- Sidepanel Footer -->
@@ -419,27 +328,27 @@ watch(
 
 const sortedPlayers = computed(() => {
   let list = [...props.players]
-
-  // 1. Sort primarily by playerNumber (seat order) to guarantee consistent spatial layout
   list.sort((a, b) => (a.playerNumber || 0) - (b.playerNumber || 0))
-
-  // 2. If we are observing or our ID is not set, just return the list sorted by seat
   if (!props.myPlayerId) return list
-
-  // 3. Find where "Me" (the local user) is seated
   const myIdx = list.findIndex((p) => p.id === props.myPlayerId)
-
   if (myIdx >= 0) {
-    // 4. Relative ordering: Put "Me" at the BOTTOM of the list.
-    // The player acting next after me (myIdx + 1) goes to the TOP of the list.
-    // This creates a natural top-to-bottom flow that ends with the user.
     const afterMe = list.slice(myIdx + 1)
     const meAndBefore = list.slice(0, myIdx + 1)
     return [...afterMe, ...meAndBefore]
   }
-
   return list
 })
+
+const maxChips = computed(() => {
+  const all = props.players.filter((p) => p && p.chips != null)
+  if (!all.length) return 1
+  return Math.max(...all.map((p) => p.chips || 0), 1)
+})
+
+const getStackPercent = (player) => {
+  const stack = player.chips || 0
+  return Math.max(3, Math.round((stack / maxChips.value) * 100))
+}
 
 const getActionBgColor = (action) => {
   const a = action.toLowerCase()
