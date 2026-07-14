@@ -22,10 +22,8 @@
       class="flex flex-col min-w-0 relative flex-none"
     >
       <!-- Small Logo/Home Button for Mobile -->
-      <div 
-        class="absolute top-3 left-3 z-[100] flex items-center gap-1"
-      >
-        <div 
+      <div class="absolute top-3 left-3 z-[100] flex items-center gap-1">
+        <div
           class="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform cursor-pointer"
           @click="$emit('goHome')"
         >
@@ -35,7 +33,8 @@
           v-if="isGuest"
           id="spectator-badge-TemplateXSmall"
           class="text-[7px] font-black text-gray-400 bg-black/40 px-1.5 py-1 rounded uppercase tracking-widest"
-        >SPECTATOR</span>
+          >SPECTATOR</span
+        >
       </div>
 
       <main
@@ -53,6 +52,8 @@
             :communityCards="communityCards"
             :players="allPlayers"
             :activePlayerId="activePlayerId"
+            :myPlayerId="myPlayerId"
+            :isGuest="isGuest"
           />
         </div>
       </main>
@@ -97,6 +98,7 @@
         :logs="logs"
         :invertLayout="true"
       />
+
       <div
         id="game-message-terminal-wrapper-TemplateXSmall"
         class="h-[150px] border-t border-gray-200 dark:border-white/5 bg-white dark:bg-black/20 shrink-0"
@@ -108,6 +110,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import PokerTable from '../../components/PokerTable.vue'
 import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
@@ -141,5 +144,11 @@ defineProps({
   isGuest: Boolean,
 })
 
-defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])
+defineEmits([
+  'action',
+  'setQuickBet',
+  'update:betAmount',
+  'sendMessage',
+  'goHome',
+])
 </script>

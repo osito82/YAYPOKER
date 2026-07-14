@@ -1,8 +1,14 @@
 <template>
   <LeaveGameModal
     :visible="showLeaveModal"
-    :title="$t(isPublic ? 'game.leave_title_public' : 'game.leave_title_private')"
-    :message="$t(isPublic ? 'game.leave_msg_public' : 'game.leave_msg_private', { code: secretCode })"
+    :title="
+      $t(isPublic ? 'game.leave_title_public' : 'game.leave_title_private')
+    "
+    :message="
+      $t(isPublic ? 'game.leave_msg_public' : 'game.leave_msg_private', {
+        code: secretCode,
+      })
+    "
     @confirm="confirmLeave"
     @cancel="showLeaveModal = false"
   />
@@ -194,7 +200,8 @@ const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
 )
 
 // VOICE INTEGRATION
-const { isRecording, startRecording, stopRecording, addToQueue } = useVoice(sendMessage)
+const { isRecording, startRecording, stopRecording, addToQueue } =
+  useVoice(sendMessage)
 
 provide('voice', { isRecording, startRecording, stopRecording })
 
@@ -206,7 +213,7 @@ watch(
         addToQueue(newVal.audioData)
       }
     }
-  }
+  },
 )
 
 // COMPUTEDS
@@ -254,15 +261,16 @@ const blindInfo = computed(() => {
 })
 
 const minBet = computed(() => {
-  const isRaiseAction = options.value.includes('raise') || options.value.includes('bet')
+  const isRaiseAction =
+    options.value.includes('raise') || options.value.includes('bet')
   const bigBlind = pokerStore.bigBlind || 20
-  
+
   let baseMin = bigBlind
   if (currentMaxBetOnTable.value > 0) {
     baseMin = currentMaxBetOnTable.value + lastRaiseAmount.value
   }
 
-  // If player has fewer chips than the required minimum, 
+  // If player has fewer chips than the required minimum,
   // their minimum (and maximum) bet is their total stack (All-In).
   return Math.min(baseMin, maxBet.value)
 })
@@ -317,7 +325,6 @@ watch([callLevel, maxBet], ([newMin, newMax]) => {
   }
 })
 
-
 function generateSecretCode() {
   return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
 }
@@ -342,7 +349,7 @@ const handleGoBack = () => {
     router.push({
       name: 'game.join',
       params: { gameCode: gameCode },
-      query: { playerName: playerName.value }
+      query: { playerName: playerName.value },
     })
   }
 }

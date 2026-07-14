@@ -328,7 +328,7 @@ wss.on('connection', (ws, req) => {
     try {
       if (match) {
         // En mesas públicas o si es un bot, el jugador se va inmediatamente
-        const foundPlayer = match.players.find(p => p.id === thisSocket.id)
+        const foundPlayer = match.players.find((p) => p.id === thisSocket.id)
         const isBot = foundPlayer ? foundPlayer.isBot : false
 
         if (match.isPublic || isBot) {

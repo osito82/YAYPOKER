@@ -11,7 +11,10 @@ function generateUniqueId() {
 function cleanPlayerName(name) {
   if (!name) return ''
   // Strip _Bot or _ia (case insensitive) and any trailing numbers/underscores if they follow
-  return name.replace(/(_Bot|_ia)/gi, '').replace(/_+/g, ' ').trim()
+  return name
+    .replace(/(_Bot|_ia)/gi, '')
+    .replace(/_+/g, ' ')
+    .trim()
 }
 
 const simbolConverter = (simbol) => {
@@ -160,5 +163,5 @@ export {
   whatColor,
   urlsFactory,
   copyToClipboard,
-  cleanPlayerName
+  cleanPlayerName,
 }

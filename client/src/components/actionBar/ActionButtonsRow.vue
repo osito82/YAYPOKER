@@ -61,10 +61,19 @@
         :id="`hud-raise-bet-button-${templateSuffix}`"
         @click="handleAction(options.includes('bet') ? 'bet' : 'raise')"
         :disabled="isRaiseActionDisabled"
-        :title="isRaiseActionDisabled ? $t('game.raise_disabled_tooltip') : (options.includes('bet') ? $t('game.bet_tooltip') : $t('game.raise_tooltip'))"
+        :title="
+          isRaiseActionDisabled
+            ? $t('game.raise_disabled_tooltip')
+            : options.includes('bet')
+              ? $t('game.bet_tooltip')
+              : $t('game.raise_tooltip')
+        "
         class="btn-raise flex-[1.5] font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
         :class="[
-          { 'opacity-60 scale-[0.97]': pressedAction === 'bet' || pressedAction === 'raise' },
+          {
+            'opacity-60 scale-[0.97]':
+              pressedAction === 'bet' || pressedAction === 'raise',
+          },
           pokerStore.blindsIncreasedFlag ? 'animate-pulse scale-105 z-10' : '',
         ]"
       >
@@ -130,7 +139,9 @@ const emit = defineEmits(['action'])
 const handleAction = (action) => {
   pressedAction.value = action
   emit('action', action)
-  setTimeout(() => { pressedAction.value = null }, 400)
+  setTimeout(() => {
+    pressedAction.value = null
+  }, 400)
 }
 </script>
 

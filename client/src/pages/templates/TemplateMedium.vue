@@ -114,7 +114,8 @@
             v-if="isGuest"
             id="spectator-badge-TemplateMedium"
             class="text-[7px] font-black text-gray-500 bg-gray-500/10 px-1 py-0.5 rounded uppercase tracking-widest"
-          >SPECTATOR</span>
+            >SPECTATOR</span
+          >
         </div>
       </div>
     </header>
@@ -155,6 +156,8 @@
               :communityCards="communityCards"
               :players="allPlayers"
               :activePlayerId="activePlayerId"
+              :myPlayerId="myPlayerId"
+              :isGuest="isGuest"
             />
           </div>
         </main>
@@ -169,7 +172,6 @@
             :logs="logs"
           />
         </div>
-
         <!-- SIDEPANEL -->
         <div
           id="game-sidepanel-container-TemplateMedium"
@@ -212,6 +214,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import PokerTable from '../../components/PokerTable.vue'
 import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
@@ -246,5 +249,11 @@ defineProps({
   isGuest: Boolean,
 })
 
-defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])
+defineEmits([
+  'action',
+  'setQuickBet',
+  'update:betAmount',
+  'sendMessage',
+  'goHome',
+])
 </script>

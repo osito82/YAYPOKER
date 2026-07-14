@@ -3,7 +3,7 @@ import { BOT_NAMES } from '../constants.js'
 
 describe('Bot Names Validation', () => {
   it('should have all names ending in _Bot', () => {
-    BOT_NAMES.forEach(name => {
+    BOT_NAMES.forEach((name) => {
       expect(name.endsWith('_Bot')).toBe(true)
     })
   })
@@ -18,19 +18,20 @@ describe('Bot Names Validation', () => {
     const mockPlayers = [
       { name: 'Player1' },
       { name: BOT_NAMES[0] }, // Simulate a bot already at the table
-      { name: BOT_NAMES[1] }  // Simulate another bot
+      { name: BOT_NAMES[1] }, // Simulate another bot
     ]
 
-    const usedNames = new Set(mockPlayers.map(p => p.name))
+    const usedNames = new Set(mockPlayers.map((p) => p.name))
     const count = 5
     const spawnedBots = []
 
     for (let i = 0; i < count; i++) {
-      const availableNames = BOT_NAMES.filter(name => !usedNames.has(name))
-      const botName = availableNames.length > 0
-        ? availableNames[Math.floor(Math.random() * availableNames.length)]
-        : `Bot_${Math.floor(Math.random() * 10000)}`
-      
+      const availableNames = BOT_NAMES.filter((name) => !usedNames.has(name))
+      const botName =
+        availableNames.length > 0
+          ? availableNames[Math.floor(Math.random() * availableNames.length)]
+          : `Bot_${Math.floor(Math.random() * 10000)}`
+
       usedNames.add(botName)
       spawnedBots.push(botName)
     }

@@ -419,16 +419,22 @@ class MatchLobby {
 
       // Si no quedan humanos conectados (sin importar si es pública o privada),
       // desconectamos a todos los bots para que no jueguen solos indefinidamente.
-      const connectedHumans = this.match.players.filter(p => p.connected && !p.isBot)
+      const connectedHumans = this.match.players.filter(
+        (p) => p.connected && !p.isBot,
+      )
       if (connectedHumans.length === 0) {
-        const connectedBots = this.match.players.filter(p => p.connected && p.isBot)
+        const connectedBots = this.match.players.filter(
+          (p) => p.connected && p.isBot,
+        )
         // Iteramos sobre una copia para no alterar el array mientras eliminamos
-        ;[...connectedBots].forEach(bot => {
+        ;[...connectedBots].forEach((bot) => {
           const botSocketWrapper = Socket.getSocket(this.match.torneoId, bot.id)
           if (botSocketWrapper && botSocketWrapper.socket) {
             botSocketWrapper.socket.close()
           } else {
-            const botIndex = this.match.players.findIndex(p => p.id === bot.id)
+            const botIndex = this.match.players.findIndex(
+              (p) => p.id === bot.id,
+            )
             if (botIndex !== -1) this.match.players.splice(botIndex, 1)
           }
         })

@@ -512,6 +512,7 @@
 import { computed, ref } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { usePokerStore } from '../store/pokerStore'
+
 import {
   urlsFactory,
   copyToClipboard as copyToClipboardUtil,
@@ -531,6 +532,7 @@ const props = defineProps({
 
 const responsive = useResponsiveStore()
 const pokerStore = usePokerStore()
+
 const isHost = computed(() => props.myId === props.hostId)
 const isPublicTable = computed(() => props.gameCode.startsWith('P_'))
 const copyStatus = ref('')

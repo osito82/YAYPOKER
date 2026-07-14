@@ -86,14 +86,15 @@ class Match extends EventEmitter {
       torneo: this.torneoId,
     })
 
-    const usedNames = new Set(this.players.map(p => p.name))
+    const usedNames = new Set(this.players.map((p) => p.name))
 
     for (let i = 0; i < count; i++) {
-      const availableNames = BOT_NAMES.filter(name => !usedNames.has(name))
-      const botName = availableNames.length > 0
-        ? availableNames[Math.floor(Math.random() * availableNames.length)]
-        : `Bot_${Math.floor(Math.random() * 10000)}`
-      
+      const availableNames = BOT_NAMES.filter((name) => !usedNames.has(name))
+      const botName =
+        availableNames.length > 0
+          ? availableNames[Math.floor(Math.random() * availableNames.length)]
+          : `Bot_${Math.floor(Math.random() * 10000)}`
+
       usedNames.add(botName)
 
       try {
@@ -263,7 +264,8 @@ class Match extends EventEmitter {
         ? GAME_RULES.MIN_PLAYERS_PUBLIC
         : GAME_RULES.MIN_PLAYERS
 
-      const botCountToSpawn = (data.bots && !this.isSpawningBots) ? Number(data.bots) : 0
+      const botCountToSpawn =
+        data.bots && !this.isSpawningBots ? Number(data.bots) : 0
       const totalExpectedPlayers = connectedPlayers.length + botCountToSpawn
 
       if (totalExpectedPlayers < minRequired) {

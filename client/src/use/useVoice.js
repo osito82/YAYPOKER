@@ -10,7 +10,8 @@ export function useVoice(sendMessage) {
   const startRecording = async () => {
     console.log('Attempting to start recording...')
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      const errorMsg = 'Microphone access is only available in secure contexts (HTTPS or localhost).'
+      const errorMsg =
+        'Microphone access is only available in secure contexts (HTTPS or localhost).'
       console.error(errorMsg)
       alert(errorMsg)
       return
@@ -32,7 +33,9 @@ export function useVoice(sendMessage) {
       }
 
       mediaRecorder.value.onstop = async () => {
-        const audioBlob = new Blob(audioChunks.value, { type: options.mimeType })
+        const audioBlob = new Blob(audioChunks.value, {
+          type: options.mimeType,
+        })
         const reader = new FileReader()
         reader.readAsDataURL(audioBlob)
         reader.onloadend = () => {

@@ -10,7 +10,7 @@ const routes = [
     name: 'landing',
     path: '/',
     component: Home,
-    meta: { title: 'YayPoker - Play Texas Hold\'em Poker with Friends Online' },
+    meta: { title: "YayPoker - Play Texas Hold'em Poker with Friends Online" },
   },
   {
     name: 'lobby.home',

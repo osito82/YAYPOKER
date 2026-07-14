@@ -60,7 +60,10 @@
               >
                 {{ player.playerNumber || '?' }}
                 <!-- Dealer Button (if your backend sends player.isDealer) -->
-                <div v-if="player.isDealer" class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-white text-black text-[7px] font-black rounded-full flex items-center justify-center border border-gray-300 shadow-sm">
+                <div
+                  v-if="player.isDealer"
+                  class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-white text-black text-[7px] font-black rounded-full flex items-center justify-center border border-gray-300 shadow-sm"
+                >
                   D
                 </div>
               </div>
@@ -163,10 +166,7 @@
 
         <!-- MAIN ACTIVITY ROW -->
         <div
-          v-if="
-            player.currentBet > 0 ||
-            player.lastAction
-          "
+          v-if="player.currentBet > 0 || player.lastAction"
           :id="`player-item-activity-row-${player.id}-${templateSuffix}`"
           class="flex items-end justify-between gap-2 mt-1.5 pt-1.5 border-t border-gray-200 dark:border-white/5"
         >
@@ -201,7 +201,7 @@
           >
             <span
               :id="`player-item-last-action-label-${player.id}-${templateSuffix}`"
-                class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 leading-none"
+              class="text-[9px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 leading-none"
               >{{ $t('game.last_action') }}</span
             >
             <Transition name="action-highlight" mode="out-in">
@@ -236,23 +236,37 @@
           :id="`player-item-showdown-cards-${player.id}-${templateSuffix}`"
           class="flex flex-col mt-1.5 pt-1.5 border-t border-gray-200 dark:border-white/5 animate-in fade-in slide-in-from-left-2 duration-700"
         >
-             <div :id="`player-item-hand-name-wrapper-${player.id}-${templateSuffix}`" class="flex items-center gap-1.5 mb-1">
-              <span :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`" class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest truncate leading-none">
-               {{ formatHandName(getPlayerHandName(player)) }}
-             </span>
-              <span v-if="isPlayerWinner(player.id)" :id="`player-item-win-badge-${player.id}-${templateSuffix}`" class="px-1 py-0.5 rounded bg-emerald-500 text-[8px] font-black text-white dark:text-black uppercase leading-none">Win</span>
-           </div>
-             <div :id="`player-item-cards-row-${player.id}-${templateSuffix}`" class="flex gap-1.5">
-              <Card
-                v-for="(card, idx) in getPlayerCards(player)"
-                :key="idx"
-                :id="`player-item-card-visual-${player.id}-${idx}-${templateSuffix}`"
-                :numSymbol="card"
-                size="small"
-                :highlight="isCardWinning(player.id, card)"
-                :percentage="55"
-              />
-           </div>
+          <div
+            :id="`player-item-hand-name-wrapper-${player.id}-${templateSuffix}`"
+            class="flex items-center gap-1.5 mb-1"
+          >
+            <span
+              :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`"
+              class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest truncate leading-none"
+            >
+              {{ formatHandName(getPlayerHandName(player)) }}
+            </span>
+            <span
+              v-if="isPlayerWinner(player.id)"
+              :id="`player-item-win-badge-${player.id}-${templateSuffix}`"
+              class="px-1 py-0.5 rounded bg-emerald-500 text-[8px] font-black text-white dark:text-black uppercase leading-none"
+              >Win</span
+            >
+          </div>
+          <div
+            :id="`player-item-cards-row-${player.id}-${templateSuffix}`"
+            class="flex gap-1.5"
+          >
+            <Card
+              v-for="(card, idx) in getPlayerCards(player)"
+              :key="idx"
+              :id="`player-item-card-visual-${player.id}-${idx}-${templateSuffix}`"
+              :numSymbol="card"
+              size="small"
+              :highlight="isCardWinning(player.id, card)"
+              :percentage="55"
+            />
+          </div>
         </div>
       </div>
     </TransitionGroup>
@@ -336,21 +350,24 @@ const isPlayerWinner = (playerId) => winnerIds.value.includes(playerId)
 const getPlayerCards = (player) => {
   // 1. If player has cards populated (e.g. local user), use them
   if (player.cards && player.cards.length > 0) return player.cards
-  
+
   // 2. Fallback: check winnerInfo.allHands (backend might send them here)
   if (winnerInfo.value?.allHands) {
     const hand = winnerInfo.value.allHands.find((h) => h.playerId === player.id)
-    if (hand && hand.privateCards && hand.privateCards.length > 0) return hand.privateCards
+    if (hand && hand.privateCards && hand.privateCards.length > 0)
+      return hand.privateCards
     if (hand && hand.cards && hand.cards.length > 0) return hand.cards
   }
 
   // 3. Fallback: check winners array directly
   const winner = winners.value.find((w) => w.playerId === player.id)
-  if (winner && winner.privateCards && winner.privateCards.length > 0) return winner.privateCards
+  if (winner && winner.privateCards && winner.privateCards.length > 0)
+    return winner.privateCards
   if (winner && winner.cards && winner.cards.length > 0) return winner.cards
 
   // 4. Fallback: check player.currentPrize
-  if (player.currentPrize?.cards && player.currentPrize.cards.length > 0) return player.currentPrize.cards
+  if (player.currentPrize?.cards && player.currentPrize.cards.length > 0)
+    return player.currentPrize.cards
 
   return []
 }
@@ -402,7 +419,7 @@ watch(
 
 const sortedPlayers = computed(() => {
   let list = [...props.players]
-  
+
   // 1. Sort primarily by playerNumber (seat order) to guarantee consistent spatial layout
   list.sort((a, b) => (a.playerNumber || 0) - (b.playerNumber || 0))
 
@@ -411,7 +428,7 @@ const sortedPlayers = computed(() => {
 
   // 3. Find where "Me" (the local user) is seated
   const myIdx = list.findIndex((p) => p.id === props.myPlayerId)
-  
+
   if (myIdx >= 0) {
     // 4. Relative ordering: Put "Me" at the BOTTOM of the list.
     // The player acting next after me (myIdx + 1) goes to the TOP of the list.

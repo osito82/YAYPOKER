@@ -102,12 +102,14 @@ describe('All-In Blinds Freeze Test', () => {
 
     // 2. Start game with big blinds
     p1.send({ action: 'startGame', smallBlind: 17, bigBlind: 32, ante: 0 })
-    
+
     // 3. Wait for dealtPrivateCards. If the bug is present, it will timeout here
     // because the server will keep asking for blinds and freezing.
     await p1.waitAction('dealtPrivateCards', 15000)
     await p2.waitAction('dealtPrivateCards', 15000)
 
-    console.log('Test Passed: Hand progressed successfully despite the short blind all-in.')
+    console.log(
+      'Test Passed: Hand progressed successfully despite the short blind all-in.',
+    )
   }, 20000)
 })

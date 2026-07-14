@@ -19,7 +19,9 @@ export function useActionBar(props, emit) {
 
   const chips = computed(() => {
     return baseChips.map((chip) => {
-      const isBlind = (props.options && props.options.includes('blind')) || props.canBlind === true
+      const isBlind =
+        (props.options && props.options.includes('blind')) ||
+        props.canBlind === true
       const exceedsBalance = chip.value > (props.balance || 0)
       const isDisabled = !props.isMyTurn || isBlind || exceedsBalance
       return {

@@ -852,7 +852,7 @@ describe('Poker Game Integration Tests', () => {
         r.message.data?.reason?.includes('raise') ||
         r.message.data?.reason?.includes('minimum'),
     )
-    
+
     expect(rejectMsg).toBeDefined()
 
     // Ahora sí: raise válido a 100 o más

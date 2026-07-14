@@ -94,7 +94,11 @@
         </div>
 
         <!-- MODE: Public Game (/public) -->
-        <form v-if="isPublic" @submit.prevent="joinPublicGame" class="space-y-6">
+        <form
+          v-if="isPublic"
+          @submit.prevent="joinPublicGame"
+          class="space-y-6"
+        >
           <div class="text-center">
             <h1
               class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic"
