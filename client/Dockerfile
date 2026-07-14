@@ -2,6 +2,12 @@
 FROM node:20-alpine AS build-stage
 WORKDIR /app
 
+# Install Chromium and its dependencies for Puppeteer prerendering
+RUN apk add --no-cache chromium nss freetype
+# Tell Puppeteer to use the system Chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=1
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 COPY package*.json ./
 RUN npm install
 
