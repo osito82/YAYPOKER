@@ -246,7 +246,11 @@ const startTimer = () => {
       const nextTick = 1000 - (elapsed % 1000)
       timer = setTimeout(tick, nextTick)
     } else {
-      handleClose()
+      // Countdown llega a 0: solo cierra el overlay localmente
+      // El servidor inicia la siguiente ronda por su cuenta
+      stopTimer()
+      isVisible.value = false
+      pokerStore.clearWinnerInfo()
       timer = null
     }
   }
@@ -262,13 +266,15 @@ const stopTimer = () => {
 }
 
 const handleClose = () => {
+  // Solo cierra el overlay localmente — NO envia nextRound al servidor
+  // El servidor maneja el inicio de la siguiente ronda de forma independiente
   if (isWaiting.value) return
   isWaiting.value = true
-  emit('close')
+  stopTimer()
   setTimeout(() => {
     isVisible.value = false
     pokerStore.clearWinnerInfo()
-  }, 500)
+  }, 300)
 }
 
 const winners = computed(() => {

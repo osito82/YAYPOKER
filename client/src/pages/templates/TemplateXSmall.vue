@@ -13,7 +13,6 @@
       v-else-if="winnerInfo"
       id="winner-standard-overlay-TemplateXSmall"
       :winnerInfo="winnerInfo"
-      @close="$emit('sendMessage', { action: 'nextRound' })"
     />
 
     <!-- TOP AREA -->

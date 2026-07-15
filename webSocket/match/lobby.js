@@ -339,7 +339,7 @@ class MatchLobby {
 
       // SOLO pausamos si el juego realmente ha empezado
       if (this.stepChecker.checkStep('startGame')) {
-        const time = TIMEOUTS.pause
+        const time = this.match.isPublic ? 15000 : TIMEOUTS.pause
         this.stepChecker.grantStep('pause')
 
         this.communicator.msgBuilder('playerPaused', 'public', foundPlayer, {
