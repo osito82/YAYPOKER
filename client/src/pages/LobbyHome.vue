@@ -94,7 +94,11 @@
         </div>
 
         <!-- MODE: Public Game (/public) -->
-        <form v-if="isPublic" @submit.prevent="joinPublicGame" class="space-y-6">
+        <form
+          v-if="isPublic"
+          @submit.prevent="joinPublicGame"
+          class="space-y-6"
+        >
           <div class="text-center">
             <h1
               class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-[0.4em] italic"
@@ -212,17 +216,16 @@
 
               <label
                 :id="`join-game-input-label-pin-${templateSuffix}`"
-                class="block text-gray-500 dark:text-gray-300 text-sm font-black uppercase tracking-[0.2em] mb-2"
+                class="block text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2 flex items-center gap-2"
               >
-                {{ $t('pages.lobby_home.setup_label_pin') }}
+                <span class="text-base leading-none">🔑</span>
+                SAVE THIS NUMBER — YOU'LL NEED IT TO RECOVER THE TABLE
               </label>
               <input
                 :id="`player-secret-pin-input-${templateSuffix}`"
-                v-model="secretCode"
-                class="shadow-inner appearance-none border border-gray-300 dark:border-white/10 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-white dark:bg-black/40 leading-tight focus:outline-none focus:border-yellow-500 transition-colors text-lg font-mono placeholder:text-gray-400 dark:placeholder:text-gray-600"
-                maxlength="4"
-                :placeholder="$t('pages.lobby_home.pin_placeholder')"
-                @input="secretCode = secretCode.replace(/\D/g, '')"
+                :value="secretCode"
+                readonly
+                class="shadow-inner appearance-none border-2 border-amber-400/50 dark:border-amber-500/40 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-amber-50 dark:bg-amber-900/10 leading-tight text-2xl font-mono font-black tracking-[0.5em] text-center cursor-default select-all"
               />
 
               <label
@@ -361,17 +364,16 @@
               />
               <label
                 :id="`creator-pin-setup-label-${templateSuffix}`"
-                class="block text-gray-500 dark:text-gray-300 text-xs font-black uppercase tracking-[0.2em] ml-2"
+                class="block text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] ml-2 flex items-center gap-2"
               >
-                {{ $t('pages.lobby_home.setup_label_pin') }}
+                <span class="text-base leading-none">🔑</span>
+                SAVE THIS NUMBER — YOU'LL NEED IT TO RECOVER THE TABLE
               </label>
               <input
                 :id="`creator-secret-pin-input-${templateSuffix}`"
-                v-model="secretCode"
-                class="shadow-inner appearance-none border border-gray-300 dark:border-white/10 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-white dark:bg-black/40 leading-tight focus:outline-none focus:border-green-500 transition-colors text-lg font-mono placeholder:text-gray-400 dark:placeholder:text-gray-600"
-                maxlength="4"
-                :placeholder="$t('pages.lobby_home.pin_placeholder')"
-                @input="secretCode = secretCode.replace(/\D/g, '')"
+                :value="secretCode"
+                readonly
+                class="shadow-inner appearance-none border-2 border-amber-400/50 dark:border-amber-500/40 rounded-xl w-full py-4 px-6 text-gray-900 dark:text-white bg-amber-50 dark:bg-amber-900/10 leading-tight text-2xl font-mono font-black tracking-[0.5em] text-center cursor-default select-all"
               />
             </div>
 
@@ -382,10 +384,7 @@
               <button
                 :id="`start-game-submit-button-${templateSuffix}`"
                 type="submit"
-                :disabled="
-                  !playerName.trim() ||
-                  (secretCode.length > 0 && secretCode.length !== 4)
-                "
+                :disabled="!playerName.trim()"
                 class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-5 px-4 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed uppercase tracking-widest text-base"
               >
                 {{ $t('pages.lobby_home.start_btn') }}
@@ -461,13 +460,17 @@ const copyStatus = ref('Copy Code')
 watch(
   () => isPublic.value,
   (newIsPublic) => {
-    // Only auto-fill if the user hasn't typed anything yet or if it matches the current stored values
     if (newIsPublic) {
       playerName.value = pokerStore.publicCredentials.playerName || ''
       secretCode.value = ''
     } else {
       playerName.value = pokerStore.privateCredentials.playerName || ''
-      secretCode.value = pokerStore.privateCredentials.secretCode || ''
+      // Si hay un código guardado lo usa, si no genera uno nuevo automáticamente
+      if (pokerStore.privateCredentials.secretCode) {
+        secretCode.value = pokerStore.privateCredentials.secretCode
+      } else {
+        secretCode.value = generateSecretCode()
+      }
     }
   },
   { immediate: true },
@@ -580,6 +583,10 @@ const checkRouteState = () => {
     }
     if (!defaultSecret.value) {
       defaultSecret.value = generateSecretCode()
+    }
+    // Siempre auto-asignar el PIN generado al secretCode
+    if (!secretCode.value || secretCode.value.length !== 4) {
+      secretCode.value = defaultSecret.value || generateSecretCode()
     }
   } else if (route.name === 'lobby.public' || route.path === '/public') {
     isCreating.value = false

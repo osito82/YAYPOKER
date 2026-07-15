@@ -36,6 +36,7 @@
     "bot_one": "1 Bot",
     "bot_many": "{count} Bots",
     "min_players_warning": "Need at least 2 players to start the match",
+
     "start_game": "Deal First Hand",
     "waiting_for_host": "Waiting for Host to Start...",
     "public_waiting_players": "Waiting for Players...",

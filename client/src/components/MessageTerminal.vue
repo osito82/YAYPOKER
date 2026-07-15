@@ -7,31 +7,6 @@
       :id="'terminal-container-' + templateSuffix"
       class="w-full h-full flex flex-col overflow-hidden bg-white/90 dark:bg-[#020402]/85 backdrop-blur-xl"
     >
-      <!-- Terminal header bar -->
-      <div
-        :id="'terminal-header-' + templateSuffix"
-        class="flex items-center gap-2 px-4 py-2 shrink-0 bg-gray-100/50 dark:bg-black/40 border-b border-gray-200 dark:border-white/5"
-      >
-        <div :id="'terminal-window-controls-' + templateSuffix" class="flex gap-1.5">
-          <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
-          <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
-          <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
-        </div>
-        <span
-          :id="'terminal-title-' + templateSuffix"
-          class="text-[9px] font-mono font-bold text-gray-400 dark:text-white/20 uppercase tracking-widest ml-2"
-          >Game Log</span
-        >
-        <div :id="'terminal-live-badge-' + templateSuffix" class="ml-auto flex items-center gap-1">
-          <div
-            class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
-          ></div>
-          <span
-            class="text-[8px] font-mono text-green-600 dark:text-green-500/60 uppercase"
-            >Live</span
-          >
-        </div>
-      </div>
 
       <!-- Terminal body -->
       <div
@@ -60,12 +35,15 @@
               class="text-yellow-600 dark:text-yellow-400 font-black shrink-0"
               >»</span
             >
-            <div :id="'terminal-log-content-' + log.id + '-' + templateSuffix" class="flex flex-wrap gap-1 items-center">
+            <div
+              :id="'terminal-log-content-' + log.id + '-' + templateSuffix"
+              class="flex flex-wrap gap-1 items-center"
+            >
               <span
                 :id="'terminal-log-emoji-' + log.id + '-' + templateSuffix"
-                class="text-lg leading-none shrink-0">{{
-                getEmoji(log)
-              }}</span>
+                class="text-lg leading-none shrink-0"
+                >{{ getEmoji(log) }}</span
+              >
               <span
                 :id="'terminal-log-text-' + log.id + '-' + templateSuffix"
                 class="font-bold tracking-tight break-words transition-colors"
@@ -92,7 +70,11 @@
         </div>
 
         <!-- Bottom anchor for auto-scroll -->
-        <div ref="bottomAnchor" :id="'terminal-scroll-anchor-' + templateSuffix" class="h-px w-full"></div>
+        <div
+          ref="bottomAnchor"
+          :id="'terminal-scroll-anchor-' + templateSuffix"
+          class="h-px w-full"
+        ></div>
       </div>
     </div>
   </div>
@@ -101,7 +83,6 @@
 <script setup>
 import { ref, watch, nextTick, onMounted, computed } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
-import { cleanPlayerName } from '../vutils'
 
 const responsive = useResponsiveStore()
 const templateSuffix = computed(() => {
@@ -132,7 +113,10 @@ const formatTime = (timestamp) => {
 const cleanText = (text) => {
   if (!text) return ''
   // Strip _Bot or _ia (case insensitive) and replace underscores with spaces
-  return text.replace(/(_Bot|_ia)/gi, '').replace(/_+/g, ' ').trim()
+  return text
+    .replace(/(_Bot|_ia)/gi, '')
+    .replace(/_+/g, ' ')
+    .trim()
 }
 
 const getEmoji = (log) => {

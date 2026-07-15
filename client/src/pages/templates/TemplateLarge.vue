@@ -123,7 +123,8 @@
             v-if="isGuest"
             id="spectator-badge-TemplateLarge"
             class="text-[8px] font-black text-gray-500 bg-gray-500/10 px-1.5 py-0.5 rounded uppercase tracking-widest"
-          >SPECTATOR</span>
+            >SPECTATOR</span
+          >
         </div>
 
         <div
@@ -147,7 +148,6 @@
     <WinnerOverlay
       v-else-if="winnerInfo"
       :winnerInfo="winnerInfo"
-      @close="$emit('sendMessage', { action: 'nextRound' })"
     />
 
     <div
@@ -174,6 +174,8 @@
               :communityCards="communityCards"
               :players="allPlayers"
               :activePlayerId="activePlayerId"
+              :myPlayerId="myPlayerId"
+              :isGuest="isGuest"
             />
           </div>
         </main>
@@ -225,6 +227,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import PokerTable from '../../components/PokerTable.vue'
 import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
@@ -259,7 +262,13 @@ defineProps({
   isGuest: Boolean,
 })
 
-defineEmits(['action', 'setQuickBet', 'update:betAmount', 'sendMessage', 'goHome'])
+defineEmits([
+  'action',
+  'setQuickBet',
+  'update:betAmount',
+  'sendMessage',
+  'goHome',
+])
 </script>
 
 <style scoped>

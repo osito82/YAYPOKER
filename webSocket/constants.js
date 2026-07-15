@@ -105,7 +105,7 @@ const BOT_NAMES = [
   'Mimoso_Bot',
   'Chipleader_Bot',
   'RakeBack_Bot',
-  'PotOdds_Bot'
+  'PotOdds_Bot',
 ]
 
 const SERVER_CONFIG = {

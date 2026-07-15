@@ -8,13 +8,9 @@
     <div
       :id="'ambient-room-glow-' + templateSuffix"
       class="absolute inset-0 pointer-events-none"
-      style="
-        background: radial-gradient(
-          ellipse 80% 60% at 50% 40%,
-          rgba(15, 40, 15, 0.6) 0%,
-          transparent 70%
-        );
-      "
+      :style="{
+        background: `radial-gradient(ellipse 80% 60% at 50% 40%, ${currentStyle.ambientGlow} 0%, transparent 70%)`,
+      }"
     ></div>
 
     <!-- TABLE SURFACE -->
@@ -24,7 +20,8 @@
     >
       <div
         :id="'poker-table-main-felt-' + templateSuffix"
-        class="w-full h-full relative overflow-hidden flex flex-col items-center table-felt transition-all duration-500"
+        class="w-full h-full relative overflow-hidden flex flex-col items-center transition-all duration-500 border-b-[6px] border-black/60"
+        :style="{ background: currentStyle.feltBackground }"
         :class="[
           responsive.screenSize === 'large'
             ? 'pt-16 justify-center pb-12'
@@ -35,8 +32,13 @@
       >
         <!-- Felt texture overlay -->
         <div
+          v-if="currentStyle.feltTexture !== 'none'"
           :id="'felt-texture-overlay-' + templateSuffix"
-          class="absolute inset-0 pointer-events-none felt-texture"
+          class="absolute inset-0 pointer-events-none"
+          :style="{
+            backgroundImage: currentStyle.feltTexture,
+            opacity: currentStyle.textureOpacity,
+          }"
         ></div>
 
         <!-- Oval table rail shadow (inner edge shadow for depth) -->
@@ -53,10 +55,10 @@
         <!-- Subtle diamond grid -->
         <div
           :id="'table-diamond-grid-' + templateSuffix"
-          class="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style="
-            background-image:
-              repeating-linear-gradient(
+          class="absolute inset-0 pointer-events-none"
+          :style="{
+            opacity: currentStyle.diamondOpacity,
+            backgroundImage: `repeating-linear-gradient(
                 45deg,
                 rgba(255, 255, 255, 1) 0px,
                 rgba(255, 255, 255, 1) 1px,
@@ -69,14 +71,15 @@
                 rgba(255, 255, 255, 1) 1px,
                 transparent 1px,
                 transparent 40px
-              );
-          "
+              )`,
+          }"
         ></div>
 
         <!-- Center logo watermark -->
         <div
           :id="'table-logo-watermark-wrapper-' + templateSuffix"
-          class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.04]"
+          class="absolute inset-0 flex items-center justify-center pointer-events-none"
+          :style="{ opacity: currentStyle.logoOpacity }"
         >
           <span
             :id="'table-logo-watermark-text-' + templateSuffix"
@@ -90,6 +93,14 @@
             >Y</span
           >
         </div>
+
+        <!-- Player Map -->
+        <PlayerMap
+          v-if="!isMobile"
+          :players="players"
+          :activePlayerId="activePlayerId"
+          :myPlayerId="myPlayerId"
+        />
 
         <!-- POT DISPLAY - TOP NOTCH -->
         <div
@@ -172,7 +183,7 @@
         <div
           :id="'table-inner-rail-line-' + templateSuffix"
           class="absolute inset-4 rounded-2xl pointer-events-none"
-          style="border: 1px solid rgba(255, 255, 255, 0.04)"
+          :style="{ border: currentStyle.railShadow }"
         ></div>
       </div>
     </div>
@@ -184,37 +195,41 @@ import { computed } from 'vue'
 import Card from './Card.vue'
 import CardSpace from './CardSpace.vue'
 import PotDisplay from './PotDisplay.vue'
+import PlayerMap from './PlayerMap.vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 
 const responsive = useResponsiveStore()
+
+const currentStyle = {
+  feltBackground:
+    'radial-gradient(ellipse 90% 80% at 50% 50%, #1a5c2a 0%, #14461f 40%, #0d3016 70%, #081e0e 100%)',
+  railColor: 'rgba(255, 255, 255, 0.04)',
+  railShadow: '1px solid rgba(255, 255, 255, 0.04)',
+  ambientGlow: 'rgba(15, 40, 15, 0.6)',
+  logoOpacity: 0.04,
+  diamondOpacity: 0.03,
+  feltTexture: "url('https://www.transparenttextures.com/patterns/felt.png')",
+  textureOpacity: 0.25,
+}
 
 const templateSuffix = computed(() => {
   const size = responsive.screenSize
   return 'Template' + size.charAt(0).toUpperCase() + size.slice(1)
 })
 
+const isMobile = computed(() =>
+  ['xsmall', 'small'].includes(responsive.screenSize),
+)
+
 const props = defineProps({
   pot: { type: [Number, String], default: 0 },
   communityCards: { type: Array, default: () => [] },
   players: { type: Array, default: () => [] },
   activePlayerId: String,
+  myPlayerId: String,
+  isGuest: Boolean,
 })
+
 </script>
 
-<style scoped>
-.table-felt {
-  background: radial-gradient(
-    ellipse 90% 80% at 50% 50%,
-    #1a5c2a 0%,
-    #14461f 40%,
-    #0d3016 70%,
-    #081e0e 100%
-  );
-  border-bottom: 6px solid rgba(0, 0, 0, 0.6);
-}
-
-.felt-texture {
-  background-image: url('https://www.transparenttextures.com/patterns/felt.png');
-  opacity: 0.25;
-}
-</style>
+<style scoped></style>
