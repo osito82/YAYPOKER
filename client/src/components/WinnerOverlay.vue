@@ -51,7 +51,7 @@
               class="trophy-glow absolute -inset-6 bg-[radial-gradient(ellipse,rgba(212,168,83,0.35)_0%,transparent_70%)] animate-pulse-glow"
             ></div>
             <span
-              class="trophy-icon text-5xl sm:text-6xl relative z-10 drop-shadow-[0_0_20px_rgba(212,168,83,0.7)] animate-trophy-bounce"
+              class="trophy-icon text-7xl sm:text-8xl relative z-10 drop-shadow-[0_0_20px_rgba(212,168,83,0.7)] animate-trophy-bounce"
               >🏆</span
             >
           </div>
@@ -61,7 +61,7 @@
             class="title-block text-center animate-fade-up animation-delay-300 shrink-0"
           >
             <p
-              class="title-eyebrow font-mono text-[9px] tracking-[3px] uppercase text-[#D4A853]"
+              class="title-eyebrow font-mono text-sm tracking-[3px] uppercase text-[#D4A853]"
             >
               YAY Poker ·
               {{
@@ -69,12 +69,12 @@
               }}
             </p>
             <h1
-              class="title-main font-bebas text-3xl sm:text-4xl leading-[0.95] tracking-[1px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent"
+              class="title-main font-bebas text-6xl sm:text-7xl leading-[0.95] tracking-[1px] bg-gradient-to-br from-[#F5D78E] via-[#D4A853] to-[#8A6A2A] bg-clip-text text-transparent"
             >
               {{ winnerNames.toUpperCase() }}
             </h1>
             <div
-              class="text-2xl sm:text-3xl font-mono font-black text-[#F5D78E] drop-shadow-2xl"
+              class="text-4xl sm:text-5xl font-mono font-black text-[#F5D78E] drop-shadow-2xl"
             >
               +${{ totalAmount.toLocaleString() }}
             </div>
@@ -91,7 +91,7 @@
               <div
                 v-for="(player, idx) in allShowdownPlayers"
                 :key="player.playerId || idx"
-                class="flex items-center gap-2 rounded-lg px-2.5 py-1.5 border transition-colors"
+                class="flex items-center gap-3 rounded-xl px-3 py-2.5 border transition-colors"
                 :class="
                   isWinner(player)
                     ? 'bg-[#1E3D20] border-[#D4A853]/40'
@@ -100,7 +100,7 @@
               >
                 <!-- Position badge -->
                 <div
-                  class="w-5 h-5 rounded flex items-center justify-center text-[8px] font-black shrink-0"
+                  class="w-7 h-7 rounded flex items-center justify-center text-sm font-black shrink-0"
                   :class="
                     isWinner(player)
                       ? 'bg-[#D4A853] text-black'
@@ -113,13 +113,13 @@
                 <!-- Name -->
                 <div class="min-w-0 flex-1">
                   <div
-                    class="text-[10px] font-bold text-[#F5F0E8] truncate leading-tight"
+                    class="text-base font-bold text-[#F5F0E8] truncate leading-tight"
                     :class="{ 'text-[#F5D78E]': isWinner(player) }"
                   >
                     {{ cleanPlayerName(player.name) }}
                   </div>
                   <div
-                    class="text-[7px] font-mono uppercase text-[#9E9080] tracking-wider leading-tight truncate"
+                    class="text-xs font-mono uppercase text-[#9E9080] tracking-wider leading-tight truncate"
                   >
                     {{
                       formatHandName(player.pokerHand || player.handName || '')
@@ -136,7 +136,7 @@
                     )"
                     :key="ci"
                     size="small"
-                    :percentage="55"
+                    :percentage="65"
                     :numSymbol="card"
                   />
                 </div>
@@ -144,13 +144,13 @@
                 <!-- Amount -->
                 <div
                   v-if="isWinner(player) && player.amount"
-                  class="text-[10px] font-mono font-bold text-[#F5D78E] shrink-0 ml-1"
+                  class="text-base font-mono font-bold text-[#F5D78E] shrink-0 ml-1"
                 >
                   +${{ player.amount.toLocaleString() }}
                 </div>
                 <div
                   v-else-if="player.handContribution > 0"
-                  class="text-[8px] font-mono text-[#9E9080] shrink-0 ml-1"
+                  class="text-sm font-mono text-[#9E9080] shrink-0 ml-1"
                 >
                   -${{ player.handContribution }}
                 </div>
@@ -165,15 +165,15 @@
             <div class="flex items-center justify-between gap-2 mb-1">
               <div class="flex items-center gap-1.5">
                 <div
-                  class="w-1 h-1 bg-green-500 rounded-full animate-blink"
+                  class="w-1.5 h-1.5 bg-green-500 rounded-full animate-blink"
                 ></div>
                 <span
-                  class="font-mono text-[9px] tracking-[1px] uppercase text-[#9E9080]"
+                  class="font-mono text-sm tracking-[1px] uppercase text-[#9E9080]"
                 >
                   {{ $t('winner.next_round', { count: countdown }) }}
                 </span>
               </div>
-              <div class="font-mono text-[9px] text-[#9E9080]">
+              <div class="font-mono text-sm text-[#9E9080]">
                 {{ $t('winner.pot_cleared') }}
               </div>
             </div>
@@ -189,11 +189,11 @@
             <button
               @click="handleClose"
               :disabled="isWaiting"
-              class="w-full py-2 bg-transparent border border-[#D4A853]/20 hover:border-[#D4A853]/50 text-[#D4A853]/70 hover:text-[#D4A853] rounded-lg text-[10px] font-black uppercase tracking-[0.15em] transition-all active:scale-95 flex items-center justify-center gap-2"
+              class="w-full py-3 bg-transparent border border-[#D4A853]/20 hover:border-[#D4A853]/50 text-[#D4A853]/70 hover:text-[#D4A853] rounded-lg text-sm font-black uppercase tracking-[0.15em] transition-all active:scale-95 flex items-center justify-center gap-2"
             >
               <div
                 v-if="isWaiting"
-                class="w-3 h-3 border-2 border-[#D4A853]/30 border-t-[#D4A853] rounded-full animate-spin"
+                class="w-4 h-4 border-2 border-[#D4A853]/30 border-t-[#D4A853] rounded-full animate-spin"
               ></div>
               {{
                 isWaiting ? $t('winner.waiting_others') : $t('winner.continue')

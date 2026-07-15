@@ -31,32 +31,40 @@
         @click="addChip(chip.value)"
       />
     </div>
-    <button
-      @click="clearBet"
-      :disabled="!isMyTurn || isSliderDisabled"
-      :id="'hud-clear-bet-button-' + templateSuffix"
+    <!-- MIN + ALL-IN comparten la misma fila -->
+    <div
       :class="[
-        'bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 active:scale-95 transition-all disabled:opacity-20 disabled:pointer-events-none',
-        isVertical ? 'w-full py-2' : 'h-8 lg:h-11 px-3',
+        'flex gap-2',
+        isVertical ? 'w-full' : '',
       ]"
     >
-      {{ $t('game.min') }}
-    </button>
-    <button
-      @click="$emit('allIn')"
-      :disabled="!isMyTurn || isSliderDisabled"
-      :id="'hud-allin-button-' + templateSuffix"
-      :class="[
-        'font-black uppercase rounded-lg active:scale-95 transition-all disabled:opacity-20 disabled:pointer-events-none',
-        isVertical ? 'w-full py-2 text-[10px]' : 'h-8 lg:h-11 px-2 text-[9px]',
-        betAmount >= maxBet && maxBet > 0
-          ? 'bg-red-500/20 border border-red-500/40 text-red-400'
-          : 'bg-white/5 border border-white/10 text-amber-400',
-      ]"
-      :title="$t('game.allin_tooltip')"
-    >
-      ALL-IN
-    </button>
+      <button
+        @click="clearBet"
+        :disabled="!isMyTurn || isSliderDisabled"
+        :id="'hud-clear-bet-button-' + templateSuffix"
+        :class="[
+          'flex-1 bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 active:scale-95 transition-all disabled:opacity-20 disabled:pointer-events-none',
+          isVertical ? 'py-2' : 'h-8 lg:h-11 px-3',
+        ]"
+      >
+        {{ $t('game.min') }}
+      </button>
+      <button
+        @click="$emit('allIn')"
+        :disabled="!isMyTurn || isSliderDisabled"
+        :id="'hud-allin-button-' + templateSuffix"
+        :class="[
+          'flex-1 font-black uppercase rounded-lg active:scale-95 transition-all disabled:opacity-20 disabled:pointer-events-none',
+          isVertical ? 'py-2 text-[10px]' : 'h-8 lg:h-11 px-2 text-[9px]',
+          betAmount >= maxBet && maxBet > 0
+            ? 'bg-red-500/20 border border-red-500/40 text-red-400'
+            : 'bg-white/5 border border-white/10 text-amber-400',
+        ]"
+        :title="$t('game.allin_tooltip')"
+      >
+        ALL-IN
+      </button>
+    </div>
   </div>
 </template>
 
