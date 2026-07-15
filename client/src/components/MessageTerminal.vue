@@ -7,37 +7,6 @@
       :id="'terminal-container-' + templateSuffix"
       class="w-full h-full flex flex-col overflow-hidden bg-white/90 dark:bg-[#020402]/85 backdrop-blur-xl"
     >
-      <!-- Terminal header bar -->
-      <div
-        :id="'terminal-header-' + templateSuffix"
-        class="flex items-center gap-2 px-4 py-2 shrink-0 bg-gray-100/50 dark:bg-black/40 border-b border-gray-200 dark:border-white/5"
-      >
-        <div
-          :id="'terminal-window-controls-' + templateSuffix"
-          class="flex gap-1.5"
-        >
-          <div class="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
-          <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
-          <div class="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
-        </div>
-        <span
-          :id="'terminal-title-' + templateSuffix"
-          class="text-[9px] font-mono font-bold text-gray-400 dark:text-white/20 uppercase tracking-widest ml-2"
-          >Game Log</span
-        >
-        <div
-          :id="'terminal-live-badge-' + templateSuffix"
-          class="ml-auto flex items-center gap-1"
-        >
-          <div
-            class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
-          ></div>
-          <span
-            class="text-[8px] font-mono text-green-600 dark:text-green-500/60 uppercase"
-            >Live</span
-          >
-        </div>
-      </div>
 
       <!-- Terminal body -->
       <div
