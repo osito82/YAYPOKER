@@ -1,7 +1,8 @@
 <template>
   <!-- Map Graphic Background (Rounded Rectangle) -->
   <div
-    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 w-[88%] h-[78%] rounded-[28px] border border-dashed border-white/10"
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 rounded-[28px] border border-dashed border-white/10 transition-all duration-300"
+    :style="{ width: (semiAxes.a * 1.96) + '%', height: (semiAxes.b * 1.96) + '%' }"
   ></div>
 
   <!-- Players Map Nodes -->
@@ -16,91 +17,49 @@
     }"
     :class="isFolded(seat.player) ? 'opacity-35' : 'opacity-100'"
   >
-    <!-- Avatar circle -->
-    <div class="relative">
-
-      <!-- Active player pulse ring -->
-      <div
-        v-if="seat.player.id === activePlayerId"
-        class="absolute inset-0 rounded-full animate-ping-slow"
-        style="background: rgba(234,179,8,0.25); transform: scale(1.5);"
-      ></div>
-
-      <!-- My player outer ring -->
-      <div
-        v-if="seat.player.id === myPlayerId"
-        class="absolute -inset-[3px] rounded-full"
-        style="background: linear-gradient(135deg, #60a5fa, #a78bfa); padding: 2px;"
-      >
-        <div class="w-full h-full rounded-full" style="background: #181818;"></div>
-      </div>
-
-      <!-- Main circle -->
-      <div
-        class="relative w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-black transition-all duration-500 select-none z-10"
-        :class="[
-          seat.player.id === activePlayerId
-            ? 'bg-yellow-500 text-black shadow-[0_0_14px_rgba(234,179,8,0.5)] scale-110'
-            : isFolded(seat.player)
-              ? 'bg-neutral-900 text-white/20 border border-white/5'
-              : seat.player.id === myPlayerId
-                ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(96,165,250,0.35)]'
-                : 'bg-neutral-800 text-white border border-white/15 shadow-lg',
-        ]"
-      >
-        <span v-if="!isFolded(seat.player)">
-          {{ seat.player.name.charAt(0).toUpperCase() }}
-        </span>
-        <span v-else class="text-[12px] opacity-60">✕</span>
-
-        <!-- Dealer chip -->
-        <div
-          v-if="seat.player.isDealer"
-          class="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-gradient-to-br from-white to-gray-300 text-black text-[7px] font-black rounded-full flex items-center justify-center shadow-md border border-white/80 z-20"
-        >D</div>
-      </div>
-    </div>
-
-    <!-- Name -->
-    <span
-      class="mt-1.5 text-[11px] font-bold uppercase tracking-wider drop-shadow-md whitespace-nowrap"
+    <!-- Contenedor Rectángulo Amarillo -->
+    <div 
+      class="flex flex-col items-center p-1.5 px-3 rounded-[12px] border transition-all duration-300 relative min-w-[70px]"
       :class="[
-        seat.player.id === myPlayerId ? 'text-blue-300' :
-        seat.player.id === activePlayerId ? 'text-yellow-300' :
-        isFolded(seat.player) ? 'text-white/30' : 'text-white/80'
+        seat.player.id === activePlayerId 
+          ? 'bg-yellow-500 text-black border-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.6)] scale-110' 
+          : seat.player.id === myPlayerId
+            ? 'bg-yellow-500 text-black border-yellow-200 shadow-[0_0_12px_rgba(234,179,8,0.4)] ring-2 ring-blue-400'
+            : isFolded(seat.player)
+              ? 'bg-neutral-800/80 border-white/10 text-white/50'
+              : 'bg-yellow-500/90 text-black border-yellow-400 shadow-md'
       ]"
     >
-      {{ cleanPlayerName(seat.player.name) }}
-      <span v-if="seat.player.id === myPlayerId" class="text-blue-400/70 normal-case font-normal ml-0.5">(tú)</span>
-    </span>
+      <!-- Dealer chip (moved to top-right corner) -->
+      <div
+        v-if="seat.player.isDealer"
+        class="absolute -top-2 -right-2 w-4 h-4 bg-white text-black text-[9px] font-black rounded-full flex items-center justify-center shadow-md border-2 border-yellow-600 z-20"
+      >D</div>
 
-    <!-- Stack bar + action badge row -->
-    <div class="flex flex-col items-center gap-0.5 mt-0.5 w-full">
+      <!-- Name -->
+      <span
+        class="text-[11px] font-black uppercase tracking-wider drop-shadow-sm whitespace-nowrap"
+      >
+        <span v-if="isFolded(seat.player)" class="text-[10px] opacity-60 mr-1">✕</span>
+        {{ cleanPlayerName(seat.player.name) }}
+        <span v-if="seat.player.id === myPlayerId" class="opacity-70 normal-case font-bold ml-0.5">(tú)</span>
+      </span>
 
-      <!-- Relative stack bar -->
-      <div class="w-14 h-1 rounded-full bg-white/10 overflow-hidden" v-if="!isFolded(seat.player)">
+      <!-- Stack bar -->
+      <div class="w-full h-1 rounded-full bg-black/20 overflow-hidden mt-1 mb-1" v-if="!isFolded(seat.player)">
         <div
           class="h-full rounded-full transition-all duration-700"
           :style="{ width: getStackPercent(seat.player) + '%' }"
           :class="[
             getStackPercent(seat.player) > 60 ? 'bg-emerald-400' :
-            getStackPercent(seat.player) > 30 ? 'bg-yellow-400' : 'bg-red-400'
+            getStackPercent(seat.player) > 30 ? 'bg-orange-400' : 'bg-red-500'
           ]"
         ></div>
       </div>
 
-      <!-- Bet / Chips badge -->
+      <!-- Bet / Chips / Action -->
       <span
-        class="text-[10px] font-bold px-1.5 py-px rounded border whitespace-nowrap backdrop-blur-sm flex items-center gap-0.5"
-        :class="
-          seat.player.currentBet > 0
-            ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
-            : seat.player.id === activePlayerId
-              ? 'text-yellow-300 border-yellow-500/20 bg-yellow-500/10'
-              : isFolded(seat.player)
-                ? 'text-white/20 border-white/5 bg-transparent'
-                : getActionColor(seat.player.lastAction)
-        "
+        class="text-[10px] font-bold whitespace-nowrap flex items-center gap-0.5"
       >
         <!-- Action icon -->
         <span v-if="seat.player.currentBet > 0">{{ getActionIcon('bet') }}</span>
@@ -108,19 +67,19 @@
 
         <template v-if="seat.player.currentBet > 0">
           <span>${{ seat.player.currentBet }}</span>
-          <span class="text-white/20">/</span>
-          <span class="text-yellow-400">${{ seat.player.chips }}</span>
+          <span class="opacity-40">/</span>
+          <span>${{ seat.player.chips }}</span>
         </template>
         <template v-else-if="isFolded(seat.player)">
           <span class="uppercase tracking-wider">fold</span>
         </template>
         <template v-else-if="seat.player.lastAction">
           <span class="uppercase text-[9px]">{{ seat.player.lastAction }}</span>
-          <span class="text-white/20">/</span>
-          <span class="text-yellow-400">${{ seat.player.chips }}</span>
+          <span class="opacity-40">/</span>
+          <span>${{ seat.player.chips }}</span>
         </template>
         <template v-else>
-          <span class="text-yellow-400">${{ seat.player.chips }}</span>
+          <span>${{ seat.player.chips }}</span>
         </template>
       </span>
     </div>
@@ -201,6 +160,10 @@ function getEllipseSeatPositions(playerCount) {
   return positions
 }
 
+const semiAxes = computed(() => {
+  return isMobile.value ? { a: 47, b: 28 } : { a: 45, b: 32 }
+})
+
 const positionedSeats = computed(() => {
   const playerList = [...props.players]
     .filter((p) => p && p.playerNumber != null)
@@ -218,7 +181,7 @@ const positionedSeats = computed(() => {
   }
 
   const ellipsePositions = getEllipseSeatPositions(rotatedList.length)
-  const semiAxes = isMobile.value ? { a: 47, b: 36 } : { a: 45, b: 40 }
+  const axes = semiAxes.value
   const myAngleOffset = Math.PI
 
   return rotatedList.map((player, idx) => {
@@ -227,8 +190,9 @@ const positionedSeats = computed(() => {
     const n = 3.5
     const absCos = Math.pow(Math.abs(Math.cos(adjustedAngle)), 2 / n)
     const absSin = Math.pow(Math.abs(Math.sin(adjustedAngle)), 2 / n)
-    const left = 50 + semiAxes.a * absCos * Math.sign(Math.cos(adjustedAngle))
-    const top = 50 + semiAxes.b * absSin * Math.sign(Math.sin(adjustedAngle))
+    
+    const left = 50 + axes.a * absCos * Math.sign(Math.cos(adjustedAngle))
+    const top = 50 + axes.b * absSin * Math.sign(Math.sin(adjustedAngle))
     return { player, left, top }
   })
 })

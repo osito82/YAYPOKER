@@ -105,9 +105,9 @@
         <!-- POT DISPLAY - TOP NOTCH -->
         <div
           :id="'pot-display-absolute-container-' + templateSuffix"
-          class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform transition-all duration-300 origin-top"
+          class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform scale-[0.75] transition-all duration-300 origin-top"
           :class="{
-            'scale-[0.6]': ['small', 'xsmall'].includes(responsive.screenSize),
+            'scale-[0.45]': ['small', 'xsmall'].includes(responsive.screenSize),
           }"
         >
           <PotDisplay
