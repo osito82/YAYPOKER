@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useSoundStore } from './soundStore'
 import router from '../router'
 
 export const usePokerStore = defineStore('pokerStore', () => {
@@ -189,6 +190,18 @@ export const usePokerStore = defineStore('pokerStore', () => {
       if (newMsg !== null) {
         displayMsg.value = newMsg
         if (newMsg) {
+          // Play sounds based on message text
+          const msgLower = newMsg.toLowerCase()
+          if (msgLower.includes(' fold')) {
+            useSoundStore().playFold()
+          } else if (msgLower.includes(' bet') || msgLower.includes(' call') || msgLower.includes(' raise') || msgLower.includes(' all in')) {
+            useSoundStore().playBet()
+          } else if (msgLower.includes(' check')) {
+            useSoundStore().playCheck()
+          } else if (msgLower.includes('dealt') || msgLower.includes('flop') || msgLower.includes('turn') || msgLower.includes('river')) {
+            useSoundStore().playDeal()
+          }
+
           dealerLog.value.unshift({
             id: Date.now(),
             text: newMsg,
@@ -256,6 +269,9 @@ export const usePokerStore = defineStore('pokerStore', () => {
       } else if (gameData.action?.startsWith('bettingCore')) {
         if (gameData.data?.messageForId) {
           activePlayerId.value = gameData.data.messageForId
+          if (gameData.data.messageForId === myInfo.value.id) {
+            useSoundStore().playYourTurn()
+          }
         }
         if (gameData.data?.action) {
           bettingOptions.value = gameData.data.action
@@ -288,6 +304,8 @@ export const usePokerStore = defineStore('pokerStore', () => {
         activePlayerId.value = null
         bettingOptions.value = []
         autofoldStartTime.value = null
+        
+        useSoundStore().playWin()
 
         const currentWinnerData = winnerInfo.value
         const timeoutDuration =
