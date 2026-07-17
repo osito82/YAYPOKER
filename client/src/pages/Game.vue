@@ -63,17 +63,18 @@ import {
   onBeforeUnmount,
   watch,
   defineAsyncComponent,
+  provide,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { useSoundStore } from '../store/soundStore'
 import useWebSocket from '../use/useSockets'
 import { useVoice } from '../use/useVoice'
 import { urlsFactory } from '../vutils'
 import LobbyView from '../components/LobbyView.vue'
 import LeaveGameModal from '../components/LeaveGameModal.vue'
-import { provide } from 'vue' // Add provide
 
 // Async loading of templates for performance
 const TemplateXSmall = defineAsyncComponent(
@@ -98,6 +99,7 @@ const route = useRoute()
 const router = useRouter()
 const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
+const soundStore = useSoundStore()
 const gameCode = route.params.gameCode || 'default_Torneo'
 const secretCode = route.params.secretCode
 
