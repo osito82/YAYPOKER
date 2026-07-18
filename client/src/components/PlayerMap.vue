@@ -2,7 +2,10 @@
   <!-- Map Graphic Background (Rounded Rectangle) -->
   <div
     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10 rounded-[28px] border border-dashed border-white/10 transition-all duration-300"
-    :style="{ width: (semiAxes.a * 1.96) + '%', height: (semiAxes.b * 1.96) + '%' }"
+    :style="{
+      width: semiAxes.a * 1.96 + '%',
+      height: semiAxes.b * 1.96 + '%',
+    }"
   ></div>
 
   <!-- Players Map Nodes -->
@@ -15,73 +18,132 @@
       left: seat.left + '%',
       transform: 'translate(-50%, -50%)',
     }"
-    :class="isFolded(seat.player) ? 'opacity-35' : 'opacity-100'"
+    :class="isFolded(seat.player) ? 'opacity-40' : 'opacity-100'"
   >
-    <!-- Contenedor Rectángulo Amarillo -->
-    <div 
-      class="flex flex-col items-center p-1.5 px-3 rounded-[12px] border transition-all duration-300 relative min-w-[70px]"
+    <!-- Player Card -->
+    <div
+      class="flex items-center gap-2 rounded-2xl border transition-all duration-300 backdrop-blur-md"
       :class="[
-        seat.player.id === activePlayerId 
-          ? 'bg-yellow-500 text-black border-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.6)] scale-110' 
+        isMobile
+          ? 'p-1.5 px-2.5 gap-1.5 min-w-[120px]'
+          : 'p-2 px-3 min-w-[155px]',
+        seat.player.id === activePlayerId
+          ? 'border-yellow-500/60 bg-yellow-500/10 shadow-[0_0_20px_rgba(234,179,8,0.3)] scale-105'
           : seat.player.id === myPlayerId
-            ? 'bg-yellow-500 text-black border-yellow-200 shadow-[0_0_12px_rgba(234,179,8,0.4)] ring-2 ring-blue-400'
-            : isFolded(seat.player)
-              ? 'bg-neutral-800/80 border-white/10 text-white/50'
-              : 'bg-yellow-500/90 text-black border-yellow-400 shadow-md'
+            ? 'border-blue-400/50 bg-blue-500/5 shadow-[0_0_12px_rgba(59,130,246,0.2)]'
+            : 'border-white/10 bg-black/60 shadow-lg',
       ]"
     >
-      <!-- Dealer chip (moved to top-right corner) -->
-      <div
-        v-if="seat.player.isDealer"
-        class="absolute -top-2 -right-2 w-4 h-4 bg-white text-black text-[9px] font-black rounded-full flex items-center justify-center shadow-md border-2 border-yellow-600 z-20"
-      >D</div>
-
-      <!-- Name -->
-      <span
-        class="text-[11px] font-black uppercase tracking-wider drop-shadow-sm whitespace-nowrap"
-      >
-        <span v-if="isFolded(seat.player)" class="text-[10px] opacity-60 mr-1">✕</span>
-        {{ cleanPlayerName(seat.player.name) }}
-        <span v-if="seat.player.id === myPlayerId" class="opacity-70 normal-case font-bold ml-0.5">(tú)</span>
-      </span>
-
-      <!-- Stack bar -->
-      <div class="w-full h-1 rounded-full bg-black/20 overflow-hidden mt-1 mb-1" v-if="!isFolded(seat.player)">
+      <!-- Left: Avatar + Dealer Badge -->
+      <div class="relative shrink-0">
         <div
-          class="h-full rounded-full transition-all duration-700"
-          :style="{ width: getStackPercent(seat.player) + '%' }"
+          class="rounded-full flex items-center justify-center font-black border-2 transition-all duration-300"
           :class="[
-            getStackPercent(seat.player) > 60 ? 'bg-emerald-400' :
-            getStackPercent(seat.player) > 30 ? 'bg-orange-400' : 'bg-red-500'
+            isMobile ? 'w-10 h-10 text-base' : 'w-12 h-12 text-lg',
+            seat.player.id === activePlayerId
+              ? 'border-yellow-400 shadow-[0_0_12px_rgba(234,179,8,0.5)]'
+              : seat.player.id === myPlayerId
+                ? 'border-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.4)]'
+                : 'border-white/20',
           ]"
-        ></div>
+          :style="{ backgroundColor: getAvatarColor(seat.player) }"
+        >
+          <span
+            :class="
+              seat.player.id === activePlayerId
+                ? 'text-yellow-100'
+                : 'text-white'
+            "
+          >
+            {{ getInitial(seat.player) }}
+          </span>
+        </div>
+        <!-- Dealer chip -->
+        <div
+          v-if="seat.player.isDealer"
+          class="absolute -top-1 -right-2 w-5 h-5 bg-white text-black text-[9px] font-black rounded-full flex items-center justify-center shadow-md border-2 border-yellow-500 z-20"
+        >
+          D
+        </div>
+        <!-- Folded marker overlay on avatar -->
+        <div
+          v-if="isFolded(seat.player)"
+          class="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center"
+        >
+          <span class="text-[9px] font-black text-red-400 uppercase">FOLD</span>
+        </div>
       </div>
 
-      <!-- Bet / Chips / Action -->
-      <span
-        class="text-[10px] font-bold whitespace-nowrap flex items-center gap-0.5"
-      >
-        <!-- Action icon -->
-        <span v-if="seat.player.currentBet > 0">{{ getActionIcon('bet') }}</span>
-        <span v-else-if="seat.player.lastAction && !isFolded(seat.player)">{{ getActionIcon(seat.player.lastAction) }}</span>
+      <!-- Right: Info Column -->
+      <div class="flex flex-col min-w-0 flex-1">
+        <!-- Name row -->
+        <div class="flex items-center gap-1 min-w-0">
+          <span
+            class="font-black uppercase tracking-wider truncate"
+            :class="[
+              isMobile ? 'text-[11px]' : 'text-[13px]',
+              isFolded(seat.player)
+                ? 'text-white/30 line-through'
+                : 'text-white/90',
+            ]"
+          >
+            {{ cleanPlayerName(seat.player.name) }}
+          </span>
+          <span
+            v-if="seat.player.id === myPlayerId"
+            class="text-[9px] text-blue-400 font-bold shrink-0"
+            >tú</span
+          >
+        </div>
 
-        <template v-if="seat.player.currentBet > 0">
-          <span>${{ seat.player.currentBet }}</span>
-          <span class="opacity-40">/</span>
-          <span>${{ seat.player.chips }}</span>
-        </template>
-        <template v-else-if="isFolded(seat.player)">
-          <span class="uppercase tracking-wider">fold</span>
-        </template>
-        <template v-else-if="seat.player.lastAction">
-          <span class="uppercase text-[9px]">{{ seat.player.lastAction }}</span>
-          <span class="opacity-40">/</span>
-          <span>${{ seat.player.chips }}</span>
-        </template>
-        <template v-else>
-          <span>${{ seat.player.chips }}</span>
-        </template>
-      </span>
+        <!-- Stack bar -->
+        <div class="w-full h-1 rounded-full bg-white/10 overflow-hidden my-1">
+          <div
+            class="h-full rounded-full transition-all duration-700"
+            :style="{ width: getStackPercent(seat.player) + '%' }"
+            :class="[
+              getStackPercent(seat.player) > 60
+                ? 'bg-emerald-400'
+                : getStackPercent(seat.player) > 30
+                  ? 'bg-orange-400'
+                  : 'bg-red-500',
+            ]"
+          ></div>
+        </div>
+
+        <!-- Chips + Action row -->
+        <div
+          class="flex items-center gap-1 text-[11px] font-mono font-bold"
+          :class="[isFolded(seat.player) ? 'text-white/20' : 'text-white/60']"
+        >
+          <template v-if="isFolded(seat.player)">
+            <span class="uppercase tracking-wider text-[9px] text-red-400/60"
+              >FOLDED</span
+            >
+          </template>
+          <template v-else-if="seat.player.isAllIn">
+            <span class="text-amber-400 font-black text-[10px]">ALL-IN</span>
+            <span class="opacity-40">${{ seat.player.chips }}</span>
+          </template>
+          <template v-else-if="seat.player.currentBet > 0">
+            <span class="text-yellow-400">${{ seat.player.currentBet }}</span>
+            <span class="opacity-30">/</span>
+            <span>${{ seat.player.chips }}</span>
+          </template>
+          <template v-else-if="seat.player.lastAction">
+            <span
+              class="uppercase tracking-wider"
+              :class="getActionTextColor(seat.player.lastAction)"
+              >{{ seat.player.lastAction }}</span
+            >
+            <span class="opacity-30">/</span>
+            <span>${{ seat.player.chips }}</span>
+          </template>
+          <template v-else>
+            <span>${{ seat.player.chips }}</span>
+          </template>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -103,39 +165,44 @@ const isMobile = computed(() =>
   ['xsmall', 'small'].includes(responsive.screenSize),
 )
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+const AVATAR_COLORS = [
+  '#4f46e5', // indigo
+  '#16a34a', // green
+  '#dc2626', // red
+  '#9333ea', // purple
+  '#ea580c', // orange
+  '#0891b2', // cyan
+  '#db2777', // pink
+  '#2563eb', // blue
+  '#65a30d', // lime
+  '#7c3aed', // violet
+]
+
+const getAvatarColor = (player) => {
+  const idx = (player.playerNumber - 1) % AVATAR_COLORS.length
+  return AVATAR_COLORS[Math.max(0, idx)]
+}
+
+const getInitial = (player) => {
+  const name = cleanPlayerName(player.name)
+  return name.charAt(0).toUpperCase()
+}
 
 const isFolded = (player) =>
-  player.lastAction && player.lastAction.toLowerCase().includes('fold')
+  !!player.folded ||
+  (player.lastAction && player.lastAction.toLowerCase().includes('fold'))
 
-const getActionColor = (action) => {
-  if (!action) return 'text-yellow-500 border-white/10 bg-black/40'
+const getActionTextColor = (action) => {
+  if (!action) return 'text-white/50'
   const a = action.toLowerCase()
-  if (a.includes('fold')) return 'text-red-400/60 border-red-500/10 bg-transparent'
-  if (a.includes('raise') || a.includes('all-in'))
-    return 'text-amber-300 border-amber-500/25 bg-amber-500/10'
-  if (a.includes('bet'))
-    return 'text-emerald-300 border-emerald-500/25 bg-emerald-500/10'
-  if (a.includes('call'))
-    return 'text-sky-300 border-sky-500/20 bg-sky-600/10'
-  if (a.includes('check')) return 'text-slate-300 border-white/10 bg-white/5'
-  return 'text-white/50 bg-white/5 border-white/10'
+  if (a.includes('fold')) return 'text-red-400/60'
+  if (a.includes('raise') || a.includes('all-in')) return 'text-amber-300'
+  if (a.includes('bet')) return 'text-emerald-300'
+  if (a.includes('call')) return 'text-sky-300'
+  if (a.includes('check')) return 'text-slate-300'
+  return 'text-white/50'
 }
 
-const getActionIcon = (action) => {
-  if (!action) return ''
-  const a = action.toLowerCase()
-  if (a === 'bet') return '💵'
-  if (a.includes('raise')) return '🔥'
-  if (a.includes('all-in')) return '🚀'
-  if (a.includes('call')) return '🤝'
-  if (a.includes('check')) return '✓'
-  return ''
-}
-
-// ── Stack bar ────────────────────────────────────────────────────────────────
-
-// Referencia: el máximo de chips entre TODOS los jugadores (incluyendo foleados)
 const maxChips = computed(() => {
   const all = props.players.filter((p) => p && p.chips != null)
   if (!all.length) return 1
@@ -146,8 +213,6 @@ const getStackPercent = (player) => {
   const stack = player.chips || 0
   return Math.max(3, Math.round((stack / maxChips.value) * 100))
 }
-
-// ── Seat positioning ─────────────────────────────────────────────────────────
 
 function getEllipseSeatPositions(playerCount) {
   if (playerCount < 2) return []
@@ -190,7 +255,7 @@ const positionedSeats = computed(() => {
     const n = 3.5
     const absCos = Math.pow(Math.abs(Math.cos(adjustedAngle)), 2 / n)
     const absSin = Math.pow(Math.abs(Math.sin(adjustedAngle)), 2 / n)
-    
+
     const left = 50 + axes.a * absCos * Math.sign(Math.cos(adjustedAngle))
     const top = 50 + axes.b * absSin * Math.sign(Math.sin(adjustedAngle))
     return { player, left, top }
@@ -198,13 +263,4 @@ const positionedSeats = computed(() => {
 })
 </script>
 
-<style scoped>
-@keyframes ping-slow {
-  0%   { transform: scale(1.4); opacity: 0.6; }
-  70%  { transform: scale(2);   opacity: 0; }
-  100% { transform: scale(2);   opacity: 0; }
-}
-.animate-ping-slow {
-  animation: ping-slow 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
-}
-</style>
+<style scoped></style>
