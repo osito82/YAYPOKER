@@ -26,16 +26,20 @@ class MatchLobby {
       if (this.match.publicCleanupTimer) {
         clearTimeout(this.match.publicCleanupTimer)
         this.match.publicCleanupTimer = null
-        this.log.R({
-          msg: `[LOBBY] Public match ${this.match.torneoId} cleanup cancelled (player joined).`,
-        })
+        this.log
+          .Template({ name: 'brakets', title: 'LOBBY:CLEANUP_CANCELLED', date: true })
+          .R({
+            msg: `Public match ${this.match.torneoId} cleanup cancelled (player joined).`,
+          })
       }
       if (this.match.publicEmptyTimer) {
         clearTimeout(this.match.publicEmptyTimer)
         this.match.publicEmptyTimer = null
-        this.log.R({
-          msg: `[LOBBY] Public match ${this.match.torneoId} empty-cleanup cancelled (player joined).`,
-        })
+        this.log
+          .Template({ name: 'brakets', title: 'LOBBY:EMPTY_CLEANUP_CANCELLED', date: true })
+          .R({
+            msg: `Public match ${this.match.torneoId} empty-cleanup cancelled (player joined).`,
+          })
       }
     }
 
@@ -113,6 +117,8 @@ class MatchLobby {
       msg.players = this.match.players.map((p) => p.toJson())
       msg.pot = this.dealer.getPot()
       msg.dealerCards = this.dealer.getDealerCards()
+      msg.bigBlind = this.match.bigBlind
+      msg.smallBlind = this.match.smallBlind
 
       Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
 
@@ -210,6 +216,8 @@ class MatchLobby {
       msg.players = this.match.players.map((p) => p.toJson())
       msg.pot = this.dealer.getPot()
       msg.dealerCards = this.dealer.getDealerCards()
+      msg.bigBlind = this.match.bigBlind
+      msg.smallBlind = this.match.smallBlind
 
       Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
     }
@@ -235,10 +243,12 @@ class MatchLobby {
       connectedBots.length === 0 &&
       !this.match.isSpawningBots
     ) {
-      this.log.R({
-        msg: `[BOT_API] Human left alone in public match. Spawning companion bot.`,
-        torneo: this.match.torneoId,
-      })
+      this.log
+        .Template({ name: 'brakets', title: 'BOT_API:SPAWN_COMPANION', date: true })
+        .R({
+          msg: `Human left alone in public match. Spawning companion bot.`,
+          tournament: this.match.torneoId,
+        })
       this.match.spawnBots(1).then(() => {
         this.match.isSpawningBots = false
       })
@@ -249,10 +259,12 @@ class MatchLobby {
       connectedBots.length > 0
     ) {
       const botToLeave = connectedBots[0]
-      this.log.R({
-        msg: `[BOT_API] Bot ${botToLeave.name} disconnecting (player count: ${this.match.players.length})`,
-        torneo: this.match.torneoId,
-      })
+      this.log
+        .Template({ name: 'brakets', title: 'BOT_API:DISCONNECT', date: true })
+        .R({
+          msg: `Bot ${botToLeave.name} disconnecting (player count: ${this.match.players.length})`,
+          tournament: this.match.torneoId,
+        })
 
       const botSocketWrapper = Socket.getSocket(
         this.match.torneoId,

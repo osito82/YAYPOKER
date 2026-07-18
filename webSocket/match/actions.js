@@ -627,9 +627,11 @@ class MatchActions {
         this.match.activePlayerId = p.id
 
         if (p.isSittingOut) {
-          this.log.R({
-            info: `[SITOUT] Player ${p.name} auto-posted blind ${isSB ? 'SB' : 'BB'} (${blindAmount}).`,
-          })
+          this.log
+            .Template({ name: 'brakets', title: 'SITOUT:AUTO_POST', date: true })
+            .R({
+              info: `Player ${p.name} auto-posted blind ${isSB ? 'SB' : 'BB'} (${blindAmount}).`,
+            })
           this.setBet({ id: p.id }, blindAmount, 'setBet', true)
           return
         }
@@ -845,7 +847,9 @@ class MatchActions {
 
   winnerHand = (winnersInfo, isFold, pot, finalHands) => {
     if (!winnersInfo || winnersInfo.length === 0) {
-      this.log.R({ info: 'No winners to announce' })
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH:WINNER', date: true })
+        .R({ info: 'No winners to announce' })
       return
     }
 
@@ -1024,10 +1028,14 @@ class MatchActions {
         this.match.activePlayerId = p.id
         const canCheck = maxBet === 0 || p.getCurrentBet() === maxBet
         if (canCheck) {
-          this.log.R({ info: `[SITOUT] Player ${p.name} auto-checked.` })
+          this.log
+            .Template({ name: 'brakets', title: 'SITOUT:AUTO_CHECK', date: true })
+            .R({ info: `Player ${p.name} auto-checked.` })
           this.setCheck({ id: p.id })
         } else {
-          this.log.R({ info: `[SITOUT] Player ${p.name} auto-folded.` })
+          this.log
+            .Template({ name: 'brakets', title: 'SITOUT:AUTO_FOLD', date: true })
+            .R({ info: `Player ${p.name} auto-folded.` })
           this.fold({ id: p.id }, true)
         }
         return
@@ -1223,13 +1231,17 @@ class MatchActions {
       foundPlayer.isSittingOut = !!isSittingOut
       if (isSittingOut) {
         foundPlayer.consecutiveAutofolds = 0
-        this.log.R({
-          info: `[SITOUT] Player ${foundPlayer.name} sat out manually.`,
-        })
+        this.log
+          .Template({ name: 'brakets', title: 'SITOUT:MANUAL', date: true })
+          .R({
+            info: `Player ${foundPlayer.name} sat out manually.`,
+          })
       } else {
-        this.log.R({
-          info: `[SITOUT] Player ${foundPlayer.name} returned to table.`,
-        })
+        this.log
+          .Template({ name: 'brakets', title: 'SITOUT:RETURN', date: true })
+          .R({
+            info: `Player ${foundPlayer.name} returned to table.`,
+          })
       }
 
       this.communicator.msgBuilder('playerSitOut', 'public', foundPlayer, {

@@ -104,7 +104,7 @@ describe('ActionBar.vue', () => {
     expect(callBtn.element.disabled).toBe(true)
   })
 
-  it('disables Raise button by default if amount equals minBet (User Request Validation)', async () => {
+  it('enables Raise button by default even if amount equals minBet (minimum raise is legal)', async () => {
     const wrapper = mount(ActionBar, {
       props: { ...defaultProps, betAmount: 20, minBet: 20 },
       global: globalConfig,
@@ -114,7 +114,7 @@ describe('ActionBar.vue', () => {
     const raiseBtn = wrapper
       .findAll('button')
       .find((b) => b.text().includes('Raise'))
-    expect(raiseBtn.element.disabled).toBe(true)
+    expect(raiseBtn.element.disabled).toBe(false)
   })
 
   it('enables Raise button when betAmount is greater than minBet', async () => {
@@ -133,7 +133,7 @@ describe('ActionBar.vue', () => {
     expect(raiseBtn.element.disabled).toBe(false)
   })
 
-  it('re-disables Raise button when betAmount goes back to minBet', async () => {
+  it('keeps Raise button enabled when betAmount goes back to minBet', async () => {
     const wrapper = mount(ActionBar, {
       props: { ...defaultProps, betAmount: 40, minBet: 20 },
       global: globalConfig,
@@ -148,7 +148,7 @@ describe('ActionBar.vue', () => {
     await wrapper.setProps({ betAmount: 20 })
 
     raiseBtn = wrapper.findAll('button').find((b) => b.text().includes('Raise'))
-    expect(raiseBtn.element.disabled).toBe(true)
+    expect(raiseBtn.element.disabled).toBe(false)
   })
 
   it('allows Raise when it is an All-in situation (minBet === maxBet)', async () => {

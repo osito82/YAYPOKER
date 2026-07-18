@@ -81,10 +81,12 @@ class Match extends EventEmitter {
     if (process.env.NODE_ENV === 'test') return
     this.isSpawningBots = true
 
-    this.log.R({
-      msg: `[BOT_API] REQUESTING ${count} BOTS`,
-      torneo: this.torneoId,
-    })
+    this.log
+      .Template({ name: 'brakets', title: 'BOT_API:REQUEST', date: true })
+      .R({
+        msg: `REQUESTING ${count} BOTS`,
+        tournament: this.torneoId,
+      })
 
     const usedNames = new Set(this.players.map((p) => p.name))
 
@@ -287,9 +289,11 @@ class Match extends EventEmitter {
       if (data.bots > 0 && !this.isSpawningBots) {
         let count = Number(data.bots)
         if (count > botLimit) {
-          this.log.R({
-            msg: `[BOT_API] Bot request reduced from ${count} to ${botLimit}`,
-          })
+          this.log
+            .Template({ name: 'brakets', title: 'BOT_API:REDUCED', date: true })
+            .R({
+              msg: `Bot request reduced from ${count} to ${botLimit}`,
+            })
           count = botLimit
         }
 
@@ -386,9 +390,11 @@ class Match extends EventEmitter {
     const playersWithChips = connected.filter((p) => p.chips > 0)
 
     if (playersWithChips.length < GAME_RULES.MIN_PLAYERS) {
-      this.log.R({
-        info: `Tournament finished. ${this.isPublic ? 'Resetting public table.' : 'No more rounds.'}`,
-      })
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH:FINISHED', date: true })
+        .R({
+          info: `Tournament finished. ${this.isPublic ? 'Resetting public table.' : 'No more rounds.'}`,
+        })
 
       this.acceptingPlayers = true
 

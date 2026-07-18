@@ -233,7 +233,7 @@ wss.on('connection', (ws, req) => {
 
   log
     .Template({ name: 'brakets', title: 'SERVER:NEW_CONNECTION', date: true })
-    .R({ playerName, id: thisSocket.id, torneo: torneoId, secretCode })
+    .R({ playerName, id: thisSocket.id, tournament: torneoId, secretCode })
 
   Socket.addSocket(thisSocket, torneoId)
 

@@ -19,7 +19,7 @@ try {
   const host = TESTING_URL || OLLAMA_URL;
   ollamaClient = new Ollama({ host });
   log
-    .Template({ name: "brakets", title: "IA:OLLAMA_INIT", date: true })
+    .Template({ name: "brakets", title: "AI:OLLAMA_INIT", date: true })
     .R({ url: host, msg: "Ready" });
 } catch (error) {
   log
@@ -70,7 +70,7 @@ class PokerBot {
       const genAI = new GoogleGenerativeAI(geminiKey);
       this.geminiModel = genAI.getGenerativeModel({ model: this.modelName });
       log
-        .Template({ name: "brakets", title: "IA:GEMINI_INIT", date: true })
+        .Template({ name: "brakets", title: "AI:GEMINI_INIT", date: true })
         .R({ bot: this.playerName, model: this.modelName });
     }
 
@@ -79,7 +79,7 @@ class PokerBot {
       this.deepseekBaseUrl =
         process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
       log
-        .Template({ name: "brakets", title: "IA:DEEPSEEK_INIT", date: true })
+        .Template({ name: "brakets", title: "AI:DEEPSEEK_INIT", date: true })
         .R({ bot: this.playerName, model: this.modelName });
     }
   }
@@ -242,14 +242,19 @@ class PokerBot {
     const tieChance = this.myOdds.tie;
     const realEquity = (winChance + tieChance / 2) / 100;
 
+    // Cálculo de Pot Odds y Expected Value (EV)
+    const currentPot = Number(msg.pot || 0);
+    const potOdds = callAmount > 0 ? callAmount / (currentPot + callAmount) : 0;
+    const evCall = (realEquity * currentPot) - ((1 - realEquity) * callAmount);
+
     // Acción base por defecto
     let baseAction = "check";
     if (callAmount === 0) {
       baseAction = allowedActions.includes("check") ? "check" : "call";
     } else {
-      // Si falla la IA y hay que pagar, usamos la equidad matemática para no ser siempre un "Call Station"
+      // Usamos EV para la acción de fallback
       if (allowedActions.includes("call")) {
-        baseAction = realEquity > 0.35 ? "call" : "fold";
+        baseAction = evCall > 0 ? "call" : "fold";
       } else {
         baseAction = "fold";
       }
@@ -260,6 +265,8 @@ class PokerBot {
       .R({
         bot: this.playerName,
         equity: realEquity,
+        potOdds: potOdds.toFixed(2),
+        ev: evCall.toFixed(2),
         call: callAmount,
         allowed: allowedActions,
       });
@@ -267,14 +274,18 @@ class PokerBot {
     const prompt = `
 You are a professional Texas Hold'em player.
 Hand: ${this.myCards.join(", ")} | Board: ${board.join(", ") || "No cards dealt yet"}
-Current Pot: ${msg.pot} | Amount to Call: ${callAmount}
+Current Pot: ${currentPot} | Amount to Call: ${callAmount}
 Your mathematical Equity is: ${realEquity.toFixed(2)} (0.0 to 1.0)
+Pot Odds: ${potOdds.toFixed(2)}
+Expected Value (EV) of calling: ${evCall.toFixed(2)} chips
 Allowed Actions: ${allowedActions.join(", ")}
 
 Strategy Rules:
 1. NEVER fold if "check" is an allowed action.
-2. If Equity < 0.35 and Call Amount > 0, you SHOULD fold unless you want to bluff.
-3. Only "raise" if Equity > 0.6 or if you want to bluff.
+2. If EV is positive (EV > 0) and Pot Odds < Equity, a call is mathematically profitable (+EV).
+3. If EV is strongly negative (EV < 0) and Call Amount > 0, you SHOULD fold unless you want to bluff.
+4. Only "raise" if Equity > 0.6, EV is highly positive, or if you want to execute a calculated bluff.
+5. If you raise, pick an amount between 2x and 3x the current raise, or a pot-sized bet.
 
 Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":number}
 `;
@@ -329,7 +340,7 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
       decision = this.safeParseJSON(aiText);
     } catch (e) {
       log
-        .Template({ name: "brakets", title: "ERROR:IA", date: true })
+        .Template({ name: "brakets", title: "ERROR:AI", date: true })
         .R({ bot: this.playerName, error: e.message });
     }
 
@@ -396,22 +407,26 @@ app.post("/spawn", (req, res) => {
   res.json({ message: `Spawned ${playerName}` });
 });
 
-app.listen(PORT, () => {
-  log
-    .Template({ name: "brakets", title: "SERVICE:READY", date: true })
-    .R({ port: PORT });
-
-  // Soporte para CLI: Permitir spawnear un bot directamente si se pasan argumentos
-  const args = process.argv.slice(2).reduce((acc, arg) => {
-    const [key, value] = arg.replace("--", "").split("=");
-    acc[key] = value;
-    return acc;
-  }, {});
-
-  if (args.gameCode && args.playerName) {
+if (require.main === module) {
+  app.listen(PORT, () => {
     log
-      .Template({ name: "brakets", title: "SERVICE:CLI_SPAWN", date: true })
-      .R({ gameCode: args.gameCode, bot: args.playerName });
-    new PokerBot(args);
-  }
-});
+      .Template({ name: "brakets", title: "SERVICE:READY", date: true })
+      .R({ port: PORT });
+
+    // Soporte para CLI: Permitir spawnear un bot directamente si se pasan argumentos
+    const args = process.argv.slice(2).reduce((acc, arg) => {
+      const [key, value] = arg.replace("--", "").split("=");
+      acc[key] = value;
+      return acc;
+    }, {});
+
+    if (args.gameCode && args.playerName) {
+      log
+        .Template({ name: "brakets", title: "SERVICE:CLI_SPAWN", date: true })
+        .R({ gameCode: args.gameCode, bot: args.playerName });
+      new PokerBot(args);
+    }
+  });
+}
+
+module.exports = { PokerBot, app };

@@ -5,6 +5,7 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
+    "test": "vitest",
     "format": "prettier --write .",
     "bot": "node bot.js --gameCode=LOBBY --name=Gemini_Bot",
     "llama": "node bot.js --gameCode=LOBBY --name=Llama_Bot --provider=openllama"
@@ -23,6 +24,7 @@
   "devDependencies": {
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "vitest": "^4.1.10"
   }
 }

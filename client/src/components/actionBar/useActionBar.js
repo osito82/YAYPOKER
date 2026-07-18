@@ -78,17 +78,16 @@ export function useActionBar(props, emit) {
     const isIncrease = props.betAmount > tableHighestBet
     const isLegalAmount = props.betAmount >= props.minBet
 
-    // User Request Validation: El botón de Raise se deshabilita si el monto es igual al mínimo,
-    // forzando al usuario a mover el slider para confirmar una subida intencional,
-    // A MENOS que estemos en un "bet" inicial (donde el mínimo es la BB y es una acción válida)
-    // Pero los tests son estrictos: si betAmount === minBet, se deshabilita.
-    const isNotAtDefaultMin = props.betAmount > props.minBet
-
+    // Se elimina la restricción de obligar al usuario a apostar más del mínimo.
+    // Un "Bet" o "Raise" mínimo es una jugada 100% válida en el poker.
+    // Al haber fijado el slider al mínimo al inicio del turno, ahora el jugador
+    // simplemente puede clickear el botón si quiere hacer la apuesta/subida mínima.
+    
     // Situación especial: Si minBet === maxBet, el jugador no tiene rango para elegir,
     // por lo que el botón de Raise se deshabilita para evitar confusión (debería usar Call/All-in)
     const hasRange = props.maxBet > props.minBet
 
-    return !(isIncrease && isLegalAmount && isNotAtDefaultMin && hasRange)
+    return !(isIncrease && isLegalAmount && hasRange)
   })
 
   const activePlayerName = computed(() => {

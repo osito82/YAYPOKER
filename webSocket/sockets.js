@@ -28,7 +28,7 @@ class Socket {
           .R({
             playerName: name,
             id,
-            torneo: idTorneo,
+            tournament: idTorneo,
             secretCode,
             replacedId: existingId,
           })
@@ -46,7 +46,7 @@ class Socket {
           title: 'SERVER:NEW_CONNECTION',
           date: true,
         })
-        .R({ playerName: name, id, torneo: idTorneo, secretCode })
+        .R({ playerName: name, id, tournament: idTorneo, secretCode })
     }
   }
 
@@ -63,7 +63,7 @@ class Socket {
         .R({
           playerName: socket.name,
           id: socket.id,
-          torneo: idTorneo,
+          tournament: idTorneo,
           secretCode: socket.secretCode,
         })
     }
