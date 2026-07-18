@@ -226,7 +226,7 @@ function getEllipseSeatPositions(playerCount) {
 }
 
 const semiAxes = computed(() => {
-  return isMobile.value ? { a: 47, b: 28 } : { a: 45, b: 32 }
+  return isMobile.value ? { a: 47, b: 32 } : { a: 45, b: 36 }
 })
 
 const positionedSeats = computed(() => {
@@ -257,7 +257,7 @@ const positionedSeats = computed(() => {
     const absSin = Math.pow(Math.abs(Math.sin(adjustedAngle)), 2 / n)
 
     const left = 50 + axes.a * absCos * Math.sign(Math.cos(adjustedAngle))
-    const top = 50 + axes.b * absSin * Math.sign(Math.sin(adjustedAngle))
+    const top = 53 + axes.b * absSin * Math.sign(Math.sin(adjustedAngle))
     return { player, left, top }
   })
 })
