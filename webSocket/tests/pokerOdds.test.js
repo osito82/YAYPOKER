@@ -5,30 +5,23 @@ import PokerOddsCalculator from '../pokerOdds'
 describe('PokerOddsCalculator', () => {
   const poker = new PokerOddsCalculator()
 
-  it('should calculate odds for a simple scenario', () => {
-    const playerHands = [
-      ['Ah', 'Ad'],
-      ['2h', '7d'],
-    ]
+  it('should calculate odds for a simple scenario against random hands', () => {
+    const myHand = ['Ah', 'Ad']
     const board = ['As', '5h', '9c']
 
-    // Aces should have a very high win probability here
-    const result = poker.calculateOdds(playerHands, board, 100)
+    // Aces should have a very high win probability here against 1 random hand
+    const result = poker.calculateOddsForPlayer(myHand, 2, board, 100)
 
-    expect(Number(result.winProbabilities[0])).toBeGreaterThan(80)
-    expect(Number(result.winProbabilities[1])).toBeLessThan(20)
+    expect(Number(result.win)).toBeGreaterThan(80)
   })
 
   it('should handle a split pot scenario', () => {
-    const playerHands = [
-      ['Ad', '2d'],
-      ['As', '3d'],
-    ] // No hearts here
-    const board = ['Kh', 'Qh', 'Jh', 'Th', '9h'] // Straight Flush on board
+    const myHand = ['Ad', '2d']
+    const board = ['Ah', 'Kh', 'Qh', 'Jh', 'Th'] // Royal Flush on board
 
-    const result = poker.calculateOdds(playerHands, board, 10)
+    const result = poker.calculateOddsForPlayer(myHand, 2, board, 10)
 
-    // Everyone ties because board is the best hand for both
-    expect(Number(result.tieProbability)).toBe(100)
+    // Everyone ties because board is a Royal Flush (the absolute best hand)
+    expect(Number(result.tie)).toBe(100)
   })
 })

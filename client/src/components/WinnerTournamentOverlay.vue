@@ -331,7 +331,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onUnmounted, watch, onMounted } from 'vue'
+import { computed, ref, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Card from './Card.vue'
@@ -347,8 +347,6 @@ const templateSuffix = computed(() => responsive.templateSuffix || 'Default')
 const props = defineProps({
   winnerInfo: Object,
 })
-
-const emit = defineEmits(['close'])
 
 const pokerStore = usePokerStore()
 const DURATION = 120 // Increased to 2 minutes to let winner enjoy the certificate
@@ -517,7 +515,7 @@ const formatHandName = (name) => {
 }
 
 const allShowdownPlayers = computed(() => {
-  let all = []
+  let all
   if (props.winnerInfo?.allHands) {
     all = props.winnerInfo.allHands.filter((h) => h.lastAction !== 'Out')
   } else {

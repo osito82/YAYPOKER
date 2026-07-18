@@ -211,17 +211,13 @@ import { computed, ref, onUnmounted, watch } from 'vue'
 import Card from './Card.vue'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
-import { useI18n } from 'vue-i18n'
 import { cleanPlayerName } from '../vutils'
 
-const { t } = useI18n()
 const responsive = useResponsiveStore()
 
 const props = defineProps({
   winnerInfo: Object,
 })
-
-const emit = defineEmits(['close'])
 
 const pokerStore = usePokerStore()
 const templateSuffix = computed(() => responsive.templateSuffix || 'Default')
@@ -340,7 +336,7 @@ const formatHandName = (name) => {
 }
 
 const allShowdownPlayers = computed(() => {
-  let all = []
+  let all
   if (props.winnerInfo?.allHands) {
     all = props.winnerInfo.allHands.filter((h) => h.lastAction !== 'Out')
   } else {

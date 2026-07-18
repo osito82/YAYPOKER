@@ -1,115 +1,127 @@
 <template>
   <div
     :id="`odds-panel-container-${templateSuffix}`"
-    class="odds-panel w-full flex items-stretch overflow-hidden"
+    class="odds-panel w-full flex flex-col items-stretch overflow-hidden"
   >
-    <!-- WIN -->
-    <div
-      :id="`odds-win-column-${templateSuffix}`"
-      class="flex flex-col items-center justify-center flex-1 px-2 py-1.5 border-r border-white/5"
-    >
-      <span
-        :id="`odds-win-label-${templateSuffix}`"
-        class="text-[7px] font-black text-gray-500 uppercase tracking-widest mb-0.5 leading-none"
-        >Win</span
-      >
+    <div class="flex items-stretch w-full">
+      <!-- WIN -->
       <div
-        :id="`odds-win-value-wrapper-${templateSuffix}`"
-        class="flex items-baseline gap-0.5 leading-none"
+        v-if="pokerStore.isPublic"
+        :id="`odds-win-column-${templateSuffix}`"
+        class="flex flex-col items-center justify-center flex-1 px-2 py-1.5 border-r border-white/5"
       >
         <span
-          :id="`odds-win-percentage-text-${templateSuffix}`"
-          :class="[
-            'font-mono font-black tracking-tighter leading-none',
-            'text-2xl sm:text-3xl',
-            winColor,
-          ]"
-          >{{ Math.round(winProb) }}</span
+          :id="`odds-win-label-${templateSuffix}`"
+          class="text-[7px] font-black text-gray-500 uppercase tracking-widest mb-0.5 leading-none"
+          >Win</span
         >
-        <span
-          :id="`odds-win-percent-symbol-${templateSuffix}`"
-          class="text-[9px] font-bold text-gray-600 leading-none"
-          >%</span
-        >
-      </div>
-      <!-- Win probability bar -->
-      <div
-        :id="`odds-win-progress-track-${templateSuffix}`"
-        class="w-full h-0.5 bg-white/5 rounded-full mt-1 overflow-hidden"
-      >
         <div
-          :id="`odds-win-progress-fill-${templateSuffix}`"
-          class="h-full rounded-full transition-all duration-500"
-          :class="winBarColor"
-          :style="{ width: Math.round(winProb) + '%' }"
-        ></div>
+          :id="`odds-win-value-wrapper-${templateSuffix}`"
+          class="flex items-baseline gap-0.5 leading-none"
+        >
+          <span
+            :id="`odds-win-percentage-text-${templateSuffix}`"
+            :class="[
+              'font-mono font-black tracking-tighter leading-none',
+              'text-2xl sm:text-3xl',
+              winColor,
+            ]"
+            >{{ Math.round(winProb) }}</span
+          >
+          <span
+            :id="`odds-win-percent-symbol-${templateSuffix}`"
+            class="text-[9px] font-bold text-gray-600 leading-none"
+            >%</span
+          >
+        </div>
+        <!-- Win probability bar -->
+        <div
+          :id="`odds-win-progress-track-${templateSuffix}`"
+          class="w-full h-0.5 bg-white/5 rounded-full mt-1 overflow-hidden"
+        >
+          <div
+            :id="`odds-win-progress-fill-${templateSuffix}`"
+            class="h-full rounded-full transition-all duration-500"
+            :class="winBarColor"
+            :style="{ width: Math.round(winProb) + '%' }"
+          ></div>
+        </div>
+      </div>
+
+      <!-- TIE -->
+      <div
+        v-if="pokerStore.isPublic"
+        :id="`odds-tie-column-${templateSuffix}`"
+        class="flex flex-col items-center justify-center flex-1 px-2 py-1.5 border-r border-white/5"
+      >
+        <span
+          :id="`odds-tie-label-${templateSuffix}`"
+          class="text-[7px] font-black text-gray-500 uppercase tracking-widest mb-0.5 leading-none"
+          >Tie</span
+        >
+        <div
+          :id="`odds-tie-value-wrapper-${templateSuffix}`"
+          class="flex items-baseline gap-0.5 leading-none"
+        >
+          <span
+            :id="`odds-tie-percentage-text-${templateSuffix}`"
+            class="text-2xl sm:text-3xl font-mono font-black text-blue-400 tracking-tighter leading-none"
+            >{{ Math.round(tieProb) }}</span
+          >
+          <span
+            :id="`odds-tie-percent-symbol-${templateSuffix}`"
+            class="text-[9px] font-bold text-gray-600 leading-none"
+            >%</span
+          >
+        </div>
+        <div
+          :id="`odds-tie-progress-track-${templateSuffix}`"
+          class="w-full h-0.5 bg-white/5 rounded-full mt-1 overflow-hidden"
+        >
+          <div
+            :id="`odds-tie-progress-fill-${templateSuffix}`"
+            class="h-full bg-blue-500 rounded-full transition-all duration-500"
+            :style="{ width: Math.round(tieProb) + '%' }"
+          ></div>
+        </div>
+      </div>
+
+      <!-- HAND -->
+      <div
+        :id="`odds-hand-column-${templateSuffix}`"
+        class="flex flex-col items-center justify-center flex-1 px-2 py-1.5"
+      >
+        <span
+          :id="`odds-hand-label-${templateSuffix}`"
+          class="text-[7px] font-black text-gray-500 uppercase tracking-widest mb-0.5 leading-none"
+          >{{ $t('game.hand') }}</span
+        >
+        <span
+          :id="`odds-hand-name-text-${templateSuffix}`"
+          class="text-[9px] sm:text-[10px] font-black text-yellow-500 uppercase italic leading-none truncate max-w-[90px] text-center"
+          >{{ handName || $t('game.waiting') }}</span
+        >
+        <div
+          :id="`odds-hand-rank-visual-wrapper-${templateSuffix}`"
+          class="flex gap-0.5 mt-1"
+        >
+          <div
+            v-for="i in 10"
+            :key="i"
+            :id="`odds-hand-rank-dot-${i}-${templateSuffix}`"
+            class="w-1.5 h-0.5 rounded-full transition-all duration-300"
+            :class="i <= 11 - (handRank || 11) ? 'bg-yellow-500' : 'bg-white/8'"
+          ></div>
+        </div>
       </div>
     </div>
 
-    <!-- TIE -->
+    <!-- Footer disclaimer -->
     <div
-      :id="`odds-tie-column-${templateSuffix}`"
-      class="flex flex-col items-center justify-center flex-1 px-2 py-1.5 border-r border-white/5"
+      v-if="pokerStore.isPublic"
+      class="text-[6.5px] lg:text-[7px] text-white/20 uppercase tracking-wider text-center py-0.5 border-t border-white/5 bg-white/5 font-black leading-none select-none"
     >
-      <span
-        :id="`odds-tie-label-${templateSuffix}`"
-        class="text-[7px] font-black text-gray-500 uppercase tracking-widest mb-0.5 leading-none"
-        >Tie</span
-      >
-      <div
-        :id="`odds-tie-value-wrapper-${templateSuffix}`"
-        class="flex items-baseline gap-0.5 leading-none"
-      >
-        <span
-          :id="`odds-tie-percentage-text-${templateSuffix}`"
-          class="text-lg sm:text-xl font-mono font-black text-blue-400 tracking-tighter leading-none"
-          >{{ Math.round(tieProb) }}</span
-        >
-        <span
-          :id="`odds-tie-percent-symbol-${templateSuffix}`"
-          class="text-[9px] font-bold text-gray-600 leading-none"
-          >%</span
-        >
-      </div>
-      <div
-        :id="`odds-tie-progress-track-${templateSuffix}`"
-        class="w-full h-0.5 bg-white/5 rounded-full mt-1 overflow-hidden"
-      >
-        <div
-          :id="`odds-tie-progress-fill-${templateSuffix}`"
-          class="h-full bg-blue-500 rounded-full transition-all duration-500"
-          :style="{ width: Math.round(tieProb) + '%' }"
-        ></div>
-      </div>
-    </div>
-
-    <!-- HAND -->
-    <div
-      :id="`odds-hand-column-${templateSuffix}`"
-      class="flex flex-col items-center justify-center flex-1 px-2 py-1.5"
-    >
-      <span
-        :id="`odds-hand-label-${templateSuffix}`"
-        class="text-[7px] font-black text-gray-500 uppercase tracking-widest mb-0.5 leading-none"
-        >{{ $t('game.hand') }}</span
-      >
-      <span
-        :id="`odds-hand-name-text-${templateSuffix}`"
-        class="text-[9px] sm:text-[10px] font-black text-yellow-500 uppercase italic leading-none truncate max-w-[90px] text-center"
-        >{{ handName || $t('game.waiting') }}</span
-      >
-      <div
-        :id="`odds-hand-rank-visual-wrapper-${templateSuffix}`"
-        class="flex gap-0.5 mt-1"
-      >
-        <div
-          v-for="i in 10"
-          :key="i"
-          :id="`odds-hand-rank-dot-${i}-${templateSuffix}`"
-          class="w-1.5 h-0.5 rounded-full transition-all duration-300"
-          :class="i <= 11 - (handRank || 11) ? 'bg-yellow-500' : 'bg-white/8'"
-        ></div>
-      </div>
+      {{ $t('game.odds_vs_random_hint') }}
     </div>
   </div>
 </template>
@@ -117,6 +129,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
+import { usePokerStore } from '../store/pokerStore'
 
 const props = defineProps({
   winProb: { type: Number, default: 0 },
@@ -126,6 +139,7 @@ const props = defineProps({
 })
 
 const responsive = useResponsiveStore()
+const pokerStore = usePokerStore()
 const templateSuffix = computed(() => responsive.templateSuffix)
 
 const winColor = computed(() => {
