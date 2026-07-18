@@ -319,7 +319,7 @@ const verify = async () => {
     )
     if (!res.ok) throw new Error('Error de servidor')
     result.value = await res.json()
-  } catch (err) {
+  } catch {
     result.value = { valid: false, error: 'Error de conexión con el servidor.' }
   } finally {
     isVerifying.value = false

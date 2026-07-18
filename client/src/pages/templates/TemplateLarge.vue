@@ -224,7 +224,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import PokerTable from '../../components/PokerTable.vue'
 import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'

@@ -124,7 +124,6 @@ export const useSoundStore = defineStore('sound', () => {
 
   const playWin = () => {
     // Triumphant arpeggio
-    const now = audioContext ? audioContext.currentTime : 0
     if (!audioContext || isMuted.value) return
     const notes = [440, 554.37, 659.25, 880] // A4, C#5, E5, A5
     notes.forEach((freq, i) => {

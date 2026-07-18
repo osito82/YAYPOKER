@@ -426,14 +426,12 @@ import { useRouter, useRoute } from 'vue-router'
 import { v4 as uuidv4 } from 'uuid'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { usePokerStore } from '../store/pokerStore'
-import QRCodeVue3 from 'qrcode-vue3'
 import Logo from '../components/Logo.vue'
 import {
   generateUniqueId,
   generatePublicId,
   generateSecretCode,
   urlsFactory,
-  copyToClipboard as copyToClipboardUtil,
 } from '../vutils'
 
 const responsive = useResponsiveStore()
@@ -454,7 +452,6 @@ const joinCode = ref('')
 const generatedCode = ref('')
 const isCreating = ref(false)
 const isPublic = ref(false)
-const copyStatus = ref('Copy Code')
 
 // Watch for mode changes to load appropriate credentials
 watch(
@@ -554,17 +551,6 @@ const footerPadding = computed(() => {
   }
 })
 
-const qrSize = computed(() => {
-  switch (responsive.screenSize) {
-    case 'xsmall':
-      return 120
-    case 'small':
-      return 150
-    default:
-      return 180
-  }
-})
-
 const generatedBoxPadding = computed(() => {
   switch (responsive.screenSize) {
     case 'xsmall':
@@ -632,14 +618,6 @@ watch(
     checkRouteState()
   },
 )
-
-const shareUrl = computed(() => {
-  const urls = urlsFactory()
-  const code = isCreating.value ? generatedCode.value : joinCode.value
-  if (!code) return ''
-
-  return `${urls.url}/join/${code}`
-})
 
 const isGameCodeValid = computed(() => {
   const gameCodeRegex = /^[A-Z0-9]{5}-[A-Z0-9]{5}$/
@@ -711,24 +689,8 @@ const joinPublicGame = async () => {
   }
 }
 
-const goToCreate = () => {
-  router.push({ name: 'lobby.new' })
-}
-
 const cancelCreate = () => {
   router.push('/lobby')
-}
-
-const copyToClipboard = async () => {
-  const success = await copyToClipboardUtil(shareUrl.value)
-  if (success) {
-    copyStatus.value = 'Copied!'
-    setTimeout(() => {
-      copyStatus.value = 'Copy Code'
-    }, 2000)
-  } else {
-    copyStatus.value = 'Error'
-  }
 }
 
 const startGame = () => {

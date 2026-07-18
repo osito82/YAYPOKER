@@ -221,7 +221,7 @@ const isMobile = computed(() =>
   ['xsmall', 'small'].includes(responsive.screenSize),
 )
 
-const props = defineProps({
+defineProps({
   pot: { type: [Number, String], default: 0 },
   communityCards: { type: Array, default: () => [] },
   players: { type: Array, default: () => [] },

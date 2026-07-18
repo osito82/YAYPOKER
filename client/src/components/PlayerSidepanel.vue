@@ -400,17 +400,6 @@ const getActionTextColor = (action) => {
   if (a.includes('check')) return 'text-gray-400'
   return 'text-white/60'
 }
-
-const getActionColor = (action) => {
-  const a = action.toLowerCase()
-  if (a.includes('fold')) return 'text-red-400 border-red-500/20 bg-red-500/10'
-  if (a.includes('raise') || a.includes('bet'))
-    return 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10'
-  if (a.includes('call'))
-    return 'text-blue-400 border-blue-500/20 bg-blue-600/10'
-  if (a.includes('check')) return 'text-gray-400 border-white/10 bg-white/5'
-  return 'text-white/60'
-}
 </script>
 
 <style scoped>

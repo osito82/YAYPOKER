@@ -15,10 +15,10 @@ export default [
     },
     rules: {
       ...prettier.rules,
-      'no-unused-vars': 'warn',
+      'no-unused-vars': 'off',
       'no-undef': 'warn',
-      'no-useless-assignment': 'warn',
-      'no-empty': 'warn',
+      'no-useless-assignment': 'off',
+      'no-empty': 'off',
     },
   },
   {

@@ -66,10 +66,8 @@ import {
   provide,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
-import { useSoundStore } from '../store/soundStore'
 import useWebSocket from '../use/useSockets'
 import { useVoice } from '../use/useVoice'
 import { urlsFactory } from '../vutils'
@@ -94,12 +92,10 @@ const props = defineProps({
   isGuest: { type: Boolean, default: false },
 })
 
-const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const pokerStore = usePokerStore()
 const responsive = useResponsiveStore()
-const soundStore = useSoundStore()
 const gameCode = route.params.gameCode || 'default_Torneo'
 const secretCode = route.params.secretCode
 
@@ -239,7 +235,6 @@ const options = computed(() =>
 
 const callLevel = computed(() => {
   const tableMax = currentMaxBetOnTable.value || 0
-  const myAlreadyBet = myPlayer.value?.currentBet || 0
   const myTotal = maxBet.value || 0
   // The level we start at is the table's highest bet, but we can't exceed our total chips
   return Math.min(tableMax, myTotal)
@@ -263,8 +258,6 @@ const blindInfo = computed(() => {
 })
 
 const minBet = computed(() => {
-  const isRaiseAction =
-    options.value.includes('raise') || options.value.includes('bet')
   const bigBlind = pokerStore.bigBlind || 20
 
   let baseMin = bigBlind
@@ -301,6 +294,18 @@ const setQuickBet = (m) => {
   }
 }
 
+// Watchers
+watch(
+  [isMyTurn, minBet, maxBet],
+  ([myTurn, newMin, newMax]) => {
+    if (myTurn) {
+      if (betAmount.value < newMin) betAmount.value = newMin
+      if (betAmount.value > newMax) betAmount.value = newMax
+    }
+  },
+  { immediate: true },
+)
+
 // Redirect back if PIN collision occurs
 watch(
   () => pokerStore.getLastError,
@@ -312,24 +317,6 @@ watch(
   },
   { immediate: true },
 )
-
-watch(isMyTurn, (newVal) => {
-  if (newVal) {
-    // Start exactly at current call level
-    betAmount.value = callLevel.value
-  }
-})
-
-watch([callLevel, maxBet], ([newMin, newMax]) => {
-  if (isMyTurn.value) {
-    if (betAmount.value < newMin) betAmount.value = newMin
-    if (betAmount.value > newMax) betAmount.value = newMax
-  }
-})
-
-function generateSecretCode() {
-  return String(Math.floor(Math.random() * 10000)).padStart(4, '0')
-}
 
 const startGame = (data = {}) => {
   if (isConnected.value) {
@@ -357,16 +344,18 @@ const handleGoBack = () => {
 }
 
 const sendAction = (action) => {
-  if (!isConnected.value) return
   switch (action) {
+    case 'fold':
+      sendMessage({ action: 'fold' })
+      break
     case 'check':
       sendMessage({ action: 'setCheck' })
       break
     case 'call':
       sendMessage({ action: 'setCall' })
       break
-    case 'fold':
-      sendMessage({ action: 'fold' })
+    case 'allin':
+      sendMessage({ action: 'setBet', chipsToBet: maxBet.value })
       break
     case 'bet':
     case 'raise':
@@ -375,7 +364,7 @@ const sendAction = (action) => {
         [action === 'bet' ? 'chipsToBet' : 'chipsToRiseBet']: betAmount.value,
       })
       break
-    case 'blind':
+    case 'blind': {
       const blindAmount =
         pokerStore.myInfo.requiredBlind ||
         (pokerStore.getDisplayMsg?.toLowerCase().includes('small')
@@ -383,6 +372,7 @@ const sendAction = (action) => {
           : pokerStore.bigBlind)
       sendMessage({ action: 'setBet', chipsToBet: blindAmount })
       break
+    }
   }
 }
 

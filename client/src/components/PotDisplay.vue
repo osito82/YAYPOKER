@@ -151,7 +151,7 @@ import { computed, ref, onUnmounted, watch } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 
-const props = defineProps({
+defineProps({
   amount: { type: [Number, String], default: 0 },
 })
 

@@ -167,7 +167,7 @@ import { usePokerStore } from '../../store/pokerStore'
 import { useResponsiveStore } from '../../store/responsiveStore'
 import { useSoundStore } from '../../store/soundStore'
 
-const props = defineProps({
+defineProps({
   isMyTurn: Boolean,
   canBlind: Boolean,
   blindInfo: Object,

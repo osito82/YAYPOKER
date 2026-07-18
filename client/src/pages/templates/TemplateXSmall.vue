@@ -109,16 +109,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import PokerTable from '../../components/PokerTable.vue'
 import ActionBar from '../../components/ActionBar.vue'
 import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 import MessageTerminal from '../../components/MessageTerminal.vue'
-import { usePokerStore } from '../../store/pokerStore'
-
-const pokerStore = usePokerStore()
 
 defineProps({
   gameCode: String,

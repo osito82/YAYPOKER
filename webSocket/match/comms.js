@@ -22,7 +22,7 @@ class MatchComms {
     }
   }
 
-  stats(socketId) {
+  stats() {
     this.log.Template({ name: 'brakets', title: 'MATCH:STATS', date: true }).R({
       torneoId: this.match.torneoId,
       handId: this.match.currentHandId,
