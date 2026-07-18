@@ -19,7 +19,7 @@ try {
   const host = TESTING_URL || OLLAMA_URL;
   ollamaClient = new Ollama({ host });
   log
-    .Template({ name: "brakets", title: "IA:OLLAMA_INIT", date: true })
+    .Template({ name: "brakets", title: "AI:OLLAMA_INIT", date: true })
     .R({ url: host, msg: "Ready" });
 } catch (error) {
   log
@@ -70,7 +70,7 @@ class PokerBot {
       const genAI = new GoogleGenerativeAI(geminiKey);
       this.geminiModel = genAI.getGenerativeModel({ model: this.modelName });
       log
-        .Template({ name: "brakets", title: "IA:GEMINI_INIT", date: true })
+        .Template({ name: "brakets", title: "AI:GEMINI_INIT", date: true })
         .R({ bot: this.playerName, model: this.modelName });
     }
 
@@ -79,7 +79,7 @@ class PokerBot {
       this.deepseekBaseUrl =
         process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
       log
-        .Template({ name: "brakets", title: "IA:DEEPSEEK_INIT", date: true })
+        .Template({ name: "brakets", title: "AI:DEEPSEEK_INIT", date: true })
         .R({ bot: this.playerName, model: this.modelName });
     }
   }
@@ -329,7 +329,7 @@ Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":numb
       decision = this.safeParseJSON(aiText);
     } catch (e) {
       log
-        .Template({ name: "brakets", title: "ERROR:IA", date: true })
+        .Template({ name: "brakets", title: "ERROR:AI", date: true })
         .R({ bot: this.playerName, error: e.message });
     }
 
