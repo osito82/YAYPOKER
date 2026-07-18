@@ -194,11 +194,21 @@ export const usePokerStore = defineStore('pokerStore', () => {
           const msgLower = newMsg.toLowerCase()
           if (msgLower.includes(' fold')) {
             useSoundStore().playFold()
-          } else if (msgLower.includes(' bet') || msgLower.includes(' call') || msgLower.includes(' raise') || msgLower.includes(' all in')) {
+          } else if (
+            msgLower.includes(' bet') ||
+            msgLower.includes(' call') ||
+            msgLower.includes(' raise') ||
+            msgLower.includes(' all in')
+          ) {
             useSoundStore().playBet()
           } else if (msgLower.includes(' check')) {
             useSoundStore().playCheck()
-          } else if (msgLower.includes('dealt') || msgLower.includes('flop') || msgLower.includes('turn') || msgLower.includes('river')) {
+          } else if (
+            msgLower.includes('dealt') ||
+            msgLower.includes('flop') ||
+            msgLower.includes('turn') ||
+            msgLower.includes('river')
+          ) {
             useSoundStore().playDeal()
           }
 
@@ -304,7 +314,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
         activePlayerId.value = null
         bettingOptions.value = []
         autofoldStartTime.value = null
-        
+
         useSoundStore().playWin()
 
         const currentWinnerData = winnerInfo.value

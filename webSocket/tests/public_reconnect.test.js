@@ -105,7 +105,7 @@ describe('Public Table Disconnect/Reconnect Tests', () => {
     await Promise.all([alice.waitAction('signUp'), bob.waitAction('signUp')])
 
     // Wait for the game to start (public registration takes ~3s)
-    await new Promise(r => setTimeout(r, 4000))
+    await new Promise((r) => setTimeout(r, 4000))
 
     console.log('Match started. Alice disconnects...')
 

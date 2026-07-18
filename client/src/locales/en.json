@@ -116,7 +116,8 @@
     "raise_disabled_tooltip": "Move the slider first to set a raise amount, then press Raise",
     "main_pot_tooltip": "The main pot — all players who have not folded are eligible to win this",
     "side_pot_tooltip": "A side pot created when a player goes all-in — only players who contributed to this pot are eligible",
-    "blind_tooltip": "Post your required blind to stay in the game"
+    "blind_tooltip": "Post your required blind to stay in the game",
+    "odds_vs_random_hint": "Odds vs. random hands"
   },
   "winner": {
     "wins": "Wins!",

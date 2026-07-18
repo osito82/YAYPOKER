@@ -41,21 +41,22 @@ class MatchComms {
     const activePlayers = this.match.getActivePlayers(true) // Only connected and in hand
     if (activePlayers.length < 2) return
 
-    const playerHands = activePlayers.map((p) => p.getCards())
     const boardCards = this.match.dealer.getDealerCards()
 
-    const results = this.match.oddsCalculator.calculateOdds(
-      playerHands,
-      boardCards,
-    )
-
-    activePlayers.forEach((p, idx) => {
+    activePlayers.forEach((p) => {
       // Si se especificó un targetPlayer, solo enviar a él
       if (targetPlayer && p.id !== targetPlayer.id) return
 
+      const myHand = p.getCards()
+      const results = this.match.oddsCalculator.calculateOddsForPlayer(
+        myHand,
+        activePlayers.length,
+        boardCards,
+      )
+
       const playerOdds = {
-        win: results.winProbabilities[idx],
-        tie: results.tieProbability,
+        win: results.win,
+        tie: results.tie,
       }
       this.communicator.msgBuilder('oddsUpdate', 'private', p, {
         odds: playerOdds,

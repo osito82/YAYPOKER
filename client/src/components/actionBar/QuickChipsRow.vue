@@ -32,12 +32,7 @@
       />
     </div>
     <!-- MIN + ALL-IN comparten la misma fila -->
-    <div
-      :class="[
-        'flex gap-2',
-        isVertical ? 'w-full' : '',
-      ]"
-    >
+    <div :class="['flex gap-2', isVertical ? 'w-full' : '']">
       <button
         @click="clearBet"
         :disabled="!isMyTurn || isSliderDisabled"

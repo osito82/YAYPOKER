@@ -5,15 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#18181b" />
-    
+
     <!-- Dynamic Language Script -->
     <script>
-      (function() {
-        var lang = localStorage.getItem('locale') || navigator.language.split('-')[0];
-        document.documentElement.lang = ['en', 'es'].includes(lang) ? lang : 'en';
-      })();
+      ;(function () {
+        var lang =
+          localStorage.getItem('locale') || navigator.language.split('-')[0]
+        document.documentElement.lang = ['en', 'es'].includes(lang)
+          ? lang
+          : 'en'
+      })()
     </script>
-    
+
     <title>YayPoker - Play Texas Hold'em Poker with Friends Online</title>
     <meta
       name="description"
@@ -56,27 +59,23 @@
 
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "VideoGame",
-      "name": "YayPoker",
-      "url": "https://yaypoker.com",
-      "image": "https://yaypoker.com/og-image.jpg",
-      "description": "Play Texas Hold'em Poker with friends for free. No registration required. Create private tables or join public matches.",
-      "genre": [
-        "Card Game",
-        "Casino Game",
-        "Multiplayer Online Game"
-      ],
-      "playMode": "MultiPlayer",
-      "applicationCategory": "Game",
-      "browserRequirements": "Requires JavaScript. Supports WebSockets.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "YayPoker",
+        "url": "https://yaypoker.com",
+        "image": "https://yaypoker.com/og-image.jpg",
+        "description": "Play Texas Hold'em Poker with friends for free. No registration required. Create private tables or join public matches.",
+        "genre": ["Card Game", "Casino Game", "Multiplayer Online Game"],
+        "playMode": "MultiPlayer",
+        "applicationCategory": "Game",
+        "browserRequirements": "Requires JavaScript. Supports WebSockets.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
       }
-    }
     </script>
 
     <!-- CSS for local font optimization -->

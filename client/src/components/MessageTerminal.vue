@@ -7,7 +7,6 @@
       :id="'terminal-container-' + templateSuffix"
       class="w-full h-full flex flex-col overflow-hidden bg-white/90 dark:bg-[#020402]/85 backdrop-blur-xl"
     >
-
       <!-- Terminal body -->
       <div
         ref="logContainer"

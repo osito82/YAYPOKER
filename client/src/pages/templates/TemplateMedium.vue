@@ -125,10 +125,7 @@
       :winnerInfo="winnerInfo"
       @close="$emit('sendMessage', { action: 'nextRound' })"
     />
-    <WinnerOverlay
-      v-else-if="winnerInfo"
-      :winnerInfo="winnerInfo"
-    />
+    <WinnerOverlay v-else-if="winnerInfo" :winnerInfo="winnerInfo" />
 
     <div
       id="main-game-layout-TemplateMedium"

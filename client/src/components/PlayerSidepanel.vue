@@ -54,7 +54,9 @@
             <div
               v-if="player.isDealer"
               class="absolute -top-1 -right-1 w-3 h-3 bg-white text-black text-[7px] font-black rounded-full flex items-center justify-center border border-gray-300 shadow-sm"
-            >D</div>
+            >
+              D
+            </div>
           </div>
 
           <!-- Status dot -->
@@ -64,7 +66,9 @@
             :class="
               player.id === delayedActivePlayerId
                 ? 'bg-yellow-500 animate-pulse'
-                : player.isConnected ? 'bg-green-500' : 'bg-gray-400 dark:bg-gray-600'
+                : player.isConnected
+                  ? 'bg-green-500'
+                  : 'bg-gray-400 dark:bg-gray-600'
             "
           ></div>
 
@@ -73,18 +77,24 @@
             :id="'player-item-display-name-' + player.id + '-' + templateSuffix"
             class="font-black text-sm text-gray-900 dark:text-gray-100 truncate uppercase tracking-tight leading-none flex-1 min-w-0 transition-colors"
             :class="{
-              'text-yellow-600 dark:text-yellow-400': player.id === delayedActivePlayerId,
-              'text-emerald-600 dark:text-emerald-400': isPlayerWinner(player.id),
-              'opacity-40': player.folded && player.id !== delayedActivePlayerId,
+              'text-yellow-600 dark:text-yellow-400':
+                player.id === delayedActivePlayerId,
+              'text-emerald-600 dark:text-emerald-400': isPlayerWinner(
+                player.id,
+              ),
+              'opacity-40':
+                player.folded && player.id !== delayedActivePlayerId,
             }"
-          >{{ cleanPlayerName(player.name) }}</span>
+            >{{ cleanPlayerName(player.name) }}</span
+          >
 
           <!-- Nombre de mano (solo en showdown) -->
           <span
             v-if="isShowDown && getPlayerHandName(player)"
             :id="`player-item-hand-name-text-${player.id}-${templateSuffix}`"
             class="text-[9px] font-black text-emerald-500 dark:text-emerald-400 uppercase tracking-wider leading-none shrink-0"
-          >{{ formatHandName(getPlayerHandName(player)) }}</span>
+            >{{ formatHandName(getPlayerHandName(player)) }}</span
+          >
         </div>
 
         <!-- STACK BAR: delgada, con padding interno, integrada al card -->
@@ -97,9 +107,13 @@
               class="h-full rounded-full transition-all duration-700"
               :style="{ width: getStackPercent(player) + '%' }"
               :class="[
-                player.folded ? 'bg-gray-400/30 dark:bg-white/10' :
-                getStackPercent(player) > 60 ? 'bg-emerald-500/65' :
-                getStackPercent(player) > 30 ? 'bg-yellow-400/65' : 'bg-red-500/65'
+                player.folded
+                  ? 'bg-gray-400/30 dark:bg-white/10'
+                  : getStackPercent(player) > 60
+                    ? 'bg-emerald-500/65'
+                    : getStackPercent(player) > 30
+                      ? 'bg-yellow-400/65'
+                      : 'bg-red-500/65',
               ]"
             ></div>
           </div>
@@ -134,12 +148,16 @@
           >
             <!-- Chips -->
             <div class="flex items-baseline gap-px">
-              <span class="text-xs text-yellow-600 dark:text-yellow-500 font-mono font-bold leading-none">$</span>
+              <span
+                class="text-xs text-yellow-600 dark:text-yellow-500 font-mono font-bold leading-none"
+                >$</span
+              >
               <span
                 :id="`player-item-stack-amount-${player.id}-${templateSuffix}`"
                 class="text-lg font-mono font-black text-gray-900 dark:text-white leading-none tracking-tight"
                 :class="{ 'opacity-40': player.folded }"
-              >{{ player.chips }}</span>
+                >{{ player.chips }}</span
+              >
             </div>
 
             <!-- Bet badge -->
@@ -147,7 +165,8 @@
               v-if="player.currentBet > 0"
               :id="`player-item-live-bet-badge-${player.id}-${templateSuffix}`"
               class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded leading-none"
-            >+${{ player.currentBet }}</span>
+              >+${{ player.currentBet }}</span
+            >
 
             <!-- Action badge -->
             <Transition name="action-highlight" mode="out-in">
@@ -162,7 +181,10 @@
                   player.id === justActedPlayerId ? 'animate-action-flash' : '',
                 ]"
               >
-                <div class="w-1.5 h-1.5 rounded-full shrink-0" :class="getActionDotColor(player.lastAction)"></div>
+                <div
+                  class="w-1.5 h-1.5 rounded-full shrink-0"
+                  :class="getActionDotColor(player.lastAction)"
+                ></div>
                 {{ player.lastAction }}
               </div>
             </Transition>
@@ -172,12 +194,11 @@
               v-if="isPlayerWinner(player.id)"
               :id="`player-item-win-badge-${player.id}-${templateSuffix}`"
               class="px-2 py-0.5 rounded bg-emerald-500 text-xs font-black text-white uppercase leading-none"
-            >WIN</span>
+              >WIN</span
+            >
           </div>
         </div>
       </div>
-
-
     </TransitionGroup>
 
     <!-- Sidepanel Footer -->

@@ -115,7 +115,8 @@
     "raise_disabled_tooltip": "Mueve el slider para fijar un monto de subida y luego presiona Subir",
     "main_pot_tooltip": "El pozo principal — todos los jugadores que no se retiraron pueden ganarlo",
     "side_pot_tooltip": "Pozo lateral creado cuando un jugador va all-in — solo los jugadores que contribuyeron pueden ganarlo",
-    "blind_tooltip": "Pon tu ciega requerida para seguir en el juego"
+    "blind_tooltip": "Put your required blind to stay in the game",
+    "odds_vs_random_hint": "Probabilidades vs. manos aleatorias"
   },
   "winner": {
     "wins": "¡Gana!",

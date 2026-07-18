@@ -7,9 +7,14 @@ export const useSoundStore = defineStore('sound', () => {
 
   const initAudio = () => {
     if (!audioContext) {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      const AudioCtx = window.AudioContext || window.webkitAudioContext
+      if (!AudioCtx) {
+        console.warn('AudioContext is not supported in this environment.')
+        return
+      }
+      audioContext = new AudioCtx()
     }
-    if (audioContext.state === 'suspended') {
+    if (audioContext && audioContext.state === 'suspended') {
       audioContext.resume()
     }
   }
@@ -20,18 +25,24 @@ export const useSoundStore = defineStore('sound', () => {
   }
 
   // Helper to play synthesized sounds
-  const playTone = (frequency, type = 'sine', duration = 0.1, vol = 0.1, slideTo = null) => {
+  const playTone = (
+    frequency,
+    type = 'sine',
+    duration = 0.1,
+    vol = 0.1,
+    slideTo = null,
+  ) => {
     if (isMuted.value) return
     initAudio()
     if (!audioContext) return
 
     const osc = audioContext.createOscillator()
     const gain = audioContext.createGain()
-    
+
     osc.type = type
     osc.connect(gain)
     gain.connect(audioContext.destination)
-    
+
     const now = audioContext.currentTime
     osc.frequency.setValueAtTime(frequency, now)
     if (slideTo) {
@@ -40,7 +51,7 @@ export const useSoundStore = defineStore('sound', () => {
 
     gain.gain.setValueAtTime(vol, now)
     gain.gain.exponentialRampToValueAtTime(0.001, now + duration)
-    
+
     osc.start(now)
     osc.stop(now + duration)
   }
@@ -51,7 +62,11 @@ export const useSoundStore = defineStore('sound', () => {
     if (!audioContext) return
 
     const bufferSize = audioContext.sampleRate * duration
-    const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate)
+    const buffer = audioContext.createBuffer(
+      1,
+      bufferSize,
+      audioContext.sampleRate,
+    )
     const data = buffer.getChannelData(0)
     for (let i = 0; i < bufferSize; i++) {
       data[i] = Math.random() * 2 - 1
@@ -59,14 +74,17 @@ export const useSoundStore = defineStore('sound', () => {
 
     const noise = audioContext.createBufferSource()
     noise.buffer = buffer
-    
+
     const filter = audioContext.createBiquadFilter()
     filter.type = 'lowpass'
     filter.frequency.value = 1000
 
     const gain = audioContext.createGain()
     gain.gain.setValueAtTime(vol, audioContext.currentTime)
-    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration)
+    gain.gain.exponentialRampToValueAtTime(
+      0.001,
+      audioContext.currentTime + duration,
+    )
 
     noise.connect(filter)
     filter.connect(gain)
@@ -123,6 +141,6 @@ export const useSoundStore = defineStore('sound', () => {
     playFold,
     playDeal,
     playYourTurn,
-    playWin
+    playWin,
   }
 })

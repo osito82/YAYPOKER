@@ -229,7 +229,6 @@ const props = defineProps({
   myPlayerId: String,
   isGuest: Boolean,
 })
-
 </script>
 
 <style scoped></style>
