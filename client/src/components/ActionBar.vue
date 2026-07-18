@@ -51,7 +51,7 @@ const responsive = useResponsiveStore()
 const pokerStore = usePokerStore()
 
 const isSittingOut = computed(() => {
-  const me = pokerStore.getPlayers?.find((p) => p.id === pokerStore.myInfo.id)
+  const me = pokerStore.getPlayers?.find((p) => p.id === pokerStore.myInfo?.id)
   return me ? !!me.isSittingOut : false
 })
 
