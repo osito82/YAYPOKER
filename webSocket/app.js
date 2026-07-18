@@ -195,6 +195,8 @@ const actionHandlers = {
   [ACTIONS.NEXT_ROUND]: (match) => match.nextRound(),
   [ACTIONS.START_GAME]: (match, socket, data) => match.startGame(socket, data),
   [ACTIONS.PLAYER_READY]: (match, socket) => match.lobby.playerReady(socket),
+  [ACTIONS.SET_SIT_OUT]: (match, socket, data) =>
+    match.actions.setSitOut(socket, data?.isSittingOut),
 }
 
 wss.on('connection', (ws, req) => {

@@ -373,6 +373,12 @@ const sendAction = (action) => {
       sendMessage({ action: 'setBet', chipsToBet: blindAmount })
       break
     }
+    case 'sitOut':
+      sendMessage({ action: 'setSitOut', isSittingOut: true })
+      break
+    case 'sitIn':
+      sendMessage({ action: 'setSitOut', isSittingOut: false })
+      break
   }
 }
 

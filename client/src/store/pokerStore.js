@@ -382,7 +382,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
         pot.value = 0
         pots.value = []
         currentHighestBet.value = 0
-        // winnerInfo.value = null // Removed to prevent premature closing for all players
+        winnerInfo.value = null // Clears winner overlay when a new hand restarts
       }
     } catch (e) {
       console.error('POKER_STORE - Error parsing message', e)

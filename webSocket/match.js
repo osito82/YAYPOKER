@@ -460,10 +460,12 @@ class Match extends EventEmitter {
     })
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
 
+    const startDelay =
+      process.env.NODE_ENV === 'test' ? TIMEOUTS.nextRound : 1500
     setTimeout(() => {
       this.stepChecker.grantStep('startGame')
       this.startGame()
-    }, TIMEOUTS.nextRound)
+    }, startDelay)
   }
 }
 

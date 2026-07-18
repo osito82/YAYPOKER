@@ -24,11 +24,13 @@
           :playerCards="playerCards"
           :balance="balance"
           :currentBet="currentBet"
+          :class="{ 'opacity-30 pointer-events-none': isSittingOut }"
         />
 
         <div
           :id="'hud-player-actions-control-area-' + templateSuffix"
           class="flex flex-col gap-2 flex-1 min-w-0"
+          :class="{ 'opacity-30 pointer-events-none': isSittingOut }"
         >
           <BettingSlider
             :isMyTurn="isMyTurn"
@@ -67,9 +69,11 @@
           :isVertical="true"
           :betAmount="betAmount"
           :maxBet="maxBet"
+          :isSittingOut="isSittingOut"
           @addChip="addChip"
           @clearBet="clearBet"
           @allIn="$emit('update:betAmount', maxBet)"
+          @toggleSitOut="$emit('action', isSittingOut ? 'sitIn' : 'sitOut')"
         />
       </div>
     </div>
@@ -97,6 +101,7 @@ const props = defineProps({
   maxBet: Number,
   sliderMin: Number,
   playerCards: Array,
+  isSittingOut: Boolean,
 })
 
 const emit = defineEmits(['action', 'update:betAmount'])

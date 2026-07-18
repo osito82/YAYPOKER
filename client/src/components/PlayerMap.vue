@@ -18,7 +18,11 @@
       left: seat.left + '%',
       transform: 'translate(-50%, -50%)',
     }"
-    :class="isFolded(seat.player) ? 'opacity-40' : 'opacity-100'"
+    :class="
+      isFolded(seat.player) || seat.player.isSittingOut
+        ? 'opacity-40'
+        : 'opacity-100'
+    "
   >
     <!-- Player Card -->
     <div
@@ -72,6 +76,16 @@
         >
           <span class="text-[9px] font-black text-red-400 uppercase">FOLD</span>
         </div>
+        <!-- Sit Out marker overlay on avatar -->
+        <div
+          v-else-if="seat.player.isSittingOut"
+          class="absolute inset-0 rounded-full bg-black/75 flex items-center justify-center border border-[#D4A853]/40"
+        >
+          <span
+            class="text-[8px] font-black text-[#D4A853] uppercase leading-none"
+            >AUS</span
+          >
+        </div>
       </div>
 
       <!-- Right: Info Column -->
@@ -114,11 +128,20 @@
         <!-- Chips + Action row -->
         <div
           class="flex items-center gap-1 text-[11px] font-mono font-bold"
-          :class="[isFolded(seat.player) ? 'text-white/20' : 'text-white/60']"
+          :class="[
+            isFolded(seat.player) || seat.player.isSittingOut
+              ? 'text-white/20'
+              : 'text-white/60',
+          ]"
         >
           <template v-if="isFolded(seat.player)">
             <span class="uppercase tracking-wider text-[9px] text-red-400/60"
               >FOLDED</span
+            >
+          </template>
+          <template v-else-if="seat.player.isSittingOut">
+            <span class="uppercase tracking-wider text-[9px] text-[#D4A853]"
+              >AUSENTE</span
             >
           </template>
           <template v-else-if="seat.player.isAllIn">

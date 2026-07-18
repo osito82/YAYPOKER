@@ -27,15 +27,15 @@
         :textColor="chip.text"
         :border="chip.border"
         :size="chipResponsiveSize"
-        :disabled="chip.disabled || isSliderDisabled"
+        :disabled="chip.disabled || isSliderDisabled || isSittingOut"
         @click="addChip(chip.value)"
       />
     </div>
-    <!-- MIN + ALL-IN comparten la misma fila -->
+    <!-- MIN + ALL-IN + SITOUT comparten la misma fila -->
     <div :class="['flex gap-2', isVertical ? 'w-full' : '']">
       <button
         @click="clearBet"
-        :disabled="!isMyTurn || isSliderDisabled"
+        :disabled="!isMyTurn || isSliderDisabled || isSittingOut"
         :id="'hud-clear-bet-button-' + templateSuffix"
         :class="[
           'flex-1 bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 active:scale-95 transition-all disabled:opacity-20 disabled:pointer-events-none',
@@ -46,7 +46,7 @@
       </button>
       <button
         @click="$emit('allIn')"
-        :disabled="!isMyTurn || isSliderDisabled"
+        :disabled="!isMyTurn || isSliderDisabled || isSittingOut"
         :id="'hud-allin-button-' + templateSuffix"
         :class="[
           'flex-1 font-black uppercase rounded-lg active:scale-95 transition-all disabled:opacity-20 disabled:pointer-events-none',
@@ -58,6 +58,19 @@
         :title="$t('game.allin_tooltip')"
       >
         ALL-IN
+      </button>
+      <button
+        @click="$emit('toggleSitOut')"
+        :id="'hud-sitout-button-' + templateSuffix"
+        :class="[
+          'flex-1 font-black uppercase rounded-lg active:scale-95 transition-all',
+          isVertical ? 'py-2 text-[10px]' : 'h-8 lg:h-11 px-2 text-[9px]',
+          isSittingOut
+            ? 'bg-red-600 border border-red-500 text-white hover:bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] font-bold'
+            : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10',
+        ]"
+      >
+        {{ isSittingOut ? 'SIT IN' : 'SIT OUT' }}
       </button>
     </div>
   </div>
@@ -76,9 +89,10 @@ defineProps({
   isVertical: Boolean,
   betAmount: { type: Number, default: 0 },
   maxBet: { type: Number, default: 0 },
+  isSittingOut: Boolean,
 })
 
-const emit = defineEmits(['addChip', 'clearBet', 'allIn'])
+const emit = defineEmits(['addChip', 'clearBet', 'allIn', 'toggleSitOut'])
 
 const addChip = (value) => emit('addChip', value)
 const clearBet = () => emit('clearBet')
