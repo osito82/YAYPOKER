@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
+import { useThemeStore } from './store/themeStore'
 
 import './styles.css'
 import './index.css'
@@ -12,6 +13,9 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+
+// Initialize theme immediately to apply classes to <html>
+useThemeStore()
 
 // ==================== Google Analytics (gtag) ====================
 
