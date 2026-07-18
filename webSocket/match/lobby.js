@@ -117,6 +117,8 @@ class MatchLobby {
       msg.players = this.match.players.map((p) => p.toJson())
       msg.pot = this.dealer.getPot()
       msg.dealerCards = this.dealer.getDealerCards()
+      msg.bigBlind = this.match.bigBlind
+      msg.smallBlind = this.match.smallBlind
 
       Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
 
@@ -214,6 +216,8 @@ class MatchLobby {
       msg.players = this.match.players.map((p) => p.toJson())
       msg.pot = this.dealer.getPot()
       msg.dealerCards = this.dealer.getDealerCards()
+      msg.bigBlind = this.match.bigBlind
+      msg.smallBlind = this.match.smallBlind
 
       Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
     }

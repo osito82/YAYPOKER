@@ -219,7 +219,7 @@ const isConnected = computed(() => pokerStore.getConnected)
 const currentMaxBetOnTable = computed(
   () => pokerStore.getCurrentHighestBet || 0,
 )
-const lastRaiseAmount = computed(() => pokerStore.lastRaiseAmount || 20) // Default to BB if no raise
+const lastRaiseAmount = computed(() => pokerStore.lastRaiseAmount || pokerStore.bigBlind) // Default to BB if no raise
 const allPlayers = computed(() => pokerStore.getPlayers || [])
 const myPlayer = computed(() =>
   allPlayers.value.find(
@@ -297,10 +297,16 @@ const setQuickBet = (m) => {
 // Watchers
 watch(
   [isMyTurn, minBet, maxBet],
-  ([myTurn, newMin, newMax]) => {
+  ([myTurn, newMin, newMax], [oldMyTurn]) => {
     if (myTurn) {
-      if (betAmount.value < newMin) betAmount.value = newMin
-      if (betAmount.value > newMax) betAmount.value = newMax
+      if (!oldMyTurn) {
+        // Siempre inicializar con el mínimo al iniciar el turno
+        betAmount.value = newMin
+      } else {
+        // Si el turno ya estaba activo y cambian los límites (ej. All-in de otro jugador)
+        if (betAmount.value < newMin) betAmount.value = newMin
+        if (betAmount.value > newMax) betAmount.value = newMax
+      }
     }
   },
   { immediate: true },

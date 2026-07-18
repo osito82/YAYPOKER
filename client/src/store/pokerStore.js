@@ -299,6 +299,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
           if (gameData.torneoId) {
             torneoId.value = gameData.torneoId
           }
+          if (gameData.bigBlind) {
+            bigBlind.value = gameData.bigBlind
+            smallBlind.value = gameData.smallBlind
+          }
           lastError.value = null
         }
       } else if (gameData.action === 'oddsUpdate') {

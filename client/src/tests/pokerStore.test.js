@@ -144,4 +144,26 @@ describe('Poker Store', () => {
     expect(store.communityCards).toEqual([])
     expect(store.currentHighestBet).toBe(0)
   })
+  it('updates bigBlind and smallBlind when receiving signUp', () => {
+    const store = usePokerStore()
+    
+    // Default values before message
+    expect(store.bigBlind).toBe(20)
+    expect(store.smallBlind).toBe(10)
+
+    store.setSocketMessage(
+      JSON.stringify({
+        message: {
+          action: 'signUp',
+          type: 'private',
+          data: { id: 'player-123' },
+          bigBlind: 400,
+          smallBlind: 200,
+        },
+      }),
+    )
+
+    expect(store.bigBlind).toBe(400)
+    expect(store.smallBlind).toBe(200)
+  })
 })
