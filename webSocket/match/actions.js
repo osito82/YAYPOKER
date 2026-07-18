@@ -105,6 +105,18 @@ class MatchActions {
 
       if (isAbandoned) {
         this.disconnectPlayer(foundPlayer)
+      } else if (
+        foundPlayer.consecutiveAutofolds >= GAME_RULES.MAX_CONSECUTIVE_AUTOFOLDS
+      ) {
+        foundPlayer.isSittingOut = true
+        this.communicator.msgBuilder('playerSitOut', 'public', foundPlayer, {
+          displayMsg: `${foundPlayer.name} is now sitting out due to inactivity.`,
+          isSittingOut: true,
+        })
+        Socket.broadcastToTorneo(
+          this.match.torneoId,
+          this.communicator.getMsg(),
+        )
       }
 
       this.fold({ id: foundPlayer.id }, true)
@@ -613,6 +625,14 @@ class MatchActions {
         const isSB = p === p1
         const blindAmount = isSB ? this.match.smallBlind : this.match.bigBlind
         this.match.activePlayerId = p.id
+
+        if (p.isSittingOut) {
+          this.log.R({
+            info: `[SITOUT] Player ${p.name} auto-posted blind ${isSB ? 'SB' : 'BB'} (${blindAmount}).`,
+          })
+          this.setBet({ id: p.id }, blindAmount, 'setBet', true)
+          return
+        }
         this.match.turnStartedAt = Date.now()
 
         if (p.lastAction !== 'Out') p.setLastAction('')
@@ -815,9 +835,11 @@ class MatchActions {
 
     if (!isTournamentWinner) {
       // Siempre intentamos ir a la siguiente ronda de forma automática, sea pública o privada
+      // Si todos foldearon (isFold = true), reiniciamos en 2 segundos para agilizar el ritmo del juego
+      const delay = isFold ? 2000 : TIMEOUTS.nextRound
       setTimeout(() => {
         this.emitter.emit('NEXT_ROUND')
-      }, TIMEOUTS.nextRound)
+      }, delay)
     }
   }
 
@@ -997,6 +1019,20 @@ class MatchActions {
       this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.collectChips)
     } else {
       const p = playersToAct[0]
+
+      if (p.isSittingOut) {
+        this.match.activePlayerId = p.id
+        const canCheck = maxBet === 0 || p.getCurrentBet() === maxBet
+        if (canCheck) {
+          this.log.R({ info: `[SITOUT] Player ${p.name} auto-checked.` })
+          this.setCheck({ id: p.id })
+        } else {
+          this.log.R({ info: `[SITOUT] Player ${p.name} auto-folded.` })
+          this.fold({ id: p.id }, true)
+        }
+        return
+      }
+
       if (!isRefresh && this.match.activePlayerId === p.id) return
 
       this.match.activePlayerId = p.id
@@ -1178,6 +1214,41 @@ class MatchActions {
       this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.standard)
     } catch (error) {
       console.error('Error in dealtPrivateCards:', error)
+    }
+  }
+
+  setSitOut = (thisSocket, isSittingOut) => {
+    const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
+    if (foundPlayer) {
+      foundPlayer.isSittingOut = !!isSittingOut
+      if (isSittingOut) {
+        foundPlayer.consecutiveAutofolds = 0
+        this.log.R({
+          info: `[SITOUT] Player ${foundPlayer.name} sat out manually.`,
+        })
+      } else {
+        this.log.R({
+          info: `[SITOUT] Player ${foundPlayer.name} returned to table.`,
+        })
+      }
+
+      this.communicator.msgBuilder('playerSitOut', 'public', foundPlayer, {
+        displayMsg: `${foundPlayer.name} is ${isSittingOut ? 'sitting out' : 'back in the game'}.`,
+        isSittingOut: foundPlayer.isSittingOut,
+      })
+      Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+
+      // Si es su turno y acaba de entrar a Sit Out, forzar el auto-check/fold
+      if (isSittingOut && this.match.activePlayerId === foundPlayer.id) {
+        this.clearAutofold()
+        const maxBet = this.dealer.getCurrentHighestBet()
+        const canCheck = maxBet === 0 || foundPlayer.getCurrentBet() === maxBet
+        if (canCheck) {
+          this.setCheck({ id: foundPlayer.id })
+        } else {
+          this.fold({ id: foundPlayer.id }, true)
+        }
+      }
     }
   }
 }

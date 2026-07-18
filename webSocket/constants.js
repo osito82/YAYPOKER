@@ -1,7 +1,7 @@
 const isTest = process.env.NODE_ENV === 'test'
 
 const TIMEOUTS = {
-  autofold: isTest ? 7000 : 300000, // 7s in test
+  autofold: isTest ? 7000 : 60000, // 7s in test, 60s in production
   autofoldPublic: isTest ? 7000 : 45000, // 7s in test
   fast: isTest ? 10 : 100, // 10ms in test, else 100ms
   standard: isTest ? 50 : 500, // 50ms in test, else 500ms
@@ -53,6 +53,7 @@ const ACTIONS = {
   SEND_MESSAGE: 'sendMessage',
   VOICE_MESSAGE: 'voiceMessage',
   DEALT_PRIVATE_CARDS: 'dealtPrivateCards',
+  SET_SIT_OUT: 'setSitOut',
 }
 
 const BOT_NAMES = [

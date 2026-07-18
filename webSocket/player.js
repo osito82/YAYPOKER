@@ -17,6 +17,7 @@ class Player {
     this.currentBet = 0
     this.handContribution = 0
     this.consecutiveAutofolds = 0
+    this.isSittingOut = false
     this.isBot =
       name.toLowerCase().includes('bot') || name.toLowerCase().includes('_ia')
   }
@@ -154,6 +155,7 @@ class Player {
       playerNumber: this.playerNumber,
       currentPrize: this.currentPrize,
       isBot: this.isBot,
+      isSittingOut: this.isSittingOut,
     }
   }
 }

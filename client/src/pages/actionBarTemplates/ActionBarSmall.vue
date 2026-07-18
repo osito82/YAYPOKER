@@ -26,6 +26,7 @@
           :playerCards="playerCards"
           :balance="balance"
           :currentBet="currentBet"
+          :class="{ 'opacity-30 pointer-events-none': isSittingOut }"
         />
 
         <div
@@ -41,12 +42,14 @@
             :sliderMin="sliderMin"
             :isSliderDisabled="isSliderDisabled"
             :templateSuffix="templateSuffix"
+            :class="{ 'opacity-30 pointer-events-none': isSittingOut }"
             @update:betAmount="(val) => $emit('update:betAmount', val)"
           />
 
           <WaitingState
             :isMyTurn="isMyTurn"
             :activePlayerName="activePlayerName"
+            :class="{ 'opacity-30 pointer-events-none': isSittingOut }"
           />
 
           <ActionButtonsRow
@@ -55,6 +58,7 @@
             :blindInfo="blindInfo"
             :options="options"
             :isRaiseActionDisabled="isRaiseActionDisabled"
+            :class="{ 'opacity-30 pointer-events-none': isSittingOut }"
             @action="(a) => $emit('action', a)"
           />
 
@@ -67,9 +71,11 @@
             :isSliderDisabled="isSliderDisabled"
             :betAmount="betAmount"
             :maxBet="maxBet"
+            :isSittingOut="isSittingOut"
             @addChip="addChip"
             @clearBet="clearBet"
             @allIn="$emit('update:betAmount', maxBet)"
+            @toggleSitOut="$emit('action', isSittingOut ? 'sitIn' : 'sitOut')"
           />
         </div>
       </div>
@@ -98,6 +104,7 @@ const props = defineProps({
   maxBet: Number,
   sliderMin: Number,
   playerCards: Array,
+  isSittingOut: Boolean,
 })
 
 const emit = defineEmits(['action', 'update:betAmount'])
