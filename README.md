@@ -14,38 +14,9 @@ Welcome to the official repository of **YAYPOKER** — a modern, fast, and highl
 
 ## 📖 About The Project
 
-**YAYPOKER** was built with a clear vision: to bring a seamless, low-latency, and engaging poker experience to the web without the need for heavy downloads. It utilizes native WebSockets for blazing-fast game state synchronization and features a custom-built poker engine that handles complex scenarios like side-pots, showdowns, and precise hand evaluations.
+**YAYPOKER** was built to bring a seamless, low-latency, and engaging poker experience to the web without heavy downloads. It utilizes native WebSockets for blazing-fast game state synchronization and features a custom-built poker engine that handles complex scenarios like side-pots, showdowns, and precise hand evaluations.
 
-One of the platform's standout innovations is the integration of **AI-driven Bots**. Powered by Large Language Models (LLMs) like Deepseek and Claude, these bots simulate human-like behavior, ensuring there's always a challenging game waiting for you, even if human players are unavailable.
-
-## ✨ Key Features
-
-- **⚡ Real-Time Multiplayer:** Instantaneous actions (Check, Call, Raise, Fold) powered by a robust Node.js WebSocket backend.
-- **🤖 Smart AI Bots:** Autonomous LLM-powered bots that understand game context, bluff, and make strategic decisions.
-- **🎨 Modern UI/UX:** A sleek, fully responsive Single Page Application (SPA) built with Vue.js and Tailwind CSS. Playable on desktops, tablets, and mobile devices.
-- **🌍 Internationalization (i18n):** Multi-language support to welcome players from around the globe.
-- **📦 Fully Dockerized:** Easy deployment and scaling using Docker and `docker-compose`.
-- **🧮 Custom Poker Logic:** Precise hand evaluators, intelligent pot splitting, and robust player queueing systems.
-- **🔐 Secure & Fast:** Encrypted connections, resilient state management against disconnections, and no sensitive data leaks.
-
-## 🛠️ Technologies Used
-
-### Frontend (`/client`)
-* **Framework:** Vue.js
-* **State Management:** Pinia
-* **Styling:** Tailwind CSS
-* **Routing:** Vue Router
-
-### Backend (`/webSocket` & `/bot`)
-* **Runtime:** Node.js
-* **Framework:** Express.js
-* **Real-time Engine:** `ws` (Native WebSockets)
-* **AI Integration:** LLM APIs (Deepseek, Claude)
-* **Logging:** Winston & Osolog
-
-### Infrastructure
-* **Containers:** Docker & Docker Compose
-* **Reverse Proxy:** Caddy
+One of the platform's standout innovations is the integration of **AI-driven Bots**. Powered by Large Language Models (LLMs) like Deepseek, Claude, or local Ollama, these bots simulate human-like behavior, ensuring there's always a challenging game waiting for you, even if human players are unavailable.
 
 ---
 
@@ -53,48 +24,41 @@ One of the platform's standout innovations is the integration of **AI-driven Bot
 
 ```text
 YAYPOKER/
-├── client/         # Vue.js frontend application
-├── webSocket/      # Node.js game server and socket manager
+├── client/         # Vue 3 frontend application (Vite, Pinia, Tailwind CSS)
+├── webSocket/      # Node.js game server and WebSocket manager
 ├── bot/            # Autonomous AI Bot microservice
+├── Caddyfile       # Reverse Proxy settings for production Caddy
 ├── docker-compose.yml        # Development container orchestration
 └── docker-compose-prod.yml   # Production container orchestration
 ```
 
 ---
 
-## 🚀 How to Run Locally
+## 🚀 Running Locally
 
-The easiest way to get the entire platform running on your local machine is by using Docker.
-
-### Prerequisites
-* [Docker](https://www.docker.com/get-started) and Docker Compose installed.
-* [Node.js](https://nodejs.org/en/) (if running manually).
+The easiest way to get the entire platform running on your local machine is using Docker.
 
 ### Option 1: Using Docker (Recommended)
-
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/osito82/YAYPOKER.git
    cd YAYPOKER
    ```
-
-2. **Start the services:**
+2. **Start all services:**
    ```bash
-   docker-compose up -d --build
+   docker compose up -d --build
    ```
+3. **Play!** Open your browser and navigate to `http://localhost:5174`.
 
-3. **Play!**
-   Open your browser and navigate to `http://localhost` (or the port defined in your configuration).
+### Option 2: Manual Development Setup
+You will need to open three terminals to run each service manually:
 
-### Option 2: Manual Setup
-
-1. **Start the Backend:**
+1. **Start the Backend Server:**
    ```bash
    cd webSocket
    npm install
    npm start
    ```
-
 2. **Start the AI Bots (Optional):**
    ```bash
    cd bot
@@ -102,8 +66,7 @@ The easiest way to get the entire platform running on your local machine is by u
    # Add your .env file with LLM API keys
    npm start
    ```
-
-3. **Start the Frontend:**
+3. **Start the Frontend Client:**
    ```bash
    cd client
    npm install
@@ -112,21 +75,92 @@ The easiest way to get the entire platform running on your local machine is by u
 
 ---
 
-## 🤝 Contributing
+## 💻 Frontend Client Details (`/client`)
 
-Contributions make the open-source community an amazing place to learn, inspire, and create. Any contributions you make to **YAYPOKER** are **greatly appreciated**.
+A modern, fast, and responsive poker client built with **Vue 3** and **Vite**.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+* **Dynamic HUD:** The action bar (`ActionBar.vue`) adapts to screen layouts (`xsmall`, `small`, `medium`, `large`), optimizing space for mobile screens while displaying comprehensive controls on desktop.
+* **Premium Skeuomorphic Chips:** The chips component (`Chip.vue`) uses 3D reliefs, shadows, and casino-like patterns for a tactile betting feel.
+* **Audio & Voice integration:** Native Web Audio synthesizer triggers sound effects (folds, calls, wins, turn warnings) dynamically. Integrated WebRTC voice chat allows talking with other players.
+* **Odds Calculation HUD:** Live probabilities show your odds of winning/tying based on your pocket cards and community cards (calculated via Monte Carlo simulation on the server against random opponent hands).
+
+### Commands (Client Directory):
+* **Dev Server:** `npm run dev`
+* **Production Build:** `npm run build`
+* **Linter & Code Format:** `npm run lint`
+* **Unit Tests:** `npm test`
 
 ---
 
-## 📄 License
+## ⚙️ Backend WebSocket Server (`/webSocket`)
 
-Distributed under the MIT License. See `LICENSE` for more information.
+A high-performance poker room manager and engine built on **Node.js** and **WebSockets**.
+
+* **Match Rooms:** Supports multiple active games simultaneously, isolated by 5-character tournament codes.
+* **Engine (`pokerCore.js`):** A custom hand evaluator identifying ranking tiers from "High Card" to "Royal Flush" and resolving complex split-pot or side-pot scenarios.
+* **Dealer Lifecycle (`dealer.js`):** Manages the card deck, pocket distribution, and progressive community card reveals (Flop, Turn, River).
+* **Automatic Lobby:** Matches start automatically when all players are ready or when host triggers the action.
+* **Garbage Collector:** Automatically cleans up inactive sockets and abandoned rooms to optimize memory usage.
+
+### WebSocket Communication Events:
+* `signUp`: Player requests entry to a tournament room.
+* `setBet` / `setRise` / `setCall`: Bet-related actions.
+* `fold`: Folds pocket cards.
+* `startGame`: Manual game initiation by room host.
+
+### Commands (WebSocket Directory):
+* **Dev Server:** `npm start` (Runs with nodemon)
+* **Linter:** `npm run lint`
+* **Integration & Logic Tests:** `npm test` (Runs with Vitest)
+
+---
+
+## 🤖 Autonomous AI Bot Service (`/bot`)
+
+An independent REST API service that spawns LLM-powered poker players and connects them to active rooms via WebSockets.
+
+* **AI Providers:**
+  * **Google Gemini (Cloud):** Set your API key in `/bot/.env` as `GEMINI_API_KEY=your_api_key`.
+  * **Ollama (Local):** Run a local model (such as `llama3.2`) using [Ollama](https://ollama.com/).
+* **REST API Endpoint (`POST /spawn`):**
+  The main game server requests bots by calling this endpoint with:
+  ```json
+  {
+    "gameCode": "ABCDE-12345",
+    "playerName": "Claude_Bot",
+    "server": "localhost",
+    "port": "8888"
+  }
+  ```
+* **Bot Behavior:** Bots parse the real-time game state, evaluate actions (Check, Call, Raise, Fold), generate bluff strategies, and send normal player socket actions.
+
+### Commands (Bot Directory):
+* **Start Service:** `npm start` (Runs with node or nodemon depending on env)
+
+---
+
+## 🎨 UI ID Naming Conventions
+
+All UI elements must follow a strict, descriptive ID pattern to support automated end-to-end testing:
+`[descriptive-name]-[TemplateSuffix]`
+
+1. **Descriptive Names:** IDs must clearly indicate the element's function (e.g., `player-item-chip-stack-count` instead of `chips`).
+2. **Template Suffix:** Match the active device layout or context template:
+   - Layout templates: `-TemplateLarge`, `-TemplateMedium`, `-TemplateSmall`, `-TemplateXSmall`.
+   - Page contexts: `-Home`, `-About`.
+   - Dynamic templates: Bind to `templateSuffix` dynamically.
+
+**Examples:**
+* `game-container-TemplateSmall`
+* `poker-table-viewport-TemplateLarge`
+* `player-item-display-name-{{ player.id }}-{{ templateSuffix }}`
+
+---
+
+## 🌎 Production Deployments
+
+For deployment guides, server specifications, reverse proxy details, and SSH keys, please refer to:
+👉 **[DEPLOYMENT.md](file:///home/osito/Development/GIT/YAYPOKER/DEPLOYMENT.md)**
 
 ---
 
