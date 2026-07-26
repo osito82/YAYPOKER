@@ -301,7 +301,7 @@ class MatchActions {
       actionType = 'All-In'
     }
 
-    foundPlayer.setLastAction(actionType)
+    foundPlayer.setLastAction(`${actionType} $${currentBetAfter}`)
 
     this.log
       .Template({
@@ -461,7 +461,7 @@ class MatchActions {
         broadcastAction = 'setCall'
       }
 
-      foundPlayer.setLastAction(actionType)
+      foundPlayer.setLastAction(`${actionType} $${currentBetAfter}`)
       this.dealer.setPot(addedChips)
       if (currentBetAfter > previousMaxBet) {
         const raiseAmount = currentBetAfter - previousMaxBet

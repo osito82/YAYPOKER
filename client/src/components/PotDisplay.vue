@@ -121,27 +121,53 @@
     <div
       v-else
       :id="`pot-display-single-pot-${templateSuffix}`"
-      class="flex items-center gap-2"
+      class="flex flex-col items-center gap-0.5 py-1"
     >
+      <!-- Game Phase Badge -->
       <span
-        :id="`pot-display-label-${templateSuffix}`"
-        class="text-2xl md:text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] tracking-tight group-hover:scale-105 transition-transform"
+        v-if="gamePhase"
+        :id="`pot-display-phase-badge-${templateSuffix}`"
+        class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border mb-0.5"
+        :class="phaseStyle"
       >
-        Pot
+        {{ gamePhase }}
       </span>
 
-      <span
-        :id="`pot-display-currency-symbol-${templateSuffix}`"
-        class="text-yellow-500/60 font-black text-[10px] tracking-tighter mt-1"
-        >$</span
-      >
+      <div class="flex items-center gap-2">
+        <span
+          :id="`pot-display-label-${templateSuffix}`"
+          class="text-2xl md:text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] tracking-tight group-hover:scale-105 transition-transform"
+        >
+          Pot
+        </span>
 
-      <span
-        :id="`pot-display-value-${templateSuffix}`"
-        class="text-2xl md:text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] tracking-tight group-hover:scale-105 transition-transform"
+        <span
+          :id="`pot-display-currency-symbol-${templateSuffix}`"
+          class="text-yellow-500/60 font-black text-[10px] tracking-tighter mt-1"
+          >$</span
+        >
+
+        <span
+          :id="`pot-display-value-${templateSuffix}`"
+          class="text-2xl md:text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] tracking-tight group-hover:scale-105 transition-transform"
+        >
+          {{ amount }}
+        </span>
+      </div>
+
+      <!-- Current Bet to Match -->
+      <div
+        v-if="currentHighestBet > 0"
+        :id="`pot-display-current-bet-${templateSuffix}`"
+        class="flex items-center gap-1.5 mt-0.5"
       >
-        {{ amount }}
-      </span>
+        <span class="text-[9px] font-bold uppercase tracking-wider text-white/40"
+          >Bet to Match</span
+        >
+        <span class="text-xs font-mono font-black text-yellow-500/80"
+          >${{ currentHighestBet }}</span
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -161,6 +187,40 @@ const templateSuffix = computed(() => responsive.templateSuffix)
 
 const lobbyTimer = computed(() => store.getLobbyTimer)
 const pots = computed(() => store.getPots)
+const currentHighestBet = computed(() => store.getCurrentHighestBet || 0)
+
+const gamePhase = computed(() => {
+  const sc = store.getStepChecker
+  if (!sc || !sc.startGame) return ''
+  if (sc.showDown || sc.winner || sc.finalHands) return 'Showdown'
+  if (sc.river_Bet_Step || sc.river_Check_Prize_Step || sc.river_Dealer_Hand)
+    return 'River'
+  if (sc.turn_Bet_Step || sc.turn_Check_Prize_Step || sc.turn_Dealer_Hand)
+    return 'Turn'
+  if (sc.flop_Bet_Step || sc.flop_Check_Prize_Step || sc.flop_Dealer_Hand)
+    return 'Flop'
+  if (sc.firstBetting || sc.dealtPrivateCards) return 'Preflop'
+  if (sc.blindsBetting) return 'Blinds'
+  return ''
+})
+
+const phaseStyle = computed(() => {
+  switch (gamePhase.value) {
+    case 'Preflop':
+    case 'Blinds':
+      return 'text-blue-400/80 border-blue-400/20 bg-blue-500/10'
+    case 'Flop':
+      return 'text-emerald-400/80 border-emerald-400/20 bg-emerald-500/10'
+    case 'Turn':
+      return 'text-orange-400/80 border-orange-400/20 bg-orange-500/10'
+    case 'River':
+      return 'text-red-400/80 border-red-400/20 bg-red-500/10'
+    case 'Showdown':
+      return 'text-yellow-400/80 border-yellow-400/20 bg-yellow-500/10'
+    default:
+      return ''
+  }
+})
 
 const localTime = ref(0)
 let interval = null
