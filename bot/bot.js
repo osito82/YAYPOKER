@@ -319,14 +319,27 @@ class PokerBot {
         allowed: allowedActions,
       });
 
-    // 1. Filtrado Algorítmico (Ahorrar 100% de tokens y costos en decisiones triviales u obvias)
+    // 1. Filtrado Algorítmico (Ahorrar 100% de tokens en decisiones triviales u obvias)
+    //    Solo se activa si tenemos datos de odds reales (realEquity > 0), para no
+    //    tomar decisiones con valores por defecto sin inicializar.
+    const hasOddsData = (this.myOdds.win + this.myOdds.tie) > 0;
     let algoDecision = null;
-    if (callAmount >= myChips * 0.5 && realEquity < 0.45 && allowedActions.includes("fold")) {
-      algoDecision = { action: "fold", reason: "high_call_low_equity" };
-    } else if (callAmount === 0 && realEquity <= 0.60 && allowedActions.includes("check")) {
-      algoDecision = { action: "check", reason: "free_check_medium_equity" };
-    } else if (board.length === 0 && callAmount > 0 && realEquity < 0.35 && allowedActions.includes("fold")) {
-      algoDecision = { action: "fold", reason: "preflop_trash_facing_raise" };
+
+    if (hasOddsData) {
+      if (callAmount >= myChips * 0.5 && realEquity < 0.45 && allowedActions.includes("fold")) {
+        // Apuesta gigante con equity débil → fold inmediato
+        algoDecision = { action: "fold", reason: "high_call_low_equity" };
+      } else if (callAmount === 0 && realEquity <= 0.40 && allowedActions.includes("check")) {
+        // Check gratis solo con manos mediocres/débiles (≤40%). Con >40% dejamos que
+        // la IA decida si apostar/raise para extraer valor.
+        algoDecision = { action: "check", reason: "free_check_weak_hand" };
+      } else if (board.length === 0 && callAmount > 0 && realEquity < 0.35 && allowedActions.includes("fold")) {
+        // Preflop trash enfrentando raise → fold
+        algoDecision = { action: "fold", reason: "preflop_trash_facing_raise" };
+      } else if (stackInBB < 10 && realEquity >= 0.55 && allowedActions.includes("raise")) {
+        // Short stack con mano fuerte → all-in algorítmico sin gastar tokens
+        algoDecision = { action: "raise", amount: myChips, reason: "short_stack_allin" };
+      }
     }
 
     if (algoDecision) {

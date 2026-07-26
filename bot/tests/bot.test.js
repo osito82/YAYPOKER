@@ -131,10 +131,10 @@ describe('PokerBot', () => {
     vi.useRealTimers();
   });
 
-  it('handleDecision executes algorithmic check when callAmount is 0 and equity is not huge', async () => {
+  it('handleDecision executes algorithmic check when callAmount is 0 and equity is weak', async () => {
     vi.useFakeTimers();
     bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
-    bot.myOdds = { win: 40, tie: 0 }; // 40% equity
+    bot.myOdds = { win: 35, tie: 0 }; // 35% equity (weak, below 0.40 threshold)
     const sendSpy = vi.spyOn(bot, 'sendAction');
     bot.provider = 'invalid_provider';
 
@@ -167,6 +167,46 @@ describe('PokerBot', () => {
     expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'fold' }));
     vi.useRealTimers();
   });
+
+  it('handleDecision executes algorithmic all-in with short stack and strong hand', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myChips = 150;        // 7.5 BB → short stack (<10)
+    bot.bigBlind = 20;
+    bot.myOdds = { win: 60, tie: 0 }; // 60% equity (strong)
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    bot.provider = 'invalid_provider';
+
+    await bot.handleDecision({
+      currentHighestBet: 20,
+      pot: 50,
+      data: { action: ['fold', 'call', 'raise'] }
+    });
+    vi.advanceTimersByTime(1000);
+
+    // Short stack + strong equity → algorithmic all-in raise
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'setRise' }));
+    vi.useRealTimers();
+  });
+
+  it('handleDecision skips algorithmic filter when odds are uninitialized (0/0)', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myOdds = { win: 0, tie: 0 }; // No odds received yet
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    bot.provider = 'invalid_provider';
+
+    await bot.handleDecision({
+      currentHighestBet: 50,
+      pot: 100,
+      dealerCards: [], // Preflop
+      data: { action: ['fold', 'call'] }
+    });
+    vi.advanceTimersByTime(1000);
+
+    // With no odds data, algo filter is skipped → falls through to AI (which fails)
+    // → baseAction fallback kicks in. EV with 0 equity = -50, so baseAction = fold
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'fold' }));
+    vi.useRealTimers();
+  });
 });
-
-
