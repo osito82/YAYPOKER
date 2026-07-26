@@ -130,5 +130,43 @@ describe('PokerBot', () => {
     expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'fold' }));
     vi.useRealTimers();
   });
+
+  it('handleDecision executes algorithmic check when callAmount is 0 and equity is not huge', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myOdds = { win: 40, tie: 0 }; // 40% equity
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    bot.provider = 'invalid_provider';
+
+    await bot.handleDecision({
+      currentHighestBet: 0,
+      pot: 100,
+      data: { action: ['check', 'bet'] }
+    });
+    vi.advanceTimersByTime(1000);
+
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'setCheck' }));
+    vi.useRealTimers();
+  });
+
+  it('handleDecision executes algorithmic fold on preflop trash hand facing raise', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myOdds = { win: 25, tie: 0 }; // 25% equity (trash)
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    bot.provider = 'invalid_provider';
+
+    await bot.handleDecision({
+      currentHighestBet: 50,
+      pot: 100,
+      dealerCards: [], // Preflop
+      data: { action: ['fold', 'call'] }
+    });
+    vi.advanceTimersByTime(1000);
+
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'fold' }));
+    vi.useRealTimers();
+  });
 });
+
 

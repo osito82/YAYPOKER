@@ -5,6 +5,18 @@ const { Ollama } = require("ollama");
 const log = require("./logger");
 require("dotenv").config();
 
+const SYSTEM_PROMPT_RULES = `You are an expert, highly professional Texas Hold'em AI player.
+Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":number}
+
+Strategy Rules:
+1. SHORT STACK (< 10 BB): Never limp or make passive calls pre-flop. If stack < 10 BB, go ALL-IN ("raise" all chips) with playable hands (any Pair, Ace, K-high, suited connectors), or FOLD.
+2. BOARD TEXTURE & COUNTERFEITING: Beware of community pairs on the board (e.g. A-A-J-J-7). Everyone has that pair! Do not call large bets on paired boards unless you hold a Full House, Trips, or Top Pair with highest kicker.
+3. SPR & AGGRESSION: When you hit Top Pair or better post-flop and SPR <= 1.5, be aggressive. Initiate an ALL-IN or max raise ("raise") to protect against draws.
+4. NEVER fold if "check" is an allowed action.
+5. If EV > 0 and Pot Odds < Equity, calling is profitable (+EV).
+6. If EV < 0 and Call Amount > 0, FOLD unless bluffing.
+7. Only "raise" if Equity > 0.6, EV is highly positive, or protecting vulnerable top pair/all-in. Pick amount between 2x-3x raise or pot-sized bet (up to total chips).`;
+
 const app = express();
 app.use(express.json());
 
@@ -70,7 +82,11 @@ class PokerBot {
     const geminiKey = process.env.GEMINI_API_KEY;
     if (this.provider === "gemini" && geminiKey) {
       const genAI = new GoogleGenerativeAI(geminiKey);
-      this.geminiModel = genAI.getGenerativeModel({ model: this.modelName });
+      this.geminiModel = genAI.getGenerativeModel({
+        model: this.modelName,
+        systemInstruction: SYSTEM_PROMPT_RULES,
+        generationConfig: { maxOutputTokens: 35, temperature: 0.1 },
+      });
       log
         .Template({ name: "brakets", title: "AI:GEMINI_INIT", date: true })
         .R({ bot: this.playerName, model: this.modelName });
@@ -303,80 +319,98 @@ class PokerBot {
         allowed: allowedActions,
       });
 
-    const prompt = `
-You are an expert, highly professional Texas Hold'em AI player.
-Hand: ${this.myCards.join(", ")} | Board: ${board.join(", ") || "No cards dealt yet"}
-Your Chip Stack: ${myChips} chips (${stackInBB} Big Blinds) | Current Pot: ${currentPot} | Amount to Call: ${callAmount}
-Stack-to-Pot Ratio (SPR): ${spr}
-Your mathematical Equity is: ${realEquity.toFixed(2)} (0.0 to 1.0)
-Pot Odds: ${potOdds.toFixed(2)}
-Expected Value (EV) of calling: ${evCall.toFixed(2)} chips
-Allowed Actions: ${allowedActions.join(", ")}
+    // 1. Filtrado Algorítmico (Ahorrar 100% de tokens y costos en decisiones triviales u obvias)
+    let algoDecision = null;
+    if (callAmount >= myChips * 0.5 && realEquity < 0.45 && allowedActions.includes("fold")) {
+      algoDecision = { action: "fold", reason: "high_call_low_equity" };
+    } else if (callAmount === 0 && realEquity <= 0.60 && allowedActions.includes("check")) {
+      algoDecision = { action: "check", reason: "free_check_medium_equity" };
+    } else if (board.length === 0 && callAmount > 0 && realEquity < 0.35 && allowedActions.includes("fold")) {
+      algoDecision = { action: "fold", reason: "preflop_trash_facing_raise" };
+    }
 
-Strategy Rules:
-1. SHORT STACK RULE (< 10 Big Blinds): If your chip stack is less than 10 Big Blinds (${stackInBB} < 10), YOU MUST NEVER LIMP OR MAKE PASSIVE CALLS PRE-FLOP. Your only valid actions pre-flop are to go ALL-IN ("raise" with all your remaining ${myChips} chips) if you hold a playable hand (any Pair, any Ace, King-high, or suited connectors), or FOLD immediately.
-2. BOARD TEXTURE & COUNTERFEITING RULE: Beware of community pairs on the board (e.g. A-A-J-J-7 or T-T-2-5-3). If the community board has a pair, EVERYONE at the table has that pair! If your only hand is matching a low board card or using the board's pairs, your hand is extremely weak. DO NOT call large bets or all-ins on paired boards unless you hold a Full House, Trips, or Top Pair with the highest kicker!
-3. SPR & AGGRESSION RULE: When you hit Top Pair or better post-flop and your remaining stack is small compared to the pot (SPR <= 1.5), BE AGGRESSIVE. Do not check or just call; initiate an ALL-IN or a max raise ("raise") to protect your hand against draws.
-4. NEVER fold if "check" is an allowed action.
-5. If EV is positive (EV > 0) and Pot Odds < Equity, calling is mathematically profitable (+EV).
-6. If EV is strongly negative (EV < 0) and Call Amount > 0, you MUST fold unless executing a calculated bluff.
-7. Only "raise" if Equity > 0.6, EV is highly positive, or to protect a vulnerable top pair/all-in shove. If raising normally, pick an amount between 2x and 3x the current raise, or a pot-sized bet (up to your total chips ${myChips}).
-
-Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":number}
-`;
-
-    let decision = null;
-    try {
-      let aiText = "";
-      
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("AI Request Timeout")), 25000)
-      );
-
-      const aiRequest = async () => {
-        if (this.provider === "gemini" && this.geminiModel) {
-          const result = await this.geminiModel.generateContent(prompt);
-          return (await result.response).text();
-        } else if (this.provider === "deepseek" && this.deepseekApiKey) {
-          const response = await fetch(
-            `${this.deepseekBaseUrl}/chat/completions`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${this.deepseekApiKey}`,
-              },
-              body: JSON.stringify({
-                model: this.modelName,
-                messages: [
-                  { role: "system", content: "You are a professional poker bot." },
-                  { role: "user", content: prompt },
-                ],
-                stream: false,
-              }),
-            },
-          );
-          const data = await response.json();
-          if (data.error) throw new Error(data.error.message || "DeepSeek Error");
-          return data.choices[0].message.content;
-        } else if (this.provider === "ollama" && ollamaClient) {
-          const response = await ollamaClient.generate({
-            model: this.modelName,
-            prompt,
-            stream: false,
-          });
-          return response.response;
-        } else {
-          throw new Error(`Provider ${this.provider} is not properly configured.`);
-        }
-      };
-
-      aiText = await Promise.race([aiRequest(), timeoutPromise]);
-      decision = this.safeParseJSON(aiText);
-    } catch (e) {
+    if (algoDecision) {
       log
-        .Template({ name: "brakets", title: "ERROR:AI", date: true })
-        .R({ bot: this.playerName, error: e.message });
+        .Template({ name: "brakets", title: "BOT:ALGO_DECISION", date: true })
+        .R({ bot: this.playerName, reason: algoDecision.reason, action: algoDecision.action });
+    }
+
+    let decision = algoDecision;
+    if (!decision) {
+      // 2. Compresión del Prompt (Mini-JSON estructurado y ultra corto)
+      const prompt = `State: ${JSON.stringify({
+        hand: this.myCards.join(", "),
+        board: board.join(", ") || "Pre-flop",
+        pot: currentPot,
+        call: callAmount,
+        chips: myChips,
+        bb: stackInBB,
+        spr,
+        eq: Number(realEquity.toFixed(2)),
+        potOdds: Number(potOdds.toFixed(2)),
+        ev: Number(evCall.toFixed(2)),
+        opts: allowedActions,
+      })}`;
+
+      try {
+        let aiText = "";
+        
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("AI Request Timeout")), 25000)
+        );
+
+        const aiRequest = async () => {
+          if (this.provider === "gemini" && this.geminiModel) {
+            const result = await this.geminiModel.generateContent(prompt);
+            return (await result.response).text();
+          } else if (this.provider === "deepseek" && this.deepseekApiKey) {
+            const response = await fetch(
+              `${this.deepseekBaseUrl}/chat/completions`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${this.deepseekApiKey}`,
+                },
+                body: JSON.stringify({
+                  model: this.modelName,
+                  messages: [
+                    { role: "system", content: SYSTEM_PROMPT_RULES },
+                    { role: "user", content: prompt },
+                  ],
+                  stream: false,
+                  max_tokens: 35,
+                  temperature: 0.1,
+                }),
+              },
+            );
+            const data = await response.json();
+            if (data.error) throw new Error(data.error.message || "DeepSeek Error");
+            return data.choices[0].message.content;
+          } else if (this.provider === "ollama" && ollamaClient) {
+            const response = await ollamaClient.generate({
+              model: this.modelName,
+              system: SYSTEM_PROMPT_RULES,
+              prompt,
+              stream: false,
+              options: {
+                num_predict: 35,
+                temperature: 0.1,
+              },
+            });
+            return response.response;
+          } else {
+            throw new Error(`Provider ${this.provider} is not properly configured.`);
+          }
+        };
+
+        aiText = await Promise.race([aiRequest(), timeoutPromise]);
+        decision = this.safeParseJSON(aiText);
+      } catch (e) {
+        log
+          .Template({ name: "brakets", title: "ERROR:AI", date: true })
+          .R({ bot: this.playerName, error: e.message });
+      }
     }
 
     if (!decision || !decision.action) decision = { action: baseAction };
