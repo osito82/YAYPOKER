@@ -655,6 +655,7 @@ class MatchActions {
 
         this.communicator.msgBuilder(`askForBlindBets`, 'public', p, {
           displayMsg: `Waiting for ${p.name} (${isSB ? 'SB' : 'BB'})`,
+          blindType: isSB ? 'SB' : 'BB',
           blindAmount,
         })
         Socket.broadcastToTorneo(
@@ -665,6 +666,7 @@ class MatchActions {
         this.communicator.msgBuilder(`askForBlindBets`, 'private', p, {
           id: p.id,
           displayMsg: `YOUR TURN: ${isSB ? 'Small' : 'Big'} Blind`,
+          blindType: isSB ? 'SB' : 'BB',
           blindAmount,
         })
         Socket.sendToPlayer(
@@ -1086,6 +1088,9 @@ class MatchActions {
         messageForId: p.id,
         action: opts,
         displayMsg: 'Your turn',
+        playerChips: p.chips,
+        playerBet: p.getCurrentBet(),
+        maxBetOnTable: maxBet,
       })
       Socket.sendToPlayer(
         this.match.torneoId,

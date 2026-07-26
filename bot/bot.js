@@ -57,6 +57,8 @@ class PokerBot {
     this.myId = null;
     this.myCards = [];
     this.myCurrentBet = 0;
+    this.myChips = 1000;
+    this.bigBlind = 20;
     this.lastStepId = null;
     this.myOdds = { win: 0, tie: 0 }; // Estado persistente de probabilidades
 
@@ -111,18 +113,35 @@ class PokerBot {
         const payload = JSON.parse(rawData);
         const msg = payload.message || payload;
 
-        // Actualizar mi apuesta actual desde la lista de jugadores
-        if (this.myId && msg.players) {
-          const me = msg.players.find((p) => p.id === this.myId);
-          if (me) this.myCurrentBet = Number(me.currentBet || 0);
+        if (msg.bigBlind) this.bigBlind = Number(msg.bigBlind);
+        if (msg.data?.bigBlind) this.bigBlind = Number(msg.data.bigBlind);
+        if (msg.data?.blindType === "BB" && msg.data?.blindAmount) {
+          this.bigBlind = Number(msg.data.blindAmount);
+        }
+        if (msg.data?.playerChips !== undefined) {
+          this.myChips = Number(msg.data.playerChips);
+        }
+
+        // Actualizar mi apuesta actual y fichas desde la lista de jugadores
+        if (msg.players) {
+          const me = msg.players.find(
+            (p) => (this.myId && p.id === this.myId) || p.name === this.playerName,
+          );
+          if (me) {
+            if (!this.myId && me.id) this.myId = me.id;
+            this.myCurrentBet = Number(me.currentBet || 0);
+            this.myChips = Number(me.chips || 0);
+          }
         }
 
         // Registro de signup
         if (msg.action === "signUp" && msg.type === "private") {
           this.myId = msg.id || msg.playerId || msg.myPlayerInfo?.playerId;
+          if (msg.bigBlind) this.bigBlind = Number(msg.bigBlind);
+          if (msg.data?.bigBlind) this.bigBlind = Number(msg.data.bigBlind);
           log
             .Template({ name: "brakets", title: "BOT:REGISTERED", date: true })
-            .R({ bot: this.playerName, myId: this.myId });
+            .R({ bot: this.playerName, myId: this.myId, bb: this.bigBlind });
           this.sendAction({ action: "playerReady" });
           return;
         }
@@ -237,6 +256,10 @@ class PokerBot {
       msg.data?.actions || ["fold", "call"];
     const board = msg.dealerCards || [];
 
+    const myChips = Number(this.myChips ?? 1000);
+    const bigBlind = Number(this.bigBlind ?? 20);
+    const stackInBB = Math.round(myChips / (bigBlind > 0 ? bigBlind : 20));
+
     // Cálculo de Equity matemático basado en el estado guardado
     const winChance = this.myOdds.win;
     const tieChance = this.myOdds.tie;
@@ -246,15 +269,21 @@ class PokerBot {
     const currentPot = Number(msg.pot || 0);
     const potOdds = callAmount > 0 ? callAmount / (currentPot + callAmount) : 0;
     const evCall = (realEquity * currentPot) - ((1 - realEquity) * callAmount);
+    const spr = currentPot > 0 ? (myChips / currentPot).toFixed(2) : "N/A";
 
-    // Acción base por defecto
+    // Acción base por defecto (segura ante errores de IA o stacks cortos)
     let baseAction = "check";
     if (callAmount === 0) {
       baseAction = allowedActions.includes("check") ? "check" : "call";
     } else {
-      // Usamos EV para la acción de fallback
       if (allowedActions.includes("call")) {
-        baseAction = evCall > 0 ? "call" : "fold";
+        // Guardarriel de stack corto / apuesta gigante:
+        // Si nos piden más de la mitad de nuestro stack y nuestra equity no es fuerte (< 45%), foldear aunque el EV marginal sea positivo
+        if (callAmount >= myChips * 0.5 && realEquity < 0.45) {
+          baseAction = "fold";
+        } else {
+          baseAction = evCall > 0 ? "call" : "fold";
+        }
       } else {
         baseAction = "fold";
       }
@@ -264,6 +293,9 @@ class PokerBot {
       .Template({ name: "brakets", title: "BOT:DECIDING", date: true })
       .R({
         bot: this.playerName,
+        chips: myChips,
+        bb: stackInBB,
+        spr,
         equity: realEquity,
         potOdds: potOdds.toFixed(2),
         ev: evCall.toFixed(2),
@@ -272,20 +304,23 @@ class PokerBot {
       });
 
     const prompt = `
-You are a professional Texas Hold'em player.
+You are an expert, highly professional Texas Hold'em AI player.
 Hand: ${this.myCards.join(", ")} | Board: ${board.join(", ") || "No cards dealt yet"}
-Current Pot: ${currentPot} | Amount to Call: ${callAmount}
+Your Chip Stack: ${myChips} chips (${stackInBB} Big Blinds) | Current Pot: ${currentPot} | Amount to Call: ${callAmount}
+Stack-to-Pot Ratio (SPR): ${spr}
 Your mathematical Equity is: ${realEquity.toFixed(2)} (0.0 to 1.0)
 Pot Odds: ${potOdds.toFixed(2)}
 Expected Value (EV) of calling: ${evCall.toFixed(2)} chips
 Allowed Actions: ${allowedActions.join(", ")}
 
 Strategy Rules:
-1. NEVER fold if "check" is an allowed action.
-2. If EV is positive (EV > 0) and Pot Odds < Equity, a call is mathematically profitable (+EV).
-3. If EV is strongly negative (EV < 0) and Call Amount > 0, you SHOULD fold unless you want to bluff.
-4. Only "raise" if Equity > 0.6, EV is highly positive, or if you want to execute a calculated bluff.
-5. If you raise, pick an amount between 2x and 3x the current raise, or a pot-sized bet.
+1. SHORT STACK RULE (< 10 Big Blinds): If your chip stack is less than 10 Big Blinds (${stackInBB} < 10), YOU MUST NEVER LIMP OR MAKE PASSIVE CALLS PRE-FLOP. Your only valid actions pre-flop are to go ALL-IN ("raise" with all your remaining ${myChips} chips) if you hold a playable hand (any Pair, any Ace, King-high, or suited connectors), or FOLD immediately.
+2. BOARD TEXTURE & COUNTERFEITING RULE: Beware of community pairs on the board (e.g. A-A-J-J-7 or T-T-2-5-3). If the community board has a pair, EVERYONE at the table has that pair! If your only hand is matching a low board card or using the board's pairs, your hand is extremely weak. DO NOT call large bets or all-ins on paired boards unless you hold a Full House, Trips, or Top Pair with the highest kicker!
+3. SPR & AGGRESSION RULE: When you hit Top Pair or better post-flop and your remaining stack is small compared to the pot (SPR <= 1.5), BE AGGRESSIVE. Do not check or just call; initiate an ALL-IN or a max raise ("raise") to protect your hand against draws.
+4. NEVER fold if "check" is an allowed action.
+5. If EV is positive (EV > 0) and Pot Odds < Equity, calling is mathematically profitable (+EV).
+6. If EV is strongly negative (EV < 0) and Call Amount > 0, you MUST fold unless executing a calculated bluff.
+7. Only "raise" if Equity > 0.6, EV is highly positive, or to protect a vulnerable top pair/all-in shove. If raising normally, pick an amount between 2x and 3x the current raise, or a pot-sized bet (up to your total chips ${myChips}).
 
 Respond strictly in JSON format: {"action":"fold|call|check|raise","amount":number}
 `;

@@ -2,33 +2,32 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PokerBot } from '../bot.js';
 
 // Mock WebSocket so we don't actually connect during tests
-vi.mock('ws', () => {
-  return {
-    default: class WebSocket {
-      constructor(url) {
-        this.url = url;
-        this.events = {};
-      }
-      on(event, cb) {
-        this.events[event] = cb;
-      }
-      send(data) {
-        // Mock send
-      }
-      // Helper to simulate incoming messages
-      simulateMessage(data) {
-        if (this.events['message']) {
-          this.events['message'](data);
-        }
-      }
-      simulateOpen() {
-        if (this.events['open']) {
-          this.events['open']();
-        }
-      }
-    },
-  };
-});
+const MockWebSocket = class WebSocket {
+  constructor(url) {
+    this.url = url;
+    this.events = {};
+  }
+  on(event, cb) {
+    this.events[event] = cb;
+  }
+  send(data) {
+    // Mock send
+  }
+  simulateMessage(data) {
+    if (this.events['message']) {
+      this.events['message'](data);
+    }
+  }
+  simulateOpen() {
+    if (this.events['open']) {
+      this.events['open']();
+    }
+  }
+};
+MockWebSocket.default = MockWebSocket;
+MockWebSocket.WebSocket = MockWebSocket;
+
+vi.mock('ws', () => MockWebSocket);
 
 describe('PokerBot', () => {
   let bot;
@@ -78,4 +77,58 @@ describe('PokerBot', () => {
     // Invalid JSON
     expect(bot.safeParseJSON('I am raising 100!')).toBe(null);
   });
+
+  it('updates chip stack and blinds from messages correctly', () => {
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    
+    const simMsg = (data) => {
+      if (bot.socket.simulateMessage) bot.socket.simulateMessage(data);
+      else if (bot.socket.emit) bot.socket.emit('message', data);
+    };
+
+    // Simulate player info message
+    simMsg(JSON.stringify({
+      players: [
+        { id: '123', name: 'TestBot', chips: 750, currentBet: 50 },
+        { id: '456', name: 'OtherPlayer', chips: 1500, currentBet: 50 }
+      ]
+    }));
+
+    expect(bot.myChips).toBe(750);
+    expect(bot.myCurrentBet).toBe(50);
+
+    // Simulate askForBlindBets with BB
+    simMsg(JSON.stringify({
+      action: 'askForBlindBets',
+      type: 'private',
+      data: { id: '123', blindType: 'BB', blindAmount: 50 }
+    }));
+    expect(bot.bigBlind).toBe(50);
+  });
+
+  it('handleDecision fallback folds on massive bets when equity is low and stack is short', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myChips = 200;
+    bot.myOdds = { win: 30, tie: 0 }; // 30% equity
+    
+    // Mock sendAction to observe result
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    
+    // Mock provider to force timeout or fail so fallback is triggered
+    bot.provider = 'invalid_provider_to_force_fallback';
+
+    await bot.handleDecision({
+      currentHighestBet: 150,
+      pot: 300,
+      data: { action: ['fold', 'call'] }
+    });
+
+    vi.advanceTimersByTime(1000);
+
+    // Since callAmount (150) >= myChips * 0.5 (100) and equity (0.30) < 0.45, fallback must be fold
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'fold' }));
+    vi.useRealTimers();
+  });
 });
+
