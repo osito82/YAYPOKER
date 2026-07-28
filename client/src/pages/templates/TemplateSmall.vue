@@ -6,7 +6,7 @@
     <!-- UNIFIED COMPACT HEADER -->
     <header
       id="game-header-bar-TemplateSmall"
-      class="w-full bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 px-3 py-1 flex items-center justify-between z-50 shrink-0"
+      class="w-full relative bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/5 px-3 flex items-center justify-between z-50 shrink-0 min-h-[52px]"
     >
       <!-- LEFT SECTION -->
       <div
@@ -42,6 +42,13 @@
           >
             {{ $t('game.type_label') }}
           </h1>
+        </div>
+      </div>
+
+      <!-- CENTER SECTION (POT) -->
+      <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none">
+        <div class="transform scale-[0.70] origin-center pointer-events-auto">
+          <PotDisplay :amount="pot" />
         </div>
       </div>
 
@@ -180,6 +187,7 @@ import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 import MessageTerminal from '../../components/MessageTerminal.vue'
+import PotDisplay from '../../components/PotDisplay.vue'
 import { usePokerStore } from '../../store/pokerStore'
 
 const pokerStore = usePokerStore()

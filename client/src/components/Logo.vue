@@ -20,7 +20,7 @@
     <!-- POKER Text -->
     <div
       :id="`brand-logo-text-${templateSuffix}`"
-      class="hidden min-[400px]:block text-xl sm:text-3xl font-black italic tracking-tighter text-white drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]"
+      class="hidden min-[400px]:block text-xl sm:text-3xl font-black italic tracking-tighter text-gray-900 dark:text-white drop-shadow-[0_4px_6px_rgba(0,0,0,0.4)]"
     >
       POKER
     </div>
