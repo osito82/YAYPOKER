@@ -57,7 +57,7 @@
         ]"
         :title="$t('game.allin_tooltip')"
       >
-        ALL-IN
+        {{ $t('game.all_in') }}
       </button>
       <button
         @click="$emit('toggleSitOut')"
@@ -70,7 +70,7 @@
             : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10',
         ]"
       >
-        {{ isSittingOut ? 'SIT IN' : 'SIT OUT' }}
+        {{ isSittingOut ? $t('game.sit_in') : $t('game.sit_out') }}
       </button>
     </div>
   </div>

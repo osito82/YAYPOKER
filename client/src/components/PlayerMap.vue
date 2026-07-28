@@ -83,7 +83,7 @@
         >
           <span
             class="text-[8px] font-black text-[#D4A853] uppercase leading-none"
-            >AUS</span
+            >{{ $t('game.away_badge') }}</span
           >
         </div>
       </div>
@@ -106,7 +106,7 @@
           <span
             v-if="seat.player.id === myPlayerId"
             class="text-[9px] text-blue-400 font-bold shrink-0"
-            >tú</span
+            >{{ $t('game.you_badge') }}</span
           >
         </div>
 
@@ -141,11 +141,11 @@
           </template>
           <template v-else-if="seat.player.isSittingOut">
             <span class="uppercase tracking-wider text-[9px] text-[#D4A853]"
-              >AUSENTE</span
+              >{{ $t('game.away_badge') }}</span
             >
           </template>
           <template v-else-if="seat.player.isAllIn">
-            <span class="text-amber-400 font-black text-[10px]">ALL-IN</span>
+            <span class="text-amber-400 font-black text-[10px]">{{ $t('game.all_in') }}</span>
             <span class="opacity-40">${{ seat.player.chips }}</span>
           </template>
           <template v-else-if="seat.player.currentBet > 0">
@@ -172,11 +172,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, toRef } from 'vue'
 import { cleanPlayerName } from '../vutils'
-import { useResponsiveStore } from '../store/responsiveStore'
-
-const responsive = useResponsiveStore()
+import { useSeatPositions } from './useSeatPositions'
 
 const props = defineProps({
   players: { type: Array, default: () => [] },
@@ -184,8 +182,13 @@ const props = defineProps({
   myPlayerId: { type: String, default: null },
 })
 
-const isMobile = computed(() =>
-  ['xsmall', 'small'].includes(responsive.screenSize),
+const { positionedSeats, isMobile } = useSeatPositions(
+  toRef(props, 'players'),
+  toRef(props, 'myPlayerId'),
+)
+
+const semiAxes = computed(() =>
+  isMobile.value ? { a: 47, b: 32 } : { a: 45, b: 36 },
 )
 
 const AVATAR_COLORS = [
@@ -236,54 +239,6 @@ const getStackPercent = (player) => {
   const stack = player.chips || 0
   return Math.max(3, Math.round((stack / maxChips.value) * 100))
 }
-
-function getEllipseSeatPositions(playerCount) {
-  if (playerCount < 2) return []
-  const positions = []
-  const startAngle = -Math.PI / 2
-  for (let i = 0; i < playerCount; i++) {
-    const angle = startAngle + (i * 2 * Math.PI) / playerCount
-    positions.push({ angle, index: i })
-  }
-  return positions
-}
-
-const semiAxes = computed(() => {
-  return isMobile.value ? { a: 47, b: 32 } : { a: 45, b: 36 }
-})
-
-const positionedSeats = computed(() => {
-  const playerList = [...props.players]
-    .filter((p) => p && p.playerNumber != null)
-    .sort((a, b) => a.playerNumber - b.playerNumber)
-
-  if (playerList.length < 2) return []
-
-  const myIndex = playerList.findIndex((p) => p.id === props.myPlayerId)
-  let rotatedList = playerList
-  if (myIndex > 0) {
-    rotatedList = [
-      ...playerList.slice(myIndex),
-      ...playerList.slice(0, myIndex),
-    ]
-  }
-
-  const ellipsePositions = getEllipseSeatPositions(rotatedList.length)
-  const axes = semiAxes.value
-  const myAngleOffset = Math.PI
-
-  return rotatedList.map((player, idx) => {
-    const { angle } = ellipsePositions[idx]
-    const adjustedAngle = angle + myAngleOffset
-    const n = 3.5
-    const absCos = Math.pow(Math.abs(Math.cos(adjustedAngle)), 2 / n)
-    const absSin = Math.pow(Math.abs(Math.sin(adjustedAngle)), 2 / n)
-
-    const left = 50 + axes.a * absCos * Math.sign(Math.cos(adjustedAngle))
-    const top = 53 + axes.b * absSin * Math.sign(Math.sin(adjustedAngle))
-    return { player, left, top }
-  })
-})
 </script>
 
 <style scoped></style>

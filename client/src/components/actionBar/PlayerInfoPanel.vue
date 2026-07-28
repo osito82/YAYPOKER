@@ -32,15 +32,20 @@
         class="flex gap-1 items-end bg-white/5 p-1 rounded-lg border border-white/5"
       >
         <template v-if="playerCards?.length">
-          <Card
+          <div
             v-for="(card, i) in playerCards"
-            :id="`hud-player-hand-card-${i}-${templateSuffix}`"
-            :key="'player-card-' + i"
-            :size="'small'"
-            :percentage="screenSize === 'xsmall' ? 40 : 45"
-            :numSymbol="card"
-            class="shadow-lg"
-          />
+            :key="'player-card-' + card"
+            class="hole-card-deal"
+            :style="{ animationDelay: `${i * 0.18}s` }"
+          >
+            <Card
+              :id="`hud-player-hand-card-${i}-${templateSuffix}`"
+              :size="'small'"
+              :percentage="screenSize === 'xsmall' ? 40 : 45"
+              :numSymbol="card"
+              class="shadow-lg"
+            />
+          </div>
         </template>
         <template v-else>
           <CardBack
@@ -118,3 +123,22 @@ defineProps({
 
 const pokerStore = usePokerStore()
 </script>
+
+<style scoped>
+/* Hole cards deal in from below with a flip, staggered per card */
+.hole-card-deal {
+  animation: hole-card-deal 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.15) backwards;
+  will-change: transform, opacity;
+}
+
+@keyframes hole-card-deal {
+  0% {
+    transform: translateY(30px) rotateY(80deg) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+</style>

@@ -102,25 +102,11 @@
           :myPlayerId="myPlayerId"
         />
 
-        <!-- POT DISPLAY - TOP NOTCH -->
-        <div
-          :id="'pot-display-absolute-container-' + templateSuffix"
-          class="absolute top-0 left-1/2 -translate-x-1/2 z-20 transform scale-[0.75] transition-all duration-300 origin-top"
-          :class="{
-            'scale-[0.45]': ['small', 'xsmall'].includes(responsive.screenSize),
-          }"
-        >
-          <PotDisplay
-            :id="'pot-display-main-component-' + templateSuffix"
-            :amount="pot"
-          />
-        </div>
-
         <!-- COMMUNITY CARDS AREA -->
         <div
           :id="'community-elements-layout-stack-' + templateSuffix"
           class="relative z-10 flex flex-col items-center w-full transition-all duration-500"
-          :class="[responsive.screenSize === 'large' ? 'gap-10' : 'gap-4']"
+          :class="[responsive.screenSize === 'large' ? 'gap-6' : 'gap-3']"
         >
           <!-- Community Cards Row -->
           <div
@@ -143,19 +129,25 @@
                 }"
               >
                 <template v-if="communityCards[i - 1]">
-                  <Card
-                    :id="
-                      'community-card-item-' + (i - 1) + '-' + templateSuffix
-                    "
-                    :numSymbol="communityCards[i - 1]"
-                    :percentage="
-                      responsive.screenSize === 'medium'
-                        ? 100
-                        : responsive.cardPercentage
-                    "
-                    :size="responsive.cardSize"
-                    class="hover:-translate-y-2 transition-transform duration-200 origin-bottom"
-                  />
+                  <div
+                    :key="'deal-' + communityCards[i - 1]"
+                    class="card-deal-animation"
+                    :style="{ animationDelay: `${(i - 1) * 0.12}s` }"
+                  >
+                    <Card
+                      :id="
+                        'community-card-item-' + (i - 1) + '-' + templateSuffix
+                      "
+                      :numSymbol="communityCards[i - 1]"
+                      :percentage="
+                        responsive.screenSize === 'medium'
+                          ? 100
+                          : responsive.cardPercentage
+                      "
+                      :size="responsive.cardSize"
+                      class="hover:-translate-y-2 transition-transform duration-200 origin-bottom"
+                    />
+                  </div>
                 </template>
                 <template v-else>
                   <CardSpace
@@ -194,7 +186,6 @@
 import { computed } from 'vue'
 import Card from './Card.vue'
 import CardSpace from './CardSpace.vue'
-import PotDisplay from './PotDisplay.vue'
 import PlayerMap from './PlayerMap.vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 
@@ -222,7 +213,6 @@ const isMobile = computed(() =>
 )
 
 defineProps({
-  pot: { type: [Number, String], default: 0 },
   communityCards: { type: Array, default: () => [] },
   players: { type: Array, default: () => [] },
   activePlayerId: String,
@@ -231,4 +221,21 @@ defineProps({
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Card dealing: cards slide in from the deck (top) with a slight flip */
+.card-deal-animation {
+  animation: card-deal 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.1) backwards;
+  will-change: transform, opacity;
+}
+
+@keyframes card-deal {
+  0% {
+    transform: translateY(-60px) rotateX(35deg) scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) rotateX(0deg) scale(1);
+    opacity: 1;
+  }
+}
+</style>

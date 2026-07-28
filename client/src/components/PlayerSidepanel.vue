@@ -340,9 +340,7 @@ watch(
         if (justActedPlayerId.value === oldId) justActedPlayerId.value = null
       }, 1000)
     }
-    setTimeout(() => {
-      delayedActivePlayerId.value = newId
-    }, 1000)
+    delayedActivePlayerId.value = newId
   },
   { immediate: true },
 )

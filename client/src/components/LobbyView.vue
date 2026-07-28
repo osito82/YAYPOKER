@@ -88,7 +88,7 @@
             </div>
             <!-- Tooltip -->
             <div
-              v-if="copyStatus === $t('lobby.copied')"
+              v-if="copied"
               :id="`copy-status-tooltip-${templateSuffix}`"
               class="absolute -top-12 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest shadow-2xl animate-bounce z-10 whitespace-nowrap"
             >
@@ -535,7 +535,7 @@ const pokerStore = usePokerStore()
 
 const isHost = computed(() => props.myId === props.hostId)
 const isPublicTable = computed(() => props.gameCode.startsWith('P_'))
-const copyStatus = ref('')
+const copied = ref(false)
 const botCount = ref(0)
 const initialStack = ref(1000)
 
@@ -576,9 +576,9 @@ const shareUrl = computed(() => {
 const copyToClipboard = async () => {
   const success = await copyToClipboardUtil(shareUrl.value)
   if (success) {
-    copyStatus.value = 'Copied!'
+    copied.value = true
     setTimeout(() => {
-      copyStatus.value = ''
+      copied.value = false
     }, 2000)
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div
     :id="`pot-display-container-${templateSuffix}`"
-    class="pot-display flex items-center justify-center py-1.5 px-6 backdrop-blur-2xl rounded-b-2xl transition-all duration-500 group"
+    class="pot-display flex items-center justify-center py-1.5 px-6 backdrop-blur-2xl rounded-2xl transition-all duration-500 group"
   >
     <div
       v-if="lobbyTimer"
@@ -15,7 +15,7 @@
         <span
           :id="`pot-display-lobby-label-${templateSuffix}`"
           class="text-xs font-black uppercase tracking-widest text-yellow-500/80"
-          >Lobby</span
+          >{{ $t('game.lobby_label') }}</span
         >
         <div
           :id="`pot-display-lobby-time-wrapper-${templateSuffix}`"
@@ -59,7 +59,7 @@
           :id="`pot-display-lobby-players-text-${templateSuffix}`"
           class="text-[10px] font-bold text-white/50 uppercase tracking-tighter"
         >
-          {{ lobbyTimer.readyPlayers }}/{{ lobbyTimer.connectedPlayers }} Ready
+          {{ $t('game.ready_count', { ready: lobbyTimer.readyPlayers, total: lobbyTimer.connectedPlayers }) }}
         </span>
       </div>
     </div>
@@ -100,7 +100,7 @@
             :id="`pot-display-pot-label-${index}-${templateSuffix}`"
             class="text-[9px] font-bold uppercase text-white/40 tracking-tighter whitespace-nowrap"
           >
-            {{ index === 0 ? 'Main' : 'Side ' + index }}
+            {{ index === 0 ? $t('game.main_pot') : $t('game.side_pot', { n: index }) }}
           </span>
           <span
             :id="`pot-display-pot-value-${index}-${templateSuffix}`"
@@ -121,27 +121,53 @@
     <div
       v-else
       :id="`pot-display-single-pot-${templateSuffix}`"
-      class="flex items-center gap-2"
+      class="flex flex-col items-center gap-0.5 py-1"
     >
+      <!-- Game Phase Badge -->
       <span
-        :id="`pot-display-label-${templateSuffix}`"
-        class="text-2xl md:text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] tracking-tight group-hover:scale-105 transition-transform"
+        v-if="gamePhase"
+        :id="`pot-display-phase-badge-${templateSuffix}`"
+        class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border mb-0.5"
+        :class="phaseStyle"
       >
-        Pot
+        {{ $t(`game.${gamePhase}`) }}
       </span>
 
-      <span
-        :id="`pot-display-currency-symbol-${templateSuffix}`"
-        class="text-yellow-500/60 font-black text-[10px] tracking-tighter mt-1"
-        >$</span
-      >
+      <div class="flex items-center gap-2">
+        <span
+          :id="`pot-display-label-${templateSuffix}`"
+          class="text-2xl md:text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] tracking-tight group-hover:scale-105 transition-transform"
+        >
+          Pot
+        </span>
 
-      <span
-        :id="`pot-display-value-${templateSuffix}`"
-        class="text-2xl md:text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] tracking-tight group-hover:scale-105 transition-transform"
+        <span
+          :id="`pot-display-currency-symbol-${templateSuffix}`"
+          class="text-yellow-500/60 font-black text-[10px] tracking-tighter mt-1"
+          >$</span
+        >
+
+        <span
+          :id="`pot-display-value-${templateSuffix}`"
+          class="text-2xl md:text-3xl font-mono font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)] tracking-tight group-hover:scale-105 transition-transform"
+        >
+          {{ amount }}
+        </span>
+      </div>
+
+      <!-- Current Bet to Match -->
+      <div
+        v-if="currentHighestBet > 0"
+        :id="`pot-display-current-bet-${templateSuffix}`"
+        class="flex items-center gap-1.5 mt-0.5"
       >
-        {{ amount }}
-      </span>
+        <span class="text-[9px] font-bold uppercase tracking-wider text-white/40"
+          >{{ $t('game.bet_to_match') }}</span
+        >
+        <span class="text-xs font-mono font-black text-yellow-500/80"
+          >${{ currentHighestBet }}</span
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -161,6 +187,40 @@ const templateSuffix = computed(() => responsive.templateSuffix)
 
 const lobbyTimer = computed(() => store.getLobbyTimer)
 const pots = computed(() => store.getPots)
+const currentHighestBet = computed(() => store.getCurrentHighestBet || 0)
+
+const gamePhase = computed(() => {
+  const sc = store.getStepChecker
+  if (!sc || !sc.startGame) return ''
+  if (sc.showDown || sc.winner || sc.finalHands) return 'phase_showdown'
+  if (sc.river_Bet_Step || sc.river_Check_Prize_Step || sc.river_Dealer_Hand)
+    return 'phase_river'
+  if (sc.turn_Bet_Step || sc.turn_Check_Prize_Step || sc.turn_Dealer_Hand)
+    return 'phase_turn'
+  if (sc.flop_Bet_Step || sc.flop_Check_Prize_Step || sc.flop_Dealer_Hand)
+    return 'phase_flop'
+  if (sc.firstBetting || sc.dealtPrivateCards) return 'phase_preflop'
+  if (sc.blindsBetting) return 'phase_blinds'
+  return ''
+})
+
+const phaseStyle = computed(() => {
+  switch (gamePhase.value) {
+    case 'phase_preflop':
+    case 'phase_blinds':
+      return 'text-blue-400/80 border-blue-400/20 bg-blue-500/10'
+    case 'phase_flop':
+      return 'text-emerald-400/80 border-emerald-400/20 bg-emerald-500/10'
+    case 'phase_turn':
+      return 'text-orange-400/80 border-orange-400/20 bg-orange-500/10'
+    case 'phase_river':
+      return 'text-red-400/80 border-red-400/20 bg-red-500/10'
+    case 'phase_showdown':
+      return 'text-yellow-400/80 border-yellow-400/20 bg-yellow-500/10'
+    default:
+      return ''
+  }
+})
 
 const localTime = ref(0)
 let interval = null
@@ -222,7 +282,6 @@ onUnmounted(() => {
     rgba(0, 0, 0, 0.85) 100%
   );
   border: 1px solid rgba(234, 179, 8, 0.25);
-  border-top: none;
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.8),
     0 0 0 1px rgba(0, 0, 0, 0.5),

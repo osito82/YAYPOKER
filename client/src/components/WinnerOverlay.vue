@@ -181,7 +181,7 @@
               class="w-full h-0.5 bg-white/5 rounded-full overflow-hidden mb-2"
             >
               <div
-                class="h-full bg-gradient-to-r from-[#D4A853]/50 to-[#D4A853] transition-all duration-50 ease-linear"
+                class="h-full bg-gradient-to-r from-[#D4A853]/50 to-[#D4A853] transition-all duration-1000 ease-linear"
                 :style="{ width: `${(countdown / 25) * 100}%` }"
               ></div>
             </div>

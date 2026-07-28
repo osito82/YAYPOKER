@@ -36,6 +36,13 @@
         >
       </div>
 
+      <!-- CENTER SECTION (POT) -->
+      <div class="absolute top-1 left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center pointer-events-none">
+        <div class="transform scale-[0.60] origin-top pointer-events-auto">
+          <PotDisplay :amount="pot" />
+        </div>
+      </div>
+
       <main
         id="poker-table-viewport-TemplateXSmall"
         class="flex-none h-auto overflow-hidden bg-gray-100 dark:bg-transparent dark:bg-[radial-gradient(circle_at_center,_#1a2e1a_0%,_#0a0a0a_100%)]"
@@ -115,6 +122,7 @@ import WinnerOverlay from '../../components/WinnerOverlay.vue'
 import WinnerTournamentOverlay from '../../components/WinnerTournamentOverlay.vue'
 import PlayerSidepanel from '../../components/PlayerSidepanel.vue'
 import MessageTerminal from '../../components/MessageTerminal.vue'
+import PotDisplay from '../../components/PotDisplay.vue'
 
 defineProps({
   gameCode: String,

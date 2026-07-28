@@ -2,33 +2,32 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PokerBot } from '../bot.js';
 
 // Mock WebSocket so we don't actually connect during tests
-vi.mock('ws', () => {
-  return {
-    default: class WebSocket {
-      constructor(url) {
-        this.url = url;
-        this.events = {};
-      }
-      on(event, cb) {
-        this.events[event] = cb;
-      }
-      send(data) {
-        // Mock send
-      }
-      // Helper to simulate incoming messages
-      simulateMessage(data) {
-        if (this.events['message']) {
-          this.events['message'](data);
-        }
-      }
-      simulateOpen() {
-        if (this.events['open']) {
-          this.events['open']();
-        }
-      }
-    },
-  };
-});
+const MockWebSocket = class WebSocket {
+  constructor(url) {
+    this.url = url;
+    this.events = {};
+  }
+  on(event, cb) {
+    this.events[event] = cb;
+  }
+  send(data) {
+    // Mock send
+  }
+  simulateMessage(data) {
+    if (this.events['message']) {
+      this.events['message'](data);
+    }
+  }
+  simulateOpen() {
+    if (this.events['open']) {
+      this.events['open']();
+    }
+  }
+};
+MockWebSocket.default = MockWebSocket;
+MockWebSocket.WebSocket = MockWebSocket;
+
+vi.mock('ws', () => MockWebSocket);
 
 describe('PokerBot', () => {
   let bot;
@@ -77,5 +76,137 @@ describe('PokerBot', () => {
 
     // Invalid JSON
     expect(bot.safeParseJSON('I am raising 100!')).toBe(null);
+  });
+
+  it('updates chip stack and blinds from messages correctly', () => {
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    
+    const simMsg = (data) => {
+      if (bot.socket.simulateMessage) bot.socket.simulateMessage(data);
+      else if (bot.socket.emit) bot.socket.emit('message', data);
+    };
+
+    // Simulate player info message
+    simMsg(JSON.stringify({
+      players: [
+        { id: '123', name: 'TestBot', chips: 750, currentBet: 50 },
+        { id: '456', name: 'OtherPlayer', chips: 1500, currentBet: 50 }
+      ]
+    }));
+
+    expect(bot.myChips).toBe(750);
+    expect(bot.myCurrentBet).toBe(50);
+
+    // Simulate askForBlindBets with BB
+    simMsg(JSON.stringify({
+      action: 'askForBlindBets',
+      type: 'private',
+      data: { id: '123', blindType: 'BB', blindAmount: 50 }
+    }));
+    expect(bot.bigBlind).toBe(50);
+  });
+
+  it('handleDecision fallback folds on massive bets when equity is low and stack is short', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myChips = 200;
+    bot.myOdds = { win: 30, tie: 0 }; // 30% equity
+    
+    // Mock sendAction to observe result
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    
+    // Mock provider to force timeout or fail so fallback is triggered
+    bot.provider = 'invalid_provider_to_force_fallback';
+
+    await bot.handleDecision({
+      currentHighestBet: 150,
+      pot: 300,
+      data: { action: ['fold', 'call'] }
+    });
+
+    vi.advanceTimersByTime(1000);
+
+    // Since callAmount (150) >= myChips * 0.5 (100) and equity (0.30) < 0.45, fallback must be fold
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'fold' }));
+    vi.useRealTimers();
+  });
+
+  it('handleDecision executes algorithmic check when callAmount is 0 and equity is weak', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myOdds = { win: 35, tie: 0 }; // 35% equity (weak, below 0.40 threshold)
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    bot.provider = 'invalid_provider';
+
+    await bot.handleDecision({
+      currentHighestBet: 0,
+      pot: 100,
+      data: { action: ['check', 'bet'] }
+    });
+    vi.advanceTimersByTime(1000);
+
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'setCheck' }));
+    vi.useRealTimers();
+  });
+
+  it('handleDecision executes algorithmic fold on preflop trash hand facing raise', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myOdds = { win: 25, tie: 0 }; // 25% equity (trash)
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    bot.provider = 'invalid_provider';
+
+    await bot.handleDecision({
+      currentHighestBet: 50,
+      pot: 100,
+      dealerCards: [], // Preflop
+      data: { action: ['fold', 'call'] }
+    });
+    vi.advanceTimersByTime(1000);
+
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'fold' }));
+    vi.useRealTimers();
+  });
+
+  it('handleDecision executes algorithmic all-in with short stack and strong hand', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myChips = 150;        // 7.5 BB → short stack (<10)
+    bot.bigBlind = 20;
+    bot.myOdds = { win: 60, tie: 0 }; // 60% equity (strong)
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    bot.provider = 'invalid_provider';
+
+    await bot.handleDecision({
+      currentHighestBet: 20,
+      pot: 50,
+      data: { action: ['fold', 'call', 'raise'] }
+    });
+    vi.advanceTimersByTime(1000);
+
+    // Short stack + strong equity → algorithmic all-in raise
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'setRise' }));
+    vi.useRealTimers();
+  });
+
+  it('handleDecision skips algorithmic filter when odds are uninitialized (0/0)', async () => {
+    vi.useFakeTimers();
+    bot = new PokerBot({ gameCode: 'T', playerName: 'TestBot' });
+    bot.myOdds = { win: 0, tie: 0 }; // No odds received yet
+    const sendSpy = vi.spyOn(bot, 'sendAction');
+    bot.provider = 'invalid_provider';
+
+    await bot.handleDecision({
+      currentHighestBet: 50,
+      pot: 100,
+      dealerCards: [], // Preflop
+      data: { action: ['fold', 'call'] }
+    });
+    vi.advanceTimersByTime(1000);
+
+    // With no odds data, algo filter is skipped → falls through to AI (which fails)
+    // → baseAction fallback kicks in. EV with 0 equity = -50, so baseAction = fold
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ action: 'fold' }));
+    vi.useRealTimers();
   });
 });
