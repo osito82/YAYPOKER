@@ -255,10 +255,12 @@ class MatchActions {
 
     const foundPlayer = this.match.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
-      this.clearAutofold()
       const success = this.performCheck(foundPlayer)
       if (success) {
         this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
+      } else {
+        // Invalid check: the turn is still theirs — keep the clock running
+        this.startAutofold()
       }
     }
   }
