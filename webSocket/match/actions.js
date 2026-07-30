@@ -1,6 +1,7 @@
 const Socket = require('../sockets')
 const { WinnerCore } = require('../winnerCore')
 const PokerCore = require('../pokerCore')
+const { distributePot } = require('../potDistributor')
 const { GAME_RULES, TIMEOUTS } = require('../constants')
 const WinnerCertificate = require('../winnerCertificate')
 
@@ -254,10 +255,12 @@ class MatchActions {
 
     const foundPlayer = this.match.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
-      this.clearAutofold()
       const success = this.performCheck(foundPlayer)
       if (success) {
         this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
+      } else {
+        // Invalid check: the turn is still theirs — keep the clock running
+        this.startAutofold()
       }
     }
   }
@@ -763,16 +766,83 @@ class MatchActions {
         pokerHand: isPlayerObject ? 'High Card' : w.pokerHand || 'High Card',
         prizeRank: isPlayerObject ? 10 : w.prizeRank || 10,
         handName: isPlayerObject ? 'High Card' : w.pokerHand || 'High Card',
-        amount:
-          w.amount ||
-          (winnersInfo.length === 1
-            ? currentPot
-            : Math.floor(currentPot / winnersInfo.length)),
+        amount: 0,
       }
     })
 
+    // === PAYOUT (official Texas Hold'em rules) ===
+    // The pot is settled layer by layer (main pot + side pots). A player can
+    // only win from each opponent up to the amount that opponent could match;
+    // any unmatched portion of a bet is returned to its owner and can never
+    // be won by the opponents.
+    const dealerCards = this.dealer.getDealerCards()
+    const showdownEvaluations = this.match.players
+      .filter((p) => !p.folded)
+      .map((p) => {
+        let prize =
+          p.getCurrentPrize && p.getCurrentPrize()?.prizeRank
+            ? p.getCurrentPrize()
+            : PokerCore.betterHand(dealerCards, p.cards)
+        if (!prize) prize = { prizeRank: 10, pokerHand: 'High Card' }
+        return {
+          ...prize,
+          name: p.name,
+          playerId: p.id,
+          gameId: p.gameId,
+          playerCards: p.cards,
+          folded: false,
+        }
+      })
+
+    const { payouts, earned, returned, layerSummaries } = distributePot(
+      this.dealer.calculatePots(),
+      showdownEvaluations,
+      {
+        isFold,
+        fallbackWinnerIds: winnersInfo.map((w) => w.playerId),
+        totalPot: currentPot,
+        seatOrderOf: (id) =>
+          this.match.players.find((p) => p.id === id)?.playerNumber || 0,
+      },
+    )
+
+    for (const [playerId, amount] of payouts) {
+      const player = this.match.players.find((p) => p.id === playerId)
+      if (player) player.chips += amount
+    }
+
+    // Public winner list: players who actually WON chips (uncalled bet
+    // returns are not wins and are not shown as such)
+    const publicWinners = []
+    for (const summary of layerSummaries) {
+      if (summary.isUncalledReturn) continue
+      for (const id of summary.winnerIds) {
+        if (publicWinners.some((w) => w.playerId === id)) continue
+        const evalData =
+          showdownEvaluations.find((e) => e.playerId === id) ||
+          winnersInfo.find((w) => w.playerId === id)
+        const player = this.match.players.find((p) => p.id === id)
+        publicWinners.push({
+          name: evalData?.name || player?.name,
+          playerId: id,
+          pokerHand: evalData?.pokerHand || 'High Card',
+          prizeRank: evalData?.prizeRank ?? 10,
+          handName: evalData?.pokerHand || 'High Card',
+          amount: earned.get(id) || 0,
+        })
+      }
+    }
+    if (publicWinners.length > 0) {
+      winnersInfo = publicWinners
+    } else {
+      winnersInfo = winnersInfo.map((w) => ({
+        ...w,
+        amount: earned.get(w.playerId) || payouts.get(w.playerId) || 0,
+      }))
+    }
+
     const finalHands = this.dealer.getFinalHands()
-    const pot = this.dealer.getPot()
+    const pot = currentPot
 
     this.log
       .Template({ name: 'brakets', title: 'MATCH:HAND_RESULT', date: true })
@@ -781,31 +851,40 @@ class MatchActions {
         handId: this.match.currentHandId,
         winners: winnersInfo.map((w) => w.name),
         pot,
+        payouts: Object.fromEntries(payouts),
+        returned: Object.fromEntries(returned),
+        layers: layerSummaries,
         isFold,
         dealerCards: this.match.cardsDealer,
       })
 
     let displayMsg = ''
-    if (winnersInfo.length === 1) {
-      const winner = winnersInfo[0]
-      const player = this.match.players.find((p) => p.id === winner.playerId)
-      if (player) {
-        player.chips += pot
-        winner.amount = pot
-      }
-      displayMsg = isFold
-        ? `${winner.name} wins ${pot} (others folded)`
-        : `${winner.name} wins ${pot} with ${winner.pokerHand}`
+    const contestedLayers = layerSummaries.filter((s) => !s.isUncalledReturn)
+    if (isFold) {
+      const w = winnersInfo[0]
+      displayMsg = `${w.name} wins ${w.amount || pot} (others folded)`
+    } else if (contestedLayers.length <= 1 && winnersInfo.length === 1) {
+      const w = winnersInfo[0]
+      displayMsg = `${w.name} wins ${w.amount} with ${w.pokerHand}`
+    } else if (contestedLayers.length <= 1) {
+      displayMsg = `Split pot: ${winnersInfo.map((w) => `${w.name} win ${w.amount}`).join(', ')}`
     } else {
-      const splitPot = Math.floor(pot / winnersInfo.length)
-      winnersInfo.forEach((winner) => {
-        const player = this.match.players.find((p) => p.id === winner.playerId)
-        if (player) {
-          player.chips += splitPot
-          winner.amount = splitPot
-        }
-      })
-      displayMsg = `Split pot: ${winnersInfo.map((w) => w.name).join(', ')} win ${splitPot} each`
+      displayMsg = contestedLayers
+        .map((s, i) => {
+          const names = s.winnerIds.map(
+            (id) =>
+              this.match.players.find((p) => p.id === id)?.name || 'Unknown',
+          )
+          const label = i === 0 ? 'main pot' : `side pot ${i}`
+          return `${names.join(' & ')} win ${s.amount} (${label})`
+        })
+        .join(' — ')
+    }
+    for (const [id, amount] of returned) {
+      const player = this.match.players.find((p) => p.id === id)
+      if (player && amount > 0) {
+        displayMsg += `. ${player.name} takes back ${amount} (uncalled bet)`
+      }
     }
 
     this.communicator.msgBuilder('winner', 'public', null, {
