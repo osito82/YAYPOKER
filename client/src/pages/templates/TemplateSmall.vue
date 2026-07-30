@@ -1,7 +1,7 @@
 <template>
   <div
     id="game-container-TemplateSmall"
-    class="h-screen w-screen bg-white dark:bg-neutral-950 overflow-hidden flex flex-col font-sans text-gray-900 dark:text-white select-none transition-colors duration-300"
+    class="h-dvh w-screen bg-white dark:bg-neutral-950 overflow-hidden flex flex-col font-sans text-gray-900 dark:text-white select-none transition-colors duration-300"
   >
     <!-- UNIFIED COMPACT HEADER -->
     <header

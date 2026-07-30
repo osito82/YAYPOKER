@@ -1,7 +1,7 @@
 <template>
   <div
     :id="`lobby-view-container-${templateSuffix}`"
-    class="min-h-screen bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-4 select-none transition-colors duration-300"
+    class="min-h-dvh bg-white dark:bg-gray-950 flex flex-col items-center justify-center p-4 select-none transition-colors duration-300"
   >
     <div
       :id="`lobby-main-card-${templateSuffix}`"

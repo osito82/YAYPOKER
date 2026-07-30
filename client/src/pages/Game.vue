@@ -137,6 +137,16 @@ const activeTemplate = computed(() => {
   }
 })
 
+// When the game starts, reset the page scroll — the lobby is taller than the
+// viewport on mobile, and the browser keeps the scroll position when the
+// template swaps in, which would leave the table pushed halfway down.
+watch(
+  () => pokerStore.getIsGameStarted,
+  (started) => {
+    if (started) window.scrollTo(0, 0)
+  },
+)
+
 // Logic for name/uuid generation
 const playerName = ref(
   route.query.playerName ||

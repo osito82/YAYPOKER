@@ -34,6 +34,7 @@ html {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport: correct on mobile browsers */
 }
 
 /* Evitar que elementos hijos se salgan del ancho en móviles */
