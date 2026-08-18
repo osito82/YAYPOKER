@@ -50,7 +50,8 @@ services:
       - PORT=8886
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OLLAMA_URL=http://host.docker.internal:11434
-      - DEFAULT_AI_PROVIDER=ollama
+      - DEFAULT_AI_PROVIDER=gemini
+      - DEFAULT_AI_MODEL=gemini-2.0-flash
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:

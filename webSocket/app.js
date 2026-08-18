@@ -1,4 +1,6 @@
+const path = require('path')
 require('dotenv').config()
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
 const express = require('express')
 const R = require('radash')
 const log = require('./logger')
@@ -21,18 +23,24 @@ const {
 } = require('./constants')
 
 const app = express()
+app.use(express.json())
+const { sendContactEmail } = require('./mailer')
 
-// ✅ AGREGADO: Middleware de CORS quirúrgico para permitir peticiones desde el frontend
+// ✅ AGREGADO: Middleware de CORS para permitir peticiones desde el frontend
 app.use((req, res, next) => {
   const allowedOrigins = [
     'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:8888',
     'http://localhost',
     'https://yaypoker.com',
     'https://www.yaypoker.com',
     'http://osongo.duckdns.org',
   ]
   const origin = req.headers.origin
-  if (allowedOrigins.includes(origin) || !origin) {
+  const isLocalhost = origin && /^http:\/\/localhost(:\d+)?$/.test(origin)
+  
+  if (allowedOrigins.includes(origin) || isLocalhost || !origin) {
     res.header('Access-Control-Allow-Origin', origin || '*')
   }
   res.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
@@ -412,6 +420,19 @@ app.get('/verify/:torneoId/:code', (req, res) => {
   const { torneoId, code } = req.params
   const result = WinnerCertificate.verifyCertificate(torneoId, code)
   res.json(result)
+})
+
+app.post('/api/contact', async (req, res) => {
+  const { nickname, subject, message } = req.body || {}
+  if (!message || message.trim() === '') {
+    return res.status(400).json({ success: false, error: 'El mensaje no puede estar vacío.' })
+  }
+  const result = await sendContactEmail({ nickname, subject, message })
+  if (result.success) {
+    return res.json({ success: true, message: 'Correo enviado con éxito.' })
+  } else {
+    return res.status(500).json({ success: false, error: result.error || 'Error al enviar el correo.' })
+  }
 })
 
 app.get('/certificate/:torneoId', (req, res) => {

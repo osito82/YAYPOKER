@@ -64,7 +64,12 @@
                   />
                 </svg>
               </div>
-              support@yaypoker.com
+              <a
+                href="mailto:info@latinstartup.com"
+                class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
+              >
+                info@latinstartup.com
+              </a>
             </div>
             <div
               class="flex items-center gap-4 text-gray-900 dark:text-white font-bold"
@@ -102,6 +107,7 @@
               >{{ $t('pages.contact.nickname') }}</label
             >
             <input
+              v-model="form.nickname"
               type="text"
               class="w-full bg-white dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500 transition-colors shadow-sm dark:shadow-none"
               :placeholder="$t('pages.contact.nickname_placeholder')"
@@ -113,12 +119,13 @@
               >{{ $t('pages.contact.subject') }}</label
             >
             <select
+              v-model="form.subject"
               class="w-full bg-white dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500 transition-colors shadow-sm dark:shadow-none"
             >
-              <option>{{ $t('pages.contact.subjects.general') }}</option>
-              <option>{{ $t('pages.contact.subjects.bug') }}</option>
-              <option>{{ $t('pages.contact.subjects.feature') }}</option>
-              <option>{{ $t('pages.contact.subjects.other') }}</option>
+              <option :value="$t('pages.contact.subjects.general')">{{ $t('pages.contact.subjects.general') }}</option>
+              <option :value="$t('pages.contact.subjects.bug')">{{ $t('pages.contact.subjects.bug') }}</option>
+              <option :value="$t('pages.contact.subjects.feature')">{{ $t('pages.contact.subjects.feature') }}</option>
+              <option :value="$t('pages.contact.subjects.other')">{{ $t('pages.contact.subjects.other') }}</option>
             </select>
           </div>
           <div>
@@ -127,15 +134,23 @@
               >{{ $t('pages.contact.message') }}</label
             >
             <textarea
+              v-model="form.message"
+              required
               rows="4"
               class="w-full bg-white dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-500 transition-colors shadow-sm dark:shadow-none"
               :placeholder="$t('pages.contact.message_placeholder')"
             ></textarea>
           </div>
+
+          <div v-if="statusMessage" :class="statusIsError ? 'text-red-500' : 'text-green-500'" class="text-xs font-bold">
+            {{ statusMessage }}
+          </div>
+
           <button
-            class="w-full py-4 bg-yellow-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-yellow-400 transition-colors shadow-lg hover:shadow-yellow-500/20"
+            :disabled="isSubmitting"
+            class="w-full py-4 bg-yellow-500 text-black font-black uppercase tracking-widest rounded-xl hover:bg-yellow-400 transition-colors shadow-lg hover:shadow-yellow-500/20 disabled:opacity-50"
           >
-            {{ $t('pages.contact.send') }}
+            {{ isSubmitting ? '...' : $t('pages.contact.send') }}
           </button>
         </form>
       </div>
@@ -144,11 +159,55 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { urlsFactory } from '../vutils'
 
 const { t } = useI18n()
+const { httpUrl } = urlsFactory()
 
-const handleSubmit = () => {
-  alert(t('pages.contact.success_alert'))
+const form = ref({
+  nickname: '',
+  subject: t('pages.contact.subjects.general'),
+  message: '',
+})
+
+const isSubmitting = ref(false)
+const statusMessage = ref('')
+const statusIsError = ref(false)
+
+const handleSubmit = async () => {
+  if (!form.value.message || !form.value.message.trim()) return
+
+  isSubmitting.value = true
+  statusMessage.value = ''
+  statusIsError.value = false
+
+  try {
+    const res = await fetch(`${httpUrl}/api/contact`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(form.value),
+    })
+
+    const data = await res.json()
+
+    if (res.ok && data.success) {
+      statusIsError.value = false
+      statusMessage.value = '¡Mensaje enviado con éxito!'
+      form.value.nickname = ''
+      form.value.message = ''
+    } else {
+      statusIsError.value = true
+      statusMessage.value = data.error || 'Error al enviar el mensaje.'
+    }
+  } catch (err) {
+    statusIsError.value = true
+    statusMessage.value = 'Error de conexión con el servidor.'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>
