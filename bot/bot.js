@@ -21,22 +21,22 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 8886;
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
-const TESTING_URL = process.env.testingURL;
-
-let ollamaClient;
-try {
-  // Si existe testingURL, la usamos (útil para pruebas externas con amigos)
-  // de lo contrario usamos la OLLAMA_URL estándar.
-  const host = TESTING_URL || OLLAMA_URL;
-  ollamaClient = new Ollama({ host });
-  log
-    .Template({ name: "brakets", title: "AI:OLLAMA_INIT", date: true })
-    .R({ url: host, msg: "Ready" });
-} catch (error) {
-  log
-    .Template({ name: "brakets", title: "ERROR:OLLAMA", date: true })
-    .R({ error: error.message });
+let ollamaClient = null;
+function getOllamaClient() {
+  if (!ollamaClient) {
+    const host = process.env.testingURL || process.env.OLLAMA_URL || "http://127.0.0.1:11434";
+    try {
+      ollamaClient = new Ollama({ host });
+      log
+        .Template({ name: "brakets", title: "AI:OLLAMA_INIT", date: true })
+        .R({ url: host, msg: "Ready" });
+    } catch (error) {
+      log
+        .Template({ name: "brakets", title: "ERROR:OLLAMA", date: true })
+        .R({ error: error.message });
+    }
+  }
+  return ollamaClient;
 }
 
 class PokerBot {
@@ -44,24 +44,29 @@ class PokerBot {
     this.gameCode = config.gameCode;
     this.playerName = config.playerName;
 
-    // Lógica de cambio automático de proveedor según entorno
-    // Local (dev/test) -> ollama | Prod -> deepseek
-    const isProduction = process.env.NODE_ENV === "production";
-    const defaultEnvProvider = isProduction ? "deepseek" : "ollama";
+    // Supported models array and their corresponding providers
+    this.modelProviders = {
+      "gemini-2.0-flash": "gemini",
+      "gemini-2.5-flash": "gemini",
+      "gemini-1.5-flash": "gemini",
+      "gemini-1.5-pro": "gemini",
+      "deepseek-chat": "deepseek",
+      "deepseek-coder": "deepseek",
+      "llama3.2": "ollama",
+      "llama3.1": "ollama",
+      "mistral": "ollama",
+      "openllama": "ollama",
+    };
 
-    this.provider =
-      config.provider || process.env.DEFAULT_AI_PROVIDER || defaultEnvProvider;
+    this.supportedModels = Object.keys(this.modelProviders);
 
-    if (this.provider === "openllama") this.provider = "ollama"; // Normalización
+    // Selected model (from config, env, or default "gemini-2.0-flash")
+    this.modelName = config.model || process.env.DEFAULT_AI_MODEL || "gemini-2.0-flash";
 
-    this.modelName =
-      config.model ||
-      process.env.DEFAULT_AI_MODEL ||
-      (this.provider === "gemini"
-        ? "gemini-1.5-flash"
-        : this.provider === "deepseek"
-          ? "deepseek-chat"
-          : "llama3.2");
+    // Provider selected explicitly or auto-mapped from the selected model
+    this.provider = config.provider 
+      ? (this.modelProviders[config.provider] || config.provider) 
+      : (this.modelProviders[this.modelName] || "gemini");
 
     this.secretCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     this.serverUrl = `ws://${config.server || "localhost"}:${config.port || "8888"}/?gameCode=${this.gameCode}&playerName=${this.playerName}&secretCode=${this.secretCode}`;
@@ -80,26 +85,46 @@ class PokerBot {
 
   initIA() {
     const geminiKey = process.env.GEMINI_API_KEY;
-    if (this.provider === "gemini" && geminiKey) {
-      const genAI = new GoogleGenerativeAI(geminiKey);
-      this.geminiModel = genAI.getGenerativeModel({
-        model: this.modelName,
-        systemInstruction: SYSTEM_PROMPT_RULES,
-        generationConfig: { maxOutputTokens: 35, temperature: 0.1 },
-      });
-      log
-        .Template({ name: "brakets", title: "AI:GEMINI_INIT", date: true })
-        .R({ bot: this.playerName, model: this.modelName });
+    const deepseekKey = process.env.DEEPSEEK_API_KEY;
+
+    if (this.provider === "gemini") {
+      if (geminiKey) {
+        const genAI = new GoogleGenerativeAI(geminiKey);
+        this.geminiModel = genAI.getGenerativeModel({
+          model: this.modelName,
+          systemInstruction: SYSTEM_PROMPT_RULES,
+          generationConfig: { maxOutputTokens: 35, temperature: 0.1 },
+        });
+        log
+          .Template({ name: "brakets", title: "AI:GEMINI_INIT", date: true })
+          .R({ bot: this.playerName, model: this.modelName });
+      } else {
+        log
+          .Template({ name: "brakets", title: "AI:GEMINI_INIT", date: true })
+          .R({
+            bot: this.playerName,
+            model: this.modelName,
+            warn: "GEMINI_API_KEY is not set",
+          });
+      }
     }
 
     if (this.provider === "deepseek") {
-      this.deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+      this.deepseekApiKey = deepseekKey;
       this.deepseekBaseUrl =
         process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
       log
         .Template({ name: "brakets", title: "AI:DEEPSEEK_INIT", date: true })
-        .R({ bot: this.playerName, model: this.modelName });
+        .R({
+          bot: this.playerName,
+          model: this.modelName,
+          key: deepseekKey ? "set" : "MISSING",
+        });
     }
+
+    log
+      .Template({ name: "brakets", title: "AI:MODEL_SELECTED", date: true })
+      .R({ bot: this.playerName, provider: this.provider, model: this.modelName });
   }
 
   connect() {
@@ -374,6 +399,9 @@ class PokerBot {
 
         const aiRequest = async () => {
           if (this.provider === "gemini" && this.geminiModel) {
+            log
+              .Template({ name: "brakets", title: "AI:GEMINI_REQUEST", date: true })
+              .R({ bot: this.playerName, model: this.modelName });
             const result = await this.geminiModel.generateContent(prompt);
             return (await result.response).text();
           } else if (this.provider === "deepseek" && this.deepseekApiKey) {
@@ -400,8 +428,10 @@ class PokerBot {
             const data = await response.json();
             if (data.error) throw new Error(data.error.message || "DeepSeek Error");
             return data.choices[0].message.content;
-          } else if (this.provider === "ollama" && ollamaClient) {
-            const response = await ollamaClient.generate({
+          } else if (this.provider === "ollama") {
+            const client = getOllamaClient();
+            if (!client) throw new Error("Ollama client unavailable");
+            const response = await client.generate({
               model: this.modelName,
               system: SYSTEM_PROMPT_RULES,
               prompt,
@@ -477,7 +507,7 @@ class PokerBot {
 }
 
 app.get("/health", (req, res) =>
-  res.json({ status: "healthy", ollama: ollamaClient ? "connected" : "off" }),
+  res.json({ status: "healthy" }),
 );
 
 app.post("/spawn", (req, res) => {
@@ -490,10 +520,14 @@ app.post("/spawn", (req, res) => {
 });
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    log
-      .Template({ name: "brakets", title: "SERVICE:READY", date: true })
-      .R({ port: PORT });
+    app.listen(PORT, () => {
+      log
+        .Template({ name: "brakets", title: "SERVICE:READY", date: true })
+        .R({
+          port: PORT,
+          provider: process.env.DEFAULT_AI_PROVIDER || "auto",
+          model: process.env.DEFAULT_AI_MODEL || "auto",
+        });
 
     // Soporte para CLI: Permitir spawnear un bot directamente si se pasan argumentos
     const args = process.argv.slice(2).reduce((acc, arg) => {

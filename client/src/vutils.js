@@ -125,6 +125,7 @@ function urlsFactory() {
   return {
     server,
     serverHttp,
+    httpUrl: serverHttp,
     url,
   }
 }

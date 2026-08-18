@@ -1,14 +1,14 @@
 {
   "name": "poker-ai-bot",
   "version": "1.0.0",
-  "description": "AI Bot for Poker using Google Gemini or OpenLLama",
+  "description": "AI Bot for Poker using Google Gemini, DeepSeek or Ollama",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
     "test": "vitest",
     "format": "prettier --write .",
-    "bot": "node bot.js --gameCode=LOBBY --name=Gemini_Bot",
-    "llama": "node bot.js --gameCode=LOBBY --name=Llama_Bot --provider=openllama"
+    "bot": "node bot.js --gameCode=LOBBY --playerName=Gemini_Bot --provider=gemini --model=gemini-2.0-flash",
+    "llama": "node bot.js --gameCode=LOBBY --playerName=Llama_Bot --provider=openllama"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
