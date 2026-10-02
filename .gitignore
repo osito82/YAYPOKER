@@ -12,3 +12,8 @@ readme.txt
 *.key
 
 DEPLOYMENT.md
+# oso-harness
+.tmp/
+.worktrees/
+.harness-handoff.md
+.agents/skills/

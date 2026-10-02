@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "profile": "node",
+  "updatedAt": "2026-10-02",
+  "format": true,
+  "stopGate": {
+    "enabled": false,
+    "command": "npm test",
+    "timeoutSec": 240
+  },
+  "agentsSkills": true,
+  "pipeline": {
+    "check": [
+      "npm test"
+    ],
+    "build": [],
+    "deploy": [
+      "manual: no deploy declared for this repo — add pipeline.deploy to .harness.json (skill release-deploy, references/local-pipeline.md)"
+    ],
+    "smoke": []
+  }
+}
