@@ -12,6 +12,14 @@
     @confirm="confirmLeave"
     @cancel="showLeaveModal = false"
   />
+  <div
+    v-if="hasConnected && !isConnected"
+    id="connection-lost-banner-Game"
+    role="status"
+    class="fixed top-2 left-1/2 -translate-x-1/2 z-50 max-w-[calc(100%-2rem)] rounded-lg bg-red-600/90 px-4 py-2 text-center text-sm font-bold text-white shadow-lg"
+  >
+    {{ $t('game.reconnecting') }}
+  </div>
   <LobbyView
     v-if="!pokerStore.getIsGameStarted"
     :players="allPlayers"
@@ -202,7 +210,7 @@ const connectionOptions = {
 }
 
 const urls = urlsFactory()
-const { connectSocket, disconnectSocket, sendMessage } = useWebSocket(
+const { connectSocket, disconnectSocket, sendMessage, hasConnected } = useWebSocket(
   urls.server,
   connectionOptions,
 )
@@ -236,8 +244,12 @@ const myPlayer = computed(() =>
     (p) => p.id === pokerStore.myInfo.id || p.name === playerName.value,
   ),
 )
+// Offline players cannot act: hide the controls until the socket is back
 const isMyTurn = computed(
-  () => !props.isGuest && pokerStore.getActivePlayerId === myPlayer.value?.id,
+  () =>
+    !props.isGuest &&
+    isConnected.value &&
+    pokerStore.getActivePlayerId === myPlayer.value?.id,
 )
 const options = computed(() =>
   props.isGuest ? [] : pokerStore.getBettingOptions || [],

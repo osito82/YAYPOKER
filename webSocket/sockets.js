@@ -5,7 +5,7 @@ class Socket {
   static log = log
 
   static addSocket(socket, idTorneo) {
-    const { id, name, secretCode } = socket
+    const { id, name, secretCode, isSpectator } = socket
 
     if (!this.torneoSockets.has(idTorneo)) {
       this.torneoSockets.set(idTorneo, new Map())
@@ -16,8 +16,10 @@ class Socket {
     // Handle re-connections based on secretCode:
     // If a socket already exists with the same secretCode, we remove it to make way for the new one.
     // This allows the player to "take over" their previous session.
+    // Spectators share a placeholder code, so they never take over a session.
     for (const [existingId, existingSocket] of torneoSockets.entries()) {
-      if (existingSocket.secretCode === secretCode) {
+      if (isSpectator) break
+      if (!existingSocket.isSpectator && existingSocket.secretCode === secretCode) {
         torneoSockets.delete(existingId)
         this.log
           .Template({
@@ -29,7 +31,6 @@ class Socket {
             playerName: name,
             id,
             tournament: idTorneo,
-            secretCode,
             replacedId: existingId,
           })
         break
@@ -46,7 +47,7 @@ class Socket {
           title: 'SERVER:NEW_CONNECTION',
           date: true,
         })
-        .R({ playerName: name, id, tournament: idTorneo, secretCode })
+        .R({ playerName: name, id, tournament: idTorneo })
     }
   }
 
@@ -64,7 +65,6 @@ class Socket {
           playerName: socket.name,
           id: socket.id,
           tournament: idTorneo,
-          secretCode: socket.secretCode,
         })
     }
   }
@@ -101,7 +101,7 @@ class Socket {
     // Find the socket by secretCode
     let playerSocketWrapper = null
     for (const socket of torneoSockets.values()) {
-      if (socket.secretCode === secretCode) {
+      if (!socket.isSpectator && socket.secretCode === secretCode) {
         playerSocketWrapper = socket
         break
       }

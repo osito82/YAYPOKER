@@ -1113,7 +1113,7 @@ describe('Poker Game Integration Tests', () => {
     expect(nextRoundMsg.message.gameId).not.toBe(firstGameId)
   }, 40000)
 
-  it('T0006 - Durante el juego, ignora silenciosamente intentos de reconexión con código incorrecto', async () => {
+  it('T0006 - Durante el juego, rechaza reconexiones con código incorrecto sin darles asiento', async () => {
     const gameCode =
       'reconnect-during-game-' + Math.random().toString(36).substring(7)
 
@@ -1159,11 +1159,13 @@ describe('Poker Game Integration Tests', () => {
     // Esperamos un poco para ver si recibe alguna respuesta
     await new Promise((r) => setTimeout(r, 500))
 
-    // Verificamos que NO ha recibido mensajes de signUp
+    // The impostor is told the name is taken (no silent hang) and gets no seat
     const signUpMessages = impostor.responses.filter(
       (r) => r.message?.action === 'signUp',
     )
-    expect(signUpMessages.length).toBe(0)
+    expect(signUpMessages.length).toBe(1)
+    expect(signUpMessages[0].message.data.errorType).toBe('NAME_TAKEN')
+    expect(signUpMessages[0].message.myPlayerInfo).toEqual({})
 
     // Verificamos que NO ha recibido mensajes de error
     const errorMessages = impostor.responses.filter(

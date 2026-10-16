@@ -81,6 +81,7 @@
     "online_count": "{count} Online",
     "status_live": "Live",
     "status_offline": "Offline",
+    "reconnecting": "Connection lost. Reconnecting…",
     "win": "Win",
     "tie": "Tie",
     "hand": "Hand",

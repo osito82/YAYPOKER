@@ -2,6 +2,27 @@
 
 Recent sessions only.
 
+## 2026-10-16 — Quick wins from the UX analysis (branch `fix/quick-wins-game-safety`)
+
+- Server no longer obeys client `dealtPrivateCards`; `nextRound` only after a tournament ends;
+  `startGame` is ignored once the game runs and table settings (blinds, ante, initial stack) are
+  host-only, private-only, pre-start and zod-validated. The lobby's initial stack now works.
+- Stacks are server-owned (client `totalChips` only honoured under `NODE_ENV=test`).
+- Turn timeout auto-checks when there is nothing to call (still folds facing a bet / on blinds).
+- No hand is dealt while every player with chips sits out; resumes when one returns (tables used
+  to play themselves forever).
+- Spectators (`role=guest`) never take a seat or knock players off; same-name joins get a
+  `NAME_TAKEN` message instead of hanging.
+- WebSocket: 20s ping/pong heartbeat, 1 MiB max payload, voice limited to seated players and
+  rate-limited, socket registry cleaned on close. Secrets removed from logs and from the
+  tournament-winner broadcast. (The public `Logs` mount in docker-compose was kept on purpose.)
+- Client: reconnect with exponential backoff + jitter, immediate reconnect on `online` /
+  tab visible, "Reconnecting…" banner, no action controls while offline.
+- Tests: new `webSocket/tests/client_guardrails.test.js` (9); updated `allin_conservation`,
+  `allin_uncalled_bet` (seed blinds server-side) and `gameplay` T0006 (expects `NAME_TAKEN`).
+  webSocket 161 tests: 4 of 5 full runs green (1 run had 1 unidentified failure; baseline was
+  already flaky, e.g. T0006 failed 1 of 3 before these changes). Client 15, bot 9, lint, build OK.
+
 ## 2026-10-15 — Harness adapted to YAYPOKER (modeled on sociablesquad)
 
 - `AGENTS.md`: repo-owned "Harness adaptation" section (real stack, skill applicability table,

@@ -16,7 +16,7 @@ description: "Language, testing, logging and git standards for YAYPOKER"
 
 3. **Logging.**
    - Server: `webSocket/logger.js`; bot: `bot/logger.js` (winston + `osolog`, daily rotated files under `/Logs`). No new raw `console.*` in `webSocket/` or `bot/` (legacy calls remain in `dealer.js`; replace them when touched). Tests may print.
-   - Never log secrets, emails from `/api/contact`, secret room codes, certificate codes or other players' pocket cards.
+   - Never log secrets, emails from `/api/contact`, secret room codes or certificate codes. Pocket and board cards **are** logged on purpose (hand history); see `game-engine.md` §4.
 
 4. **Lint & format.** `npx eslint .` to check (`npm run lint` auto-fixes, use it only on purpose); Prettier via `npm run format`. The `bot/` package has no ESLint config yet.
 

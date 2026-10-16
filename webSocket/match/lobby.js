@@ -60,6 +60,11 @@ class MatchLobby {
       playerWithSameName.secretCode !== thisSecretCode
     ) {
       if (!this.match.acceptingPlayers) {
+        this.communicator.msgBuilder('signUp', 'private', null, {
+          displayMsg: `The name ${finalRequestedName} is already taken at this table and the game is in progress.`,
+          errorType: 'NAME_TAKEN',
+        })
+        this.dealer.talkToSocketById(thisSocketId, this.communicator.getMsg())
         return
       }
     }
@@ -165,7 +170,7 @@ class MatchLobby {
         this.match.gameId,
         finalName,
         thisSecretCode,
-        data.totalChips || this.match.initialStack,
+        this.startingStack(data),
         [],
         thisSocketId,
         playerNumber,
@@ -226,6 +231,13 @@ class MatchLobby {
       this.handlePublicBots()
       this.handlePublicAutoStart()
     }
+  }
+
+  // The server decides stacks. Integration tests may still seed a custom stack
+  // per player to reproduce short-stack and all-in scenarios.
+  startingStack(data) {
+    if (process.env.NODE_ENV === 'test' && data.totalChips) return data.totalChips
+    return this.match.initialStack
   }
 
   handlePublicBots() {

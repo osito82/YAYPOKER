@@ -113,7 +113,23 @@ const SERVER_CONFIG = {
   PORT: process.env.VITE_WS_PORT || '8888',
   PROTOCOL: 'http',
   BASE_URL: process.env.VITE_WS_URL || 'localhost',
-  BOT_SERVICE_URL: process.env.BOT_SERVICE_URL || (process.env.NODE_ENV === 'production' ? 'http://bot:8886' : 'http://localhost:8886'),
+  // Docker Compose sets BOT_SERVICE_URL=http://bot:8886; outside Docker the bot
+  // service runs on localhost even when NODE_ENV=production.
+  BOT_SERVICE_URL: process.env.BOT_SERVICE_URL || 'http://localhost:8886',
+}
+
+const CONNECTION_CONFIG = {
+  HEARTBEAT_INTERVAL: 20000, // ping every 20s; drop sockets that miss one pong
+  MAX_PAYLOAD_BYTES: 1024 * 1024, // 1 MiB: fits a 15s voice clip in base64
+  MAX_AUDIO_DATA_CHARS: 700000,
+  VOICE_MIN_INTERVAL_MS: isTest ? 0 : 2000,
+  SPECTATOR_SECRET: 'spectator',
+}
+
+const TABLE_SETTINGS_LIMITS = {
+  MIN_STACK: 100,
+  MAX_STACK: 1000000,
+  MAX_BLIND: 1000000,
 }
 
 const CLEANUP_CONFIG = {
@@ -130,4 +146,6 @@ module.exports = {
   BOT_NAMES,
   SERVER_CONFIG,
   CLEANUP_CONFIG,
+  CONNECTION_CONFIG,
+  TABLE_SETTINGS_LIMITS,
 }

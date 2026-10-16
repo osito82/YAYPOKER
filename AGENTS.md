@@ -102,7 +102,7 @@ The full text of every rule lives in `.agents/rules/` — **that directory is th
 | 5 | Git: Conventional Commits, commit/push only on explicit request, `--no-ff` merges, keep branches | `code-standards.md` §5 |
 | 6 | Server-authoritative engine and validated inbound messages | `game-engine.md` §1–2 |
 | 7 | Chip conservation | `game-engine.md` §3 |
-| 8 | Hidden information (pocket cards, deck, secret codes) | `game-engine.md` §4 |
+| 8 | Hidden information: cards never broadcast early, but kept in private server logs; secret codes never logged | `game-engine.md` §4 |
 | 9 | Timers and rule constants from `constants.js`; bots are ordinary players; in-memory state | `game-engine.md` §5–7 |
 | 10 | Element IDs `[descriptive-name]-[TemplateSuffix]` | `ui-standards.md` §1 |
 | 11 | Responsive templates, 360 px, display-only client, modals, runtime URLs | `ui-standards.md` §2–6 |
