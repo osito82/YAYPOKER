@@ -8,7 +8,7 @@ Last reviewed: 2026-10-16.
 
 ## Next
 
-- [ ] **Rotate the VPS root password and switch to SSH keys** — `DEPLOYMENT.md` (gitignored, never
+- [ ] **Rotate the VPS root password and disable password login** (SSH key auth works since 2026-10-16) — `DEPLOYMENT.md` (gitignored, never
       committed) stores it in plain text. Disable root password login afterwards.
 - [ ] **Node ≥ 22 locally** — the harness CLI (`ship check`) refuses Node 20.19; Dockerfiles also use
       `node:20-alpine`.
@@ -32,7 +32,12 @@ Last reviewed: 2026-10-16.
       Proposal: no table pause, auto check/fold, keep the seat, 20–25s turns + time bank.
 - [ ] **GAM — folded hands revealed** at showdown/runout (`communicator.censoredPlayersInfo`).
 - [ ] **BOT — slow bots**: 25s LLM timeout; aim for 6–8s with a heuristic fallback.
-- [ ] **Deploy the quick wins** (branch `fix/quick-wins-game-safety`).
+- [ ] **OPS — prerender on the VPS**: "Unable to prerender all routes" (no memory for Chromium);
+      build the client image locally, add swap, or drop prerender (SEO only).
+- [ ] **OPS — test domain cert**: Caddy cannot obtain a cert for `osongo.duckdns.org`; fix DNS or
+      remove it from the `Caddyfile`.
+- [ ] **OPS — delete `/root/YAYPOKER-backup-20261016`** on the VPS once the 2026-10-16 release is
+      confirmed.
 
 ## Gaps
 

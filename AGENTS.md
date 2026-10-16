@@ -50,6 +50,7 @@ The block above is a **generic template imported from an external harness** (`..
 - **Code map:** regenerate with `node .agents/skills/context-economy/scripts/codemap.mjs --root . --out CODEMAP.md`. The "kiuvy-harness" name in its header is expected.
 - **Pipeline:** `node ../harnes/scripts/harness.mjs ship check` (needs Node ≥ 22) runs lint + `vitest run` for each package and a client build (stages in `.harness.json`). `ship build` builds the prod images; `ship deploy` is manual (`secrets-and-deploy.md`); `ship smoke` hits the prod health endpoint.
 - **Logging:** `webSocket/logger.js` / `bot/logger.js` (winston + `osolog`), see `code-standards.md` §3.
+- **Deploy:** project skill `yaypoker-deploy` (`.claude/skills/yaypoker-deploy/SKILL.md`) — the only supported way to update production; it replaces the tarball steps in the local `DEPLOYMENT.md`.
 
 ---
 
