@@ -24,8 +24,7 @@ services:
       - "80"
     depends_on:
       - websocket
-    volumes:
-      - ./Logs:/usr/share/nginx/html/Logs
+    # Logs are read over SSH/FTP from ./Logs on the host; never serve them on the web
 
   websocket:
     build: ./webSocket

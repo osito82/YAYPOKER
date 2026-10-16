@@ -15,7 +15,8 @@ Recent sessions only.
   `NAME_TAKEN` message instead of hanging.
 - WebSocket: 20s ping/pong heartbeat, 1 MiB max payload, voice limited to seated players and
   rate-limited, socket registry cleaned on close. Secrets removed from logs and from the
-  tournament-winner broadcast. (The public `Logs` mount in docker-compose was kept on purpose.)
+  tournament-winner broadcast. `Logs` no longer mounted into the client web root (read over
+  SSH/FTP from `./Logs` on the host). (The public `Logs` mount in docker-compose was kept on purpose.)
 - Client: reconnect with exponential backoff + jitter, immediate reconnect on `online` /
   tab visible, "Reconnecting…" banner, no action controls while offline.
 - Tests: new `webSocket/tests/client_guardrails.test.js` (9); updated `allin_conservation`,
