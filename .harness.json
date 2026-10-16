@@ -22,11 +22,12 @@
       "docker compose -f docker-compose-prod.yml build"
     ],
     "deploy": [
-      "manual: deploy is tarball + scp + `docker compose -f docker-compose-prod.yml up --build -d` on the VPS — follow the local DEPLOYMENT.md (gitignored) after explicit human OK"
+      "manual: follow the yaypoker-deploy skill (.claude/skills/yaypoker-deploy/SKILL.md) after explicit human OK"
     ],
     "smoke": [
       "curl -fsS https://yaypoker.com:8888/health | grep -q healthy",
-      "curl -fsSI https://yaypoker.com/ | grep -qi '^HTTP/.* 200'"
+      "curl -fsSI https://yaypoker.com/ | grep -qi '^HTTP/.* 200'",
+      "curl -fsSI https://yaypoker.com/Logs/certificates.json | grep -qi '^content-type: text/html'"
     ]
   }
 }

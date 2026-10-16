@@ -2,6 +2,17 @@
 
 Recent sessions only.
 
+## 2026-10-16 — Production deploy of `a505048` + deploy skill
+
+- Deployed `main` (`a505048`) to the VPS: backup `/root/YAYPOKER-backup-20261016`, `git archive`
+  upload, `down` + `up --build -d`. Checks: 4 containers up, `/health` healthy, home 200, new bundle
+  served (tico heart, reconnect banner), `/Logs/certificates.json` no longer served. Downtime ~3 min.
+- Learned: the client build fails while the old containers run (864 MB RAM, Chromium for prerender);
+  `--rmi all -v` would have removed the rollback images and Caddy's certs; the tarball would have
+  overwritten production `Logs/`. Prerender still logs "Unable to prerender all routes" (SEO only);
+  Caddy cannot get a cert for `osongo.duckdns.org`.
+- New project skill `.claude/skills/yaypoker-deploy/SKILL.md`; SSH key auth set up for root.
+
 ## 2026-10-16 — Quick wins from the UX analysis (branch `fix/quick-wins-game-safety`)
 
 - Server no longer obeys client `dealtPrivateCards`; `nextRound` only after a tournament ends;
