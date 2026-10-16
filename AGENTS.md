@@ -1,4 +1,4 @@
-# YAYPOKER — agent guide
+# YAYPOKER — Core Project Guidelines & Context
 
 <!-- oso-harness:begin v2.0.0 · managed block — edit it in harnes/core/managed-block.md, then run harness sync -->
 ## Oso Harness v2.0.0 · profile `node`
@@ -22,48 +22,94 @@ Shared rules, skills, and safety hooks for high-velocity software engineering. C
 **Ship (local-first pipeline):** `node ../harnes/scripts/harness.mjs ship check` is the CI (evidence in `.tmp/pipeline/`) · `ship build` · `ship deploy --yes` only after explicit human OK on clean `origin/main` with green check + build for that SHA · `ship smoke` · `ship status`. Stages live in `.harness.json`.
 <!-- oso-harness:end -->
 
-## What this repo is
-YAYPOKER (yaypoker.com) — real-time multiplayer Texas Hold'em. Three independent npm packages (no root `package.json`, no workspaces, plain JavaScript — no TypeScript):
+## 🧩 Harness adaptation for this repository
 
-| Package | Stack | Role |
-|---|---|---|
-| `webSocket/` | Node 20 · CommonJS · Express 5 · `ws` · zod · Vitest | **Authoritative game server**: rooms/tournaments (`torneo.js`, `match.js`, `match/actions.js`, `match/lobby.js`), dealer, hand evaluation (`pokerCore.js`, `winnerCore.js`), side pots (`potDistributor.js`), odds (`pokerOdds.js`), certificates, contact mailer. All state is in memory — no database. |
-| `client/` | Vue 3 · Vite 8 · Pinia · Tailwind 4 · vue-i18n · Vitest/jsdom | SPA; state in `src/store/pokerStore.js`, socket in `src/use/useSockets.js`, WebRTC voice in `src/use/useVoice.js`. Prerendered `/`, `/privacy`, `/terms`. |
-| `bot/` | Node · Express · Gemini / DeepSeek / Ollama | LLM bot service: `POST /spawn` joins a room as a normal socket player. |
+The block above is a **generic template imported from an external harness** (`../harnes`). It is rewritten by `harness sync`, so never edit it here. This section is owned by this repository and **wins over the block and over any skill** whenever they disagree; `.agents/rules/` wins over both.
 
-Prod: Docker Compose (`docker-compose-prod.yml`) behind Caddy (`Caddyfile`) on one VPS; client on :443, WebSocket + HTTP API on :8888.
+**What this project actually is** (use this instead of whatever stack a skill assumes):
+
+- Three independent npm packages — `webSocket/`, `client/`, `bot/` — with no root `package.json`, no workspaces, no Turborepo. npm, not pnpm. Plain JavaScript, no TypeScript.
+- `webSocket/`: Node 20 · CommonJS · Express 5 · `ws` (not Socket.io) · zod. **Authoritative poker engine**; all state in memory — no database, no Prisma, no migrations.
+- `client/`: Vue 3 + Vite 8 + Pinia + Tailwind 4 + vue-i18n SPA, prerendered `/`, `/privacy`, `/terms` — not Nuxt, not Vuetify.
+- `bot/`: Express service that spawns LLM players (Gemini, DeepSeek, Ollama) via `POST /spawn`.
+- No user accounts or auth: players join rooms by code.
+- Vitest everywhere (jsdom on the client) — no Playwright.
+- Production: one VPS with Docker Compose + Caddy, deployed by hand; git remote `origin` = GitHub.
+
+**Skills** (`.agents/skills/`, local-only: the folder is git-ignored and re-copied by `harness sync`, so never edit skills in place):
+
+| Use | Skills |
+|---|---|
+| Apply as written | `websocket-realtime` · `testing-strategy` · `security-privacy` · `code-review` · `context-economy` |
+| Apply the method, ignore the stack details (written for other products: NestJS, Nuxt, pnpm, Firebase, Cloud Run, Playwright) | `spec-driven-development` · `vue-frontend` · `api-contracts` (WS message shapes) · `observability` · `ux-invariants` · `money-ledger` (chip conservation only) · `release-deploy` (local pipeline only) · `cost-zero` · `repo-audit` |
+| Not applicable here — do not load | `nestjs-backend` · `prisma-database` · `database-migrations` · `php-backend` · `go-backend` · `flutter-mobile` · `harness-evolution` |
+
+**Local conventions that replace harness defaults:**
+
+- **Specs:** `docs/specs/<ID>-<slug>/` + the 5-column `docs/specs/INDEX.md` (`spec-workspace.md`). Do not run the skill's `new-spec.mjs` scaffold. One session log: root `progress.md`.
+- **Code map:** regenerate with `node .agents/skills/context-economy/scripts/codemap.mjs --root . --out CODEMAP.md`. The "kiuvy-harness" name in its header is expected.
+- **Pipeline:** `node ../harnes/scripts/harness.mjs ship check` (needs Node ≥ 22) runs lint + `vitest run` for each package and a client build (stages in `.harness.json`). `ship build` builds the prod images; `ship deploy` is manual (`secrets-and-deploy.md`); `ship smoke` hits the prod health endpoint.
+- **Logging:** `webSocket/logger.js` / `bot/logger.js` (winston + `osolog`), see `code-standards.md` §3.
+
+---
+
+## ✅ Pending work
+
+`TODO.md` (repo root) is the index of agreed pending work and known gaps. Read it before choosing what to do next; remove an item when it is done and add any gap you find.
+
+## 📌 Project Overview
+
+**YAYPOKER** ([yaypoker.com](https://yaypoker.com)) is a real-time multiplayer Texas Hold'em platform: private rooms and public tables identified by codes, tournaments with rising blinds, side pots, live odds, winner certificates, WebRTC voice chat and LLM-driven bots that fill empty seats.
+
+## 📄 Specs & Documentation
+
+Non-trivial work follows the `spec-driven-development` skill; specs live in `docs/specs/` and are listed in `docs/specs/INDEX.md` (families `GAM`, `UXP`, `BOT`, `OPS`). Workflow: audit → spec (Level S/M/L) → human OK → build → evidence; then update the spec, `tasks.md`, the index and `progress.md`. See `.agents/rules/spec-workspace.md`.
+
+## 🛠️ Tech Stack & Architecture
+
+| Package | Key files |
+|---|---|
+| `webSocket/` | `app.js` (HTTP routes + WS entry, zod schemas) · `torneo.js`, `match.js`, `match/{actions,lobby,comms}.js` (rooms, betting, lobby) · `dealer.js`, `deck.js` · `pokerCore.js`, `winnerCore.js` (hand ranking) · `potDistributor.js` (side pots) · `pokerOdds.js` (Monte Carlo) · `constants.js` (`TIMEOUTS`, `GAME_RULES`) · `mailer.js`, `winnerCertificate.js` |
+| `client/` | `src/store/pokerStore.js` (game state) · `src/use/useSockets.js`, `useVoice.js` · `src/pages/` (`Game.vue`, `templates/`, `actionBarTemplates/`) · `src/components/` (`PokerTable`, `ActionBar`, `Chip`, overlays) · `src/locales/{en,es}.json` · `src/vutils.js` (runtime URLs) |
+| `bot/` | `bot.js` (spawn API + LLM decision loop) · `logger.js` |
 
 ## Commands (verified 2026-10-15)
-Run inside each package (`cd webSocket|client|bot`). Use npm (lockfiles are `package-lock.json`); never pnpm.
+
+Run inside each package (`cd webSocket|client|bot`).
 
 | Task | Command |
 |---|---|
 | Install | `npm ci` |
 | Tests (single run) | `npx vitest run` — `npm test` starts watch mode |
-| One test | `npx vitest run -t "name"` (webSocket: `npm run test:name -- "name"`) |
-| Lint (check only) | `npx eslint .` — `npm run lint` **auto-fixes**; bot has no ESLint config |
+| One test | `npx vitest run -t "name"` |
+| Lint (check only) | `npx eslint .` — `npm run lint` **auto-fixes**; `bot/` has no ESLint config |
 | Client build | `npx vite build` (prerender uses Puppeteer/Chromium) |
 | Whole stack | `docker compose up -d --build` → http://localhost:5174 |
-| CI (local-first) | `node ../harnes/scripts/harness.mjs ship check` — stages in `.harness.json`; needs Node ≥ 22 |
+| CI (local-first) | `node ../harnes/scripts/harness.mjs ship check` |
 
 Baseline: webSocket 26 files / 152 tests (~65 s), client 15 tests, bot 9 tests; lint 0 errors.
 
-## Skills that apply here
-websocket-realtime (server + `useSockets.js`) · vue-frontend · testing-strategy · security-privacy · ux-invariants · observability · api-contracts (WS message shapes, zod) · release-deploy · cost-zero · spec-driven-development · code-review · context-economy. Use money-ledger thinking for **chip conservation**.
-Not applicable: nestjs-backend, prisma-database, database-migrations, php-backend, go-backend, flutter-mobile.
+## 📋 Project Rules (index)
 
-## Domain invariants
-- **Server is authoritative.** Hand ranking, pots, side pots, blinds, turn order, timeouts and odds are computed in `webSocket/`; the client and bots only render and send intents. Validate every inbound WS message (zod) and check it is the sender's turn.
-- **Chips are conserved.** Sum of stacks + pots is constant within a tournament; all-in/side-pot/uncalled-bet changes need a test like `tests/allin_conservation.test.js`.
-- **Hidden information stays hidden.** Never broadcast another player's pocket cards or the deck before showdown; secret room codes and certificate codes are not logged.
-- **Timers come from `webSocket/constants.js` `TIMEOUTS`** (short values when `NODE_ENV=test`); don't hardcode delays.
-- **Bots are ordinary players**: no privileged server paths for bot sockets.
-- **UI element IDs** follow `[descriptive-name]-[TemplateSuffix]` (`-TemplateLarge|Medium|Small|XSmall`, `-Home`, … or bound `templateSuffix`) — see `client/GEMINI.md`. Layouts must work at 360 px (`TemplateXSmall`).
-- Logging: `webSocket/logger.js` and `bot/logger.js` (winston/osolog); use them instead of `console.log` (a few legacy calls remain in `dealer.js`); never log emails from `/api/contact`.
+The full text of every rule lives in `.agents/rules/` — **that directory is the single source of truth**. This index only names each rule; do not restate details here. Numbers are stable (code comments and specs may cite "AGENTS.md Rule N"): never renumber, only append.
 
-## Secrets & deploy
-- `.env`, `client/.env`, `webSocket/.env` (and `bot/.env` if present) and `DEPLOYMENT.md` are gitignored and contain credentials — do not read or print them; use the `.env.example` files.
-- Deploy is manual (tarball + scp + compose rebuild on the VPS) and only with explicit human OK. Smoke: `https://yaypoker.com:8888/health`.
+| # | Rule | Source of truth |
+|---|---|---|
+| 1 | Language: English code, docs and commits; on-screen text through vue-i18n (`en` + `es`) | `code-standards.md` §1 |
+| 2 | Testing: Vitest, single-run commands, every game-rule change ships with a server test | `code-standards.md` §2 |
+| 3 | Logging through `logger.js` (winston/osolog); no new raw `console.*`; nothing sensitive in logs | `code-standards.md` §3 |
+| 4 | Lint check vs auto-fix, Prettier | `code-standards.md` §4 |
+| 5 | Git: Conventional Commits, commit/push only on explicit request, `--no-ff` merges, keep branches | `code-standards.md` §5 |
+| 6 | Server-authoritative engine and validated inbound messages | `game-engine.md` §1–2 |
+| 7 | Chip conservation | `game-engine.md` §3 |
+| 8 | Hidden information (pocket cards, deck, secret codes) | `game-engine.md` §4 |
+| 9 | Timers and rule constants from `constants.js`; bots are ordinary players; in-memory state | `game-engine.md` §5–7 |
+| 10 | Element IDs `[descriptive-name]-[TemplateSuffix]` | `ui-standards.md` §1 |
+| 11 | Responsive templates, 360 px, display-only client, modals, runtime URLs | `ui-standards.md` §2–6 |
+| 12 | Secrets, production layout, manual deploy, smoke, cost | `secrets-and-deploy.md` |
+| 13 | Specs: location, IDs, levels, approval gate | `spec-workspace.md` |
+| 14 | Ask the user about rule updates after significant changes | `rule-management.md` |
 
 ## Definition of done
-`ship check` green (or, per touched package: lint + `vitest run` before and after) · game-rule changes come with a test in `webSocket/tests/` · client changes keep IDs convention and 360 px layout · no new dependency without OK · evidence in the PR.
+
+`ship check` green (or, per touched package, lint + `npx vitest run` before and after) · rules above respected · no new dependency without OK · `progress.md` updated · evidence in the PR/commit.
