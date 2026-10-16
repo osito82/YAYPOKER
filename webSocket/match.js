@@ -118,14 +118,18 @@ class Match extends EventEmitter {
     }
   }
 
+  handsPlayed() {
+    return this.handCount + 1
+  }
+
   increaseBlinds() {
     this.blindLevel++
+    // Round the small blind and keep the big blind at exactly twice it
+    // (rounding both separately produced 13/25, 17/32...)
     this.smallBlind = Math.ceil(
       this.smallBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
     )
-    this.bigBlind = Math.ceil(
-      this.bigBlind * GAME_RULES.BLIND_INCREASE_PERCENTAGE,
-    )
+    this.bigBlind = this.smallBlind * 2
     if (this.ante > 0) {
       this.ante = Math.ceil(this.ante * GAME_RULES.BLIND_INCREASE_PERCENTAGE)
     }
@@ -142,7 +146,7 @@ class Match extends EventEmitter {
         smallBlind: this.smallBlind,
         bigBlind: this.bigBlind,
         ante: this.ante,
-        handsPlayed: this.handCount,
+        handsPlayed: this.handsPlayed(),
       })
 
     this.communicator.msgBuilder('blindsIncreased', 'public', null, {
@@ -150,7 +154,7 @@ class Match extends EventEmitter {
       smallBlind: this.smallBlind,
       bigBlind: this.bigBlind,
       ante: this.ante,
-      handsPlayed: this.handCount,
+      handsPlayed: this.handsPlayed(),
       displayMsg: `Blinds increased to level ${this.blindLevel}: SB $${this.smallBlind} / BB $${this.bigBlind}`,
     })
     Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())

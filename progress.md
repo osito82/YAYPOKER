@@ -2,6 +2,22 @@
 
 Recent sessions only.
 
+## 2026-10-16 — Fixes from the production logs (branch `fix/log-findings`)
+
+Found in `webSocket-2026-10-09.log` / `-10-16.log` and the bot logs on the VPS:
+- Blinds went up after the first hand (`handCount % 10` with handCount 0) → `Match.handsPlayed()`.
+- Min raise was BB − SB after the blinds (raise to 30 over BB 20 accepted) → last raise reset to
+  the big blind when blinds complete.
+- Blind levels 13/25, 17/32 → big blind is exactly 2× the rounded small blind (13/26, 17/34).
+- Every Gemini call failed with 404 (`gemini-2.0-flash` shut down), bots always used the fallback →
+  `gemini-3.5-flash-lite` (bot default, both compose files, npm script).
+- Double click sent a second bet → client `useActionGuard` (one turn action until the server answers,
+  3s safety timeout).
+- Tests: `webSocket/tests/blinds_and_min_raise.test.js` (3, fail on the old code),
+  `client/src/tests/use/useActionGuard.test.js` (3). webSocket 164, client 20, bot 9, lint, build OK.
+- Still open (need specs): tournament lost on a 15s disconnect, certificates issued to bots,
+  manual blinds.
+
 ## 2026-10-16 — Production deploy of `a505048` + deploy skill
 
 - Deployed `main` (`a505048`) to the VPS: backup `/root/YAYPOKER-backup-20261016`, `git archive`
