@@ -558,6 +558,17 @@
               >{{ $t('footer.contact') }}</router-link
             >
           </div>
+          <div
+            id="home-footer-tico-Home"
+            class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30"
+          >
+            <span id="home-footer-pura-vida-Home">{{ $t('footer.pura_vida') }}</span>
+            <TicoHeart
+              id="home-footer-tico-heart-Home"
+              :size="16"
+              :label="$t('footer.pura_vida')"
+            />
+          </div>
           <p
             class="text-[10px] text-gray-300 dark:text-white/10 font-black uppercase tracking-[0.5em]"
           >
@@ -575,6 +586,7 @@ import { useI18n } from 'vue-i18n'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { useThemeStore } from '../store/themeStore'
 import Logo from '../components/Logo.vue'
+import TicoHeart from '../components/TicoHeart.vue'
 
 const { locale } = useI18n()
 const responsive = useResponsiveStore()
