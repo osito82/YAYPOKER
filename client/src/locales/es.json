@@ -80,6 +80,7 @@
     "online_count": "{count} En Línea",
     "status_live": "En Vivo",
     "status_offline": "Desconectado",
+    "reconnecting": "Conexión perdida. Reconectando…",
     "win": "Ganar",
     "tie": "Empate",
     "hand": "Mano",

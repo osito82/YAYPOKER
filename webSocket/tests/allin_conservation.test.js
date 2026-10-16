@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import WebSocket from 'ws'
 const { server } = require('../app')
+const Torneo = require('../torneo')
 
 describe('All-In Chip Conservation Test (Realistic Scenario)', () => {
   let port
@@ -106,7 +107,9 @@ describe('All-In Chip Conservation Test (Realistic Scenario)', () => {
     await Promise.all([big.waitAction('signUp'), short.waitAction('signUp')])
 
     // 2. Iniciar con ciegas en 0 para mantener la compatibilidad con el escenario original
-    big.send({ action: 'startGame', smallBlind: 0, bigBlind: 0, ante: 0 })
+    // Public tables ignore client table settings: seed zero blinds server-side
+    Object.assign(Torneo.getMatch(gameCode), { smallBlind: 0, bigBlind: 0, ante: 0 })
+    big.send({ action: 'startGame' })
     await big.waitAction('dealtPrivateCards')
 
     // 3. Primera calle (Pre-flop): Apuesta pequeña

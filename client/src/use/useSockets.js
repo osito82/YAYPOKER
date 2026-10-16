@@ -11,6 +11,8 @@ export default function useWebSocket(url, options) {
 
   const socket = ref(null)
   const reconnectTimeout = ref(null)
+  const reconnectAttempts = ref(0)
+  const hasConnected = ref(false)
   const isManuallyClosed = ref(false)
   const isDestroyed = ref(false) // Flag definitivo
   const pokerStore = usePokerStore()
@@ -34,8 +36,9 @@ export default function useWebSocket(url, options) {
         socket.value.close()
         return
       }
-      console.log('Conexión establecida')
       pokerStore.setConnected(true)
+      hasConnected.value = true
+      reconnectAttempts.value = 0
       if (reconnectTimeout.value) {
         clearTimeout(reconnectTimeout.value)
         reconnectTimeout.value = null
@@ -67,15 +70,36 @@ export default function useWebSocket(url, options) {
     })
   }
 
+  // Exponential backoff with jitter (1s, 2s, 4s… capped at 15s) so a server
+  // restart does not get every client reconnecting in the same instant.
   const attemptReconnect = () => {
     if (reconnectTimeout.value || isDestroyed.value) return
 
-    console.log('Intentando reconectar en 3 segundos...')
+    const base = Math.min(15000, 1000 * 2 ** reconnectAttempts.value)
+    const delay = base / 2 + Math.random() * (base / 2)
+    reconnectAttempts.value++
     reconnectTimeout.value = setTimeout(() => {
       reconnectTimeout.value = null
       if (!isDestroyed.value) connectSocket()
-    }, 3000)
+    }, delay)
   }
+
+  // Back online or back to the tab: reconnect now instead of waiting
+  const reconnectNow = () => {
+    if (isDestroyed.value || isManuallyClosed.value) return
+    if (socket.value && socket.value.readyState === WebSocket.OPEN) return
+    if (reconnectTimeout.value) {
+      clearTimeout(reconnectTimeout.value)
+      reconnectTimeout.value = null
+    }
+    reconnectAttempts.value = 0
+    connectSocket()
+  }
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'visible') reconnectNow()
+  }
+  window.addEventListener('online', reconnectNow)
+  document.addEventListener('visibilitychange', onVisibilityChange)
 
   const disconnectSocket = () => {
     isManuallyClosed.value = true
@@ -89,14 +113,16 @@ export default function useWebSocket(url, options) {
       socket.value = null
     }
     pokerStore.setConnected(false)
+    window.removeEventListener('online', reconnectNow)
+    document.removeEventListener('visibilitychange', onVisibilityChange)
   }
 
   const sendMessage = (message) => {
     if (socket.value && socket.value.readyState === WebSocket.OPEN) {
       socket.value.send(JSON.stringify(message))
-    } else {
-      console.error('Error: Socket no está abierto.')
+      return true
     }
+    return false
   }
 
   onBeforeUnmount(() => {
@@ -105,6 +131,7 @@ export default function useWebSocket(url, options) {
 
   return {
     socket,
+    hasConnected,
     connectSocket,
     disconnectSocket,
     sendMessage,

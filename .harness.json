@@ -1,22 +1,32 @@
 {
   "version": "2.0.0",
   "profile": "node",
-  "updatedAt": "2026-10-02",
+  "updatedAt": "2026-10-15",
   "format": true,
   "stopGate": {
     "enabled": false,
-    "command": "npm test",
+    "command": "cd webSocket && npx vitest run --reporter=dot",
     "timeoutSec": 240
   },
   "agentsSkills": true,
   "pipeline": {
     "check": [
-      "npm test"
+      "cd webSocket && npx eslint . --max-warnings=0",
+      "cd webSocket && npx vitest run --reporter=dot",
+      "cd client && npx eslint .",
+      "cd client && npx vitest run --reporter=dot",
+      "cd bot && npx vitest run --reporter=dot",
+      "cd client && npx vite build --outDir ../.tmp/client-dist --emptyOutDir"
     ],
-    "build": [],
+    "build": [
+      "docker compose -f docker-compose-prod.yml build"
+    ],
     "deploy": [
-      "manual: no deploy declared for this repo — add pipeline.deploy to .harness.json (skill release-deploy, references/local-pipeline.md)"
+      "manual: deploy is tarball + scp + `docker compose -f docker-compose-prod.yml up --build -d` on the VPS — follow the local DEPLOYMENT.md (gitignored) after explicit human OK"
     ],
-    "smoke": []
+    "smoke": [
+      "curl -fsS https://yaypoker.com:8888/health | grep -q healthy",
+      "curl -fsSI https://yaypoker.com/ | grep -qi '^HTTP/.* 200'"
+    ]
   }
 }

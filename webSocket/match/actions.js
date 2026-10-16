@@ -120,7 +120,16 @@ class MatchActions {
         )
       }
 
-      this.fold({ id: foundPlayer.id }, true)
+      // Timing out never costs a free card: check when there is nothing to call.
+      // During the blinds step a timeout still folds (the blind is not posted).
+      const canCheck =
+        this.stepChecker.checkStep('blindsBetting') &&
+        foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()
+      if (canCheck) {
+        this.setCheck({ id: foundPlayer.id }, true)
+      } else {
+        this.fold({ id: foundPlayer.id }, true)
+      }
     }
   }
 
@@ -166,7 +175,6 @@ class MatchActions {
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
           dealerCards: this.match.cardsDealer,
           pot: this.dealer.getPot(),
         })
@@ -187,14 +195,14 @@ class MatchActions {
     }
   }
 
-  performCheck = (foundPlayer) => {
+  performCheck = (foundPlayer, isAutoCheck = false) => {
     if (foundPlayer.getCurrentBet() === this.dealer.getCurrentHighestBet()) {
-      this.resetConsecutiveAutofolds(foundPlayer)
+      if (!isAutoCheck) this.resetConsecutiveAutofolds(foundPlayer)
       this.clearAutofold()
       this.match.activePlayerId = null
       this.dealer.setPlayerActed(foundPlayer.id)
 
-      foundPlayer.setLastAction('Check')
+      foundPlayer.setLastAction(isAutoCheck ? 'Check (timeout)' : 'Check')
       this.log
         .Template({
           name: 'brakets',
@@ -206,7 +214,6 @@ class MatchActions {
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
           dealerCards: this.match.cardsDealer,
           pot: this.dealer.getPot(),
         })
@@ -227,7 +234,6 @@ class MatchActions {
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
           dealerCards: this.match.cardsDealer,
           currentBet: foundPlayer.getCurrentBet(),
           maxBet: this.dealer.getCurrentHighestBet(),
@@ -246,7 +252,7 @@ class MatchActions {
     }
   }
 
-  setCheck = (thisSocket) => {
+  setCheck = (thisSocket, isAutoCheck = false) => {
     if (
       !this.match.activePlayerId ||
       this.match.activePlayerId !== thisSocket.id
@@ -255,7 +261,7 @@ class MatchActions {
 
     const foundPlayer = this.match.players.find((p) => p.id == thisSocket.id)
     if (foundPlayer) {
-      const success = this.performCheck(foundPlayer)
+      const success = this.performCheck(foundPlayer, isAutoCheck)
       if (success) {
         this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
       } else {
@@ -317,7 +323,6 @@ class MatchActions {
         handId: this.match.currentHandId,
         player: foundPlayer.name,
         playerCards: foundPlayer.cards,
-        playerSecret: foundPlayer.secretCode,
         dealerCards: this.match.cardsDealer,
         added: amountAdded,
         totalBet: foundPlayer.getCurrentBet(),
@@ -381,7 +386,6 @@ class MatchActions {
             handId: this.match.currentHandId,
             player: foundPlayer.name,
             playerCards: foundPlayer.cards,
-            playerSecret: foundPlayer.secretCode,
             dealerCards: this.match.cardsDealer,
             amount,
             currentMax: currentMaxBet,
@@ -421,7 +425,6 @@ class MatchActions {
             handId: this.match.currentHandId,
             player: foundPlayer.name,
             playerCards: foundPlayer.cards,
-            playerSecret: foundPlayer.secretCode,
             dealerCards: this.match.cardsDealer,
             amount,
             currentMax: currentMaxBet,
@@ -488,7 +491,6 @@ class MatchActions {
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
           dealerCards: this.match.cardsDealer,
           added: addedChips,
           totalBet: currentBetAfter,
@@ -518,7 +520,6 @@ class MatchActions {
           handId: this.match.currentHandId,
           player: foundPlayer.name,
           playerCards: foundPlayer.cards,
-          playerSecret: foundPlayer.secretCode,
           dealerCards: this.match.cardsDealer,
           amount,
           chips: foundPlayer.chips,
@@ -905,6 +906,7 @@ class MatchActions {
     const isTournamentWinner = playersWithChips.length === 1
 
     if (isTournamentWinner) {
+      this.match.awaitingManualNextRound = true
       this.winnerTournament(winnersInfo)
     } else {
       this.winnerHand(winnersInfo, isFold, pot, finalHands)
@@ -992,7 +994,8 @@ class MatchActions {
     this.communicator.msgBuilder('winnerTournament', 'public', null, {
       method: 'winnerTournament',
       displayMsg: `${winnerForCert.name} wins the tournament!`,
-      winner: winnerForCert,
+      // Never broadcast the winner's secret code
+      winner: (({ secretCode, ...rest }) => rest)(winnerForCert),
       isTournamentWinner: true,
       allHands: finalHands,
       certificate: {
@@ -1151,7 +1154,6 @@ class MatchActions {
           handId: this.match.currentHandId,
           player: p.name,
           playerCards: p.cards,
-          playerSecret: p.secretCode,
           dealerCards: this.match.cardsDealer,
           options: opts,
           maxBetOnTable: maxBet,
@@ -1284,7 +1286,6 @@ class MatchActions {
           players: this.match.players.map((p) => ({
             name: p.name,
             playerCards: p.cards,
-            playerSecret: p.secretCode,
           })),
           dealerCards: this.match.cardsDealer,
         })
@@ -1333,6 +1334,13 @@ class MatchActions {
         isSittingOut: foundPlayer.isSittingOut,
       })
       Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+
+      if (!isSittingOut && this.match.idleAllSittingOut) {
+        this.match.idleAllSittingOut = false
+        this.match.waitingForNextRound = true
+        this.match.nextRound()
+        return
+      }
 
       // Si es su turno y acaba de entrar a Sit Out, forzar el auto-check/fold
       if (isSittingOut && this.match.activePlayerId === foundPlayer.id) {

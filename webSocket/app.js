@@ -20,6 +20,8 @@ const {
   SERVER_CONFIG,
   GAME_RULES,
   CLEANUP_CONFIG,
+  CONNECTION_CONFIG,
+  TABLE_SETTINGS_LIMITS,
 } = require('./constants')
 
 const app = express()
@@ -52,7 +54,23 @@ app.use((req, res, next) => {
 })
 
 const server = http.createServer(app)
-const wss = new WebSocket.Server({ server })
+const wss = new WebSocket.Server({
+  server,
+  maxPayload: CONNECTION_CONFIG.MAX_PAYLOAD_BYTES,
+})
+
+// Heartbeat: half-open connections (phone switching networks, sleeping tabs)
+// never fire 'close' on their own. Ping every interval and terminate sockets
+// that did not answer the previous ping, so the normal disconnect flow runs.
+const heartbeat = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) return ws.terminate()
+    ws.isAlive = false
+    ws.ping()
+  })
+}, CONNECTION_CONFIG.HEARTBEAT_INTERVAL)
+heartbeat.unref()
+wss.on('close', () => clearInterval(heartbeat))
 
 const Match = require('./match')
 const Socket = require('./sockets')
@@ -150,8 +168,46 @@ const actionSchemas = {
     .passthrough(),
   [ACTIONS.VOICE_MESSAGE]: z
     .object({
-      audioData: z.string().min(1),
+      audioData: z.string().min(1).max(CONNECTION_CONFIG.MAX_AUDIO_DATA_CHARS),
     })
+    .passthrough(),
+  // Table settings are only honoured from the host before the game starts
+  // (see Match.startGame); here we only reject malformed values.
+  [ACTIONS.START_GAME]: z
+    .object({
+      smallBlind: z.coerce
+        .number()
+        .int()
+        .min(0)
+        .max(TABLE_SETTINGS_LIMITS.MAX_BLIND)
+        .optional(),
+      bigBlind: z.coerce
+        .number()
+        .int()
+        .min(0)
+        .max(TABLE_SETTINGS_LIMITS.MAX_BLIND)
+        .optional(),
+      ante: z.coerce
+        .number()
+        .int()
+        .min(0)
+        .max(TABLE_SETTINGS_LIMITS.MAX_BLIND)
+        .optional(),
+      initialStack: z.coerce
+        .number()
+        .int()
+        .min(TABLE_SETTINGS_LIMITS.MIN_STACK)
+        .max(TABLE_SETTINGS_LIMITS.MAX_STACK)
+        .optional(),
+      bots: z.coerce.number().int().min(0).max(GAME_RULES.MAX_PLAYERS).optional(),
+    })
+    .refine(
+      (d) =>
+        d.smallBlind === undefined ||
+        d.bigBlind === undefined ||
+        d.bigBlind >= d.smallBlind,
+      { message: 'Big blind must be >= small blind', path: ['bigBlind'] },
+    )
     .passthrough(),
 }
 
@@ -178,6 +234,12 @@ const actionHandlers = {
   [ACTIONS.SEND_MESSAGE]: (match, socket, data) =>
     match.comms.sendMessage(data),
   [ACTIONS.VOICE_MESSAGE]: (match, socket, data) => {
+    // Only seated players may talk, and not faster than the rate limit
+    if (!match.players.some((p) => p.id === socket.id)) return
+    const now = Date.now()
+    if (now - (socket.lastVoiceAt || 0) < CONNECTION_CONFIG.VOICE_MIN_INTERVAL_MS)
+      return
+    socket.lastVoiceAt = now
     Socket.broadcastToTorneo(match.torneoId, {
       action: ACTIONS.VOICE_MESSAGE,
       data: {
@@ -197,11 +259,18 @@ const actionHandlers = {
     match.actions.setBet(socket, data.blindAmount, 'setBet', true),
   [ACTIONS.CALL]: (match, socket) => match.actions.setCall(socket),
   [ACTIONS.CHECK]: (match, socket) => match.actions.setCheck(socket),
-  [ACTIONS.DEALT_PRIVATE_CARDS]: (match, socket) =>
-    match.actions.dealtPrivateCards(socket),
   [ACTIONS.STATS]: (match, socket) => match.comms.stats(socket.id),
-  [ACTIONS.NEXT_ROUND]: (match) => match.nextRound(),
-  [ACTIONS.START_GAME]: (match, socket, data) => match.startGame(socket, data),
+  // Clients may only advance after a finished tournament (overlay closed);
+  // between hands the server schedules the next round itself.
+  [ACTIONS.NEXT_ROUND]: (match) => {
+    if (match.awaitingManualNextRound) match.nextRound()
+  },
+  // Once the game is running the server drives the hand; a client startGame
+  // must not re-enter the state machine or change the table settings.
+  [ACTIONS.START_GAME]: (match, socket, data) => {
+    if (match.stepChecker.checkStep('startGame')) return
+    match.startGame(socket, data)
+  },
   [ACTIONS.PLAYER_READY]: (match, socket) => match.lobby.playerReady(socket),
   [ACTIONS.SET_SIT_OUT]: (match, socket, data) =>
     match.actions.setSitOut(socket, data?.isSittingOut),
@@ -230,18 +299,27 @@ wss.on('connection', (ws, req) => {
   const playerName = urlParams.get('playerName') ?? randomName()
 
   const secretCode = urlParams.get('secretCode') ?? generateSecretCode()
+  const isSpectator =
+    urlParams.get('role') === 'guest' ||
+    secretCode === CONNECTION_CONFIG.SPECTATOR_SECRET
 
   const thisSocket = {
     id: socketId(),
     name: playerName,
     torneoId,
     secretCode,
+    isSpectator,
     socket: ws,
   }
 
+  ws.isAlive = true
+  ws.on('pong', () => {
+    ws.isAlive = true
+  })
+
   log
     .Template({ name: 'brakets', title: 'SERVER:NEW_CONNECTION', date: true })
-    .R({ playerName, id: thisSocket.id, tournament: torneoId, secretCode })
+    .R({ playerName, id: thisSocket.id, tournament: torneoId, isSpectator })
 
   Socket.addSocket(thisSocket, torneoId)
 
@@ -299,6 +377,9 @@ wss.on('connection', (ws, req) => {
         return
       }
 
+      // Spectators only watch: they never sit down or act
+      if (thisSocket.isSpectator) return
+
       const handler = actionHandlers[jsonData.action]
       if (handler) {
         try {
@@ -335,8 +416,12 @@ wss.on('connection', (ws, req) => {
         date: true,
       })
       .R({ playerName })
+    // Drop the registry entry unless a reconnection already replaced it
+    if (Socket.getSocket(torneoId, thisSocket.id)?.socket === ws) {
+      Socket.removeSocket(thisSocket, torneoId)
+    }
     try {
-      if (match) {
+      if (match && !thisSocket.isSpectator) {
         // En mesas públicas o si es un bot, el jugador se va inmediatamente
         const foundPlayer = match.players.find((p) => p.id === thisSocket.id)
         const isBot = foundPlayer ? foundPlayer.isBot : false

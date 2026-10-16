@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import WebSocket from 'ws'
 const { server } = require('../app')
+const Torneo = require('../torneo')
 
 /**
  * Reproduces the exact reported bug:
@@ -109,7 +110,9 @@ describe('Uncalled Bet Return — Official All-In Rules (Integration)', () => {
     short.send({ action: 'signUp', totalChips: initialShort, isReady: true })
     await Promise.all([big.waitAction('signUp'), short.waitAction('signUp')])
 
-    big.send({ action: 'startGame', smallBlind: 0, bigBlind: 0, ante: 0 })
+    // Public tables ignore client table settings: seed zero blinds server-side
+    Object.assign(Torneo.getMatch(gameCode), { smallBlind: 0, bigBlind: 0, ante: 0 })
+    big.send({ action: 'startGame' })
     await big.waitAction('dealtPrivateCards')
 
     // Turn protocol: the acting player gets a PRIVATE 'Your turn' message.

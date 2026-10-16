@@ -59,6 +59,8 @@ class Match extends EventEmitter {
 
     this.activePlayerId = null // Track who is expected to act
     this.waitingForNextRound = false
+    this.awaitingManualNextRound = false // true only after a tournament winner
+    this.idleAllSittingOut = false // no hand is dealt while everyone sits out
     this.isRunout = false
 
     this.hostId = null
@@ -246,10 +248,6 @@ class Match extends EventEmitter {
   async startGame(thisSocket = {}, data = {}) {
     if (this.stepChecker.checkStep('pause')) return
 
-    if (data.smallBlind !== undefined) this.smallBlind = Number(data.smallBlind)
-    if (data.bigBlind !== undefined) this.bigBlind = Number(data.bigBlind)
-    if (data.ante !== undefined) this.ante = Number(data.ante)
-
     if (!this.stepChecker.checkStep('startGame')) {
       const isHost =
         thisSocket.id && this.hostId && thisSocket.id === this.hostId
@@ -260,6 +258,10 @@ class Match extends EventEmitter {
         this.dealer.talkToSocketById(thisSocket.id, this.communicator.getMsg())
         return
       }
+
+      // Table settings: private tables only, from the host, before the start.
+      // Values were range-checked by the startGame schema in app.js.
+      if (!this.isPublic && isHost) this.applyTableSettings(data)
 
       const connectedPlayers = this.getConnectedPlayers()
       const minRequired = this.isPublic
@@ -380,9 +382,27 @@ class Match extends EventEmitter {
     }
   }
 
+  applyTableSettings(data = {}) {
+    if (data.smallBlind !== undefined) this.smallBlind = data.smallBlind
+    if (data.bigBlind !== undefined) this.bigBlind = data.bigBlind
+    if (data.ante !== undefined) this.ante = data.ante
+    if (data.initialStack !== undefined) {
+      this.initialStack = data.initialStack
+      // Nobody has bet yet: every seated player starts with the chosen stack
+      this.players.forEach((p) => {
+        p.chips = data.initialStack
+      })
+    }
+    delete data.smallBlind
+    delete data.bigBlind
+    delete data.ante
+    delete data.initialStack
+  }
+
   nextRound() {
     if (!this.waitingForNextRound) return
     this.waitingForNextRound = false
+    this.awaitingManualNextRound = false
 
     const connected = this.getConnectedPlayers()
     if (connected.length === 0 && this.isPublic) return
@@ -420,6 +440,17 @@ class Match extends EventEmitter {
         }
         return
       }
+      return
+    }
+
+    // Nobody is playing: do not deal hands among sitting-out players forever.
+    // The next hand starts when someone comes back (MatchActions.setSitOut).
+    if (playersWithChips.every((p) => p.isSittingOut)) {
+      this.idleAllSittingOut = true
+      this.communicator.msgBuilder('tableIdle', 'public', null, {
+        displayMsg: 'Everyone is sitting out. The next hand starts when a player returns.',
+      })
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
       return
     }
     this.restartMatch()
