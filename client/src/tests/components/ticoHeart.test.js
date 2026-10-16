@@ -15,6 +15,11 @@ describe('TicoHeart.vue', () => {
     expect(html).toContain('#002B7F') // blue
     expect(html).toContain('#FFFFFF') // white
     expect(html).toContain('#CE1126') // red
+
+    // Theme-contrasting outline (colour set in CSS: black light / white dark)
+    const outline = wrapper.find('.tico-heart__outline')
+    expect(outline.exists()).toBe(true)
+    expect(outline.attributes('fill')).toBe('none')
   })
 
   it('honors the animated flag and custom label/size', () => {
