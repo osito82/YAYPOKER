@@ -613,6 +613,9 @@ class MatchActions {
         })
       this.match.activePlayerId = null
       this.dealer.clearActedPlayers() // Asegurar que BB tenga opción después
+      // Posting the BB over the SB is not a raise: the minimum raise starts
+      // at one big blind (otherwise it was BB - SB, e.g. 25 - 13 = 12).
+      this.dealer.setLastRaiseAmount(this.match.bigBlind)
       this.stepChecker.grantStep('blindsBetting')
       this.emitter.emit('CONTINUE', thisSocket, TIMEOUTS.fast)
     } else {
@@ -914,7 +917,8 @@ class MatchActions {
 
     this.match.waitingForNextRound = true
 
-    if (this.match.handCount % GAME_RULES.BLIND_INCREASE_INTERVAL === 0) {
+    // handCount is the 0-based index of the hand that just ended
+    if (this.match.handsPlayed() % GAME_RULES.BLIND_INCREASE_INTERVAL === 0) {
       this.match.increaseBlinds()
     }
 

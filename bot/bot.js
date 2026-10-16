@@ -45,11 +45,12 @@ class PokerBot {
     this.playerName = config.playerName;
 
     // Supported models array and their corresponding providers
+    // gemini-2.0-flash and 1.5-* are shut down (API answers 404); see
+    // https://ai.google.dev/gemini-api/docs/models
     this.modelProviders = {
-      "gemini-2.0-flash": "gemini",
+      "gemini-3.5-flash-lite": "gemini",
+      "gemini-3.8-flash": "gemini",
       "gemini-2.5-flash": "gemini",
-      "gemini-1.5-flash": "gemini",
-      "gemini-1.5-pro": "gemini",
       "deepseek-chat": "deepseek",
       "deepseek-coder": "deepseek",
       "llama3.2": "ollama",
@@ -60,8 +61,9 @@ class PokerBot {
 
     this.supportedModels = Object.keys(this.modelProviders);
 
-    // Selected model (from config, env, or default "gemini-2.0-flash")
-    this.modelName = config.model || process.env.DEFAULT_AI_MODEL || "gemini-2.0-flash";
+    // Selected model (from config, env, or default "gemini-3.5-flash-lite":
+    // fastest/cheapest current Flash model, a bot needs quick answers)
+    this.modelName = config.model || process.env.DEFAULT_AI_MODEL || "gemini-3.5-flash-lite";
 
     // Provider selected explicitly or auto-mapped from the selected model
     this.provider = config.provider 

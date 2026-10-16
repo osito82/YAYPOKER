@@ -77,6 +77,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { usePokerStore } from '../store/pokerStore'
 import { useResponsiveStore } from '../store/responsiveStore'
 import useWebSocket from '../use/useSockets'
+import { useActionGuard } from '../use/useActionGuard'
 import { useVoice } from '../use/useVoice'
 import { urlsFactory } from '../vutils'
 import LobbyView from '../components/LobbyView.vue'
@@ -210,10 +211,8 @@ const connectionOptions = {
 }
 
 const urls = urlsFactory()
-const { connectSocket, disconnectSocket, sendMessage, hasConnected } = useWebSocket(
-  urls.server,
-  connectionOptions,
-)
+const { connectSocket, disconnectSocket, sendMessage, hasConnected } =
+  useWebSocket(urls.server, connectionOptions)
 
 // VOICE INTEGRATION
 const { isRecording, startRecording, stopRecording, addToQueue } =
@@ -237,7 +236,9 @@ const isConnected = computed(() => pokerStore.getConnected)
 const currentMaxBetOnTable = computed(
   () => pokerStore.getCurrentHighestBet || 0,
 )
-const lastRaiseAmount = computed(() => pokerStore.lastRaiseAmount || pokerStore.bigBlind) // Default to BB if no raise
+const lastRaiseAmount = computed(
+  () => pokerStore.lastRaiseAmount || pokerStore.bigBlind,
+) // Default to BB if no raise
 const allPlayers = computed(() => pokerStore.getPlayers || [])
 const myPlayer = computed(() =>
   allPlayers.value.find(
@@ -371,7 +372,19 @@ const handleGoBack = () => {
   }
 }
 
+// One turn action per server answer: a double click must not send two bets
+const actionGuard = useActionGuard()
+watch(
+  () => [
+    pokerStore.getActivePlayerId,
+    pokerStore.getBettingOptions,
+    pokerStore.getLastError,
+  ],
+  actionGuard.release,
+)
+
 const sendAction = (action) => {
+  if (!actionGuard.tryAcquire(action)) return
   switch (action) {
     case 'fold':
       sendMessage({ action: 'fold' })

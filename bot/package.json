@@ -7,7 +7,7 @@
     "start": "node bot.js",
     "test": "vitest",
     "format": "prettier --write .",
-    "bot": "node bot.js --gameCode=LOBBY --playerName=Gemini_Bot --provider=gemini --model=gemini-2.0-flash",
+    "bot": "node bot.js --gameCode=LOBBY --playerName=Gemini_Bot --provider=gemini --model=gemini-3.5-flash-lite",
     "llama": "node bot.js --gameCode=LOBBY --playerName=Llama_Bot --provider=openllama"
   },
   "dependencies": {
