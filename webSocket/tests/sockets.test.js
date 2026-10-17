@@ -29,7 +29,8 @@ describe('Socket Manager', () => {
     expect(sockets.get('1')).toEqual(socket1)
   })
 
-  it('should replace socket on reconnection', () => {
+  // OPS-001: the registry never evicts by PIN; signUp decides seat takeovers
+  it('keeps both sockets when two connections share a PIN', () => {
     Socket.addSocket(socket1, torneoId)
     const socket1New = {
       id: '3',
@@ -40,9 +41,9 @@ describe('Socket Manager', () => {
     Socket.addSocket(socket1New, torneoId)
 
     const sockets = Socket.getSocketsByTorneo(torneoId)
-    expect(sockets.size).toBe(1)
+    expect(sockets.size).toBe(2)
     expect(sockets.get('3')).toEqual(socket1New)
-    expect(sockets.has('1')).toBe(false)
+    expect(sockets.has('1')).toBe(true)
   })
 
   it('should remove a socket', () => {
@@ -72,7 +73,7 @@ describe('Socket Manager', () => {
     it('should send data to a specific player', () => {
       Socket.addSocket(socket1, torneoId)
       const data = { action: 'test' }
-      Socket.sendToPlayer(torneoId, '1111', data)
+      Socket.sendToPlayer(torneoId, { id: '1' }, data) // routed by socket id
 
       expect(socket1.socket.send).toHaveBeenCalledWith(
         JSON.stringify({ message: data }),
@@ -87,7 +88,7 @@ describe('Socket Manager', () => {
         socket: { send: vi.fn(), readyState: 3 },
       } // 3 is CLOSED
       Socket.addSocket(closedSocket, torneoId)
-      Socket.sendToPlayer(torneoId, '4444', { action: 'test' })
+      Socket.sendToPlayer(torneoId, { id: '4' }, { action: 'test' })
 
       expect(closedSocket.socket.send).not.toHaveBeenCalled()
     })

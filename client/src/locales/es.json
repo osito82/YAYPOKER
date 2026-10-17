@@ -61,8 +61,6 @@
     "copyright": "© 2026 YayPoker"
   },
   "game": {
-    "post_blind": "Poner Ciega {type} ${amount}",
-    "post_blind_generic": "Poner Ciega",
     "fold": "Retirarse",
     "check": "Pasar",
     "call": "Igualar",
@@ -82,6 +80,7 @@
     "status_live": "En Vivo",
     "status_offline": "Desconectado",
     "reconnecting": "Conexión perdida. Reconectando…",
+    "session_replaced": "Esta mesa está abierta en otra pestaña o dispositivo. Recarga para jugar aquí.",
     "win": "Ganar",
     "tie": "Empate",
     "hand": "Mano",
@@ -117,7 +116,6 @@
     "raise_disabled_tooltip": "Mueve el slider para fijar un monto de subida y luego presiona Subir",
     "main_pot_tooltip": "El pozo principal — todos los jugadores que no se retiraron pueden ganarlo",
     "side_pot_tooltip": "Pozo lateral creado cuando un jugador va all-in — solo los jugadores que contribuyeron pueden ganarlo",
-    "blind_tooltip": "Pon tu ciega requerida para seguir en el juego",
     "odds_vs_random_hint": "Probabilidades vs. manos aleatorias",
     "lobby_label": "Lobby",
     "ready_count": "{ready}/{total} Listos",
@@ -126,6 +124,7 @@
     "bet_to_match": "Apuesta a Igualar",
     "you_badge": "Tú",
     "away_badge": "Ausente",
+    "offline_badge": "Desconectado",
     "all_in": "All-In",
     "sit_out": "Ausentarse",
     "sit_in": "Volver",

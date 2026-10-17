@@ -54,8 +54,6 @@
 
           <ActionButtonsRow
             :isMyTurn="isMyTurn"
-            :canBlind="canBlind"
-            :blindInfo="blindInfo"
             :options="options"
             :isRaiseActionDisabled="isRaiseActionDisabled"
             :class="{ 'opacity-30 pointer-events-none': isSittingOut }"
@@ -94,8 +92,6 @@ import { useActionBar } from '../../components/actionBar/useActionBar'
 
 const props = defineProps({
   isMyTurn: Boolean,
-  canBlind: Boolean,
-  blindInfo: Object,
   options: Array,
   balance: Number,
   currentBet: Number,

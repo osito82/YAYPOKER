@@ -70,13 +70,7 @@ describe('Blinds and minimum raise', () => {
     await guest.waitAction('signUp')
     host.send({ action: 'startGame' })
 
-    await host.waitAction('askForBlindBets')
-    host.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await guest.waitFor(
-      (r) => r.message?.action === 'askForBlindBets' && r.message.type === 'private',
-      'BB prompt',
-    )
-    guest.send(MOCK_ACTIONS.BIG_BLIND(20))
+    await host.waitAction('blindsPosted')
 
     const match = Torneo.getMatch(gameCode)
     // Heads-up: the small blind acts first pre-flop

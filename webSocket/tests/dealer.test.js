@@ -211,7 +211,8 @@ describe('Dealer Class', () => {
   // 🟢 jugadores folded / disconnected
   // ================================
 
-  it('should NOT deal cards to folded or disconnected players', () => {
+  // GAM-001: a disconnected player keeps the seat and is dealt in
+  it('should NOT deal cards to folded players, but deals to disconnected seats', () => {
     const deck = ['A♠', 'K♠', 'Q♠']
 
     const players = [
@@ -226,7 +227,7 @@ describe('Dealer Class', () => {
 
     expect(players[0].cards.length).toBe(1) // activo recibe carta
     expect(players[1].cards.length).toBe(0) // folded NO recibe
-    expect(players[2].cards.length).toBe(0) // disconnected NO recibe
+    expect(players[2].cards.length).toBe(1) // disconnected seat recibe
   })
 
   it('should ignore folded and disconnected players in allPlayersCheck', () => {

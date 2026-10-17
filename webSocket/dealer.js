@@ -16,6 +16,13 @@ class Dealer {
     this.currentHighestBet = 0
     this.lastRaiser = null
     this.lastRaiseAmount = 0
+    this.lastActorId = null // last player who acted on their turn this street
+  }
+
+  getLastActorId = () => this.lastActorId
+
+  setLastActorId = (playerId) => {
+    this.lastActorId = playerId
   }
 
   setLastRaiseAmount = (amount) => {
@@ -95,12 +102,18 @@ class Dealer {
     if (this.lastRaiser === oldId) {
       this.lastRaiser = newId
     }
+    if (this.lastActorId === oldId) {
+      this.lastActorId = newId
+    }
   }
 
-  setPlayerActed = (thisSocketId) => {
+  // `onTurn` = false for a fold outside the player's turn (leaving the table):
+  // it must not move the turn order
+  setPlayerActed = (thisSocketId, onTurn = true) => {
     if (thisSocketId && !this.playersActed.includes(thisSocketId)) {
       this.playersActed.push(thisSocketId)
     }
+    if (thisSocketId && onTurn) this.lastActorId = thisSocketId
   }
 
   setPot(chipsToBet) {
@@ -217,7 +230,7 @@ class Dealer {
 
     for (let i = 0; i < numberOfCards; i++) {
       this.players.forEach((player) => {
-        if (player.connected && !player.folded && player.isStarted) {
+        if (!player.folded && player.isStarted && !player.left) {
           const cardToDeal = this.deck.shift()
           if (cardToDeal) player.setCard(cardToDeal)
         }

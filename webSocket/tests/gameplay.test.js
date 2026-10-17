@@ -111,14 +111,12 @@ describe('Poker Game Integration Tests', () => {
     bob.send(MOCK_ACTIONS.START_GAME)
 
     // Mano 1: Alice SB
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
@@ -128,14 +126,12 @@ describe('Poker Game Integration Tests', () => {
 
     // Mano 2: Bob SB
     alice.send({ action: 'nextRound' })
-    await bob.waitAction('askForBlindBets', 10000, (r) =>
+    await bob.waitAction('blindsPosted', 10000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.BIG_BLIND(20))
     expect(true).toBe(true)
   }, 40000)
 
@@ -167,15 +163,13 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
 
     // Wait for blinds - only Alice and Bob should be asked in this setup
-    await alice.waitAction('askForBlindBets', 10000, (r) =>
+    await alice.waitAction('blindsPosted', 10000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
 
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     // Wait for cards to be dealt
     await alice.waitAction('dealtPrivateCards')
@@ -216,14 +210,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
@@ -253,14 +245,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
@@ -286,14 +276,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
@@ -321,14 +309,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     shorty.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await shorty.waitAction('askForBlindBets', 5000, (r) =>
+    await shorty.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Shorty'),
     )
-    shorty.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
@@ -361,14 +347,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     shorty.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await shorty.waitAction('askForBlindBets', 5000, (r) =>
+    await shorty.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Shorty'),
     )
-    shorty.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
@@ -392,14 +376,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
 
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
@@ -449,14 +431,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
@@ -506,14 +486,12 @@ describe('Poker Game Integration Tests', () => {
     bob.send(MOCK_ACTIONS.START_GAME)
     charlie.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
 
     await charlie.waitAction('bettingCore-firstBetting', 5000, (r) =>
@@ -555,14 +533,12 @@ describe('Poker Game Integration Tests', () => {
     bob.send(MOCK_ACTIONS.START_GAME)
     charlie.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
 
     await charlie.waitAction('bettingCore-firstBetting', 5000, (r) =>
@@ -616,14 +592,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
 
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
@@ -715,15 +689,13 @@ describe('Poker Game Integration Tests', () => {
     bob.send(MOCK_ACTIONS.START_GAME)
 
     // --- PRE-FLOP: Blinds ---
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
 
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     // --- Esperamos la confirmación de cartas privadas ---
     await Promise.all([
@@ -779,14 +751,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
     await alice.waitAction('dealtPrivateCards')
 
     await alice.waitAction('bettingCore-firstBetting', 5000, (r) =>
@@ -818,15 +788,13 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
 
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     await alice.waitAction('dealtPrivateCards')
 
@@ -881,15 +849,13 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
 
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     await alice.waitAction('dealtPrivateCards')
 
@@ -960,15 +926,13 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
 
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     await alice.waitAction('dealtPrivateCards')
 
@@ -1019,15 +983,13 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
 
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data?.displayMsg?.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     await alice.waitAction('dealtPrivateCards')
 
@@ -1067,7 +1029,7 @@ describe('Poker Game Integration Tests', () => {
     await alice.waitAction('dealerHand-flop', 10000)
   }, 45000)
 
-  it('T0005 - Regression: Autofold during blinds should declare winner and auto-restart', async () => {
+  it('T0005 - Regression: autofold on the first turn declares the winner and auto-restarts', async () => {
     const gameCode = 'regr-auto-' + Math.random().toString(36).substring(7)
     const alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
     const bob = createClient(MOCK_PLAYERS.BOB, gameCode)
@@ -1085,28 +1047,19 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    // Capture first round gameId
-    const firstRoundMsg = await alice.waitAction('askForBlindBets')
+    // Blinds are posted by the server (GAM-002); capture the first hand
+    const firstRoundMsg = await alice.waitAction('blindsPosted')
     const firstGameId = firstRoundMsg.message.gameId
 
-    // Alice posts Small Blind
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-
-    // Bob is asked for Big Blind, we WAIT for autofold (1s in test mode)
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
-      r.message.data?.displayMsg?.includes('Bob'),
-    )
-
-    // The server should trigger autofold for Bob after ~7s (TIMEOUTS.autofold)
-    // Then Alice should be the winner
+    // Alice (SB) acts first and lets her clock run out: facing the big blind
+    // the timeout folds, so Bob wins
     const winnerMsg = await alice.waitAction('winner', 15000)
-    expect(winnerMsg.message.data.winners[0].name).toBe('Alice')
+    expect(winnerMsg.message.data.winners[0].name).toBe('Bob')
     expect(winnerMsg.message.data.isFold).toBe(true)
 
     // Verify auto-restart: wait for a NEW hand with a DIFFERENT gameId
     // Standard nextRound delay is used (500ms in test)
-    const nextRoundMsg = await bob.waitAction(
-      'askForBlindBets',
+    const nextRoundMsg = await bob.waitAction('blindsPosted',
       15000,
       (r) => r.message.gameId !== firstGameId,
     )
@@ -1132,10 +1085,8 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
 
     // Avanzar hasta después de las ciegas
-    await alice.waitAction('askForBlindBets')
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets')
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
+    await alice.waitAction('blindsPosted')
+    await bob.waitAction('blindsPosted')
     await alice.waitAction('dealtPrivateCards')
 
     // Alice se desconecta DURANTE la mano
@@ -1181,10 +1132,18 @@ describe('Poker Game Integration Tests', () => {
     )
     expect(impostorAsPlayer).toBe(false)
 
-    // El juego debería continuar y eventualmente declarar un ganador (Bob)
-    // Aumentamos el timeout a 10000ms para dar tiempo al pause de 3s + juego
-    const winnerMsg = await bob.waitAction('winnerTournament', 10000)
-    expect(winnerMsg.message.data.winner.name).toBe('Bob')
+    // GAM-001: Alice keeps her seat while disconnected; her disconnect does
+    // not hand Bob the tournament
+    await new Promise((r) => setTimeout(r, 1500))
+    const aliceSeat = bob.responses
+      .filter((r) => r.message?.players)
+      .at(-1)
+      .message.players.find((p) => p.name === 'Alice')
+    expect(aliceSeat).toBeDefined()
+    expect(aliceSeat.connected).toBe(false)
+    expect(
+      bob.responses.some((r) => r.message?.action === 'winnerTournament'),
+    ).toBe(false)
   }, 44000)
 
   it('T0007 - Reconexión restaura botones de acción (Check/Bet/Fold y Fold/Call/Raise)', async () => {
@@ -1205,26 +1164,17 @@ describe('Poker Game Integration Tests', () => {
 
     alice.send(MOCK_ACTIONS.START_GAME)
 
-    // --- ESCENARIO 1: Botones de Ciega (Small Blind) ---
-    // Alice debe poner SB
-    await alice.waitAction('askForBlindBets')
-
-    // Alice refresca ANTES de poner la ciega
+    // --- ESCENARIO 1: Ciegas automáticas (GAM-002) ---
+    // No blind prompt: blinds are posted by the server; a reconnect right after
+    // gets the table state with both blinds already in
+    await alice.waitAction('blindsPosted')
     alice.ws.close()
     await new Promise((r) => setTimeout(r, 100))
     const aliceReconnect1 = createClient(MOCK_PLAYERS.ALICE, gameCode)
     await new Promise((r) => aliceReconnect1.ws.on('open', r))
     aliceReconnect1.send(MOCK_ACTIONS.SIGN_UP(1000))
-
-    // Alice debe recibir de nuevo la petición de ciega
-    const blindMsg = await aliceReconnect1.waitAction('askForBlindBets', 8000)
-    expect(blindMsg.message.action).toBe('askForBlindBets')
-
-    // Ponemos las ciegas para avanzar
-    aliceReconnect1.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets')
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
-    await aliceReconnect1.waitAction('dealtPrivateCards')
+    const rejoin = await aliceReconnect1.waitAction('signUp', 8000)
+    expect(rejoin.message.players.map((p) => p.currentBet).sort()).toEqual([10, 20])
 
     // --- ESCENARIO 2: Botones de Acción (Fold/Call/Raise) ---
     // Es el turno de Alice (Pre-flop, después de ciegas)
@@ -1304,14 +1254,12 @@ describe('Poker Game Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
 
     // --- CIEGAS ---
-    await alice.waitAction('askForBlindBets', 5000, (r) =>
+    await alice.waitAction('blindsPosted', 5000, (r) =>
       r.message.data.displayMsg.includes('Alice'),
     )
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
+    await bob.waitAction('blindsPosted', 5000, (r) =>
       r.message.data.displayMsg.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
 
     await alice.waitAction('dealtPrivateCards')
 
@@ -1352,7 +1300,7 @@ describe('Poker Game Integration Tests', () => {
     await bob.waitAction('bettingCore-riverBetting', 5000, (r) =>
       r.message.data.displayMsg.includes('Bob'),
     )
-    bob.send(MOCK_ACTIONS.BET(15))
+    bob.send(MOCK_ACTIONS.BET(20)) // minimum bet is one big blind (GAM-002)
     await alice.waitAction('bettingCore-riverBetting', 5000, (r) =>
       r.message.data.displayMsg.includes('Alice'),
     )
@@ -1362,10 +1310,13 @@ describe('Poker Game Integration Tests', () => {
     await alice.waitAction('winner', 10000)
 
     // Verificamos saldos en la siguiente mano
-    const nextHandMsg = await alice.waitAction('askForBlindBets', 15000)
+    const nextHandMsg = await alice.waitAction('gameRestarted', 15000)
 
     const players = nextHandMsg.message.players
-    const totalCurrentChips = players.reduce((sum, p) => sum + p.chips, 0)
+    const totalCurrentChips = players.reduce(
+      (sum, p) => sum + p.chips + p.currentBet,
+      0,
+    )
 
     expect(totalCurrentChips).toBe(TOTAL_CHIPS)
     console.log(
@@ -1373,7 +1324,7 @@ describe('Poker Game Integration Tests', () => {
     )
   }, 60000)
 
-  it('T0012 - No permite que dos jugadores distintos usen el mismo PIN en el lobby', async () => {
+  it('T0012 - Dos jugadores distintos pueden usar el mismo PIN (OPS-001)', async () => {
     const gameCode = 'pin-collision-' + Math.random().toString(36).substring(7)
 
     // Alice se une con PIN 1234
@@ -1387,20 +1338,17 @@ describe('Poker Game Integration Tests', () => {
     await new Promise((r) => bob.ws.on('open', r))
     bob.send(MOCK_ACTIONS.SIGN_UP(1000))
 
-    // Bob debería recibir un error de colisión de PIN
-    const errorMsg = await bob.waitAction('signUp')
-    expect(errorMsg.message.data.errorType).toBe('PIN_COLLISION')
-    expect(errorMsg.message.data.displayMsg).toContain(
-      'PIN is already in use by another player',
-    )
-
-    // Verificamos que Bob NO fue añadido a la lista de jugadores de Alice
-    // Esperamos un poco para asegurar que no hubo broadcast accidental
-    await new Promise((r) => setTimeout(r, 500))
-    const lastAliceMsg = alice.responses[alice.responses.length - 1]
-    const bobInAliceList = lastAliceMsg.message.players?.some(
-      (p) => p.name === 'Bob',
-    )
-    expect(bobInAliceList).toBeFalsy()
+    // OPS-001: a shared PIN is fine; nobody is disconnected or rejected
+    const bobMsg = await bob.waitAction('signUp')
+    expect(bobMsg.message.data.errorType).toBeUndefined()
+    await new Promise((r) => setTimeout(r, 300))
+    expect(alice.ws.readyState).toBe(1)
+    const lastAliceMsg = alice.responses
+      .filter((r) => r.message?.players)
+      .at(-1)
+    expect(lastAliceMsg.message.players.map((p) => p.name).sort()).toEqual([
+      'Alice',
+      'Bob',
+    ])
   }, 15000)
 })

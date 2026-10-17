@@ -19,11 +19,8 @@ export function useActionBar(props, emit) {
 
   const chips = computed(() => {
     return baseChips.map((chip) => {
-      const isBlind =
-        (props.options && props.options.includes('blind')) ||
-        props.canBlind === true
       const exceedsBalance = chip.value > (props.balance || 0)
-      const isDisabled = !props.isMyTurn || isBlind || exceedsBalance
+      const isDisabled = !props.isMyTurn || exceedsBalance
       return {
         ...chip,
         disabled: isDisabled,
@@ -62,7 +59,6 @@ export function useActionBar(props, emit) {
 
   const isSliderDisabled = computed(() => {
     if (!props.isMyTurn) return true
-    if (props.options?.includes('blind') || props.canBlind) return true
     // El slider solo se bloquea si el jugador ya no tiene más fichas para agregar
     // (es decir, ya puso todo lo que tenía o su stack es 0)
     return props.balance <= 0

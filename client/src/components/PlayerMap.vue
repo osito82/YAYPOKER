@@ -19,7 +19,9 @@
       transform: 'translate(-50%, -50%)',
     }"
     :class="
-      isFolded(seat.player) || seat.player.isSittingOut
+      isFolded(seat.player) ||
+      seat.player.isSittingOut ||
+      seat.player.connected === false
         ? 'opacity-40'
         : 'opacity-100'
     "
@@ -75,6 +77,16 @@
           class="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center"
         >
           <span class="text-[9px] font-black text-red-400 uppercase">FOLD</span>
+        </div>
+        <!-- Disconnected marker overlay on avatar (seat kept, GAM-001) -->
+        <div
+          v-else-if="seat.player.connected === false"
+          class="absolute inset-0 rounded-full bg-black/75 flex items-center justify-center border border-white/20"
+        >
+          <span
+            class="text-[7px] font-black text-white/70 uppercase leading-none"
+            >{{ $t('game.offline_badge') }}</span
+          >
         </div>
         <!-- Sit Out marker overlay on avatar -->
         <div
@@ -138,6 +150,12 @@
             <span class="uppercase tracking-wider text-[9px] text-red-400/60"
               >FOLDED</span
             >
+          </template>
+          <template v-else-if="seat.player.connected === false">
+            <span class="uppercase tracking-wider text-[9px] text-white/50"
+              >{{ $t('game.offline_badge') }}</span
+            >
+            <span class="opacity-40">${{ seat.player.chips }}</span>
           </template>
           <template v-else-if="seat.player.isSittingOut">
             <span class="uppercase tracking-wider text-[9px] text-[#D4A853]"

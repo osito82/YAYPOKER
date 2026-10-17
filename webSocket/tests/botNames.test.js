@@ -45,3 +45,21 @@ describe('Bot Names Validation', () => {
     expect(uniqueSpawnedBots.size).toBe(count)
   })
 })
+
+// GAM-003 R-06: only bot-style names are bots (a human called "Robot" is not)
+describe('Player.isBot', () => {
+  const Player = require('../player.js')
+  const isBot = (name) => new Player('g', name, '0000', 1000, [], 'id', 1).isBot
+
+  it('recognises spawned bot names', () => {
+    expect(isBot('TicoMan_Bot')).toBe(true)
+    expect(isBot('Bot_1234')).toBe(true)
+    expect(isBot('Gemini_IA')).toBe(true)
+  })
+
+  it('does not treat humans whose name contains "bot" as bots', () => {
+    expect(isBot('Robot')).toBe(false)
+    expect(isBot('Botella')).toBe(false)
+    expect(isBot('Abbott')).toBe(false)
+  })
+})

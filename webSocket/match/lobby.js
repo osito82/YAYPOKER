@@ -1,6 +1,7 @@
+const { randomUUID } = require('node:crypto')
 const Socket = require('../sockets')
 const Player = require('../player')
-const { GAME_RULES, TIMEOUTS } = require('../constants')
+const { GAME_RULES, TIMEOUTS, CONNECTION_CONFIG } = require('../constants')
 
 class MatchLobby {
   constructor(context) {
@@ -51,41 +52,23 @@ class MatchLobby {
         socketId: thisSocketId,
       })
 
-    const playerWithSameName = this.match.players.find(
-      (p) => p.name === finalRequestedName,
-    )
-
-    if (
-      playerWithSameName &&
-      playerWithSameName.secretCode !== thisSecretCode
-    ) {
-      if (!this.match.acceptingPlayers) {
-        this.communicator.msgBuilder('signUp', 'private', null, {
-          displayMsg: `The name ${finalRequestedName} is already taken at this table and the game is in progress.`,
-          errorType: 'NAME_TAKEN',
-        })
-        this.dealer.talkToSocketById(thisSocketId, this.communicator.getMsg())
-        return
-      }
+    const seat = this.findSeat(finalRequestedName, thisSocket)
+    if (seat.error) {
+      this.communicator.msgBuilder('signUp', 'private', null, {
+        displayMsg: seat.displayMsg,
+        errorType: seat.error,
+      })
+      this.dealer.talkToSocketById(thisSocketId, this.communicator.getMsg())
+      return
     }
-
-    const existingPlayerIndex = this.match.players.findIndex(
-      (s) => s.secretCode === thisSecretCode,
-    )
 
     let player
 
-    if (existingPlayerIndex !== -1) {
-      player = this.match.players[existingPlayerIndex]
-
-      if (player.name !== finalRequestedName) {
-        this.communicator.msgBuilder('signUp', 'private', null, {
-          displayMsg: 'This PIN is already in use by another player.',
-          errorType: 'PIN_COLLISION',
-        })
-        this.dealer.talkToSocketById(thisSocketId, this.communicator.getMsg())
-        return
-      }
+    if (seat.player) {
+      player = seat.player
+      // A PIN recovery hands out a new token: the old device loses the seat
+      if (seat.rotateToken) player.sessionToken = randomUUID()
+      this.replaceOldSocket(player.id, thisSocketId)
 
       const oldId = player.id
       player.id = thisSocketId
@@ -100,16 +83,9 @@ class MatchLobby {
         this.match.hostId = thisSocketId
       }
 
-      const timeout = this.match.pauseTimeouts.get(player.name)
-      if (timeout) {
-        clearTimeout(timeout)
-        this.match.pauseTimeouts.delete(player.name)
-      }
-
-      const stillPaused = this.match.players.some((p) => !p.connected)
-      if (!stillPaused && this.stepChecker.checkStep('pause')) {
-        this.stepChecker.revokeStep('pause')
-        this.emitter.emit('CONTINUE', thisSocket)
+      if (this.match.publicEmptyTimer && !player.isBot) {
+        clearTimeout(this.match.publicEmptyTimer)
+        this.match.publicEmptyTimer = null
       }
 
       this.communicator.msgBuilder('signUp', 'private', player, {
@@ -119,13 +95,15 @@ class MatchLobby {
       })
 
       const msg = this.communicator.getMsg()
+      // Only the owner ever receives the session token (never logged)
+      msg.sessionToken = player.sessionToken
       msg.players = this.match.players.map((p) => p.toJson())
       msg.pot = this.dealer.getPot()
       msg.dealerCards = this.dealer.getDealerCards()
       msg.bigBlind = this.match.bigBlind
       msg.smallBlind = this.match.smallBlind
 
-      Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
+      Socket.sendToPlayer(this.match.torneoId, player, msg)
 
       this.communicator.msgBuilder('signUp', 'public', player, {
         msg: `${player.name} reconnected.`,
@@ -137,6 +115,13 @@ class MatchLobby {
 
       this.match.comms.sendOdds(player)
       this.match.actions.sendCurrentPrompt(player)
+
+      // A human is back at a table that stopped for lack of humans
+      if (this.match.idleNoHumans && !player.isBot) {
+        this.match.idleNoHumans = false
+        this.match.waitingForNextRound = true
+        this.match.nextRound()
+      }
       return
     } else {
       const maxPlayers = this.match.isPublic
@@ -176,6 +161,7 @@ class MatchLobby {
         playerNumber,
       )
       player.setConnected(true)
+      player.sessionToken = randomUUID()
 
       if (
         this.match.isPublic &&
@@ -218,13 +204,15 @@ class MatchLobby {
         hostId: this.match.hostId,
       })
       const msg = this.communicator.getMsg()
+      // Only the owner ever receives the session token (never logged)
+      msg.sessionToken = player.sessionToken
       msg.players = this.match.players.map((p) => p.toJson())
       msg.pot = this.dealer.getPot()
       msg.dealerCards = this.dealer.getDealerCards()
       msg.bigBlind = this.match.bigBlind
       msg.smallBlind = this.match.smallBlind
 
-      Socket.sendToPlayer(this.match.torneoId, player.secretCode, msg)
+      Socket.sendToPlayer(this.match.torneoId, player, msg)
     }
 
     if (this.match.isPublic) {
@@ -356,35 +344,232 @@ class MatchLobby {
     }
   }
 
-  pause(thisSocket) {
-    const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
-    if (foundPlayer) {
-      foundPlayer.setConnected(false)
+  // Socket closed. Before the game starts the player simply leaves; once it
+  // runs the seat is kept and the table never pauses (GAM-001).
+  // Which seat (if any) this connection may take (OPS-001):
+  // 1. the session token of a seated player → that seat
+  // 2. same name, different PIN, before the game starts → a new seat (Name-1)
+  // 3. same name + right PIN, seat disconnected, not locked → PIN recovery
+  // 4. anything else with a taken name → NAME_TAKEN, counted as a failed try
+  findSeat(name, thisSocket) {
+    const seated = this.match.players.filter((p) => !p.left)
+    const token = thisSocket.sessionToken
+    if (token) {
+      const byToken = seated.find((p) => p.sessionToken === token)
+      if (byToken) return { player: byToken }
+    }
 
-      // SOLO pausamos si el juego realmente ha empezado
-      if (this.stepChecker.checkStep('startGame')) {
-        const time = this.match.isPublic ? 15000 : TIMEOUTS.pause
-        this.stepChecker.grantStep('pause')
+    const sameName = seated.find((p) => p.name === name)
+    if (!sameName) return {}
+    const pinMatches = sameName.secretCode === thisSocket.secretCode
+    if (this.match.acceptingPlayers && !pinMatches) return {}
 
-        this.communicator.msgBuilder('playerPaused', 'public', foundPlayer, {
-          displayMsg: `${foundPlayer.name} disconnected. Match paused for ${time / 1000}s`,
-          timeout: time / 1000,
-        })
-        Socket.broadcastToTorneo(
-          this.match.torneoId,
-          this.communicator.getMsg(),
-        )
-
-        const timeout = setTimeout(() => {
-          this.playerLeave(thisSocket)
-          this.match.pauseTimeouts.delete(foundPlayer.name)
-        }, time)
-        this.match.pauseTimeouts.set(foundPlayer.name, timeout)
-      } else {
-        // Si el juego no ha empezado, no hay por qué pausar, se va directo
-        this.playerLeave(thisSocket)
+    if (this.isPinLocked(sameName)) {
+      return {
+        error: 'TOO_MANY_ATTEMPTS',
+        displayMsg: 'Too many attempts for this seat. Try again in a few minutes.',
       }
     }
+    if (pinMatches && !sameName.connected) {
+      return { player: sameName, rotateToken: true }
+    }
+
+    this.recordPinFailure(sameName)
+    return {
+      error: 'NAME_TAKEN',
+      displayMsg: `The name ${name} is already taken at this table.`,
+    }
+  }
+
+  recentPinFailures(player) {
+    const since = Date.now() - CONNECTION_CONFIG.PIN_LOCK_WINDOW_MS
+    const attempts = (this.match.pinAttempts.get(player.name) || []).filter(
+      (t) => t > since,
+    )
+    this.match.pinAttempts.set(player.name, attempts)
+    return attempts
+  }
+
+  isPinLocked(player) {
+    return (
+      this.recentPinFailures(player).length >= CONNECTION_CONFIG.PIN_MAX_ATTEMPTS
+    )
+  }
+
+  recordPinFailure(player) {
+    const attempts = this.recentPinFailures(player)
+    attempts.push(Date.now())
+    this.log
+      .Template({ name: 'brakets', title: 'LOBBY:SEAT_ATTEMPT_FAILED', date: true })
+      .R({
+        torneoId: this.match.torneoId,
+        playerName: player.name,
+        failures: attempts.length,
+      })
+  }
+
+  // The seat moves to a new connection: drop and close the previous one
+  replaceOldSocket(oldId, newId) {
+    if (!oldId || oldId === newId) return
+    const old = Socket.getSocket(this.match.torneoId, oldId)
+    if (!old) return
+    Socket.removeSocket(old, this.match.torneoId)
+    if (old.socket && old.socket.readyState === 1) {
+      old.socket.close(4000, 'Replaced by a new connection')
+    }
+  }
+
+  // Leaving once the game runs (close, abandonment, bot socket closed): fold
+  // now, keep the contribution in the pot, remove the seat when the hand ends
+  // (Match.restartMatch drops players marked `left`). GAM-001 R-09.
+  leaveRunningGame(player) {
+    player.left = true
+    player.setConnected(false)
+
+    if (player.isStarted && !player.folded) {
+      if (this.match.activePlayerId === player.id) {
+        this.match.actions.fold({ id: player.id }, true)
+      } else {
+        player.setFolded(true)
+        this.match.playersFold.push(player.name)
+        this.dealer.setPlayerActed(player.id, false)
+        this.match.comms.sendOdds()
+        const stillIn = this.match.getActivePlayers()
+        if (stillIn.length === 1 && !this.stepChecker.checkStep('winner')) {
+          this.match.actions.winner(stillIn[0], true)
+        }
+      }
+    }
+
+    this.log
+      .Template({ name: 'brakets', title: 'LOBBY:PLAYER_LEFT', date: true })
+      .R({
+        torneoId: this.match.torneoId,
+        handId: this.match.currentHandId,
+        playerName: player.name,
+        chips: player.chips,
+      })
+    this.communicator.msgBuilder('playerLeave', 'public', player, {
+      displayMsg: `${player.name} has left the game.`,
+    })
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+
+    if (this.match.hostId === player.id) this.assignNewHost()
+
+    const seated = this.match.players.filter((p) => !p.left)
+    if (seated.length === 0) {
+      this.closeTable('All players left')
+      return
+    }
+
+    // No human seated any more: the bots leave too
+    if (!seated.some((p) => !p.isBot)) {
+      for (const bot of seated) {
+        const wrapper = Socket.getSocket(this.match.torneoId, bot.id)
+        if (wrapper?.socket) wrapper.socket.close()
+        else this.leaveRunningGame(bot)
+      }
+      return
+    }
+
+    if (this.match.isPublic && !this.match.hasConnectedHuman()) {
+      this.schedulePublicClose(TIMEOUTS.publicEmptyGrace)
+    }
+  }
+
+  pause(thisSocket) {
+    const foundPlayer = this.match.players.find((p) => p.id === thisSocket.id)
+    if (!foundPlayer || foundPlayer.left) return
+
+    if (!this.stepChecker.checkStep('startGame')) {
+      this.playerLeave(thisSocket)
+      return
+    }
+
+    foundPlayer.setConnected(false)
+    this.log
+      .Template({ name: 'brakets', title: 'LOBBY:PLAYER_DISCONNECTED', date: true })
+      .R({ torneoId: this.match.torneoId, playerName: foundPlayer.name })
+
+    this.communicator.msgBuilder('playerDisconnected', 'public', foundPlayer, {
+      playerId: foundPlayer.id,
+      displayMsg: `${foundPlayer.name} disconnected.`,
+    })
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
+
+    if (this.match.activePlayerId === foundPlayer.id) {
+      this.match.actions.shortenTurnForDisconnect()
+    }
+
+    // Public table without humans: close it if nobody comes back in time
+    if (this.match.isPublic && !this.match.hasConnectedHuman()) {
+      this.schedulePublicClose(TIMEOUTS.publicSeatRelease)
+    }
+  }
+
+  // Public tables: seats disconnected for too long are freed between hands
+  releaseStaleSeats() {
+    const now = Date.now()
+    const stale = this.match.players.filter(
+      (p) =>
+        !p.connected &&
+        !p.left &&
+        p.disconnectedAt &&
+        now - p.disconnectedAt >= TIMEOUTS.publicSeatRelease,
+    )
+    for (const p of stale) {
+      this.log
+        .Template({ name: 'brakets', title: 'LOBBY:SEAT_RELEASED', date: true })
+        .R({ torneoId: this.match.torneoId, playerName: p.name })
+      this.removeFromTable(p)
+    }
+  }
+
+  schedulePublicClose(delay) {
+    if (this.match.publicEmptyTimer) clearTimeout(this.match.publicEmptyTimer)
+    this.match.publicEmptyTimer = setTimeout(() => {
+      this.match.publicEmptyTimer = null
+      if (this.match.hasConnectedHuman()) return
+      this.closeTable('No humans left')
+    }, delay)
+  }
+
+  // Closes every socket still attached (bots included) and deletes the table
+  closeTable(reason) {
+    const Torneo = require('../torneo')
+    this.match.actions.clearAutofold()
+    const sockets = Socket.getSocketsByTorneo(this.match.torneoId)
+    if (sockets) {
+      for (const wrapper of sockets.values()) {
+        if (wrapper.socket && wrapper.socket.readyState === 1) {
+          wrapper.socket.close(1000, 'Table closed')
+        }
+      }
+    }
+    Torneo.getTorneos().delete(this.match.torneoId)
+    this.log
+      .Template({ name: 'brakets', title: 'LOBBY:TABLE_CLOSED', date: true })
+      .R({ torneoId: this.match.torneoId, reason })
+  }
+
+  // Takes a player out of the players list and passes the host if needed
+  removeFromTable(player) {
+    const index = this.match.players.indexOf(player)
+    if (index === -1) return
+    this.match.players.splice(index, 1)
+    if (this.match.hostId === player.id) this.assignNewHost()
+  }
+
+  assignNewHost() {
+    this.match.hostId = null
+    const nextHost = this.match.players.find((p) => p.connected && !p.left)
+    if (!nextHost) return
+    this.match.hostId = nextHost.id
+    this.communicator.msgBuilder('newHost', 'public', null, {
+      displayMsg: `${nextHost.name} is the new host.`,
+      hostId: this.match.hostId,
+    })
+    Socket.broadcastToTorneo(this.match.torneoId, this.communicator.getMsg())
   }
 
   close(thisSocket) {
@@ -393,6 +578,13 @@ class MatchLobby {
 
   playerLeave(thisSocket) {
     const socketId = typeof thisSocket === 'string' ? thisSocket : thisSocket.id
+    const running = this.match.players.find(
+      (p) => p.id === socketId && !p.left,
+    )
+    if (running && this.stepChecker.checkStep('startGame')) {
+      this.leaveRunningGame(running)
+      return
+    }
     const index = this.match.players.findIndex((p) => p.id === socketId)
     if (index !== -1) {
       const playerLeaving = this.match.players[index]
@@ -533,9 +725,7 @@ class MatchLobby {
                   reason: 'SINGLE_PLAYER_TIMEOUT',
                 },
               )
-              Socket.sendToPlayer(
-                this.match.torneoId,
-                lastPlayer.secretCode,
+              Socket.sendToPlayer(this.match.torneoId, lastPlayer,
                 this.communicator.getMsg(),
               )
 

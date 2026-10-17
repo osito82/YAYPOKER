@@ -1,5 +1,6 @@
 import { ref, onBeforeUnmount } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
+import { getSessionToken } from './sessionToken'
 
 export default function useWebSocket(url, options) {
   const socketUrl = new URL(url)
@@ -29,6 +30,16 @@ export default function useWebSocket(url, options) {
     }
 
     isManuallyClosed.value = false
+    // Reconnect to the table the server actually seated us at (public tables
+    // may differ from the requested code) with our session token (OPS-001)
+    if (socketUrl.searchParams.get('role') !== 'guest') {
+      if (pokerStore.torneoId) {
+        socketUrl.searchParams.set('gameCode', pokerStore.torneoId)
+      }
+      const token = getSessionToken(socketUrl.searchParams.get('gameCode'))
+      if (token) socketUrl.searchParams.set('sessionToken', token)
+      else socketUrl.searchParams.delete('sessionToken')
+    }
     socket.value = new WebSocket(socketUrl)
 
     socket.value.addEventListener('open', () => {
@@ -55,9 +66,20 @@ export default function useWebSocket(url, options) {
       pokerStore.setSocketMessage(event.data)
     })
 
-    socket.value.addEventListener('close', () => {
+    socket.value.addEventListener('close', (event) => {
       console.log('Conexión cerrada')
       pokerStore.setConnected(false)
+
+      // 4000: the seat was taken by a newer connection (another tab or
+      // device). Reconnecting would steal it back and forth.
+      if (event?.code === 4000) {
+        isManuallyClosed.value = true
+        pokerStore.setLastError({
+          type: 'SESSION_REPLACED',
+          message: 'This seat is now open in another tab or device.',
+        })
+        return
+      }
 
       if (!isManuallyClosed.value && !isDestroyed.value) {
         attemptReconnect()

@@ -9,15 +9,6 @@ yaypoker.com:8888, www.yaypoker.com:8888 {
     reverse_proxy websocket:8888
 }
 
-# 🧪 ENTORNO DE PRUEBAS (DuckDNS)
-osongo.duckdns.org {
-    reverse_proxy client:80
-}
-
-osongo.duckdns.org:8888 {
-    reverse_proxy websocket:8888
-}
-
 # 🏠 DESARROLLO LOCAL
 localhost, 127.0.0.1 {
     tls internal

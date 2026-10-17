@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { saveSessionToken } from '../use/sessionToken'
 import { ref, computed } from 'vue'
 import { useSoundStore } from './soundStore'
 import router from '../router'
@@ -140,7 +141,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
       // Reset lobby timer if game starts or hand is in progress
       if (
         [
-          'askForBlindBets',
+          'blindsPosted',
           'dealtPrivateCards',
           'gameRestarted',
           'noMorePlayers',
@@ -166,7 +167,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
       // Reset winner info ONLY if a new hand/action starts and we don't want the old one
       if (
         [
-          // 'askForBlindBets',
+          // 'blindsPosted',
           // 'gameRestarted',
           // 'dealtPrivateCards',
         ].includes(gameData.action)
@@ -267,15 +268,11 @@ export const usePokerStore = defineStore('pokerStore', () => {
         if (lobbyTimer.value) {
           lobbyTimer.value.error = gameData.data.displayMsg
         }
-      } else if (gameData.action === 'askForBlindBets') {
-        activePlayerId.value = gameData.data.id
-        bettingOptions.value = ['blind']
-        displayMsg.value = gameData.data.displayMsg || ''
-        if (gameData.data.blindAmount) {
-          myInfo.value.requiredBlind = gameData.data.blindAmount
+      } else if (gameData.action === 'blindsPosted') {
+        if (gameData.data?.bigBlind) {
+          bigBlind.value = gameData.data.bigBlind
+          smallBlind.value = gameData.data.smallBlind
         }
-        autofoldStartTime.value = Date.now()
-        autofoldDuration.value = gameData.autofoldDuration || 600
       } else if (gameData.action?.startsWith('bettingCore')) {
         if (gameData.data?.messageForId) {
           activePlayerId.value = gameData.data.messageForId
@@ -298,6 +295,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
           myInfo.value.id = gameData.data?.id
           if (gameData.torneoId) {
             torneoId.value = gameData.torneoId
+          }
+          // Only our own private signUp carries the session token (OPS-001)
+          if (gameData.sessionToken) {
+            saveSessionToken(gameData.torneoId, gameData.sessionToken)
           }
           if (gameData.bigBlind) {
             bigBlind.value = gameData.bigBlind
@@ -430,6 +431,10 @@ export const usePokerStore = defineStore('pokerStore', () => {
     lastError.value = null
   }
 
+  function setLastError(error) {
+    lastError.value = error
+  }
+
   function resetState() {
     isGameStarted.value = false
     players.value = []
@@ -455,6 +460,7 @@ export const usePokerStore = defineStore('pokerStore', () => {
   }
 
   return {
+    setLastError,
     // State (refs)
     socketMessage,
     connected,

@@ -74,10 +74,8 @@ describe('Client guardrails', () => {
   it('ignores a client dealtPrivateCards (no re-deal mid hand)', async () => {
     const gameCode = 'GUARD_DEAL_' + Math.random().toString(36).slice(2, 7)
     const { host, guest, match } = await startHeadsUp(gameCode)
-    await host.waitAction('askForBlindBets')
-    host.send(MOCK_ACTIONS.SMALL_BLIND(10))
+    await host.waitAction('blindsPosted')
     await sleep(100)
-    guest.send(MOCK_ACTIONS.BIG_BLIND(20))
     await host.waitAction('dealtPrivateCards')
 
     const before = match.players.map((p) => [...p.cards])
@@ -95,11 +93,12 @@ describe('Client guardrails', () => {
       bigBlind: 50,
       initialStack: 3000,
     })
-    await host.waitAction('askForBlindBets')
+    await host.waitAction('blindsPosted')
 
     expect(match.smallBlind).toBe(25)
     expect(match.bigBlind).toBe(50)
-    expect(match.players.map((p) => p.chips)).toEqual([3000, 3000])
+    // Blinds are already posted (GAM-002): stack + blind = initial stack
+    expect(match.players.map((p) => p.chips + p.currentBet)).toEqual([3000, 3000])
 
     // Mid game, neither the host nor another player can change the table
     host.send({ action: 'startGame', smallBlind: 1, bigBlind: 2 })
@@ -122,7 +121,7 @@ describe('Client guardrails', () => {
   it('ignores nextRound from clients unless a tournament just ended', async () => {
     const gameCode = 'GUARD_NEXT_' + Math.random().toString(36).slice(2, 7)
     const { host, match } = await startHeadsUp(gameCode)
-    await host.waitAction('askForBlindBets')
+    await host.waitAction('blindsPosted')
 
     match.waitingForNextRound = true
     host.send({ action: 'nextRound' })

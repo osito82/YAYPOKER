@@ -2,6 +2,44 @@
 
 Recent sessions only.
 
+## 2026-10-16 — Specs GAM-001..003, OPS-001..002 implemented (branch `feat/gam-ops-specs`)
+
+- Approvals: 2026-10-16 direction + spec OK (Guillermo). Decisions: keep the seat on disconnect,
+  token + rate-limited PIN, drop prerender, no certificate for bot winners, per-player ante.
+- GAM-001: no table pause; disconnected seats are dealt in, post blinds and auto check/fold after 10 s;
+  reconnect keeps the turn clock; no humans connected → `tableIdle` (NO_HUMANS); public seats freed
+  after 60 s; leaving mid-hand folds and keeps the chips in the pot (was losing them: 2000 vs 2020).
+- GAM-002: server posts antes/blinds (`blindsPosted`), one `validateBet` (decimals, below call, min
+  bet 1 BB, min raise, incomplete all-in does not reopen); order from hand seats (post-flop starts at
+  the SB). Found and fixed: after any action the turn restarted from the first seat of the street
+  (now continues clockwise from the last actor, R-10). `tests/tournament.test.js` rewritten (it
+  encoded the old wrong order).
+- GAM-003: fold wins no longer reveal the winner's cards; folded cards kept in the log
+  (`muckedCards`); bot winners get no certificate; `totalPlayers` counts entrants; "Robot" is human.
+- OPS-001: session token (UUID) in the private signUp; PIN + name only recovers a disconnected seat,
+  5 failures / 10 min lock; sockets no longer evicted by PIN; private messages routed by socket id;
+  client stores the token per table and stops reconnecting on close code 4000.
+- OPS-002: prerender/Puppeteer/Chromium removed, `osongo` removed from the Caddyfile, skill updated.
+- Client blind-button removal delegated to the `simple-tasks` subagent (reviewed).
+- Evidence: webSocket 196 passed + eslint clean; client 24 passed, eslint (1 old warning), build OK;
+  bot 9 passed. Not deployed.
+- Browser test (local, 2026-10-16): auto blinds, UTG-first and SB-first post-flop order, min raise
+  40 / min bet 20, reload mid-turn keeps seat/cards/turn, second tab takes the seat without
+  ping-pong, disconnect → `MATCH:IDLE NO_HUMANS` (no bot tournament win) → reconnect resumes
+  (blinds 13/26 after 10 hands). Fixes from it: "open in another tab" banner instead of
+  "Reconnecting…", `MATCH:IDLE` log line; test grace for disconnected turns 3 s.
+
+## 2026-10-16 — Production deploy of `830d2ee` (log findings)
+
+- Deployed with the `yaypoker-deploy` skill: backup `/root/YAYPOKER-backup-20261016-2351`,
+  `git archive` upload, `down` + `up --build -d` (UP_EXIT=0). Checks: 4 containers up, `/health`
+  healthy, home 200, new bundle served, `/Logs/certificates.json` not served.
+- Verified in production: blinds stayed 10/20 after the first hand (h1); a direct call from the bot
+  container to `gemini-3.5-flash-lite` answered in 780 ms (was 404 on every call before).
+- Skill fixed: backup name now includes the time (a same-day backup used to nest inside the
+  previous one) and a bot/Gemini smoke check was added.
+- Seen again: the human disconnected and the bot won the tournament after 15 s (open item).
+
 ## 2026-10-16 — Fixes from the production logs (branch `fix/log-findings`)
 
 Found in `webSocket-2026-10-09.log` / `-10-16.log` and the bot logs on the VPS:

@@ -3,84 +3,61 @@
     :id="`hud-action-buttons-row-${templateSuffix}`"
     class="flex gap-2 w-full h-11 lg:h-13"
   >
-    <template v-if="canBlind">
-      <button
-        :id="`hud-post-blind-button-${templateSuffix}`"
-        @click="handleAction('blind')"
-        :title="$t('game.blind_tooltip')"
-        class="btn-blind flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm px-3 active:scale-95 transition-all duration-150"
-        :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'blind' }"
-      >
-        <template v-if="blindInfo">
-          {{
-            $t('game.post_blind', {
-              type: $t('game.' + blindInfo.type.toLowerCase()),
-              amount: blindInfo.amount,
-            })
-          }}
-        </template>
-        <template v-else>{{ $t('game.post_blind_generic') }}</template>
-      </button>
-    </template>
+    <button
+      :id="`hud-fold-button-${templateSuffix}`"
+      @click="handleAction('fold')"
+      :disabled="!isMyTurn || !options.includes('fold')"
+      :title="$t('game.fold_tooltip')"
+      class="btn-fold flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
+      :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'fold' }"
+    >
+      {{ $t('game.fold') }}
+    </button>
 
-    <template v-else>
-      <button
-        :id="`hud-fold-button-${templateSuffix}`"
-        @click="handleAction('fold')"
-        :disabled="!isMyTurn || !options.includes('fold')"
-        :title="$t('game.fold_tooltip')"
-        class="btn-fold flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
-        :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'fold' }"
-      >
-        {{ $t('game.fold') }}
-      </button>
+    <button
+      :id="`hud-check-button-${templateSuffix}`"
+      @click="handleAction('check')"
+      :disabled="!isMyTurn || !options.includes('check')"
+      :title="$t('game.check_tooltip')"
+      class="btn-check flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
+      :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'check' }"
+    >
+      {{ $t('game.check') }}
+    </button>
 
-      <button
-        :id="`hud-check-button-${templateSuffix}`"
-        @click="handleAction('check')"
-        :disabled="!isMyTurn || !options.includes('check')"
-        :title="$t('game.check_tooltip')"
-        class="btn-check flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
-        :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'check' }"
-      >
-        {{ $t('game.check') }}
-      </button>
+    <button
+      :id="`hud-call-button-${templateSuffix}`"
+      @click="handleAction('call')"
+      :disabled="!isMyTurn || !options.includes('call')"
+      :title="$t('game.call_tooltip')"
+      class="btn-call flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
+      :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'call' }"
+    >
+      {{ $t('game.call') }}
+    </button>
 
-      <button
-        :id="`hud-call-button-${templateSuffix}`"
-        @click="handleAction('call')"
-        :disabled="!isMyTurn || !options.includes('call')"
-        :title="$t('game.call_tooltip')"
-        class="btn-call flex-1 font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:cursor-not-allowed"
-        :class="{ 'opacity-60 scale-[0.97]': pressedAction === 'call' }"
-      >
-        {{ $t('game.call') }}
-      </button>
-
-      <button
-        :id="`hud-raise-bet-button-${templateSuffix}`"
-        @click="handleAction(options.includes('bet') ? 'bet' : 'raise')"
-        :disabled="isRaiseActionDisabled"
-        :title="
-          isRaiseActionDisabled
-            ? $t('game.raise_disabled_tooltip')
-            : options.includes('bet')
-              ? $t('game.bet_tooltip')
-              : $t('game.raise_tooltip')
-        "
-        class="btn-raise flex-[1.5] font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
-        :class="[
-          {
-            'opacity-60 scale-[0.97]':
-              pressedAction === 'bet' || pressedAction === 'raise',
-          },
-          pokerStore.blindsIncreasedFlag ? 'animate-pulse scale-105 z-10' : '',
-        ]"
-      >
-        {{ options.includes('bet') ? $t('game.bet') : $t('game.raise') }}
-      </button>
-    </template>
-
+    <button
+      :id="`hud-raise-bet-button-${templateSuffix}`"
+      @click="handleAction(options.includes('bet') ? 'bet' : 'raise')"
+      :disabled="isRaiseActionDisabled"
+      :title="
+        isRaiseActionDisabled
+          ? $t('game.raise_disabled_tooltip')
+          : options.includes('bet')
+            ? $t('game.bet_tooltip')
+            : $t('game.raise_tooltip')
+      "
+      class="btn-raise flex-[1.5] font-black uppercase rounded-xl text-[11px] lg:text-sm transition-all duration-150 active:scale-95 disabled:opacity-20 disabled:grayscale disabled:cursor-not-allowed"
+      :class="[
+        {
+          'opacity-60 scale-[0.97]':
+            pressedAction === 'bet' || pressedAction === 'raise',
+        },
+        pokerStore.blindsIncreasedFlag ? 'animate-pulse scale-105 z-10' : '',
+      ]"
+    >
+      {{ options.includes('bet') ? $t('game.bet') : $t('game.raise') }}
+    </button>
     <!-- MUTE BUTTON (ALWAYS PRESENT) -->
     <button
       :id="`hud-mute-button-${templateSuffix}`"
@@ -169,8 +146,6 @@ import { useSoundStore } from '../../store/soundStore'
 
 defineProps({
   isMyTurn: Boolean,
-  canBlind: Boolean,
-  blindInfo: Object,
   options: Array,
   isRaiseActionDisabled: Boolean,
 })
@@ -242,18 +217,6 @@ const handleAction = (action) => {
   box-shadow:
     0 4px 20px rgba(234, 179, 8, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.btn-blind {
-  background: linear-gradient(135deg, #eab308 0%, #ca8a04 60%, #a16207 100%);
-  border: 1px solid rgba(234, 179, 8, 0.6);
-  color: #1a0f00;
-  box-shadow:
-    0 2px 12px rgba(234, 179, 8, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-.btn-blind:hover {
-  background: linear-gradient(135deg, #facc15 0%, #ca8a04 60%, #a16207 100%);
 }
 
 .btn-voice {

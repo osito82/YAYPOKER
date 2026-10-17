@@ -137,8 +137,6 @@
         >
           <ActionBar
             :isMyTurn="isMyTurn"
-            :canBlind="canBlind"
-            :blindInfo="blindInfo"
             :options="options"
             :balance="myPlayer?.chips || 0"
             :currentBet="myPlayer?.currentBet || 0"
@@ -199,8 +197,6 @@ defineProps({
   allPlayers: Array,
   myPlayer: Object,
   isMyTurn: Boolean,
-  canBlind: Boolean,
-  blindInfo: Object,
   options: Array,
   betAmount: Number,
   minBet: Number,
