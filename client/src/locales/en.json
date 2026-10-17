@@ -36,7 +36,6 @@
     "bot_one": "1 Bot",
     "bot_many": "{count} Bots",
     "min_players_warning": "Need at least 2 players to start the match",
-
     "start_game": "Deal First Hand",
     "waiting_for_host": "Waiting for Host to Start...",
     "public_waiting_players": "Waiting for Players...",
@@ -344,6 +343,183 @@
       "back_to_lobby": "← Back to Lobby",
       "footer": "© 2026 {span}. All chips are virtual.",
       "brand": "YayPoker"
+    },
+    "rules": {
+      "back": "Back to Home",
+      "badge": "How to play",
+      "headline": "Texas Hold'em rules",
+      "intro": "Texas Hold'em is the most popular poker game in the world. Each player gets two private cards, five shared cards are dealt to the middle of the table, and the best five-card hand wins the pot. Here is everything you need to play your first hand.",
+      "sections": [
+        {
+          "title": "The goal",
+          "paragraphs": [
+            "Win chips. You win a pot either by having the best hand at the showdown or by betting so that every other player folds.",
+            "On YayPoker every table is a freezeout: everyone starts with the same stack, and the last player with chips wins the table and gets a winner certificate."
+          ]
+        },
+        {
+          "title": "The button and the blinds",
+          "paragraphs": [
+            "A table has 2 to 10 players. The dealer button marks the last seat to act after the flop, and it moves one seat clockwise after every hand.",
+            "The two players to the left of the button post forced bets called blinds: the small blind and the big blind (twice the small blind). With only two players, the button posts the small blind.",
+            "YayPoker posts the blinds for you. They start at 10 / 20 and go up about 25% every 10 hands, so games always come to an end."
+          ]
+        },
+        {
+          "title": "Hole cards and community cards",
+          "paragraphs": [
+            "Each player is dealt two hole cards that only they can see. Then up to five community cards are dealt face up in three steps: the flop (three cards), the turn (one card) and the river (one card).",
+            "Your hand is the best five cards you can make from your two hole cards and the five community cards. You can use both, one or none of your hole cards."
+          ]
+        },
+        {
+          "title": "The four betting rounds",
+          "list": [
+            "Pre-flop: after the hole cards. The first to act is the player to the left of the big blind.",
+            "Flop: after the first three community cards. From here on, the first active player to the left of the button acts first.",
+            "Turn: after the fourth community card.",
+            "River: after the fifth and last community card."
+          ],
+          "paragraphs": [
+            "A betting round ends when every player still in the hand has put the same amount in the pot, or is all-in."
+          ]
+        },
+        {
+          "title": "Your options on each turn",
+          "list": [
+            "Check: pass the action without betting. Only possible when nobody has bet in this round.",
+            "Bet: put chips in when nobody has bet yet. The minimum bet is one big blind.",
+            "Call: match the current bet.",
+            "Raise: increase the current bet. A raise must be at least as large as the previous bet or raise.",
+            "Fold: give up your cards and any chance at the pot.",
+            "All-in: bet all your remaining chips. You can always go all-in, even for less than a full call or raise."
+          ],
+          "paragraphs": [
+            "YayPoker is played no-limit: you can bet any amount up to your whole stack. An all-in that is smaller than a full raise does not reopen the betting for players who already acted; they can only call or fold."
+          ]
+        },
+        {
+          "title": "The showdown",
+          "paragraphs": [
+            "If two or more players are still in after the river betting, they show their cards and the best five-card hand wins the pot. If everyone else folds, the last player wins without showing.",
+            "Suits never rank higher or lower than each other: when two hands are exactly equal, the pot is split."
+          ]
+        },
+        {
+          "title": "All-ins and side pots",
+          "paragraphs": [
+            "A player who goes all-in can only win, from each opponent, as much as they put in themselves. Any extra chips that other players keep betting go into a side pot that only those players can win.",
+            "Example: you go all-in with 100 and two opponents each put in 300. The main pot (300) can be won by any of the three of you; the side pot (400) only by the two opponents."
+          ]
+        },
+        {
+          "title": "Playing on YayPoker",
+          "list": [
+            "Private tables: start a table, share the link or table code with your friends and play together. Bots can fill empty seats.",
+            "Public tables: join a table with other players at any time.",
+            "Turn timer: if your time runs out, the game checks for you when possible, otherwise it folds. On public tables, two timeouts in a row free your seat.",
+            "Virtual chips only: YayPoker is a free social game. No real money is ever involved."
+          ]
+        }
+      ],
+      "cta_title": "Ready for your first hand?",
+      "cta_body": "Open a private table and send the link to your friends, or jump into a public table now.",
+      "cta_create": "Start Private Table",
+      "cta_public": "Play on a Public Table",
+      "see_rankings": "See the poker hand rankings"
+    },
+    "hand_rankings": {
+      "back": "Back to Home",
+      "badge": "Poker basics",
+      "headline": "Poker hand rankings",
+      "intro": "In Texas Hold'em your hand is the best five cards out of your two hole cards and the five community cards. These are the ten possible hands, from the strongest to the weakest.",
+      "hands": [
+        {
+          "name": "Royal flush",
+          "body": "A, K, Q, J and 10, all of the same suit. The best hand in poker."
+        },
+        {
+          "name": "Straight flush",
+          "body": "Five cards in sequence, all of the same suit. Between two straight flushes, the higher top card wins."
+        },
+        {
+          "name": "Four of a kind",
+          "body": "Four cards of the same rank. The fifth card (the kicker) breaks ties."
+        },
+        {
+          "name": "Full house",
+          "body": "Three cards of one rank plus a pair of another. The three of a kind decides first, then the pair."
+        },
+        {
+          "name": "Flush",
+          "body": "Five cards of the same suit, not in sequence. Compare the highest card, then the next, and so on."
+        },
+        {
+          "name": "Straight",
+          "body": "Five cards in sequence of different suits. The ace can be high (10-J-Q-K-A) or low (A-2-3-4-5, the lowest straight)."
+        },
+        {
+          "name": "Three of a kind",
+          "body": "Three cards of the same rank, plus two unrelated cards."
+        },
+        {
+          "name": "Two pair",
+          "body": "Two cards of one rank and two of another. The higher pair decides first, then the lower pair, then the kicker."
+        },
+        {
+          "name": "One pair",
+          "body": "Two cards of the same rank. If two players have the same pair, the highest side cards decide."
+        },
+        {
+          "name": "High card",
+          "body": "No combination: the hand is worth its highest card, then the next ones."
+        }
+      ],
+      "ties_title": "Ties and kickers",
+      "ties": [
+        "Only five cards count. Cards outside the best five never break a tie.",
+        "When two hands have the same rank, compare the cards that make the hand first and then the remaining cards (kickers), from the highest down.",
+        "Suits never break a tie. If the best five cards are equal, the pot is split.",
+        "If the best hand is on the board (the five community cards), every player still in the hand splits the pot."
+      ],
+      "see_rules": "Read the full Texas Hold'em rules"
     }
+  },
+  "seo": {
+    "home": {
+      "title": "YayPoker - Free Texas Hold'em Poker with Friends Online",
+      "description": "Play free Texas Hold'em poker with friends in your browser. No sign-up, no downloads: create a private table, share the link and deal. Virtual chips only."
+    },
+    "about": {
+      "title": "About Us - Free Poker Nights with Friends",
+      "description": "Why YayPoker exists: a free, fast, no-registration poker table for home games with friends, played with virtual chips on any device."
+    },
+    "rules": {
+      "title": "Texas Hold'em Rules: How to Play Poker",
+      "description": "Learn Texas Hold'em step by step: blinds and the button, hole and community cards, the four betting rounds, all-ins, side pots and the showdown."
+    },
+    "hand_rankings": {
+      "title": "Poker Hand Rankings: From Royal Flush to High Card",
+      "description": "All 10 Texas Hold'em poker hands ranked from best to worst, with card examples and how ties and kickers are decided."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "How YayPoker handles your data: no accounts, no real money, only what is needed to run your poker table."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "description": "The terms for playing on YayPoker, a free social poker game with virtual chips and no real-money gambling."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "description": "Questions, bug reports or ideas for YayPoker? Send us a message and help us improve your poker nights."
+    }
+  },
+  "site_links": {
+    "label": "Site links",
+    "home": "Home",
+    "rules": "Poker rules",
+    "hand_rankings": "Hand rankings",
+    "about": "About"
   }
 }

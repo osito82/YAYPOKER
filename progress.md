@@ -2,6 +2,18 @@
 
 Recent sessions only.
 
+## 2026-10-17 — OPS-003 SEO (branch `feat/ops-003-seo`)
+
+- Approvals: 2026-10-17 direction (fix SEO, `/es` URLs, rules + hand rankings pages) and spec OK
+  (Guillermo).
+- Built: build-time Vue SSR prerender (`client/scripts/prerender.mjs`, jsdom globals, no Chromium) of
+  14 pages (7 × en/es), `dist/app.html` (noindex shell), `dist/404.html`, generated sitemap;
+  `client/nginx.conf` (real 404s, trailing-slash 301, noindex app routes); Caddy `www` → apex 301;
+  new `/rules` and `/hand-rankings`; `og-image.jpg`; theme applied before paint.
+- Verified locally (nginx:alpine container + browser); client tests 34/34. Not committed/deployed.
+- Pending: human review of rules/rankings texts (AC-10), commit, deploy, AC-07 on prod, then submit
+  the sitemap in Google Search Console (owner).
+
 ## 2026-10-17 — Production deploy of `5ab037f` (GAM-001..003, OPS-001..002)
 
 - `yaypoker-deploy` skill: backup `/root/YAYPOKER-backup-20261017-0314`, old

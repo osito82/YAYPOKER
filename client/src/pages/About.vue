@@ -13,7 +13,7 @@
         class="scale-90 dark:invert-0"
       />
       <router-link
-        to="/"
+        :to="localePath('/')"
         :id="`about-nav-link-back-${templateSuffix}`"
         class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
       >
@@ -133,10 +133,13 @@
         </p>
       </footer>
     </main>
+    <SiteLinks class="px-6 pb-12" />
   </div>
 </template>
 
 <script setup>
+import SiteLinks from '../components/SiteLinks.vue'
+import { useLocalePath } from '../use/useLocalePath'
 import { computed } from 'vue'
 import { useResponsiveStore } from '../store/responsiveStore'
 import Logo from '../components/Logo.vue'
@@ -155,4 +158,6 @@ const templateSuffix = computed(() => {
       return 'About'
   }
 })
+
+const { localePath } = useLocalePath()
 </script>

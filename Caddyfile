@@ -1,6 +1,11 @@
 # 🚀 PRODUCCIÓN OFICIAL (Puertos 80/443)
-yaypoker.com, www.yaypoker.com {
+yaypoker.com {
     reverse_proxy client:80
+}
+
+# One canonical host for search engines (OPS-003 R-08)
+www.yaypoker.com {
+    redir https://yaypoker.com{uri} permanent
 }
 
 # 🚀 PROD WEBSOCKET & API (Puerto 8888)

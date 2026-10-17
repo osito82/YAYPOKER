@@ -9,3 +9,4 @@ Families: **GAM** = game engine and rules · **UXP** = client experience and lay
 | GAM-003 | Hand reveal and tournament certificates | implemented | 2026-10-16 | Fold-win reveal, bot certificates |
 | OPS-001 | Server-issued session tokens | implemented | 2026-10-16 | Replaces PIN-as-session; depends on GAM-001 |
 | OPS-002 | Drop prerender, remove the test domain, clean server backups | implemented | 2026-10-16 | Level S |
+| OPS-003 | SEO: static HTML for public pages, Spanish URLs, rules and hand rankings | implemented | 2026-10-17 | Level M; build-time SSR, no Chromium |

@@ -42,6 +42,12 @@
             class="hover:text-yellow-500 transition-colors duration-300"
             >{{ $t('nav.features') }}</a
           >
+          <router-link
+            id="landing-nav-link-rules-Home"
+            :to="localePath('/rules')"
+            class="hover:text-yellow-500 transition-colors duration-300"
+            >{{ $t('site_links.rules') }}</router-link
+          >
         </div>
 
         <div class="flex items-center gap-2 sm:gap-8">
@@ -54,7 +60,7 @@
               class="flex gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-r border-gray-300 dark:border-white/10 pr-2 sm:pr-3"
             >
               <button
-                @click="locale = 'en'"
+                @click="switchLocale('en')"
                 class="transition-colors cursor-pointer"
                 :class="
                   locale === 'en'
@@ -65,7 +71,7 @@
                 EN
               </button>
               <button
-                @click="locale = 'es'"
+                @click="switchLocale('es')"
                 class="transition-colors cursor-pointer"
                 :class="
                   locale === 'es'
@@ -543,17 +549,35 @@
               Open Source (GitHub)
             </a>
             <router-link
-              to="/privacy"
+              id="home-footer-link-rules-Home"
+              :to="localePath('/rules')"
+              class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
+              >{{ $t('site_links.rules') }}</router-link
+            >
+            <router-link
+              id="home-footer-link-hand-rankings-Home"
+              :to="localePath('/hand-rankings')"
+              class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
+              >{{ $t('site_links.hand_rankings') }}</router-link
+            >
+            <router-link
+              id="home-footer-link-about-Home"
+              :to="localePath('/about')"
+              class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
+              >{{ $t('site_links.about') }}</router-link
+            >
+            <router-link
+              :to="localePath('/privacy')"
               class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
               >{{ $t('footer.privacy') }}</router-link
             >
             <router-link
-              to="/terms"
+              :to="localePath('/terms')"
               class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
               >{{ $t('footer.terms') }}</router-link
             >
             <router-link
-              to="/contact"
+              :to="localePath('/contact')"
               class="hover:text-yellow-600 dark:hover:text-yellow-500 transition-colors"
               >{{ $t('footer.contact') }}</router-link
             >
@@ -582,13 +606,13 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useLocalePath } from '../use/useLocalePath'
 import { useResponsiveStore } from '../store/responsiveStore'
 import { useThemeStore } from '../store/themeStore'
 import Logo from '../components/Logo.vue'
 import TicoHeart from '../components/TicoHeart.vue'
 
-const { locale } = useI18n()
+const { locale, localePath, switchLocale } = useLocalePath()
 const responsive = useResponsiveStore()
 const themeStore = useThemeStore()
 
