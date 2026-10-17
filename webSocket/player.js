@@ -18,8 +18,13 @@ class Player {
     this.handContribution = 0
     this.consecutiveAutofolds = 0
     this.isSittingOut = false
-    this.isBot =
-      name.toLowerCase().includes('bot') || name.toLowerCase().includes('_ia')
+    this.left = false // left the table mid-hand; removed when the hand ends
+    this.disconnectedAt = null
+    // Spawned bots are named "<Name>_Bot" (or the "Bot_<n>" fallback); a human
+    // called "Robot" is not a bot (GAM-003 R-06)
+    this.isBot = /(_bot|_ia)$/i.test(name) || /^bot_\d+$/i.test(name)
+    this.muckedCards = [] // cards of a folded hand, kept for the server log
+    this.sessionToken = null // OPS-001: never in toJson, never logged
   }
 
   currentPrize = {}
@@ -82,6 +87,7 @@ class Player {
 
   setConnected = (status) => {
     this.connected = !!status
+    this.disconnectedAt = this.connected ? null : Date.now()
   }
 
   setAllIn = (status) => {
@@ -90,7 +96,13 @@ class Player {
 
   setFolded = (status) => {
     this.folded = !!status
-    if (this.folded) this.cards = []
+    if (this.folded) {
+      // Never broadcast again, but kept for the hand history in the log
+      if (this.cards.length) this.muckedCards = this.cards
+      this.cards = []
+    } else {
+      this.muckedCards = []
+    }
   }
 
   giveChipsToDealer = () => {

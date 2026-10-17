@@ -132,7 +132,10 @@ class PokerBot {
   connect() {
     log
       .Template({ name: "brakets", title: "BOT:CONNECTING", date: true })
-      .R({ name: this.playerName, url: this.serverUrl });
+      .R({
+        name: this.playerName,
+        url: this.serverUrl.replace(/secretCode=[^&]*/, "secretCode=***"),
+      });
 
     this.socket = new WebSocket(this.serverUrl);
 
@@ -158,9 +161,6 @@ class PokerBot {
 
         if (msg.bigBlind) this.bigBlind = Number(msg.bigBlind);
         if (msg.data?.bigBlind) this.bigBlind = Number(msg.data.bigBlind);
-        if (msg.data?.blindType === "BB" && msg.data?.blindAmount) {
-          this.bigBlind = Number(msg.data.blindAmount);
-        }
         if (msg.data?.playerChips !== undefined) {
           this.myChips = Number(msg.data.playerChips);
         }
@@ -180,6 +180,8 @@ class PokerBot {
         // Registro de signup
         if (msg.action === "signUp" && msg.type === "private") {
           this.myId = msg.id || msg.playerId || msg.myPlayerInfo?.playerId;
+          // Server-issued session token (OPS-001): kept in memory, never logged
+          if (msg.sessionToken) this.sessionToken = msg.sessionToken;
           if (msg.bigBlind) this.bigBlind = Number(msg.bigBlind);
           if (msg.data?.bigBlind) this.bigBlind = Number(msg.data.bigBlind);
           log
@@ -216,22 +218,7 @@ class PokerBot {
           this.lastStepId = stepId;
         }
 
-        // Poner ciegas
-        if (msg.action === "askForBlindBets" && msg.type === "private") {
-          const targetId = msg.myPlayerInfo?.playerId || msg.data?.id;
-          if (targetId === this.myId) {
-            const amount = msg.data?.blindAmount || msg.blindAmount || 20;
-            log
-              .Template({
-                name: "brakets",
-                title: "BOT:POSTING_BLIND",
-                date: true,
-              })
-              .R({ bot: this.playerName, amount });
-            this.sendAction({ action: "setBet", chipsToBet: amount });
-            this.lastStepId = stepId;
-          }
-        }
+        // Blinds are posted by the server (GAM-002): nothing to do here
 
         // Turno de apuesta
         if (msg.action?.startsWith("bettingCore") && msg.type === "private") {
@@ -474,10 +461,14 @@ class PokerBot {
       actionMsg.chipsToCall = callAmount;
     } else if (action === "raise") {
       actionMsg.action = "setRise";
-      const minRaise = Number(msg.lastRaiseAmount || 20); // Valor de subida mínima obligatoria
-      actionMsg.chipsToRiseBet = Math.max(
-        Number(decision.amount || 0),
-        currentHighestBet + minRaise,
+      // Minimum legal raise: the last full raise, never less than one big
+      // blind; whole chips only (the server rejects anything else)
+      const minRaise = Math.max(
+        Number(msg.lastRaiseAmount || 0),
+        Number(this.bigBlind || 20),
+      );
+      actionMsg.chipsToRiseBet = Math.ceil(
+        Math.max(Number(decision.amount || 0), currentHighestBet + minRaise),
       );
     } else {
       actionMsg.action = "setCheck";

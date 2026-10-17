@@ -97,11 +97,12 @@ describe('PokerBot', () => {
     expect(bot.myChips).toBe(750);
     expect(bot.myCurrentBet).toBe(50);
 
-    // Simulate askForBlindBets with BB
+    // Blinds are posted by the server (GAM-002): the bot learns the big blind
+    // from the public blindsPosted message
     simMsg(JSON.stringify({
-      action: 'askForBlindBets',
-      type: 'private',
-      data: { id: '123', blindType: 'BB', blindAmount: 50 }
+      action: 'blindsPosted',
+      type: 'public',
+      data: { smallBlind: 25, bigBlind: 50, ante: 0, posts: [] }
     }));
     expect(bot.bigBlind).toBe(50);
   });

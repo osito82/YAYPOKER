@@ -172,17 +172,37 @@ describe('Match Class', () => {
       expect(match.players[1].name).toBe('Alice-1')
     })
 
-    it('should reconnect an existing player by secretCode', () => {
+    // OPS-001: name + PIN recovers a seat only while it is disconnected
+    it('should reconnect a disconnected player by name + secretCode', () => {
       const data = { name: 'Alice', totalChips: 1000, secretCode: '1234' }
       const s1 = { id: 'S1', name: 'Alice', secretCode: '1234' }
       match.lobby.signUp(data, s1)
+      match.players[0].setConnected(false)
 
       const s2 = { id: 'S2', name: 'Alice', secretCode: '1234' }
       match.lobby.signUp(data, s2)
 
       expect(match.players.length).toBe(1)
       expect(match.players[0].id).toBe('S2')
-      // Note: setConnected(true) is called, verified by logs in Match.signUp
+      expect(match.players[0].connected).toBe(true)
+    })
+
+    it('should reconnect a connected player only with the session token', () => {
+      const data = { name: 'Alice', totalChips: 1000, secretCode: '1234' }
+      match.lobby.signUp(data, { id: 'S1', name: 'Alice', secretCode: '1234' })
+      const token = match.players[0].sessionToken
+
+      match.lobby.signUp(data, { id: 'S2', name: 'Alice', secretCode: '1234' })
+      expect(match.players[0].id).toBe('S1') // name + PIN refused: seat connected
+
+      match.lobby.signUp(data, {
+        id: 'S3',
+        name: 'Alice',
+        secretCode: '1234',
+        sessionToken: token,
+      })
+      expect(match.players.length).toBe(1)
+      expect(match.players[0].id).toBe('S3')
     })
   })
 

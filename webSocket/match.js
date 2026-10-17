@@ -48,7 +48,7 @@ class Match extends EventEmitter {
 
     this.players = []
     this.acceptingPlayers = true
-    this.pauseTimeouts = new Map()
+    this.pinAttempts = new Map() // seat name → failed PIN recovery timestamps
     this.autofoldTimer = null
     this.autofoldDuration = this.isPublic
       ? TIMEOUTS.autofoldPublic
@@ -61,7 +61,10 @@ class Match extends EventEmitter {
     this.waitingForNextRound = false
     this.awaitingManualNextRound = false // true only after a tournament winner
     this.idleAllSittingOut = false // no hand is dealt while everyone sits out
+    this.idleNoHumans = false // no hand is dealt while no human is connected
     this.isRunout = false
+    this.handEndedByFold = false
+    this.entrants = new Set() // everyone dealt into a hand of this tournament
 
     this.hostId = null
     this.isSpawningBots = false
@@ -165,6 +168,7 @@ class Match extends EventEmitter {
     this.cardsDealer = []
     this.playersFold = []
     this.isRunout = false
+    this.handEndedByFold = false
 
     this.stepChecker = new StepChecker()
     this.dealer = new Dealer(
@@ -219,11 +223,33 @@ class Match extends EventEmitter {
       })
   }
 
-  getActivePlayers(onlyConnected = true) {
+  // Players still in the hand. Disconnected players keep their seat and stay
+  // in the hand (they auto check/fold on their turn), see GAM-001.
+  getActivePlayers(onlyConnected = false) {
     return this.players.filter((p) => {
-      const base = p.isStarted && !p.folded
+      const base = p.isStarted && !p.folded && !p.left
       return onlyConnected ? base && p.connected : base
     })
+  }
+
+  // Seats dealt into the current hand, in seat order: seat 0 is the small
+  // blind, seat 1 the big blind, the last seat the button (heads-up the button
+  // posts the small blind). Blinds and turn order both use this list (GAM-002).
+  handSeats() {
+    return this.players.filter((p) => p.isStarted)
+  }
+
+  registerEntrants() {
+    for (const p of this.handSeats()) this.entrants.add(p.name)
+  }
+
+  // Players who can win the tournament: seated with chips, connected or not
+  getPlayersWithChips() {
+    return this.players.filter((p) => p.chips > 0 && !p.left)
+  }
+
+  hasConnectedHuman() {
+    return this.players.some((p) => p.connected && !p.isBot && !p.left)
   }
 
   getStartedPlayers(onlyConnected = true) {
@@ -321,7 +347,7 @@ class Match extends EventEmitter {
     }
 
     if (!this.stepChecker.checkStep('blindsBetting'))
-      return this.actions.askForBlindBets(thisSocket)
+      return this.actions.postBlinds(thisSocket)
     if (!this.stepChecker.checkStep('dealtPrivateCards')) {
       this.players.forEach((p) => {
         if (p.connected) p.setStarted(true)
@@ -408,10 +434,12 @@ class Match extends EventEmitter {
     this.waitingForNextRound = false
     this.awaitingManualNextRound = false
 
+    if (this.isPublic) this.lobby.releaseStaleSeats()
+
     const connected = this.getConnectedPlayers()
     if (connected.length === 0 && this.isPublic) return
 
-    const playersWithChips = connected.filter((p) => p.chips > 0)
+    const playersWithChips = this.getPlayersWithChips()
 
     if (playersWithChips.length < GAME_RULES.MIN_PLAYERS) {
       this.log
@@ -424,13 +452,14 @@ class Match extends EventEmitter {
 
       if (this.isPublic) {
         const remainingPlayers = this.players.filter(
-          (p) => p.chips > 0 && p.connected,
+          (p) => p.chips > 0 && p.connected && !p.left,
         )
         this.players.length = 0
         this.players.push(...remainingPlayers)
 
         this.handCount = 0
         this.currentHandId = `${GAME_RULES.HAND_ID_PREFIX}0`
+        this.entrants = new Set()
         this.initHand()
 
         this.communicator.msgBuilder('lobby', 'public', null, {
@@ -447,10 +476,28 @@ class Match extends EventEmitter {
       return
     }
 
+    // No human at the table: do not let the bots blind a disconnected human
+    // away. The next hand starts when a human reconnects (MatchLobby.signUp).
+    if (!this.hasConnectedHuman()) {
+      this.idleNoHumans = true
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH:IDLE', date: true })
+        .R({ torneoId: this.torneoId, reason: 'NO_HUMANS' })
+      this.communicator.msgBuilder('tableIdle', 'public', null, {
+        reason: 'NO_HUMANS',
+        displayMsg: 'Waiting for a player to reconnect...',
+      })
+      Socket.broadcastToTorneo(this.torneoId, this.communicator.getMsg())
+      return
+    }
+
     // Nobody is playing: do not deal hands among sitting-out players forever.
     // The next hand starts when someone comes back (MatchActions.setSitOut).
     if (playersWithChips.every((p) => p.isSittingOut)) {
       this.idleAllSittingOut = true
+      this.log
+        .Template({ name: 'brakets', title: 'MATCH:IDLE', date: true })
+        .R({ torneoId: this.torneoId, reason: 'ALL_SITTING_OUT' })
       this.communicator.msgBuilder('tableIdle', 'public', null, {
         displayMsg: 'Everyone is sitting out. The next hand starts when a player returns.',
       })
@@ -479,7 +526,7 @@ class Match extends EventEmitter {
 
     this.players.push(this.players.shift())
 
-    const activePlayers = this.players.filter((p) => p.chips > 0)
+    const activePlayers = this.players.filter((p) => p.chips > 0 && !p.left)
     this.players.length = 0
     this.players.push(...activePlayers)
 
@@ -489,7 +536,8 @@ class Match extends EventEmitter {
       p.setFolded(false)
       p.setAllIn(false)
       p.setLastAction('')
-      p.setStarted(p.connected)
+      // Disconnected players keep their seat and are dealt in (GAM-001)
+      p.setStarted(true)
       p.cards = []
       p.currentBet = 0
       p.handContribution = 0

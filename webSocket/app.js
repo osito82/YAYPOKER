@@ -255,8 +255,8 @@ const actionHandlers = {
     match.actions.setBet(socket, data.chipsToBet),
   [ACTIONS.RAISE]: (match, socket, data) =>
     match.actions.setRise(socket, data.chipsToRiseBet),
-  [ACTIONS.BLIND]: (match, socket, data) =>
-    match.actions.setBet(socket, data.blindAmount, 'setBet', true),
+  // Blinds are posted by the server (GAM-002): the old client action is ignored
+  [ACTIONS.BLIND]: () => {},
   [ACTIONS.CALL]: (match, socket) => match.actions.setCall(socket),
   [ACTIONS.CHECK]: (match, socket) => match.actions.setCheck(socket),
   [ACTIONS.STATS]: (match, socket) => match.comms.stats(socket.id),
@@ -280,9 +280,21 @@ wss.on('connection', (ws, req) => {
   const urlParams = new URLSearchParams(req.url.substring(1))
 
   let torneoId = urlParams.get('gameCode')
+  const requestedSecret = urlParams.get('secretCode')
+  const sessionToken = urlParams.get('sessionToken')
+
+  // A player who already has a seat at this public table goes back to it
+  const requestedMatch = torneoId ? Torneo.getMatch(torneoId) : null
+  const hasSeatHere =
+    !!requestedMatch?.players.some(
+      (p) =>
+        !p.left &&
+        ((sessionToken && p.sessionToken === sessionToken) ||
+          (requestedSecret && p.secretCode === requestedSecret)),
+    )
 
   // LÓGICA DE MESAS PÚBLICAS: Maximizar agrupación
-  if (torneoId && torneoId.startsWith('P_')) {
+  if (torneoId && torneoId.startsWith('P_') && !hasSeatHere) {
     const availablePublicMatch = Torneo.findAvailablePublicMatch()
 
     // Si ya existe una mesa pública disponible, nos unimos a esa obligatoriamente
@@ -308,6 +320,7 @@ wss.on('connection', (ws, req) => {
     name: playerName,
     torneoId,
     secretCode,
+    sessionToken,
     isSpectator,
     socket: ws,
   }

@@ -18,7 +18,11 @@
     role="status"
     class="fixed top-2 left-1/2 -translate-x-1/2 z-50 max-w-[calc(100%-2rem)] rounded-lg bg-red-600/90 px-4 py-2 text-center text-sm font-bold text-white shadow-lg"
   >
-    {{ $t('game.reconnecting') }}
+    {{
+      pokerStore.getLastError?.type === 'SESSION_REPLACED'
+        ? $t('game.session_replaced')
+        : $t('game.reconnecting')
+    }}
   </div>
   <LobbyView
     v-if="!pokerStore.getIsGameStarted"
@@ -41,8 +45,6 @@
     :allPlayers="allPlayers"
     :myPlayer="myPlayer"
     :isMyTurn="isMyTurn"
-    :canBlind="canBlind"
-    :blindInfo="blindInfo"
     :options="options"
     :betAmount="betAmount"
     :minBet="minBet"
@@ -263,23 +265,6 @@ const callLevel = computed(() => {
   return Math.min(tableMax, myTotal)
 })
 
-const canBlind = computed(
-  () => !props.isGuest && isMyTurn.value && options.value.includes('blind'),
-)
-
-const blindInfo = computed(() => {
-  if (!canBlind.value) return null
-  const amount =
-    pokerStore.myInfo.requiredBlind ||
-    (pokerStore.getDisplayMsg?.toLowerCase().includes('small')
-      ? pokerStore.smallBlind
-      : pokerStore.bigBlind)
-  const type = pokerStore.getDisplayMsg?.toLowerCase().includes('small')
-    ? 'Small'
-    : 'Big'
-  return { amount, type }
-})
-
 const minBet = computed(() => {
   const bigBlind = pokerStore.bigBlind || 20
 
@@ -335,12 +320,12 @@ watch(
   { immediate: true },
 )
 
-// Redirect back if PIN collision occurs
+// Too many wrong PINs for this seat: back to the join form
 watch(
   () => pokerStore.getLastError,
   (newError) => {
-    if (newError?.type === 'PIN_COLLISION') {
-      console.warn('Redirecting due to PIN collision:', newError.message)
+    if (newError?.type === 'TOO_MANY_ATTEMPTS') {
+      console.warn('Seat locked after failed PIN attempts:', newError.message)
       handleGoBack()
     }
   },
@@ -362,7 +347,7 @@ const handleGoBack = () => {
   if (isPublic.value) {
     router.push('/public')
   } else {
-    // Si hay un PIN_COLLISION o queremos volver atrás en privada,
+    // Al volver atrás en privada,
     // mantenemos el código del torneo para que no tenga que volver a escribirlo.
     router.push({
       name: 'game.join',
@@ -405,15 +390,6 @@ const sendAction = (action) => {
         [action === 'bet' ? 'chipsToBet' : 'chipsToRiseBet']: betAmount.value,
       })
       break
-    case 'blind': {
-      const blindAmount =
-        pokerStore.myInfo.requiredBlind ||
-        (pokerStore.getDisplayMsg?.toLowerCase().includes('small')
-          ? pokerStore.smallBlind
-          : pokerStore.bigBlind)
-      sendMessage({ action: 'setBet', chipsToBet: blindAmount })
-      break
-    }
     case 'sitOut':
       sendMessage({ action: 'setSitOut', isSittingOut: true })
       break

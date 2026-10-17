@@ -4,8 +4,6 @@
     <component
       :is="activeTemplate"
       :isMyTurn="isMyTurn"
-      :canBlind="canBlind"
-      :blindInfo="blindInfo"
       :options="options"
       :balance="balance"
       :currentBet="currentBet"
@@ -33,8 +31,6 @@ import ActionBarLarge from '../pages/actionBarTemplates/ActionBarLarge.vue'
 
 defineProps({
   isMyTurn: Boolean,
-  canBlind: Boolean,
-  blindInfo: Object,
   options: { type: Array, default: () => [] },
   balance: { type: Number, default: 0 },
   currentBet: { type: Number, default: 0 },

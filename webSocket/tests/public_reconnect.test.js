@@ -88,7 +88,7 @@ describe('Public Table Disconnect/Reconnect Tests', () => {
     return { name, secretCode, ws, responses, waitAction, gameCode }
   }
 
-  it('Player should be paused instead of kicked when disconnecting in public match, allowing reconnect', async () => {
+  it('Player keeps the seat (no pause, no kick) when disconnecting in a public match and reconnects to the same table', async () => {
     const gameCode = 'P_RECONN_' + Math.random().toString(36).substring(7)
 
     let alice = createClient(MOCK_PLAYERS.ALICE, gameCode)
@@ -112,10 +112,10 @@ describe('Public Table Disconnect/Reconnect Tests', () => {
     // Alice disconnects
     alice.ws.close()
 
-    // Bob should receive a pause message, not a playerLeave message
-    const pauseMsg = await bob.waitAction('playerPaused', 5000)
-    expect(pauseMsg.message.data.displayMsg).toContain('disconnected')
-    expect(pauseMsg.message.data.displayMsg).toContain('Match paused')
+    // GAM-001: Bob is told Alice disconnected; the table is not paused
+    const disconnectMsg = await bob.waitAction('playerDisconnected', 5000)
+    expect(disconnectMsg.message.data.displayMsg).toContain('disconnected')
+    expect(disconnectMsg.message.data.displayMsg).not.toContain('paused')
 
     console.log('Bob saw Alice get paused. Alice reconnecting...')
 
@@ -128,6 +128,8 @@ describe('Public Table Disconnect/Reconnect Tests', () => {
     // Alice should successfully sign up (reconnect)
     const signUpMsg = await newAlice.waitAction('signUp', 5000)
     expect(signUpMsg).toBeDefined()
+    // GAM-001 AC-07: back to her own table, not redirected to another one
+    expect(signUpMsg.message.torneoId).toBe(gameCode)
 
     console.log('Alice successfully reconnected. Game continues.')
   }, 30000)

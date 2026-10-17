@@ -13,34 +13,23 @@ Last reviewed: 2026-10-16.
 - [ ] **Node ≥ 22 locally** — the harness CLI (`ship check`) refuses Node 20.19; Dockerfiles also use
       `node:20-alpine`.
 
-## Game & connection (from the 2026-10-16 UX analysis — need specs, Level M)
+## Game & connection (from the 2026-10-16 UX analysis)
 
-- [ ] **GAM — automatic blinds + one bet validator**: blinds are posted by hand (client guesses the
-      amount from the message text); `setBet` accepts bets below the call and skips the min-raise
-      rule; decimals accepted.
-- [ ] **GAM — action order**: post-flop starts at `players[1]` (BB) with 3+ players
-      (`match/actions.js` bettingCore); blinds use active players but order uses all players.
-- [ ] **GAM — leaving mid-hand loses pot chips**: pots are rebuilt from the players still in the
-      list; `playerLeave` splices the leaver (private tables do not even fold them first).
-- [ ] **GAM — tournament ends on a disconnect**: winner/nextRound count only *connected* players
-      with chips.
-- [ ] **GAM/OPS — identity**: 4-digit PIN in the URL is the session; brute-forceable, collisions make
-      `Socket.addSocket` drop another player's socket. Move to a server-issued UUID session token.
-- [ ] **GAM/UXP — disconnects**: one disconnect pauses the whole table (60s private / 15s public)
-      and then removes the player for good; reconnecting resets the active player's turn clock;
-      reconnecting to a public table can redirect to another table (`app.js` public lobby logic).
-      Proposal: no table pause, auto check/fold, keep the seat, 20–25s turns + time bank.
-- [ ] **GAM — folded hands revealed** at showdown/runout (`communicator.censoredPlayersInfo`).
+Done in GAM-001..003, OPS-001..002 (see `docs/specs/INDEX.md`). Still open:
+
 - [ ] **BOT — slow bots**: 25s LLM timeout; aim for 6–8s with a heuristic fallback.
-- [ ] **OPS — prerender on the VPS**: "Unable to prerender all routes" (no memory for Chromium);
-      build the client image locally, add swap, or drop prerender (SEO only).
-- [ ] **OPS — test domain cert**: Caddy cannot obtain a cert for `osongo.duckdns.org`; fix DNS or
-      remove it from the `Caddyfile`.
-- [ ] **OPS — delete `/root/YAYPOKER-backup-20261016`** on the VPS once the 2026-10-16 release is
-      confirmed.
+- [ ] **OPS — delete old `/root/YAYPOKER-backup-*`** on the VPS once the next release is confirmed
+      (OPS-002 R-04, keep only the newest rollback point).
 
 ## Gaps
 
+- [ ] Dead-button rule when a player busts (GAM-002 non-goal).
+- [ ] PIN still travels in the `/play/:gameCode/:secretCode` URL; with OPS-001 it only recovers a
+      disconnected seat (rate limited), but it could move out of the URL.
+- [ ] `gameplay.test.js` T0003/T0007 are timing-sensitive under load (failed 2 of 6 full runs on
+      2026-10-16 while the local server and a browser were running); move them to the cursor-based
+      helper in `tests/helpers/tableClient.js`.
+- [ ] Turn length (60 s / 45 s) and a time bank were not changed (GAM-001 non-goal).
 - [ ] `bot/` has no ESLint config (only Prettier); add one so `ship check` can lint it.
 - [ ] Raw `console.log` in `webSocket/dealer.js` (`talkToSocketById`, `talkToAllSockets`) → `logger`.
 - [ ] Lint warning: unused `err` in `client/src/pages/Contact.vue:206`.

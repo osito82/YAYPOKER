@@ -1,4 +1,5 @@
 const log = require('./logger')
+const Socket = require('./sockets')
 const { GAME_RULES } = require('./constants')
 
 class Torneo {
@@ -72,6 +73,18 @@ class Torneo {
     return publicMatches.sort((a, b) => b.players.length - a.players.length)[0]
   }
 
+  // Sockets still attached to a removed match (bots stay connected forever
+  // otherwise). GAM-001 R-12.
+  static closeSockets(idTorneo) {
+    const sockets = Socket.getSocketsByTorneo(idTorneo)
+    if (!sockets) return
+    for (const wrapper of sockets.values()) {
+      if (wrapper.socket && wrapper.socket.readyState === 1) {
+        wrapper.socket.close(1000, 'Table closed')
+      }
+    }
+  }
+
   static removeInactiveMatches(maxIdleTimeMs = 3600000) {
     // 1 hora por defecto
     const now = Date.now()
@@ -94,6 +107,7 @@ class Torneo {
       })
 
       if (activeMatches.length === 0) {
+        this.closeSockets(idTorneo)
         this.torneos.delete(idTorneo)
       } else if (activeMatches.length !== matches.length) {
         this.torneos.set(idTorneo, activeMatches)

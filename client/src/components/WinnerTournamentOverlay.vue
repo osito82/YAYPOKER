@@ -229,8 +229,9 @@
             </div>
           </div>
 
-          <!-- Certificate Box -->
+          <!-- Certificate Box: human winners only (bots get none, GAM-003) -->
           <div
+            v-if="certificate"
             :id="'winner-tournament-cert-box-' + templateSuffix"
             class="cert-box w-full max-w-lg bg-[#060E07] border border-[#D4A853]/20 rounded-xl p-3 relative animate-fade-up animation-delay-700 shrink-0"
           >
@@ -294,6 +295,8 @@
 
           <!-- Verify Link -->
           <div
+            v-if="certificate"
+            :id="'winner-tournament-verify-link-' + templateSuffix"
             class="w-full max-w-lg animate-fade-up animation-delay-900 shrink-0"
           >
             <router-link

@@ -11,6 +11,8 @@ const TIMEOUTS = {
   collectChips: isTest ? 100 : 1500, // 100ms in test, else 1.5 seconds
   publicEmptyGrace: isTest ? 1000 : 30000, // 30 seconds
   publicSingleGrace: isTest ? 1000 : 15000, // 15 seconds
+  disconnectedTurn: isTest ? 3000 : 10000, // turn of a disconnected player (GAM-001)
+  publicSeatRelease: isTest ? 1500 : 60000, // public seat freed after this long disconnected
 }
 
 const GAME_RULES = {
@@ -124,6 +126,8 @@ const CONNECTION_CONFIG = {
   MAX_AUDIO_DATA_CHARS: 700000,
   VOICE_MIN_INTERVAL_MS: isTest ? 0 : 2000,
   SPECTATOR_SECRET: 'spectator',
+  PIN_MAX_ATTEMPTS: 5, // failed PIN recoveries per seat (OPS-001)
+  PIN_LOCK_WINDOW_MS: 10 * 60 * 1000,
 }
 
 const TABLE_SETTINGS_LIMITS = {

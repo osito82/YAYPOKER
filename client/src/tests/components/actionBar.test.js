@@ -53,7 +53,6 @@ describe('ActionBar.vue', () => {
 
   const defaultProps = {
     isMyTurn: true,
-    canBlind: false,
     options: ['fold', 'check', 'call', 'raise'],
     balance: 1000,
     currentBet: 0,
@@ -179,21 +178,5 @@ describe('ActionBar.vue', () => {
 
     expect(wrapper.emitted()).toHaveProperty('action')
     expect(wrapper.emitted().action[0]).toEqual(['fold'])
-  })
-
-  it('shows Post Blind button with type and amount when canBlind is true', async () => {
-    const wrapper = mount(ActionBar, {
-      props: {
-        ...defaultProps,
-        canBlind: true,
-        blindInfo: { type: 'Small', amount: 10 },
-      },
-      global: globalConfig,
-    })
-    await flushPromises()
-
-    expect(wrapper.text()).toContain('Post Small Blind $10')
-    expect(wrapper.text()).not.toContain('Fold')
-    expect(wrapper.text()).not.toContain('Raise')
   })
 })

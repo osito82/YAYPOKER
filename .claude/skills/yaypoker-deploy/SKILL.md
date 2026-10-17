@@ -55,8 +55,11 @@ ssh -o BatchMode=yes yaypoker-prod 'cd /root/YAYPOKER && ls -A; docker ps --form
 ## 2. Backup
 
 ```bash
-ssh -o BatchMode=yes yaypoker-prod 'cp -a /root/YAYPOKER /root/YAYPOKER-backup-$(date +%Y%m%d) && du -sh /root/YAYPOKER-backup-*'
+ssh -o BatchMode=yes yaypoker-prod 'B=/root/YAYPOKER-backup-$(date +%Y%m%d-%H%M); test -e $B && { echo "EXISTS $B"; exit 1; }; cp -a /root/YAYPOKER $B && du -sh $B'
 ```
+
+Include the time in the name: if the target folder already exists, `cp -a` silently nests the copy
+inside it (`…-backup-20261016/YAYPOKER`) instead of creating a new backup.
 
 ## 3. Upload tracked files from `main`
 
@@ -70,21 +73,19 @@ they matter.
 
 ## 4. Rebuild and restart
 
-Plain `down` frees memory for the build (Chromium for the client prerender does not start with
-~200 MB free) while keeping images and volumes:
+Plain `down` frees memory for the build on this 864 MB box while keeping images and volumes:
 
 ```bash
 ssh -o BatchMode=yes yaypoker-prod 'cd /root/YAYPOKER && docker compose -f docker-compose-prod.yml down && docker compose -f docker-compose-prod.yml up --build -d > /tmp/yay-deploy.log 2>&1; echo "UP_EXIT=$?"; docker ps --format "{{.Names}} {{.Status}}"'
 ```
 
-Downtime ≈ build time (~3 min). Do **not** build with the old containers running: on this box the
-client build fails with `TimeoutError ... trying to connect to Chrome`. If `UP_EXIT` ≠ 0, go to
-Rollback immediately.
+Downtime ≈ build time (~2–3 min). Do **not** build with the old containers running (not enough
+memory). If `UP_EXIT` ≠ 0, go to Rollback immediately.
 
 ## 5. Smoke checks
 
 ```bash
-ssh -o BatchMode=yes yaypoker-prod 'docker logs --tail 15 yaypoker-websocket-1; grep -iE "prerender|rendered" /tmp/yay-deploy.log'
+ssh -o BatchMode=yes yaypoker-prod 'docker logs --tail 15 yaypoker-websocket-1; tail -5 /tmp/yay-deploy.log'
 curl -s https://yaypoker.com:8888/health                         # {"status":"healthy"}
 curl -s -o /dev/null -w "%{http_code}\n" https://yaypoker.com/   # 200
 curl -sI https://yaypoker.com/Logs/certificates.json | grep -i content-type   # text/html (SPA), never JSON
@@ -94,6 +95,10 @@ curl -s https://yaypoker.com:8888/status                         # fresh startTi
 Confirm the served bundle is the new one: take `assets/index-*.js` from the home HTML and grep it for
 an id added in this release.
 
+Bots: after the first bot turn, the day's `Logs/bot/bot-<date>.log` must show `AI:GEMINI_REQUEST`
+without an `ERROR:AI` right after it (mask any `key=` when printing). A 404 means the model in
+`DEFAULT_AI_MODEL` was retired — check https://ai.google.dev/gemini-api/docs/models.
+
 ## Rollback
 
 - Build failed after `down`: the previous images still exist →
@@ -102,13 +107,10 @@ an id added in this release.
   (`rm -rf /root/YAYPOKER && cp -a /root/YAYPOKER-backup-<date> /root/YAYPOKER`), then
   `down` + `up --build -d` as in step 4.
 
-## Known issues (as of 2026-10-16)
+## Known issues and history (as of 2026-10-16)
 
-- **Prerender** (`vite-plugin-prerender`, Puppeteer) often logs `Unable to prerender all routes!` on
-  the VPS for lack of memory. Non-fatal: the SPA works, but `/`, `/privacy`, `/terms` ship without
-  pre-rendered HTML (SEO only). Fix options: build the client image locally and
-  `docker save | ssh … docker load`, add swap, or drop prerender.
-- **Caddy** fails ACME for the test domain `osongo.duckdns.org`; `yaypoker.com` is unaffected.
+- **Prerender was removed** on 2026-10-16 (OPS-002): the client build no longer needs Chromium.
+- **Caddy** no longer serves the test domain `osongo.duckdns.org` (OPS-002).
 - **Local dev**: the root `.env` has `NODE_ENV=production`; the bot service URL defaults to
   `http://localhost:8886` and compose sets `BOT_SERVICE_URL=http://bot:8886`.
 - **`!` commands**: when the user runs commands with the `!` prefix, one command per input. A pasted

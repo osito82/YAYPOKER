@@ -120,11 +120,9 @@ describe('Private Match Start Restriction', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
 
     // In current logic, game asks for blinds BEFORE dealing private cards
-    await alice.waitAction('askForBlindBets')
-    alice.send(MOCK_ACTIONS.SMALL_BLIND(10))
+    await alice.waitAction('blindsPosted')
 
-    await bob.waitAction('askForBlindBets')
-    bob.send(MOCK_ACTIONS.BIG_BLIND(20))
+    await bob.waitAction('blindsPosted')
 
     // Game should start now
     await alice.waitAction('dealtPrivateCards')

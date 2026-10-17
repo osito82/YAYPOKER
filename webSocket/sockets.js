@@ -4,51 +4,24 @@ class Socket {
   static torneoSockets = new Map() // Map<idTorneo, Map<socketId, socketWrapper>>
   static log = log
 
+  // Registers a connection. It never evicts another socket: two players may
+  // share a PIN, and taking a seat over is decided in MatchLobby.signUp with
+  // the session token (OPS-001).
   static addSocket(socket, idTorneo) {
-    const { id, name, secretCode, isSpectator } = socket
+    const { id, name } = socket
 
     if (!this.torneoSockets.has(idTorneo)) {
       this.torneoSockets.set(idTorneo, new Map())
     }
+    this.torneoSockets.get(idTorneo).set(id, socket)
 
-    const torneoSockets = this.torneoSockets.get(idTorneo)
-
-    // Handle re-connections based on secretCode:
-    // If a socket already exists with the same secretCode, we remove it to make way for the new one.
-    // This allows the player to "take over" their previous session.
-    // Spectators share a placeholder code, so they never take over a session.
-    for (const [existingId, existingSocket] of torneoSockets.entries()) {
-      if (isSpectator) break
-      if (!existingSocket.isSpectator && existingSocket.secretCode === secretCode) {
-        torneoSockets.delete(existingId)
-        this.log
-          .Template({
-            name: 'brakets',
-            title: 'SERVER:RECONNECTED',
-            date: true,
-          })
-          .R({
-            playerName: name,
-            id,
-            tournament: idTorneo,
-            replacedId: existingId,
-          })
-        break
-      }
-    }
-
-    torneoSockets.set(id, socket)
-
-    // If not a reconnection, it's a new connection
-    if (!this.log.lastTitle?.includes('RECONNECTED')) {
-      this.log
-        .Template({
-          name: 'brakets',
-          title: 'SERVER:NEW_CONNECTION',
-          date: true,
-        })
-        .R({ playerName: name, id, tournament: idTorneo })
-    }
+    this.log
+      .Template({
+        name: 'brakets',
+        title: 'SERVER:NEW_CONNECTION',
+        date: true,
+      })
+      .R({ playerName: name, id, tournament: idTorneo })
   }
 
   static removeSocket(socket, idTorneo) {
@@ -94,26 +67,10 @@ class Socket {
     return !!torneoSockets?.has(id)
   }
 
-  static sendToPlayer(idTorneo, secretCode, data) {
-    const torneoSockets = this.getSocketsByTorneo(idTorneo)
-    if (!torneoSockets) return
-
-    // Find the socket by secretCode
-    let playerSocketWrapper = null
-    for (const socket of torneoSockets.values()) {
-      if (!socket.isSpectator && socket.secretCode === secretCode) {
-        playerSocketWrapper = socket
-        break
-      }
-    }
-
-    if (
-      playerSocketWrapper &&
-      playerSocketWrapper.socket &&
-      playerSocketWrapper.socket.readyState === 1
-    ) {
-      playerSocketWrapper.socket.send(JSON.stringify({ message: data }))
-    }
+  // Private message to a seated player, routed by their current socket
+  static sendToPlayer(idTorneo, player, data) {
+    if (!player?.id) return
+    this.sendToSocketId(idTorneo, player.id, data)
   }
 
   static sendToSocketId(idTorneo, socketId, data) {

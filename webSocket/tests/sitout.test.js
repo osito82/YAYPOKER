@@ -107,15 +107,12 @@ describe('Sit Out System Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    // Wait for blinds
-    await alice.waitAction('askForBlindBets')
-
-    // Alice posts Small Blind (10)
-    alice.send({ action: 'setBet', chipsToBet: 10 })
-
-    // Wait for Bob Big Blind
-    await bob.waitAction('askForBlindBets', 5000, (r) =>
-      r.message.data?.displayMsg?.includes('Bob'),
+    // Blinds are posted by the server (GAM-002); Alice (SB) acts first
+    await alice.waitAction('blindsPosted')
+    await alice.waitAction(
+      'bettingCore-firstBetting',
+      5000,
+      (r) => r.message.type === 'private',
     )
 
     // Bob sets himself to Sit Out
@@ -126,8 +123,8 @@ describe('Sit Out System Integration Tests', () => {
     expect(sitOutMsg.message.data.isSittingOut).toBe(true)
     expect(sitOutMsg.message.data.displayMsg).toContain('Bob')
 
-    // Since Bob is in Sit Out mode and it is his turn to post BB, he should auto-fold
-    // Let's verify the winner is declared immediately (Alice wins because Bob auto-folds)
+    // Alice raises; Bob is sitting out and faces a bet, so he auto-folds
+    alice.send({ action: 'setRise', chipsToRiseBet: 40 })
     const winnerMsg = await alice.waitAction('winner', 5000)
     expect(winnerMsg.message.data.winners[0].name).toBe('Alice')
     expect(winnerMsg.message.data.isFold).toBe(true)
@@ -163,25 +160,23 @@ describe('Sit Out System Integration Tests', () => {
     alice.send(MOCK_ACTIONS.START_GAME)
     bob.send(MOCK_ACTIONS.START_GAME)
 
-    // Round 1
-    await alice.waitAction('askForBlindBets')
-    alice.send({ action: 'setBet', chipsToBet: 10 })
-
-    // Bob times out once (autofold 1)
+    // Hand 1: Alice (SB) raises, Bob times out facing the raise (autofold 1)
+    await alice.waitAction(
+      'bettingCore-firstBetting',
+      5000,
+      (r) => r.message.type === 'private',
+    )
+    alice.send({ action: 'setRise', chipsToRiseBet: 40 })
     const winner1 = await alice.waitAction('winner', 6000)
     expect(winner1.message.data.winners[0].name).toBe('Alice')
 
-    // Wait for next round to start
+    // Hand 2: Bob is now the SB and acts first facing the BB; he times out again
     await alice.waitAction('gameRestarted')
-    await alice.waitAction('askForBlindBets')
-
-    // Post blinds for new hand
-    alice.send({ action: 'setBet', chipsToBet: 10 })
 
     // Bob times out second time (autofold 2)
     // He should now trigger the sitOut automatically!
     const sitOutMsg = await alice.waitAction('playerSitOut', 8000)
     expect(sitOutMsg.message.data.isSittingOut).toBe(true)
     expect(sitOutMsg.message.data.displayMsg).toContain('Bob')
-  })
+  }, 15000)
 })

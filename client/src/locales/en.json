@@ -62,8 +62,6 @@
     "copyright": "© 2026 YayPoker"
   },
   "game": {
-    "post_blind": "Post {type} Blind ${amount}",
-    "post_blind_generic": "Post Blind",
     "fold": "Fold",
     "check": "Check",
     "call": "Call",
@@ -83,6 +81,7 @@
     "status_live": "Live",
     "status_offline": "Offline",
     "reconnecting": "Connection lost. Reconnecting…",
+    "session_replaced": "This table is open in another tab or device. Reload to play here.",
     "win": "Win",
     "tie": "Tie",
     "hand": "Hand",
@@ -118,7 +117,6 @@
     "raise_disabled_tooltip": "Move the slider first to set a raise amount, then press Raise",
     "main_pot_tooltip": "The main pot — all players who have not folded are eligible to win this",
     "side_pot_tooltip": "A side pot created when a player goes all-in — only players who contributed to this pot are eligible",
-    "blind_tooltip": "Post your required blind to stay in the game",
     "odds_vs_random_hint": "Odds vs. random hands",
     "lobby_label": "Lobby",
     "ready_count": "{ready}/{total} Ready",
@@ -127,6 +125,7 @@
     "bet_to_match": "Bet to Match",
     "you_badge": "You",
     "away_badge": "Away",
+    "offline_badge": "Offline",
     "all_in": "All-In",
     "sit_out": "Sit Out",
     "sit_in": "Sit In",

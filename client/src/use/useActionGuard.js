@@ -2,15 +2,7 @@ import { ref } from 'vue'
 
 // Turn actions that must be sent at most once per turn (a double click used
 // to send a second bet that the server rejected as "not your turn").
-const TURN_ACTIONS = new Set([
-  'fold',
-  'check',
-  'call',
-  'allin',
-  'bet',
-  'raise',
-  'blind',
-])
+const TURN_ACTIONS = new Set(['fold', 'check', 'call', 'allin', 'bet', 'raise'])
 
 /**
  * One turn action at a time. `tryAcquire(action)` returns false while a

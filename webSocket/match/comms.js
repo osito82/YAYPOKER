@@ -38,7 +38,7 @@ class MatchComms {
   }
 
   sendOdds(targetPlayer = null) {
-    const activePlayers = this.match.getActivePlayers(true) // Only connected and in hand
+    const activePlayers = this.match.getActivePlayers()
     if (activePlayers.length < 2) return
 
     const boardCards = this.match.dealer.getDealerCards()
@@ -61,9 +61,7 @@ class MatchComms {
       this.communicator.msgBuilder('oddsUpdate', 'private', p, {
         odds: playerOdds,
       })
-      Socket.sendToPlayer(
-        this.match.torneoId,
-        p.secretCode,
+      Socket.sendToPlayer(this.match.torneoId, p,
         this.communicator.getMsg(),
       )
     })

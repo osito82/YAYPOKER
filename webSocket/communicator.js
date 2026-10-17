@@ -22,12 +22,16 @@ class Communicator {
 
   censoredPlayersInfo(players) {
     if (!players) return []
-    const isShowDown = this.stepChecker.checkStep('showDown')
-    const isRunout = this.match.isRunout
+    // Cards are shown only at a real showdown or an all-in runout, and only
+    // for players still in the hand. A hand won because everybody folded
+    // reveals nothing (GAM-003).
+    const isShowDown =
+      this.stepChecker.checkStep('showDown') && !this.match.handEndedByFold
+    const isRunout = this.match.isRunout && !this.match.handEndedByFold
 
     return players.map((p) => {
       const info = p.toJson()
-      if (isShowDown || isRunout) {
+      if ((isShowDown || isRunout) && !p.folded) {
         info.cards = p.getCards()
       }
       return info
