@@ -18,8 +18,8 @@ Last reviewed: 2026-10-16.
 Done in GAM-001..003, OPS-001..002 (see `docs/specs/INDEX.md`). Still open:
 
 - [ ] **BOT — slow bots**: 25s LLM timeout; aim for 6–8s with a heuristic fallback.
-- [ ] **OPS — delete old `/root/YAYPOKER-backup-*`** on the VPS once the next release is confirmed
-      (OPS-002 R-04, keep only the newest rollback point).
+- [ ] **OPS — delete `/root/YAYPOKER-backup-20261016-2351`** once the 2026-10-17 release is confirmed
+      (keep `-20261017-0314` as the rollback point).
 
 ## Gaps
 

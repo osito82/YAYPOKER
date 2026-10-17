@@ -2,6 +2,19 @@
 
 Recent sessions only.
 
+## 2026-10-17 — Production deploy of `5ab037f` (GAM-001..003, OPS-001..002)
+
+- `yaypoker-deploy` skill: backup `/root/YAYPOKER-backup-20261017-0314`, old
+  `/root/YAYPOKER-backup-20261016` deleted (OPS-002 R-04; kept `-20261016-2351` and the new one),
+  `git archive` upload, `down` + `up --build -d` (UP_EXIT=0, no prerender/Chromium in the build).
+- Checks: 4 containers up, `/health` healthy, home 200, `certificates.json` served as text/html, new
+  bundle `index-Ce84qf_5.js` contains the session-token code.
+- Live smoke (two scripted players, temporary private table): same PIN → both connected, session
+  token issued and not leaked, `blindsPosted` "SB 10 / BB 20", no `askForBlindBets`, first turn
+  fold/call/raise; table removed afterwards (0 tournaments).
+- Pending: watch the next real games' logs (`MATCH:IDLE`, `LOBBY:PLAYER_DISCONNECTED`, bot
+  `AI:GEMINI_REQUEST`).
+
 ## 2026-10-16 — Specs GAM-001..003, OPS-001..002 implemented (branch `feat/gam-ops-specs`)
 
 - Approvals: 2026-10-16 direction + spec OK (Guillermo). Decisions: keep the seat on disconnect,
