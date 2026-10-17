@@ -4,6 +4,7 @@ import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
 import { useThemeStore } from './store/themeStore'
+import { headData, applyHead } from './seo/head'
 
 import './styles.css'
 import './index.css'
@@ -16,6 +17,14 @@ app.use(router)
 
 // Initialize theme immediately to apply classes to <html>
 useThemeStore()
+
+// Keep title, description, canonical and hreflang in sync on client navigation (OPS-003)
+router.afterEach((to) => {
+  const data = to.meta.seo
+    ? headData(to.meta.seo, to.meta.locale, i18n.global.t)
+    : null
+  applyHead(data, to.meta.title)
+})
 
 // ==================== Google Analytics (gtag) ====================
 

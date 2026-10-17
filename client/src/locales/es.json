@@ -345,6 +345,183 @@
       "footer": "© 2026 {span}. Todas las fichas son virtuales.",
       "brand": "YayPoker",
       "back_to_home": "Ir a Inicio"
+    },
+    "rules": {
+      "back": "Volver al inicio",
+      "badge": "Cómo jugar",
+      "headline": "Reglas del Texas Hold'em",
+      "intro": "El Texas Hold'em es el póker más popular del mundo. Cada jugador recibe dos cartas privadas, se reparten cinco cartas comunitarias al centro de la mesa y la mejor mano de cinco cartas gana el bote. Aquí tienes todo lo que necesitas para jugar tu primera mano.",
+      "sections": [
+        {
+          "title": "El objetivo",
+          "paragraphs": [
+            "Ganar fichas. Ganas un bote si tienes la mejor mano en el showdown o si apuestas de forma que todos los demás se retiren.",
+            "En YayPoker cada mesa es un freezeout: todos empiezan con las mismas fichas y el último jugador que conserva fichas gana la mesa y recibe un certificado de ganador."
+          ]
+        },
+        {
+          "title": "El botón y las ciegas",
+          "paragraphs": [
+            "Una mesa tiene de 2 a 10 jugadores. El botón de repartidor marca el último asiento en actuar después del flop y se mueve un asiento en el sentido de las agujas del reloj después de cada mano.",
+            "Los dos jugadores a la izquierda del botón ponen apuestas obligatorias llamadas ciegas: la ciega pequeña y la ciega grande (el doble de la pequeña). Si solo hay dos jugadores, el botón pone la ciega pequeña.",
+            "YayPoker pone las ciegas por ti. Empiezan en 10 / 20 y suben cerca de un 25% cada 10 manos, así que las partidas siempre terminan."
+          ]
+        },
+        {
+          "title": "Cartas propias y cartas comunitarias",
+          "paragraphs": [
+            "Cada jugador recibe dos cartas propias que solo él puede ver. Después se reparten hasta cinco cartas comunitarias boca arriba en tres pasos: el flop (tres cartas), el turn (una carta) y el river (una carta).",
+            "Tu mano son las mejores cinco cartas que puedas formar con tus dos cartas propias y las cinco comunitarias. Puedes usar las dos, una o ninguna de tus cartas propias."
+          ]
+        },
+        {
+          "title": "Las cuatro rondas de apuestas",
+          "list": [
+            "Pre-flop: después de repartir las cartas propias. Empieza el jugador a la izquierda de la ciega grande.",
+            "Flop: después de las tres primeras cartas comunitarias. Desde aquí empieza el primer jugador activo a la izquierda del botón.",
+            "Turn: después de la cuarta carta comunitaria.",
+            "River: después de la quinta y última carta comunitaria."
+          ],
+          "paragraphs": [
+            "Una ronda de apuestas termina cuando todos los jugadores que siguen en la mano han puesto la misma cantidad en el bote o están all-in."
+          ]
+        },
+        {
+          "title": "Tus opciones en cada turno",
+          "list": [
+            "Pasar (check): ceder el turno sin apostar. Solo se puede si nadie ha apostado en esta ronda.",
+            "Apostar (bet): poner fichas cuando nadie ha apostado todavía. La apuesta mínima es una ciega grande.",
+            "Igualar (call): poner lo mismo que la apuesta actual.",
+            "Subir (raise): aumentar la apuesta actual. La subida debe ser al menos tan grande como la apuesta o subida anterior.",
+            "Retirarse (fold): dejar tus cartas y renunciar al bote.",
+            "All-in: apostar todas tus fichas. Siempre puedes ir all-in, aunque sea por menos de lo que cuesta igualar o subir."
+          ],
+          "paragraphs": [
+            "En YayPoker se juega sin límite (no-limit): puedes apostar cualquier cantidad hasta todas tus fichas. Un all-in menor que una subida completa no reabre las apuestas para quienes ya actuaron; solo pueden igualar o retirarse."
+          ]
+        },
+        {
+          "title": "El showdown",
+          "paragraphs": [
+            "Si después de las apuestas del river quedan dos o más jugadores, muestran sus cartas y la mejor mano de cinco cartas gana el bote. Si todos los demás se retiran, el último jugador gana sin mostrar.",
+            "Ningún palo vale más que otro: si dos manos son exactamente iguales, el bote se reparte."
+          ]
+        },
+        {
+          "title": "All-in y botes secundarios",
+          "paragraphs": [
+            "Un jugador que va all-in solo puede ganarle a cada rival lo mismo que él puso. Las fichas que los demás sigan apostando van a un bote secundario que solo ellos pueden ganar.",
+            "Ejemplo: vas all-in con 100 y dos rivales ponen 300 cada uno. El bote principal (300) lo puede ganar cualquiera de los tres; el bote secundario (400), solo los dos rivales."
+          ]
+        },
+        {
+          "title": "Jugar en YayPoker",
+          "list": [
+            "Mesas privadas: crea una mesa, comparte el enlace o el código con tus amigos y jueguen juntos. Los bots pueden ocupar los asientos vacíos.",
+            "Mesas públicas: únete cuando quieras a una mesa con otros jugadores.",
+            "Tiempo de turno: si se te acaba el tiempo, el juego pasa por ti cuando se puede; si no, te retira. En mesas públicas, dos turnos seguidos sin jugar liberan tu asiento.",
+            "Solo fichas virtuales: YayPoker es un juego social gratuito. Nunca se usa dinero real."
+          ]
+        }
+      ],
+      "cta_title": "¿Listo para tu primera mano?",
+      "cta_body": "Abre una mesa privada y manda el enlace a tus amigos, o entra ya a una mesa pública.",
+      "cta_create": "Crear mesa privada",
+      "cta_public": "Jugar en una mesa pública",
+      "see_rankings": "Ver el ranking de manos de póker"
+    },
+    "hand_rankings": {
+      "back": "Volver al inicio",
+      "badge": "Lo básico del póker",
+      "headline": "Ranking de manos de póker",
+      "intro": "En Texas Hold'em tu mano son las mejores cinco cartas entre tus dos cartas propias y las cinco comunitarias. Estas son las diez manos posibles, de la más fuerte a la más débil.",
+      "hands": [
+        {
+          "name": "Escalera real",
+          "body": "A, K, Q, J y 10, todas del mismo palo. La mejor mano del póker."
+        },
+        {
+          "name": "Escalera de color",
+          "body": "Cinco cartas seguidas del mismo palo. Entre dos escaleras de color gana la de carta más alta."
+        },
+        {
+          "name": "Póker",
+          "body": "Cuatro cartas del mismo valor. La quinta carta (el kicker) desempata."
+        },
+        {
+          "name": "Full",
+          "body": "Un trío más una pareja de otro valor. Primero decide el trío y después la pareja."
+        },
+        {
+          "name": "Color",
+          "body": "Cinco cartas del mismo palo que no van seguidas. Se compara la carta más alta, luego la siguiente, y así sucesivamente."
+        },
+        {
+          "name": "Escalera",
+          "body": "Cinco cartas seguidas de distintos palos. El as puede ir arriba (10-J-Q-K-A) o abajo (A-2-3-4-5, la escalera más baja)."
+        },
+        {
+          "name": "Trío",
+          "body": "Tres cartas del mismo valor y dos cartas sueltas."
+        },
+        {
+          "name": "Doble pareja",
+          "body": "Dos cartas de un valor y dos de otro. Decide primero la pareja más alta, después la más baja y después el kicker."
+        },
+        {
+          "name": "Pareja",
+          "body": "Dos cartas del mismo valor. Si dos jugadores tienen la misma pareja, deciden las cartas restantes más altas."
+        },
+        {
+          "name": "Carta alta",
+          "body": "Ninguna combinación: la mano vale por su carta más alta y luego por las siguientes."
+        }
+      ],
+      "ties_title": "Empates y kickers",
+      "ties": [
+        "Solo cuentan cinco cartas. Las cartas fuera de las mejores cinco nunca desempatan.",
+        "Si dos manos son del mismo tipo, se comparan primero las cartas que forman la mano y después las restantes (kickers), de la más alta a la más baja.",
+        "Los palos nunca desempatan. Si las mejores cinco cartas son iguales, el bote se reparte.",
+        "Si la mejor mano está en la mesa (las cinco cartas comunitarias), todos los jugadores que siguen en la mano se reparten el bote."
+      ],
+      "see_rules": "Leer las reglas completas del Texas Hold'em"
     }
+  },
+  "seo": {
+    "home": {
+      "title": "YayPoker - Póker Texas Hold'em gratis con amigos en línea",
+      "description": "Juega póker Texas Hold'em gratis con tus amigos desde el navegador. Sin registro ni descargas: crea una mesa privada, comparte el enlace y reparte. Solo fichas virtuales."
+    },
+    "about": {
+      "title": "Sobre nosotros - Noches de póker gratis con amigos",
+      "description": "Por qué existe YayPoker: una mesa de póker gratis, rápida y sin registro para jugar con amigos con fichas virtuales en cualquier dispositivo."
+    },
+    "rules": {
+      "title": "Reglas del Texas Hold'em: cómo jugar póker",
+      "description": "Aprende Texas Hold'em paso a paso: ciegas y botón, cartas propias y comunitarias, las cuatro rondas de apuestas, all-in, botes secundarios y el showdown."
+    },
+    "hand_rankings": {
+      "title": "Ranking de manos de póker: de la escalera real a la carta alta",
+      "description": "Las 10 manos del póker Texas Hold'em ordenadas de mejor a peor, con ejemplos de cartas y cómo se deciden los empates y los kickers."
+    },
+    "privacy": {
+      "title": "Política de privacidad",
+      "description": "Cómo trata YayPoker tus datos: sin cuentas, sin dinero real, solo lo necesario para que funcione tu mesa de póker."
+    },
+    "terms": {
+      "title": "Términos de servicio",
+      "description": "Los términos para jugar en YayPoker, un juego social de póker gratuito con fichas virtuales y sin apuestas de dinero real."
+    },
+    "contact": {
+      "title": "Contacto",
+      "description": "¿Preguntas, errores o ideas para YayPoker? Escríbenos y ayúdanos a mejorar tus noches de póker."
+    }
+  },
+  "site_links": {
+    "label": "Enlaces del sitio",
+    "home": "Inicio",
+    "rules": "Reglas del póker",
+    "hand_rankings": "Ranking de manos",
+    "about": "Sobre nosotros"
   }
 }

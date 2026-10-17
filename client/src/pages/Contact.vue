@@ -4,7 +4,7 @@
   >
     <div class="max-w-4xl mx-auto">
       <router-link
-        to="/"
+        :to="localePath('/')"
         class="inline-flex items-center text-yellow-600 dark:text-yellow-500 hover:text-yellow-700 dark:hover:text-yellow-400 mb-12 transition-colors"
       >
         <svg
@@ -155,10 +155,13 @@
         </form>
       </div>
     </div>
+    <SiteLinks class="px-6 pb-12" />
   </div>
 </template>
 
 <script setup>
+import SiteLinks from '../components/SiteLinks.vue'
+import { useLocalePath } from '../use/useLocalePath'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { urlsFactory } from '../vutils'
@@ -210,4 +213,6 @@ const handleSubmit = async () => {
     isSubmitting.value = false
   }
 }
+
+const { localePath } = useLocalePath()
 </script>
