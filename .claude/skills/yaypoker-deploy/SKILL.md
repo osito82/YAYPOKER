@@ -88,7 +88,7 @@ memory). If `UP_EXIT` ≠ 0, go to Rollback immediately.
 ssh -o BatchMode=yes yaypoker-prod 'docker logs --tail 15 yaypoker-websocket-1; tail -5 /tmp/yay-deploy.log'
 curl -s https://yaypoker.com:8888/health                         # {"status":"healthy"}
 curl -s -o /dev/null -w "%{http_code}\n" https://yaypoker.com/   # 200
-curl -sI https://yaypoker.com/Logs/certificates.json | grep -i content-type   # text/html (SPA), never JSON
+curl -s -o /dev/null -w "%{http_code}\n" https://yaypoker.com/Logs/certificates.json   # 404 (OPS-003), never JSON
 curl -s https://yaypoker.com:8888/status                         # fresh startTime
 ```
 

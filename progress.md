@@ -10,9 +10,13 @@ Recent sessions only.
   14 pages (7 × en/es), `dist/app.html` (noindex shell), `dist/404.html`, generated sitemap;
   `client/nginx.conf` (real 404s, trailing-slash 301, noindex app routes); Caddy `www` → apex 301;
   new `/rules` and `/hand-rankings`; `og-image.jpg`; theme applied before paint.
-- Verified locally (nginx:alpine container + browser); client tests 34/34. Not committed/deployed.
-- Pending: human review of rules/rankings texts (AC-10), commit, deploy, AC-07 on prod, then submit
-  the sitemap in Google Search Console (owner).
+- Verified locally (nginx:alpine container + browser); client 34/34, webSocket 196/196.
+- Deployed 2026-10-17 (`c01a214`): backup `/root/YAYPOKER-backup-20261017-1903`, VPS build ran the
+  prerender (14 pages), prod checks OK (titles per page, 301s, noindex app routes, 404s incl.
+  `/Logs/*`, og-image, sitemap 14 URLs, `www` → apex, lobby loads). 79 merged remote branches and 99
+  local ones deleted (owner OK); 5 unmerged kept: callButton, integrated-bots, reOrg, sidePot, winston.
+- Pending: AC-10 text review; submit the sitemap in Google Search Console (owner); delete old
+  server backups once confirmed.
 
 ## 2026-10-17 — Production deploy of `5ab037f` (GAM-001..003, OPS-001..002)
 

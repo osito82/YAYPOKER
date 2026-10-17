@@ -1,6 +1,6 @@
 # OPS-003 · SEO: static HTML for public pages, Spanish URLs, rules and hand rankings
 
-- **Level:** M · **Status:** implemented (pending deploy + text review) · **Owner:** Guillermo · **Created:** 2026-10-17
+- **Level:** M · **Status:** implemented, deployed 2026-10-17 (AC-10 text review pending) · **Owner:** Guillermo · **Created:** 2026-10-17
 - **Repos:** client (build, router, pages, locales, nginx), root (Caddyfile) · **Flags:** —
 - **Supersedes:** OPS-002 R-02 (head handling). OPS-002 R-01 still holds: no Puppeteer/Chromium.
 
@@ -142,7 +142,7 @@ beyond the existing `VideoGame`.
 | AC-04 | ✅ `seo.test.js` "first-load language redirect"; browser: saved `es` + `/about` → `/es/about` |
 | AC-05 | ✅ local nginx: `/lobby`, `/public`, `/new`, `/join/ABC`, `/play/ABC/1234`, `/watch/ABC`, `/verify/x/y` → 200 + `X-Robots-Tag: noindex`; lobby renders in browser |
 | AC-06 | ✅ local nginx: `/nope` and `/Logs/certificates.json` → 404 NotFound; `/about/` and `/es/` → 301 |
-| AC-07 | ⏳ after deploy |
+| AC-07 | ✅ prod 2026-10-17: `curl -I https://www.yaypoker.com/rules?x=1` → 301 `https://yaypoker.com/rules?x=1` |
 | AC-08 | ✅ `identify public/og-image.jpg` → JPEG 1200x630; nginx 200 `image/jpeg` |
 | AC-09 | ✅ `seo.test.js` "builds a sitemap…" |
 | AC-10 | ⏳ human review of rules / hand rankings texts |
