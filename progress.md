@@ -11,6 +11,12 @@ Recent sessions only.
   - Note: the "lingering" sockets in the log were old tabs left open while joining a new table; browsers already close WebSockets on unload, so this is hardening, not the fix for that log entry.
   - `webSocket/sockets.js` & `webSocket/app.js`: eliminated duplicate `SERVER:NEW_CONNECTION` and `SERVER:DISCONNECTION` logs by centralizing registration in `Socket.addSocket` (with `isSpectator`) and `Socket.removeSocket`. Added unit test in `webSocket/tests/sockets.test.js`.
 - Verified: client 43/43 tests green, webSocket test suite green, ESLint 0 errors, `npx vite build` clean (1.92s).
+- Merged to `main` (`bb24f04`) and **deployed to production 2026-11-21 15:17 UTC**: harness ship check
+  green; backup `/root/YAYPOKER-backup-20261121-1516` (14 MB); `git archive` upload; `down` +
+  `up --build -d` → `UP_EXIT=0`. Smoke: `/health` healthy, home 200, `/Logs/certificates.json` 404,
+  fresh `startTime`, served bundle `index-BbAyskyN.js` contains the `pageshow` fix. Disk 79% (2.0 GB
+  free); 4 backups now on the server (3 from October can be deleted). Bot Gemini check pending first
+  bot turn.
 
 
 ## 2026-10-17 — OPS-003 SEO (branch `feat/ops-003-seo`)
