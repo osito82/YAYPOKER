@@ -2,6 +2,16 @@
 
 Recent sessions only.
 
+## 2026-11-21 — Fix slider step shortfall, unload cleanup, and duplicate logging (branch `fix/slider-step-and-socket-logging`)
+
+- Analyzed production match log (`E3D57-B5A7E` and `22581-FA824`): identified slider step limitation preventing exact all-in bets, duplicate socket connection/disconnection logs, and client unmount socket lingering.
+- Built & verified:
+  - `client/src/components/actionBar/BettingSlider.vue`: changed slider step from 5 to 1, clamped `betProxy` to `[sliderMin, maxBet]` integers so all-in bets never leave 1-4 micro-stacks. Added unit tests in `client/src/tests/components/bettingSlider.test.js`.
+  - `client/src/use/useSockets.js`: added `beforeunload` and `pagehide` listeners calling `disconnectSocket()`.
+  - `webSocket/sockets.js` & `webSocket/app.js`: eliminated duplicate `SERVER:NEW_CONNECTION` and `SERVER:DISCONNECTION` logs by centralizing registration in `Socket.addSocket` (with `isSpectator`) and `Socket.removeSocket`. Added unit test in `webSocket/tests/sockets.test.js`.
+- Verified: client 38/38 tests green, webSocket test suite green, ESLint 0 errors, `npx vite build` clean (1.92s).
+
+
 ## 2026-10-17 — OPS-003 SEO (branch `feat/ops-003-seo`)
 
 - Approvals: 2026-10-17 direction (fix SEO, `/es` URLs, rules + hand rankings pages) and spec OK

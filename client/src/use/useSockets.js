@@ -120,7 +120,12 @@ export default function useWebSocket(url, options) {
   const onVisibilityChange = () => {
     if (document.visibilityState === 'visible') reconnectNow()
   }
+  const onPageUnload = () => {
+    disconnectSocket()
+  }
   window.addEventListener('online', reconnectNow)
+  window.addEventListener('beforeunload', onPageUnload)
+  window.addEventListener('pagehide', onPageUnload)
   document.addEventListener('visibilitychange', onVisibilityChange)
 
   const disconnectSocket = () => {
@@ -136,6 +141,8 @@ export default function useWebSocket(url, options) {
     }
     pokerStore.setConnected(false)
     window.removeEventListener('online', reconnectNow)
+    window.removeEventListener('beforeunload', onPageUnload)
+    window.removeEventListener('pagehide', onPageUnload)
     document.removeEventListener('visibilitychange', onVisibilityChange)
   }
 

@@ -109,4 +109,20 @@ describe('Socket Manager', () => {
       )
     })
   })
+
+  describe('logging', () => {
+    it('logs NEW_CONNECTION with isSpectator and DISCONNECTION once', () => {
+      const templateSpy = vi.spyOn(Socket.log, 'Template')
+      Socket.addSocket(socket1, torneoId)
+      expect(templateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'SERVER:NEW_CONNECTION' }),
+      )
+
+      Socket.removeSocket(socket1, torneoId)
+      expect(templateSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'SERVER:DISCONNECTION' }),
+      )
+      templateSpy.mockRestore()
+    })
+  })
 })

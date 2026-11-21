@@ -21,7 +21,12 @@ class Socket {
         title: 'SERVER:NEW_CONNECTION',
         date: true,
       })
-      .R({ playerName: name, id, tournament: idTorneo })
+      .R({
+        playerName: name,
+        id,
+        tournament: idTorneo,
+        isSpectator: Boolean(socket.isSpectator),
+      })
   }
 
   static removeSocket(socket, idTorneo) {

@@ -330,10 +330,6 @@ wss.on('connection', (ws, req) => {
     ws.isAlive = true
   })
 
-  log
-    .Template({ name: 'brakets', title: 'SERVER:NEW_CONNECTION', date: true })
-    .R({ playerName, id: thisSocket.id, tournament: torneoId, isSpectator })
-
   Socket.addSocket(thisSocket, torneoId)
 
   // Intentar obtener el match existente o crear uno nuevo
@@ -422,16 +418,17 @@ wss.on('connection', (ws, req) => {
   })
 
   ws.on('close', () => {
-    log
-      .Template({
-        name: 'brakets',
-        title: 'SERVER:DISCONNECTION',
-        date: true,
-      })
-      .R({ playerName })
     // Drop the registry entry unless a reconnection already replaced it
     if (Socket.getSocket(torneoId, thisSocket.id)?.socket === ws) {
       Socket.removeSocket(thisSocket, torneoId)
+    } else {
+      log
+        .Template({
+          name: 'brakets',
+          title: 'SERVER:SUPERSEDED_SOCKET_CLOSED',
+          date: true,
+        })
+        .R({ playerName, id: thisSocket.id, tournament: torneoId })
     }
     try {
       if (match && !thisSocket.isSpectator) {

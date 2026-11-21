@@ -11,7 +11,7 @@
       v-model.number="betProxy"
       :min="sliderMin"
       :max="maxBet"
-      :step="5"
+      :step="1"
       :disabled="isSliderDisabled"
       class="slider-input flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
     />
@@ -51,7 +51,13 @@ const emit = defineEmits(['update:betAmount'])
 
 const betProxy = computed({
   get: () => props.betAmount,
-  set: (val) => emit('update:betAmount', val),
+  set: (val) => {
+    let num = Math.round(Number(val))
+    if (isNaN(num)) num = props.sliderMin ?? 0
+    if (props.maxBet != null && num >= props.maxBet) num = props.maxBet
+    else if (props.sliderMin != null && num < props.sliderMin) num = props.sliderMin
+    emit('update:betAmount', num)
+  },
 })
 </script>
 
