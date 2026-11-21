@@ -1,4 +1,4 @@
-import { ref, onBeforeUnmount } from 'vue'
+import { ref, toRaw, onBeforeUnmount } from 'vue'
 import { usePokerStore } from '../store/pokerStore'
 import { getSessionToken } from './sessionToken'
 
@@ -40,7 +40,8 @@ export default function useWebSocket(url, options) {
       if (token) socketUrl.searchParams.set('sessionToken', token)
       else socketUrl.searchParams.delete('sessionToken')
     }
-    socket.value = new WebSocket(socketUrl)
+    const ws = new WebSocket(socketUrl)
+    socket.value = ws
 
     socket.value.addEventListener('open', () => {
       if (isDestroyed.value) {
@@ -67,6 +68,9 @@ export default function useWebSocket(url, options) {
     })
 
     socket.value.addEventListener('close', (event) => {
+      // A late close from a socket we already replaced (e.g. the one closed
+      // when the page entered the back/forward cache) must not touch state
+      if (socket.value && toRaw(socket.value) !== ws) return
       console.log('Conexión cerrada')
       pokerStore.setConnected(false)
 
@@ -120,12 +124,33 @@ export default function useWebSocket(url, options) {
   const onVisibilityChange = () => {
     if (document.visibilityState === 'visible') reconnectNow()
   }
-  const onPageUnload = () => {
-    disconnectSocket()
+  // Leaving the page. If it goes into the back/forward cache (persisted) it
+  // may come back: close the socket but keep the composable alive so
+  // `pageshow` can reconnect. Otherwise the page is gone for good.
+  const onPageHide = (event) => {
+    if (!event?.persisted) {
+      disconnectSocket()
+      return
+    }
+    isManuallyClosed.value = true
+    if (reconnectTimeout.value) {
+      clearTimeout(reconnectTimeout.value)
+      reconnectTimeout.value = null
+    }
+    if (socket.value) {
+      socket.value.close()
+      socket.value = null
+    }
+    pokerStore.setConnected(false)
+  }
+  const onPageShow = (event) => {
+    if (!event?.persisted || isDestroyed.value) return
+    isManuallyClosed.value = false
+    reconnectNow()
   }
   window.addEventListener('online', reconnectNow)
-  window.addEventListener('beforeunload', onPageUnload)
-  window.addEventListener('pagehide', onPageUnload)
+  window.addEventListener('pagehide', onPageHide)
+  window.addEventListener('pageshow', onPageShow)
   document.addEventListener('visibilitychange', onVisibilityChange)
 
   const disconnectSocket = () => {
@@ -141,8 +166,8 @@ export default function useWebSocket(url, options) {
     }
     pokerStore.setConnected(false)
     window.removeEventListener('online', reconnectNow)
-    window.removeEventListener('beforeunload', onPageUnload)
-    window.removeEventListener('pagehide', onPageUnload)
+    window.removeEventListener('pagehide', onPageHide)
+    window.removeEventListener('pageshow', onPageShow)
     document.removeEventListener('visibilitychange', onVisibilityChange)
   }
 
