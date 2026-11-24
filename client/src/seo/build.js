@@ -7,14 +7,18 @@ const SEO_BLOCK = /<!--seo-->[\s\S]*?<!--\/seo-->/
 const JSONLD_BLOCK = /\s*<!--jsonld-->[\s\S]*?<!--\/jsonld-->/
 const APP_DIV = '<div id="app"></div>'
 
-// rendered = { html, locale, head } from entry-server render(); options.noindex for app shell/404
+// rendered = { html, locale, head | headHtml } from entry-server render(); options.noindex for app
+// shell, share shells and 404
 export function fillTemplate(template, rendered, { noindex = false, jsonLd = false } = {}) {
   if (!SEO_BLOCK.test(template) || !template.includes(APP_DIV)) {
     throw new Error('index.html is missing the <!--seo--> block or the empty #app div')
   }
-  const head = rendered.head
-    ? headTags(rendered.head)
-    : `<title>${rendered.title || 'YayPoker'}</title>`
+  // headHtml: a ready head (share shells); head: SEO page data; neither: title only (app shell)
+  const head =
+    rendered.headHtml ??
+    (rendered.head
+      ? headTags(rendered.head)
+      : `<title>${rendered.title || 'YayPoker'}</title>`)
   const robots = noindex ? '\n    <meta name="robots" content="noindex" />' : ''
   let out = template
     .replace(SEO_BLOCK, () => head + robots)

@@ -9,7 +9,8 @@ import { createAppRouter } from './router'
 import i18n from './i18n'
 import { headData } from './seo/head'
 
-export { seoUrls, SITE_URL, absoluteUrl, LOCALES } from './seo/pages'
+export { seoUrls, SITE_URL, absoluteUrl, LOCALES, SHARE_SHELLS } from './seo/pages'
+export { shareHeadTags } from './seo/head'
 export { fillTemplate, sitemapXml, validatePages } from './seo/build'
 
 // Renders one URL. Returns the app HTML, its locale and the head data (null for non-SEO routes).

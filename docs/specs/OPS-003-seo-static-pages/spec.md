@@ -151,3 +151,29 @@ beyond the existing `VideoGame`.
 
 Notes: titles keep the " | YayPoker" suffix in code (`seo/head.js`) because vue-i18n reads `|` as a
 plural separator. The SSR bundle inlines all deps (`ssr.noExternal`) and is deleted after prerender.
+
+## Addendum A (2026-11-24): link previews for shared app links, gzip
+
+Search Console (2026-11-24) showed 1 indexed page and 1 click in 3 months; the sitemap had never been
+submitted (now submitted, 6 URLs sent for indexing). Two gaps found in the same audit:
+
+- **R-A1** WHEN a `/join/<code>` or `/watch/<code>` link is fetched (chat link previews) THE SYSTEM SHALL
+  return a title, description, `og:*` and `twitter:*` tags with the 1200×630 image. Before: title
+  "YayPoker" only, so WhatsApp showed a bare link on the main growth channel (invites).
+- **R-A2** Those pages SHALL stay `noindex` (meta and `X-Robots-Tag`) with no canonical or hreflang: the
+  URL carries a game code.
+- **R-A3** THE nginx server SHALL gzip text assets (JS, CSS, JSON, SVG, XML). Before: the main JS was
+  served uncompressed (418 KB; 140 KB gzipped).
+
+Design: `SHARE_SHELLS` in `seo/pages.js` (file, title, description) → `shareHeadTags` in `seo/head.js`
+→ prerender writes `dist/invite.html` and `dist/watch.html`; nginx serves them for `/join` and `/watch`
+instead of `app.html`. Text in English (site default; links carry no language).
+
+Evidence (local, `nginx:alpine` with the repo `nginx.conf`): `nginx -t` OK; `/join/ABCDE` and
+`/join/ABCDE/secret` → 200 "You're invited to a poker table | YayPoker" + `X-Robots-Tag: noindex`;
+`/watch/ABCDE` → "Watch a live poker game | YayPoker"; `/play`, `/lobby`, `/`, `/rules`, `/nope`
+unchanged; main JS `Content-Encoding: gzip`, 140 KB. `seo.test.js` share-shell and nginx tests;
+client 46/46.
+
+Not done (noted for later): home H1 without search words, JSON-LD only on `/` (not `/es`), sitemap
+`lastmod` changes on every build.
