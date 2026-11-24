@@ -10,7 +10,13 @@ Recent sessions only.
 - Built (OPS-003 Addendum A): `/join` and `/watch` get their own shells with link-preview tags
   (`invite.html`, `watch.html`, still noindex); nginx gzip (main JS 418 → 140 KB).
 - Verified: client 46/46, ESLint 0 errors, `npm run build` writes both shells, local nginx checks.
-- Next: deploy; watch Search Console (Pages, Performance → Queries) over the next 1–2 weeks.
+- **Deployed 2026-11-24** `cd5b193` (06:19 UTC) then `5dae2f6` (06:22 UTC): the first deploy served the
+  previews but not gzip, because Caddy's `Via` header makes nginx skip gzip for proxied requests; fixed
+  with `gzip_proxied any` (`fix/gzip-behind-caddy`, test added). Smoke: health OK, `/`, `/rules`, `/es`,
+  `/lobby` 200, `/Logs/certificates.json` and `/nope` 404, `/join/<code>` shows the invite preview and
+  `X-Robots-Tag: noindex`; main JS 418 → 140 KB, CSS 124 → 18 KB, home HTML 32 → 7 KB on the wire.
+  Backups on the server: `YAYPOKER-backup-20261124-0617` (before both) and `-0621`.
+- Next: watch Search Console (Pages, Performance → Queries) over the next 1–2 weeks.
 
 ## 2026-11-21 — Fix slider step shortfall, unload cleanup, and duplicate logging (branch `fix/slider-step-and-socket-logging`)
 
