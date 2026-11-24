@@ -138,6 +138,8 @@ describe('nginx.conf', () => {
 
   it('compresses JS and CSS', () => {
     expect(conf).toMatch(/^\s*gzip on;/m)
+    // Behind Caddy (Via header) nginx skips gzip unless proxied responses are allowed
+    expect(conf).toMatch(/^\s*gzip_proxied any;/m)
     expect(conf).toMatch(/gzip_types[^;]*application\/javascript/)
     expect(conf).toMatch(/gzip_types[^;]*text\/css/)
   })
