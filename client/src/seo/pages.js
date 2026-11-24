@@ -16,6 +16,23 @@ export const SEO_PAGES = [
   { name: 'contact', path: '/contact', key: 'contact' },
 ]
 
+// App links people share in chats (WhatsApp, Telegram…). Not indexed, but the link preview needs
+// a title, description and image, or it shows a bare "YayPoker". `file` is the shell nginx serves.
+export const SHARE_SHELLS = [
+  {
+    file: 'invite.html',
+    title: "You're invited to a poker table | YayPoker",
+    description:
+      'Join a free Texas Hold\'em game with friends. No sign-up, no downloads: open the link, pick a name and take your seat.',
+  },
+  {
+    file: 'watch.html',
+    title: 'Watch a live poker game | YayPoker',
+    description:
+      'Follow a free Texas Hold\'em game between friends as a spectator, live in your browser.',
+  },
+]
+
 // '/about' + 'es' → '/es/about'; '/' + 'es' → '/es'
 export function localizedPath(path, locale) {
   if (locale !== 'es') return path

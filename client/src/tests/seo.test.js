@@ -6,7 +6,8 @@ import { createMemoryHistory } from 'vue-router'
 import { render } from '../entry-server'
 import { createAppRouter } from '../router'
 import { fillTemplate, sitemapXml, validatePages } from '../seo/build'
-import { seoUrls, localizedPath, basePath } from '../seo/pages'
+import { seoUrls, localizedPath, basePath, SHARE_SHELLS } from '../seo/pages'
+import { shareHeadTags } from '../seo/head'
 
 const template = readFileSync(resolve(__dirname, '../../index.html'), 'utf8')
 
@@ -90,6 +91,55 @@ describe('prerendered pages', () => {
     )
     expect(shell).toContain('<meta name="robots" content="noindex" />')
     expect(shell).not.toContain('rel="canonical"')
+  })
+
+  // Shared /join and /watch links: a chat preview with title, text and image, still noindex
+  it('gives shared app links a link preview without making them indexable', () => {
+    expect(SHARE_SHELLS.map((s) => s.file)).toEqual(['invite.html', 'watch.html'])
+    for (const share of SHARE_SHELLS) {
+      const html = fillTemplate(
+        template,
+        { html: '', locale: 'en', headHtml: shareHeadTags(share) },
+        { noindex: true },
+      )
+      const titles = html.match(/<title>[^<]*<\/title>/g)
+      expect(titles).toHaveLength(1)
+      expect(html).toContain('<meta name="robots" content="noindex" />')
+      expect(html).not.toContain('rel="canonical"')
+      expect(html).not.toContain('hreflang=')
+      expect(html).toContain('<meta property="og:image" content="https://yaypoker.com/og-image.jpg" />')
+      expect(html).toContain('<meta name="twitter:card" content="summary_large_image" />')
+      expect(html).toMatch(/<meta property="og:title" content="[^"]+" \/>/)
+      expect(html).toMatch(/<meta property="og:description" content="[^"]+" \/>/)
+      expect(html).toContain('<div id="app"></div>')
+    }
+    // Quotes in the text are escaped, so the attribute is not cut short
+    expect(shareHeadTags({ title: 'A "b"', description: "it's" })).toContain(
+      'content="A &quot;b&quot;"',
+    )
+  })
+})
+
+describe('nginx.conf', () => {
+  const conf = readFileSync(resolve(__dirname, '../../nginx.conf'), 'utf8')
+
+  it('serves the share shells on /join and /watch, noindex', () => {
+    const block = (route) =>
+      conf.match(new RegExp(`location ~ \\^/${route}\\(/\\|\\$\\) \\{[^}]*\\}`))?.[0]
+    expect(block('join')).toContain('try_files /invite.html =404')
+    expect(block('watch')).toContain('try_files /watch.html =404')
+    for (const route of ['join', 'watch']) expect(block(route)).toContain('X-Robots-Tag "noindex"')
+    // The generic app shell must no longer catch them first
+    const generic = conf.match(/location ~ \^\/\(([^)]*)\)\(\/\|\$\)/)[1].split('|')
+    expect(generic).not.toContain('join')
+    expect(generic).not.toContain('watch')
+    expect(generic).toEqual(expect.arrayContaining(['lobby', 'public', 'new', 'play', 'verify']))
+  })
+
+  it('compresses JS and CSS', () => {
+    expect(conf).toMatch(/^\s*gzip on;/m)
+    expect(conf).toMatch(/gzip_types[^;]*application\/javascript/)
+    expect(conf).toMatch(/gzip_types[^;]*text\/css/)
   })
 })
 

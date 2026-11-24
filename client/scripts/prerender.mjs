@@ -2,6 +2,7 @@
 // dist/) and `vite build --ssr` (into dist-ssr/). No browser: Vue renders to a string in Node.
 //
 // Writes dist/<path>/index.html for every SEO URL, dist/app.html (shell for the app routes),
+// dist/invite.html and dist/watch.html (app shell with a link preview for shared links),
 // dist/404.html and dist/sitemap.xml, then fails the build if a page breaks the R-15 checks.
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
@@ -59,6 +60,16 @@ const shell = ssr.fillTemplate(
 )
 await writeFile(join(dist, 'app.html'), shell)
 
+// Shared app links (/join, /watch): same shell with a link preview, still not indexed
+for (const share of ssr.SHARE_SHELLS) {
+  const html = ssr.fillTemplate(
+    template,
+    { html: '', locale: 'en', headHtml: ssr.shareHeadTags(share) },
+    { noindex: true },
+  )
+  await writeFile(join(dist, share.file), html)
+}
+
 // Unknown paths: NotFound page, served by nginx with status 404
 const notFound = await ssr.render('/404-page-not-found')
 await writeFile(join(dist, '404.html'), ssr.fillTemplate(template, notFound, { noindex: true }))
@@ -67,4 +78,6 @@ const today = new Date().toISOString().slice(0, 10)
 await writeFile(join(dist, 'sitemap.xml'), ssr.sitemapXml(ssr.seoUrls(), today))
 
 await rm(ssrDir, { recursive: true, force: true })
-console.log(`[prerender] ${pages.length} pages, app.html, 404.html and sitemap.xml written`)
+console.log(
+  `[prerender] ${pages.length} pages, app.html, ${ssr.SHARE_SHELLS.length} share shells, 404.html and sitemap.xml written`,
+)

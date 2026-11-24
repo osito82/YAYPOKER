@@ -2,6 +2,16 @@
 
 Recent sessions only.
 
+## 2026-11-24 — SEO audit, Search Console, share previews and gzip (branch `feat/seo-share-previews`)
+
+- Audit of yaypoker.com: technical SEO fine (titles, canonicals, hreflang, prerender, 404s). Search
+  Console: 1 indexed page, 1 click in 3 months, sitemap never submitted. Submitted the sitemap and
+  requested indexing for `/`, `/es`, `/rules`, `/es/rules`, `/hand-rankings`, `/es/hand-rankings`.
+- Built (OPS-003 Addendum A): `/join` and `/watch` get their own shells with link-preview tags
+  (`invite.html`, `watch.html`, still noindex); nginx gzip (main JS 418 → 140 KB).
+- Verified: client 46/46, ESLint 0 errors, `npm run build` writes both shells, local nginx checks.
+- Next: deploy; watch Search Console (Pages, Performance → Queries) over the next 1–2 weeks.
+
 ## 2026-11-21 — Fix slider step shortfall, unload cleanup, and duplicate logging (branch `fix/slider-step-and-socket-logging`)
 
 - Analyzed production match log (`E3D57-B5A7E` and `22581-FA824`): identified slider step limitation preventing exact all-in bets, duplicate socket connection/disconnection logs, and client unmount socket lingering.

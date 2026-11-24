@@ -65,6 +65,28 @@ export function headTags(data) {
   ].join('\n    ')
 }
 
+// Head for a shared app link (invite, spectate): link-preview tags only. No canonical or hreflang,
+// because these pages are noindex and their URL carries a game code.
+export function shareHeadTags({ title, description }) {
+  const t = escapeHtml(title)
+  const d = escapeHtml(description)
+  return [
+    `<title>${t}</title>`,
+    `<meta name="description" content="${d}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="YayPoker" />`,
+    `<meta property="og:title" content="${t}" />`,
+    `<meta property="og:description" content="${d}" />`,
+    `<meta property="og:image" content="${OG_IMAGE}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${t}" />`,
+    `<meta name="twitter:description" content="${d}" />`,
+    `<meta name="twitter:image" content="${OG_IMAGE}" />`,
+  ].join('\n    ')
+}
+
 function setMeta(attr, key, content) {
   let el = document.head.querySelector(`meta[${attr}="${key}"]`)
   if (!el) {
